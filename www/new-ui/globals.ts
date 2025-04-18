@@ -1,4 +1,4 @@
-const apiPath = "http://localhost:8080/api/v1"
+const apiPath = `${AIO}${API}`
 
 const urlParams = new URLSearchParams(document.location.search)
 const uid = urlParams.get("uid")

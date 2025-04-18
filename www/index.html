@@ -57,6 +57,7 @@
     <div id="users-output">
     </div>
 
+    <script src="/config.js"></script>
     <script>
         const params = new URLSearchParams(document.location.search)
         const uid = params.get("uid")
@@ -65,7 +66,7 @@
         }
 
         function deleteaccount(uid) {
-            fetch(`http://localhost:8080/account/delete?uid=${uid}`, { method: "DELETE" }).then(res => {
+            fetch(`${AIO}/account/delete?uid=${uid}`, { method: "DELETE" }).then(res => {
                 if(res.status !== 200) {
                     return "Failed to delete account"
                 }
@@ -75,7 +76,7 @@
             })
         }
 
-        fetch("http://localhost:8080/account/list")
+        fetch(`${AIO}/account/list`)
             .then(res => res.text())
             .then(users => {
                 const usersOutput = document.getElementById("users-output")
