@@ -149,6 +149,14 @@ async function loadList<T>(endpoint: string): Promise<T[]> {
         .map(parseJsonL)
 }
 
+function fixThumbnailURL(url: string) {
+    //a / url assumes that the aio server is the same as the web server
+    if(url.startsWith("/")) {
+        return `${AIO}${url}`
+    }
+    return url
+}
+
 async function copyUserInfo(oldid: bigint, newid: bigint) {
     return await authorizedRequest(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`).catch(console.error)
 }

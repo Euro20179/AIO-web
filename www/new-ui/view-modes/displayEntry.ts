@@ -560,7 +560,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                 el.title = `${child.En_Title} (${typeToSymbol(child.Type)} on ${name})`
             })
             //@ts-ignore
-            el.src = meta.Thumbnail
+            el.src = fixThumbnailURL(meta.Thumbnail)
         } else {
             el = document.createElement("button")
             el.innerText = child.En_Title
@@ -657,7 +657,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
     //Thumbnail
     imgEl.alt = meta.Title || item.En_Title
-    imgEl.src = meta.Thumbnail
+    imgEl.src = fixThumbnailURL(meta.Thumbnail)
 
 
     //Description

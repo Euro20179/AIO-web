@@ -128,8 +128,8 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     }
 
     elem.addEventListener("on-screen-appear", function(e) {
-        if (img.src !== meta.Thumbnail) {
-            img.src = meta.Thumbnail
+        if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
+            img.src = fixThumbnailURL(meta.Thumbnail)
         }
     })
 

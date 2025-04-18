@@ -454,7 +454,8 @@ async function remote2LocalThumbService() {
 
         if (!thumbnail) continue
         if (thumbnail.startsWith(`${apiPath}/resource/thumbnail`) || thumbnail.startsWith(`${apiPath}/resource/get-thumbnail`)) continue
-        console.log(thumbnail)
+        //relative url is local
+        if(thumbnail.startsWith("/")) continue
 
         //FIXME: this should work, but for some reason just doesn't
         if (thumbnail.startsWith("data:")) continue

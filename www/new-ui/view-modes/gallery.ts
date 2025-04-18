@@ -4,7 +4,7 @@ function renderGalleryItem(item: InfoEntry, parent = galleryItems){
     let el = new Image()
     let meta = findMetadataById(item.ItemId)
     if(meta?.Thumbnail) {
-        el.src = meta.Thumbnail
+        el.src = fixThumbnailURL(meta.Thumbnail)
     }
     el.title = item.En_Title
     el.setAttribute("data-item-id", String(item.ItemId))
