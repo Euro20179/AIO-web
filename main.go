@@ -61,6 +61,23 @@ func main() {
 
 	config = data
 
+	port := "8081"
+	var portKey *ini.Key
+
+	networkSection, err := config.GetSection("network")
+	if err != nil {
+		println(err.Error())
+		goto start
+	}
+
+	portKey, err = networkSection.GetKey("port")
+	if err != nil {
+		println(err.Error())
+		goto start
+	}
+	port = portKey.String()
+
+	start:
 	http.HandleFunc("/", root)
-	http.ListenAndServe(":8081", nil)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }
