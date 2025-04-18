@@ -57,6 +57,17 @@
     <div id="users-output">
     </div>
 
+    <dialog id="login" popover>
+        <h3 class="center">Login</h3>
+        <form action="javascript:void(0)" class="flex column" style="align-content: center">
+            <input type="text" placeholder="username" name="username">
+            <input type="password" placeholder="password" name="password">
+            <input type="submit" value="login">
+        </form>
+    </dialog>
+
+
+    <script src="/js/api.js"></script>
     <script src="/config.js"></script>
     <script>
         const params = new URLSearchParams(document.location.search)
@@ -66,7 +77,7 @@
         }
 
         function deleteaccount(uid) {
-            fetch(`${AIO}/account/delete?uid=${uid}`, { method: "DELETE" }).then(res => {
+            authorizedRequest(`${AIO}/account/delete?uid=${uid}`, { method: "DELETE" }).then(res => {
                 if(res.status !== 200) {
                     return "Failed to delete account"
                 }
