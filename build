@@ -1,0 +1,71 @@
+#!/bin/bash
+
+devmode=0
+while getopts "d" OPT; do
+    case "$OPT" in 
+        d) devmode=1;;
+    esac
+done
+
+[ "$devmode" = 1 ] && {
+    esbuildOpts=--sourcemap
+}
+
+#create config.ts from ini {{{
+AIO_CONFIGTS=./www/config.ts
+
+handle_configts_from_ini() {
+    section=""
+    while read -r line; do
+        case "$line" in
+            \[*\])
+                name="${line#'['}"
+                name="${name%']'}"
+                section="$name"
+                ;;
+            '') continue ;;
+            *)
+                ! [ "$section" = aio_limas ] && continue;
+
+                name="${line%%[[:space:]]=*}"
+                value="${line#*=[[:space:]]}"
+                case "$name" in
+                    host) host="$value" ;;
+                    api) api="$value" ;;
+                esac
+        esac
+    done < ./server-config.ini
+
+    cat <<-EOF > ./www/config.ts
+const AIO = "${host:-http://localhost:8080}"
+const API = "${api:-/api/v1}"
+EOF
+}
+
+handle_configts_from_ini
+
+#}}}
+
+#esbuild/typescript stuff
+esbuild $(find . -regex '.*\.ts$') --minify --outdir=www $esbuildOpts
+
+#compile html into one BIG html to avoid having to have all of this in one massive file while working on it. It gets really annoying lol
+idx="./www/new-ui/index.html"
+#copy the initial template file to the final output
+cp "./www/new-ui/index-template.html" "$idx"
+#for each template
+for file in ./www/new-ui/html-templates/*.html; do
+    name="${file##*/}"
+    name="${name%.html}"
+    #create a template html tag and put it into the final output html file
+    cat <<EOTEMPLATE >> "$idx"
+<template id="${name}">
+$(cat "$file")
+</template>
+
+EOTEMPLATE
+done
+
+#main go program
+${GO:-go} build .
+
