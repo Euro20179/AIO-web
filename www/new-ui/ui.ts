@@ -73,7 +73,7 @@ async function newEntryUI() {
 
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-    let res = await fetch(`${apiPath}/add-entry${queryString}&timezone=${encodeURIComponent(tz)}`)
+    let res = await authorizedRequest(`${apiPath}/add-entry${queryString}&timezone=${encodeURIComponent(tz)}`)
     let text = await res.text()
     if (res.status !== 200) {
         alert(text)

@@ -465,7 +465,7 @@ async function remote2LocalThumbService() {
 
         console.log(`${userTitle || userNativeTitle || metadata.Title || metadata.Native_Title} Has a remote image url, downloading`)
 
-        fetch(`${apiPath}/resource/download-thumbnail?id=${metadata.ItemId}`).then(res => {
+        authorizedRequest(`${apiPath}/resource/download-thumbnail?id=${metadata.ItemId}`).then(res => {
             if (res.status !== 200) return ""
             return res.text()
         }).then(hash => {

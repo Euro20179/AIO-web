@@ -150,7 +150,7 @@ async function loadList<T>(endpoint: string): Promise<T[]> {
 }
 
 async function copyUserInfo(oldid: bigint, newid: bigint) {
-    return await fetch(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`).catch(console.error)
+    return await authorizedRequest(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`).catch(console.error)
 }
 
 function typeToSymbol(type: string) {
@@ -208,21 +208,21 @@ async function formatToName(format: number) {
 }
 
 async function identify(title: string, provider: string) {
-    return await fetch(`${apiPath}/metadata/identify?title=${encodeURIComponent(title)}&provider=${provider}`)
+    return await authorizedRequest(`${apiPath}/metadata/identify?title=${encodeURIComponent(title)}&provider=${provider}`)
 }
 
 async function finalizeIdentify(identifiedId: string, provider: string, applyTo: bigint) {
     identifiedId = encodeURIComponent(identifiedId)
     provider = encodeURIComponent(provider)
-    return await fetch(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}&apply-to=${applyTo}`)
+    return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}&apply-to=${applyTo}`)
 }
 
 async function updateThumbnail(id: bigint, thumbnail: string) {
-    return await fetch(`${apiPath}/metadata/mod-entry?id=${id}&thumbnail=${encodeURIComponent(thumbnail)}`)
+    return await authorizedRequest(`${apiPath}/metadata/mod-entry?id=${id}&thumbnail=${encodeURIComponent(thumbnail)}`)
 }
 
 async function setParent(id: bigint, parent: bigint) {
-    return await fetch(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
+    return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
 async function doQuery3(searchString: string) {
@@ -249,7 +249,7 @@ async function doQuery3(searchString: string) {
 }
 
 async function setPos(id: bigint, pos: string) {
-    return fetch(`${apiPath}/engagement/mod-entry?id=${id}&current-position=${pos}`)
+    return authorizedRequest(`${apiPath}/engagement/mod-entry?id=${id}&current-position=${pos}`)
 }
 
 function sortEntries(entries: InfoEntry[], sortBy: string) {
@@ -335,34 +335,48 @@ async function newEntry(params: NewEntryParams) {
         }
         qs += `${p}=${v}`
     }
-    return await fetch(`${apiPath}/add-entry${qs}`)
+    return await authorizedRequest(`${apiPath}/add-entry${qs}`)
+}
+
+
+let userAuth = ""
+async function authorizedRequest(url: string | URL, options?: RequestInit): Promise<Response>{
+    options ||= {}
+    options.headers ||= {}
+    if(userAuth == "") {
+        let username = prompt("username")
+        let password = prompt("password")
+        userAuth = btoa(`${username}:${password}`)
+    }
+    options.headers["Authorization"] = `Basic ${userAuth}`
+    return await fetch(url, options)
 }
 
 async function apiDeleteEvent(itemId: bigint, ts: number, after: number) {
-    return await fetch(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
+    return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
 }
 
 async function apiRegisterEvent(itemId: bigint, name: string, ts: number, after: number) {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-    return await fetch(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}`)
+    return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}`)
 }
 
 async function addEntryTags(itemId: bigint, tags: string[]) {
-    return await fetch(`${apiPath}/add-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
+    return await authorizedRequest(`${apiPath}/add-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
 }
 
 async function deleteEntryTags(itemId: bigint, tags: string[]) {
-    return await fetch(`${apiPath}/delete-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
+    return await authorizedRequest(`${apiPath}/delete-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
 }
 
 async function deleteEntry(itemId: bigint) {
-    return await fetch(`${apiPath}/delete-entry?id=${itemId}`)
+    return await authorizedRequest(`${apiPath}/delete-entry?id=${itemId}`)
 }
 
 async function overwriteMetadataEntry(itemId: bigint) {
-    return fetch(`${apiPath}/metadata/fetch?id=${itemId}`)
+    return authorizedRequest(`${apiPath}/metadata/fetch?id=${itemId}`)
 }
 
 async function updateInfoTitle(itemId: bigint, newTitle: string) {
-    return fetch(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
+    return authorizedRequest(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
 }

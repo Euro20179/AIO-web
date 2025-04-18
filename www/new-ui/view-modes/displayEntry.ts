@@ -199,7 +199,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     let promises = []
 
-    let engagementSet = fetch(`${apiPath}/engagement/set-entry`, {
+    let engagementSet = authorizedRequest(`${apiPath}/engagement/set-entry`, {
         body: userStringified,
         method: "POST"
     })
@@ -209,7 +209,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     promises.push(engagementSet)
 
-    let entrySet = fetch(`${apiPath}/set-entry`, {
+    let entrySet = authorizedRequest(`${apiPath}/set-entry`, {
         body: infoStringified,
         method: "POST"
     })
@@ -219,7 +219,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     promises.push(entrySet)
 
-    let metaSet = fetch(`${apiPath}/metadata/set-entry`, {
+    let metaSet = authorizedRequest(`${apiPath}/metadata/set-entry`, {
         body: metaStringified,
         method: "POST"
     }).then(res => res.text())
@@ -426,7 +426,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
                 return
             }
 
-            fetch(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
+            authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
                 .then(res => res.text())
                 .then(text => {
                     alert(text)
@@ -462,7 +462,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             }
 
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-            fetch(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
+            authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
                 .then(res => res.text())
                 .then(text => {
                     alert(text)
@@ -964,7 +964,7 @@ const displayEntryViewCount = displayEntryAction(item => {
     let count = promptNumber("New view count", 'Not a number, view count')
     if (count === null) return
 
-    fetch(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
+    authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
         .then(res => res.text())
         .then(alert)
         .then(() => {
@@ -1010,7 +1010,7 @@ const displayEntryRating = displayEntryAction(item => {
         return
     }
 
-    fetch(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&rating=${newRating}`)
+    authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&rating=${newRating}`)
         .then(() => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
