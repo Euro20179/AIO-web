@@ -4,7 +4,8 @@ The web frontend for the AIO LIMAS.
 
 # Setup
 
-See the sample `server-config.ini` file, and edit as needed
+See the sample `server-config-example.ini` file, and edit as needed.
+Once finished rename it to `server-config.ini`
 
 # Running
 
