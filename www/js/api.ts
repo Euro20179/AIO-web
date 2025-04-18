@@ -338,15 +338,30 @@ async function newEntry(params: NewEntryParams) {
     return await authorizedRequest(`${apiPath}/add-entry${qs}`)
 }
 
+async function signin(): Promise<string> {
+    const loginPopover = document.getElementById("login") as HTMLDialogElement
+    loginPopover.showPopover()
 
-let userAuth = ""
+    return await new Promise((res, rej) => {
+        const form = loginPopover.querySelector("form") as HTMLFormElement
+        form.onsubmit = function() {
+            let data = new FormData(form)
+            let username = data.get("username")
+            let password = data.get("password")
+            loginPopover.hidePopover()
+            res(btoa(`${username}:${password}`))
+        }
+    })
+}
+
+
+let userAuth = sessionStorage.getItem("userAuth") || ""
 async function authorizedRequest(url: string | URL, options?: RequestInit): Promise<Response>{
     options ||= {}
     options.headers ||= {}
     if(userAuth == "") {
-        let username = prompt("username")
-        let password = prompt("password")
-        userAuth = btoa(`${username}:${password}`)
+        userAuth = await signin()
+        sessionStorage.setItem("userAuth", userAuth)
     }
     options.headers["Authorization"] = `Basic ${userAuth}`
     return await fetch(url, options)
