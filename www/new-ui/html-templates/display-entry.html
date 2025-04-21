@@ -146,7 +146,11 @@
         </section>
         <section>
             <h4 class="center">Notes</h4>
-            <p class="notes" id="notes" contenteditable="" id="notes"></p>
+            <div class="flex"> <button id="edit-notes" popovertarget="notes-edit-dialog">✏</button><p class="notes" id="notes" id="notes"></p></div>
+            <dialog id="notes-edit-dialog" popover>
+                <p class="center">Be sure to hit save when done :)</p>
+                <textarea id="notes-edit-box"></textarea>
+            </dialog>
             <div>
                 <button id="create-tag">+</button>
                 <div class="tags" id="tags"></div>

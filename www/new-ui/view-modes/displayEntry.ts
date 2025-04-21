@@ -1,43 +1,5 @@
 let displayQueue: InfoEntry[] = []
 
-function handleRichText(e: KeyboardEvent) {
-    const actions: Record<string, () => ([string, string[]] | [string, string[]][])> = {
-        "b": () => ["bold", []],
-        "i": () => ["italic", []],
-        "h": () => ["hiliteColor", [prompt("highlight color (yellow)") || "yellow"]],
-        "f": () => ["foreColor", [prompt("Foreground color (black)") || "black"]],
-        "t": () => ["fontName", [prompt("Font name (sans-serif)") || "sans-serif"]],
-        "T": () => ["fontSize", [prompt("Font size (12pt)") || "12pt"]],
-        "I": () => ["insertImage", [prompt("Image url (/favicon.ico)") || "/favicon.ico"]],
-        "e": () => [
-            ["enableObjectResizing", []],
-            ["enableAbsolutePositionEditor", []],
-            ["enableInlineTableEditing", []],
-        ],
-        "s": () => ["strikeThrough", []],
-        "u": () => ['underline', []],
-        "m": () => ["insertHTML", [getSelection()?.toString() || prompt("html (html)") || "html"]],
-        "f12": () => ["removeFormat", []]
-    }
-    if (!e.ctrlKey) return
-    let key = e.key
-    if (key in actions) {
-        let res = actions[key]()
-        if (typeof res[0] === "string") {
-            let [name, args] = res
-            //@ts-ignore
-            document.execCommand(name, false, ...args)
-        } else {
-            for (let [name, args] of res) {
-                //@ts-ignore
-                document.execCommand(name, false, ...args)
-            }
-        }
-        e.preventDefault()
-    }
-}
-
-
 async function itemIdentification(form: HTMLFormElement) {
     form.parentElement?.hidePopover()
     let data = new FormData(form)
@@ -98,7 +60,6 @@ async function titleIdentification(provider: string, search: string, selectionEl
 
     return await new Promise(RETURN => {
         for (let result of items) {
-            console.log(result)
             let fig = document.createElement("figure")
 
             let img = document.createElement("img")
@@ -141,7 +102,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     setUserExtra(userEntry, "styles", customStylesElem.value)
 
-    let notes = (root?.getElementById("notes"))?.innerHTML
+    let notes = (root?.getElementById("notes-edit-box") as HTMLTextAreaElement)?.value
     if (notes === "<br>") {
         notes = ""
     }
@@ -571,20 +532,19 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
 }
 
 function parseNotes(notes: string) {
-    console.log(notes)
 
     const tags: Record<string, (opening: boolean, tag: string) => string> = {
         b: opening => opening ? "<b>" : "</b>",
         spoiler: opening => opening ? "<span class='spoiler'>" : "</span>",
         i: opening => opening ? "<i>" : "</i>",
         ["*"]: (opening, tag) => {
-            if(tag.includes("=")) {
+            if (tag.includes("=")) {
                 const [key, val] = tag.split("=")
                 if (key == "color" && opening) {
                     return `<span style='color: ${val}'>`
                 }
                 return tag
-            } else if(tag === "color" && !opening) {
+            } else if (tag === "color" && !opening) {
                 return "</span>"
             } else {
                 return tag
@@ -598,7 +558,6 @@ function parseNotes(notes: string) {
     let finalText = ""
     for (let i = 0; i < notes.length; i++) {
         let ch = notes[i]
-        console.log(ch, inTag, inPart)
         if (ch === "[") {
             inPart = inTag ? "CLOSING" : "OPENING"
             if (inPart === "CLOSING") {
@@ -621,7 +580,6 @@ function parseNotes(notes: string) {
             finalText += ch
         }
     }
-    console.log(finalText)
     //&nbsp; to remove formatting after the section
     return finalText + "<span>&nbsp;</span>"
 }
@@ -642,6 +600,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const mediaInfoTbl = el.getElementById("media-info") as HTMLTableElement
     const eventsTbl = el.getElementById("user-actions") as HTMLTableElement
     const customStyles = el.getElementById("custom-styles") as HTMLStyleElement
+
+    const notesEditBox = el.getElementById("notes-edit-box") as HTMLTextAreaElement
 
     //Cost
     updateCostDisplay(el, item)
@@ -720,6 +680,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     descEl.innerHTML = meta.Description
 
     //Notes
+    notesEditBox.value = user.Notes
     notesEl.innerHTML = parseNotes(user.Notes)
 
     //Rating
@@ -927,6 +888,20 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 
     hookActionButtons(root, item)
 
+    const notesEditBox = root.getElementById("notes-edit-box") as HTMLTextAreaElement
+    notesEditBox.onchange = function() {
+        user.Notes = notesEditBox.value
+        console.log("NOTES", user.Notes)
+        updateInfo({
+            entries: {
+                [String(item.ItemId)]: item
+            },
+            userEntries: {
+                [String(item.ItemId)]: user
+            }
+        })
+    }
+
     const newTag = (root.getElementById("create-tag")) as HTMLButtonElement
     newTag.onclick = function() {
         const name = prompt("Tag name (, seperated)")
@@ -952,10 +927,6 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     })
 
     changeDisplayItemData(item, user, meta, events, el)
-
-    for (let el of root.querySelectorAll("[contenteditable]")) {
-        (el as HTMLElement).addEventListener("keydown", handleRichText)
-    }
 }
 
 function removeDisplayItem(item: InfoEntry) {
