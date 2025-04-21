@@ -635,6 +635,11 @@ class NotesTagNode implements NotesNode {
                 startTag = `<span style="color:${this.propertyValue.replaceAll(/;"/g, "")}">`
                 endTag = "</span>"
                 break
+            case "indent":
+                let amount = parseInt(this.propertyValue || "0") || 4
+                startTag = `<div style="margin-left: ${amount}ch">`
+                endTag = "</div>"
+                break
             case "list":
                 if (this.propertyValue === "numbered") {
                     let n = 0
