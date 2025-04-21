@@ -243,4 +243,14 @@
     .m-5 {
         margin: 5px;
     }
+
+    .spoiler {
+        color: var(--red);
+        background: var(--red);
+    }
+
+    .spoiler:active {
+        background: transparent;
+        color: var(--text-color);
+    }
 }

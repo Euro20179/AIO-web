@@ -165,7 +165,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
                 continue
             }
             let ty = item[name as keyof typeof item]?.constructor
-            if(!ty) continue
+            if (!ty) continue
             //@ts-ignore
             item[name] = ty(value)
         }
@@ -570,6 +570,50 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
     }
 }
 
+function parseNotes(notes: string) {
+    console.log(notes)
+
+    const tags: Record<string, (opening: boolean, tag: string) => string> = {
+        b: opening => opening ? "<b>" : "</b>",
+        spoiler: opening => opening ? "<span class='spoiler'>" : "</span>",
+        i: opening => opening ? "<i>" : "</i>",
+        ["*"]: (opening, tag) => tag
+    }
+
+    let inTag = ""
+    let lastOpen = ""
+    let inPart: "TEXT" | "OPENING" | "CLOSING" = "TEXT"
+    let finalText = ""
+    for (let i = 0; i < notes.length; i++) {
+        let ch = notes[i]
+        console.log(ch, inTag, inPart)
+        if (ch === "[") {
+            inPart = inTag ? "CLOSING" : "OPENING"
+            if (inPart === "CLOSING") {
+                lastOpen = inTag
+                inTag = ""
+            }
+        } else if (ch === "]") {
+            if (inPart == "CLOSING" || inPart == "OPENING") {
+                const opening = inPart == "OPENING"
+                let fn = tags[inTag] || tags["*"]
+                finalText += fn(opening, inTag) || ""
+            }
+
+            inPart = "TEXT"
+        } else if (inPart === "CLOSING" && ch == "/" && inTag == "") {
+            // pass, dont add a / to the inTag
+        } else if (inPart == "OPENING" || inPart == "CLOSING") {
+            inTag += ch
+        } else if (inPart === "TEXT") {
+            finalText += ch
+        }
+    }
+    console.log(finalText)
+    //&nbsp; to remove formatting after the section
+    return finalText + "<span>&nbsp;</span>"
+}
+
 function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
     const displayEntryTitle = el.getElementById("main-title") as HTMLHeadingElement
     const displayEntryNativeTitle = el.getElementById("official-native-title") as HTMLHeadingElement
@@ -664,7 +708,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     descEl.innerHTML = meta.Description
 
     //Notes
-    notesEl.innerHTML = user.Notes
+    notesEl.innerHTML = parseNotes(user.Notes)
 
     //Rating
     if (user.UserRating) {
@@ -749,7 +793,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     }
 
     //relation elements
-    for(let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
+    for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
         let relationshipEl = el.getElementById(relationship[0]) as HTMLElement
         relationshipEl.innerHTML = ""
         createRelationButtons(relationshipEl, relationship[1](item.ItemId))
