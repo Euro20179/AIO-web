@@ -89,24 +89,12 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
         return
     }
 
-    const userEn_title = root.getElementById("main-title") as HTMLHeadingElement
-
-    if (userEn_title) {
-        item.En_Title = userEn_title.innerText
-    }
-
     let userEntry = findUserEntryById(item.ItemId)
     if (!userEntry) return
 
     const customStylesElem = root.getElementById("style-editor") as HTMLTextAreaElement
 
     setUserExtra(userEntry, "styles", customStylesElem.value)
-
-    let notes = (root?.getElementById("notes-edit-box") as HTMLTextAreaElement)?.value
-    if (notes === "<br>") {
-        notes = ""
-    }
-    userEntry.Notes = notes || ""
 
     let infoTable = root.getElementById("info-raw")
     let metaTable = root.getElementById("meta-info-raw")
@@ -693,7 +681,6 @@ class NotesParser {
 
         let ate = ""
         while (this.next() && !(this.curTok.t === "close-tag" && this.curTok.value === name)) {
-            console.log(this.curTok)
             ate += serializeTT(this.curTok)
         };
 
@@ -740,26 +727,6 @@ class NotesParser {
 }
 
 function parseNotes(notes: string) {
-
-    const tags: Record<string, (opening: boolean, tag: string) => string> = {
-        b: opening => opening ? "<b>" : "</b>",
-        spoiler: opening => opening ? "<span class='spoiler'>" : "</span>",
-        i: opening => opening ? "<i>" : "</i>",
-        ["*"]: (opening, tag) => {
-            if (tag.includes("=")) {
-                const [key, val] = tag.split("=")
-                if (key == "color" && opening) {
-                    return `<span style='color: ${val}'>`
-                }
-                return tag
-            } else if (tag === "color" && !opening) {
-                return "</span>"
-            } else {
-                return tag
-            }
-        }
-    }
-
     const l = new NotesLexer(notes)
     const tokens = l.lex()
 
