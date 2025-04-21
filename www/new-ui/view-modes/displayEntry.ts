@@ -622,12 +622,10 @@ class NotesTagNode implements NotesNode {
         let selfClosing = false
         switch (this.name) {
             case "i":
-                startTag = "<i>"
-                endTag = "</i>"
-                break
             case "b":
-                startTag = "<b>"
-                endTag = "</b>"
+            case "u":
+                startTag = `<${this.name}>`
+                endTag = `</${this.name}>`
                 break
             case "spoiler":
                 startTag = "<span class='spoiler'>"
