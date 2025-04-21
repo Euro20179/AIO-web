@@ -636,6 +636,10 @@ class NotesTagNode implements NotesNode {
                 startTag = `<font color='${this.propertyValue}'>`
                 endTag = "</font>"
                 break
+            case "item":
+                startTag = `<button onclick="toggleItem(findInfoEntryById(${this.propertyValue}n))">`
+                endTag = "</button>"
+                break
         }
         return startTag + parseNotes(this.innerText) + endTag
     }
