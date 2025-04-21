@@ -356,10 +356,10 @@ function updateInfo({
     entries, metadataEntries, events, userEntries
 }: Partial<GlobalsNewUi>, del = false) {
 
-    if(del && events) {
+    if (del && events) {
         let specific = events.map(v => `${v.ItemId}:${v.Timestamp || v.After}:${v.Event}`)
         globalsNewUi.events = globalsNewUi.events.filter(v => !specific.includes(`${v.ItemId}:${v.Timestamp || v.After}:${v.Event}`))
-    } else if(events) {
+    } else if (events) {
         globalsNewUi.events = globalsNewUi.events.concat(events)
     }
 
@@ -386,7 +386,7 @@ function updateInfo({
             globalsNewUi.userEntries[entry] = user
 
             refreshSidebarItem(e)
-            if(mode.refresh)
+            if (mode.refresh)
                 mode.refresh(e.ItemId)
         } else {
             delete globalsNewUi.entries[entry]
@@ -412,6 +412,23 @@ async function refreshInfo() {
 
 async function main() {
     await refreshInfo()
+
+    listTypes().then(types => {
+        const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
+
+        if (typeDropdown === null) {
+            console.error("type dropdown could not be found")
+            return
+        }
+
+        for (let type of types) {
+            const option = document.createElement("option")
+            option.value = type
+            option.innerText = type
+            typeDropdown.append(option)
+        }
+    })
+
 
     if (initialSearch) {
         let entries = await doQuery3(initialSearch)
@@ -455,7 +472,7 @@ async function remote2LocalThumbService() {
         if (!thumbnail) continue
         if (thumbnail.startsWith(`${apiPath}/resource/thumbnail`) || thumbnail.startsWith(`${apiPath}/resource/get-thumbnail`)) continue
         //relative url is local
-        if(thumbnail.startsWith("/")) continue
+        if (thumbnail.startsWith("/")) continue
 
         //FIXME: this should work, but for some reason just doesn't
         if (thumbnail.startsWith("data:")) continue

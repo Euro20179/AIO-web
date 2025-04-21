@@ -106,6 +106,11 @@ async function listFormats() {
     return formats
 }
 
+async function listTypes() {
+    const res = await fetch(`${apiPath}/type/type`)
+    return await res.json()
+}
+
 function mkStrItemId(jsonl: string) {
     return jsonl
         .replace(/"ItemId":\s*(\d+),/, "\"ItemId\": \"$1\",")
