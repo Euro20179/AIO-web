@@ -281,6 +281,10 @@
         overflow: auto auto;
     }
 
+    #notes {
+        white-space: pre;
+    }
+
     hgroup {
         > * {
             text-wrap: balance;

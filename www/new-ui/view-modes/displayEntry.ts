@@ -531,6 +531,214 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
     }
 }
 
+type TT = { t: "open-tag" | "close-tag" | "\\" | "whitespace" | "char", value: string }
+
+function serializeTT(t: TT) {
+    switch (t.t) {
+        case "open-tag":
+            return `[${t.value}]`
+        case "close-tag":
+            return `[/${t.value}]`
+        case "\\":
+            return `\\${t.value}`
+        case "whitespace":
+        case "char":
+            return t.value
+    }
+}
+
+class NotesLexer {
+    notes: string
+    #i: number
+    constructor(notes: string) {
+        this.notes = notes
+
+        this.#i = -1
+    }
+
+    next() {
+        this.#i++
+        return this.notes[this.#i]
+    }
+
+    peek() {
+        return this.notes[this.#i + 1]
+    }
+
+    back() {
+        this.#i--
+        return this.notes[this.#i]
+    }
+
+    get curChar() {
+        return this.notes[this.#i]
+    }
+
+    tag(): ["open" | "close", string] {
+        let name = ""
+        let open = true
+        if (this.peek() == "/") {
+            this.next()
+            open = false
+        }
+
+        while (this.next() && this.curChar != "]") {
+            name += this.curChar
+        }
+        return [open ? "open" : "close", name]
+    }
+
+    lex() {
+        const tokens: TT[] = []
+        while (this.next()) {
+            let ch = this.curChar
+            if (ch.match(/\s/)) {
+                tokens.push({ t: "whitespace", value: ch })
+            } else {
+                switch (ch) {
+                    case "[":
+                        //tag_pos is either open or close
+                        let [tag_pos, name] = this.tag()
+                        tokens.push({ t: `${tag_pos}-tag`, value: name })
+                        break
+                    case "\\":
+                        tokens.push({ t: ch, value: ch })
+                        break
+                    default:
+                        tokens.push({ t: "char", value: ch })
+                }
+            }
+        }
+
+        return tokens
+    }
+}
+
+interface NotesNode {
+    getHTML(): string
+}
+
+class NotesStringNode implements NotesNode {
+    constructor(public value: string) { }
+
+    getHTML(): string {
+        return this.value
+    }
+}
+class NotesTagNode implements NotesNode {
+    constructor(public name: string, public innerText: string, public propertyValue: string) { }
+
+    getHTML(): string {
+        let startTag = ""
+        let endTag = ""
+        switch (this.name) {
+            case "i":
+                startTag = "<i>"
+                endTag = "</i>"
+                break
+            case "b":
+                startTag = "<b>"
+                endTag = "</b>"
+                break
+            case "spoiler":
+                startTag = "<span class='spoiler'>"
+                endTag = "</span>"
+                break
+            case "color":
+                startTag = `<font color='${this.propertyValue}'>`
+                endTag = "</font>"
+                break
+        }
+        return startTag + parseNotes(this.innerText) + endTag
+    }
+}
+
+class NotesParser {
+    tokens: TT[]
+    nodes: NotesNode[]
+    #i: number
+    constructor(tokens: TT[]) {
+        this.tokens = tokens
+
+        this.nodes = []
+
+        this.#i = -1
+    }
+
+    next() {
+        this.#i++
+        return this.tokens[this.#i]
+    }
+
+    back() {
+        this.#i--
+        return this.tokens[this.#i]
+    }
+
+    get curTok() {
+        return this.tokens[this.#i]
+    }
+
+    handleEscape(): NotesStringNode {
+        return new NotesStringNode(this.next().value)
+    }
+
+    handleOpenTag(): NotesTagNode | NotesStringNode {
+        let name = this.curTok.value
+        let value = ""
+        if (name.includes("=")) {
+            [name, value] = name.split("=")
+        }
+
+
+        let ate = ""
+        while (this.next() && !(this.curTok.t === "close-tag" && this.curTok.value === name)) {
+            console.log(this.curTok)
+            ate += serializeTT(this.curTok)
+        };
+
+
+        if (!this.curTok) {
+            if (value)
+                return new NotesStringNode(`[${name}=${value}]${ate}`)
+            return new NotesStringNode(`[${name}]${ate}`)
+        }
+
+        return new NotesTagNode(name, ate.trim(), value)
+    }
+
+    handleString(): NotesStringNode {
+        let text = this.curTok.value
+
+        while (this.next() && this.curTok.t === "char") {
+            text += this.curTok.value
+        }
+        //goes too far
+        this.back()
+        return new NotesStringNode(text)
+    }
+
+    parse() {
+        while (this.next()) {
+            switch (this.curTok.t) {
+                case "\\":
+                    this.nodes.push(this.handleEscape())
+                    break
+                case "open-tag":
+                    this.nodes.push(this.handleOpenTag())
+                    break
+                case "char":
+                    this.nodes.push(this.handleString())
+                    break
+                case "whitespace":
+                    this.nodes.push(new NotesStringNode(this.curTok.value))
+                    break
+            }
+        }
+        return this.nodes
+    }
+}
+
 function parseNotes(notes: string) {
 
     const tags: Record<string, (opening: boolean, tag: string) => string> = {
@@ -552,36 +760,17 @@ function parseNotes(notes: string) {
         }
     }
 
-    let inTag = ""
-    let lastOpen = ""
-    let inPart: "TEXT" | "OPENING" | "CLOSING" = "TEXT"
-    let finalText = ""
-    for (let i = 0; i < notes.length; i++) {
-        let ch = notes[i]
-        if (ch === "[") {
-            inPart = inTag ? "CLOSING" : "OPENING"
-            if (inPart === "CLOSING") {
-                lastOpen = inTag
-                inTag = ""
-            }
-        } else if (ch === "]") {
-            if (inPart == "CLOSING" || inPart == "OPENING") {
-                const opening = inPart == "OPENING"
-                let fn = tags[inTag] || tags["*"]
-                finalText += fn(opening, inTag) || ""
-            }
+    const l = new NotesLexer(notes)
+    const tokens = l.lex()
 
-            inPart = "TEXT"
-        } else if (inPart === "CLOSING" && ch == "/" && inTag == "") {
-            // pass, dont add a / to the inTag
-        } else if (inPart == "OPENING" || inPart == "CLOSING") {
-            inTag += ch
-        } else if (inPart === "TEXT") {
-            finalText += ch
-        }
+    const p = new NotesParser(tokens)
+    const nodes = p.parse()
+
+    let text = ""
+    for (let node of nodes) {
+        text += node.getHTML()
     }
-    //&nbsp; to remove formatting after the section
-    return finalText + "<span>&nbsp;</span>"
+    return text
 }
 
 function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
@@ -891,7 +1080,6 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     const notesEditBox = root.getElementById("notes-edit-box") as HTMLTextAreaElement
     notesEditBox.onchange = function() {
         user.Notes = notesEditBox.value
-        console.log("NOTES", user.Notes)
         updateInfo({
             entries: {
                 [String(item.ItemId)]: item
