@@ -634,8 +634,16 @@ class NotesTagNode implements NotesNode {
                 endTag = "</span>"
                 break
             case "color":
-                startTag = `<font color='${this.propertyValue}'>`
-                endTag = "</font>"
+                startTag = `<span style="color:${this.propertyValue.replaceAll(/;"/g, "")}">`
+                endTag = "</span>"
+                break
+            case "bgcolor":
+                startTag = `<span style="background-color:${this.propertyValue.replaceAll(/;"/g, "")}">`
+                endTag = "</span>"
+                break
+            case "hl":
+                startTag = `<mark>`
+                endTag = "</mark>"
                 break
             case "size":
                 let size = parseFloat(this.propertyValue)
