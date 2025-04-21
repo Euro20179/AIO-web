@@ -43,8 +43,7 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     })
 }
 
-async function newEntryUI() {
-    const form = document.getElementById("new-item-form") as HTMLFormElement
+async function newEntryUI(form: HTMLFormElement) {
     document.getElementById("new-entry")?.hidePopover()
     const data = new FormData(form)
 
@@ -91,6 +90,10 @@ async function newEntryUI() {
 
     selectItem(json, mode, true)
     renderSidebarItem(json)
+}
+const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
+newItemForm.onsubmit = function() {
+    newEntryUI(newItemForm)
 }
 
 
