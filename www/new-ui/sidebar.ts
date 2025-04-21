@@ -93,7 +93,7 @@ function updateSidebarThumbnail(id: bigint, src: string) {
     const elem = sidebarItems.querySelector(`[data-entry-id="${id}"]`)
     if(!elem) return
     let img = elem.shadowRoot?.querySelector("img") as HTMLImageElement
-    img.src = src
+    img.src = fixThumbnailURL(src)
 }
 
 function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems) {
