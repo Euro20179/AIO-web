@@ -637,6 +637,17 @@ class NotesTagNode implements NotesNode {
                 startTag = `<span style="color:${this.propertyValue.replaceAll(/;"/g, "")}">`
                 endTag = "</span>"
                 break
+            case "list":
+                if (this.propertyValue === "numbered") {
+                    let n = 0
+                    this.innerText = this.innerText.replaceAll("-", () => {
+                        n++
+                        return `${n}. `
+                    })
+                } else {
+                    this.innerText = this.innerText.replaceAll("-", "•")
+                }
+                break
             case "bgcolor":
                 startTag = `<span style="background-color:${this.propertyValue.replaceAll(/;"/g, "")}">`
                 endTag = "</span>"
