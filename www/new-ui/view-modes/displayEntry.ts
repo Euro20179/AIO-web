@@ -637,6 +637,16 @@ class NotesTagNode implements NotesNode {
                 startTag = `<font color='${this.propertyValue}'>`
                 endTag = "</font>"
                 break
+            case "size":
+                let size = parseFloat(this.propertyValue)
+                let unit = this.propertyValue.slice(Math.ceil(Math.log10(size)))
+                if (unit)
+                    startTag = `<span style="font-size: ${size}${unit.replaceAll('"', '')}">`
+                else
+                    //use old sizes since user did not specify a unit
+                    startTag = `<font size=${size}>`
+                endTag = "</span>"
+                break
             case "img":
                 let properties = this.propertyValue.split(",")
                 let width = "", height = ""
