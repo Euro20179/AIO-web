@@ -637,8 +637,14 @@ class NotesTagNode implements NotesNode {
                 endTag = "</font>"
                 break
             case "item":
-                startTag = `<button onclick="toggleItem(findInfoEntryById(${this.propertyValue}n))">`
-                endTag = "</button>"
+                if (this.propertyValue.match(/[^\d]/)) {
+                    startTag = "<span>"
+                    this.innerText = "INVALID ID"
+                    endTag = "</span>"
+                } else {
+                    startTag = `<button onclick="toggleItem(findInfoEntryById(${this.propertyValue}n))">`
+                    endTag = "</button>"
+                }
                 break
         }
         return startTag + parseNotes(this.innerText) + endTag
