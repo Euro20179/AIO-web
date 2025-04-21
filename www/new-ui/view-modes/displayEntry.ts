@@ -792,11 +792,17 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
         outer.append(del)
 
-        const span = document.createElement("span")
-        span.classList.add("tag")
-        span.innerText = tag
+        const btn = document.createElement("button")
+        btn.classList.add("tag")
+        btn.innerText = tag
+        outer.append(btn)
 
-        outer.append(span)
+        btn.onclick = function(e) {
+            let btn = e.target as HTMLButtonElement
+            let tag = btn.innerText
+            searchInput.value = `#tag:${tag}`
+            searchInput.form?.submit()
+        }
 
         tagsRoot?.append(outer)
     }

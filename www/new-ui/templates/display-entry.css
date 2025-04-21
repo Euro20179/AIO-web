@@ -34,17 +34,6 @@
         width: 35px;
     }
 
-    .tag {
-        background-color: var(--secondary);
-        border: 1px solid var(--input-border-color);
-        border-radius: var(--border-roundness);
-        padding: 0 3px;
-
-        vertical-align: middle;
-
-        text-wrap: nowrap;
-    }
-
     .tag::before {
         content: "🏷︎ ";
         line-height: 0;
