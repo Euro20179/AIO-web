@@ -577,7 +577,19 @@ function parseNotes(notes: string) {
         b: opening => opening ? "<b>" : "</b>",
         spoiler: opening => opening ? "<span class='spoiler'>" : "</span>",
         i: opening => opening ? "<i>" : "</i>",
-        ["*"]: (opening, tag) => tag
+        ["*"]: (opening, tag) => {
+            if(tag.includes("=")) {
+                const [key, val] = tag.split("=")
+                if (key == "color" && opening) {
+                    return `<span style='color: ${val}'>`
+                }
+                return tag
+            } else if(tag === "color" && !opening) {
+                return "</span>"
+            } else {
+                return tag
+            }
+        }
     }
 
     let inTag = ""
