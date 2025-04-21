@@ -1,18 +1,5 @@
 const apiPath = `${AIO}${API}`
-
-const urlParams = new URLSearchParams(document.location.search)
-const uid = urlParams.get("uid")
-
-if(!uid) {
-    setError("No user id selected")
-}
-
-const initialSearch = urlParams.get("q")
-
-const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
-if(searchInput && initialSearch) {
-    searchInput.value = decodeURIComponent(initialSearch)
-}
+let uid: string
 
 function setError(text: string) {
     const errorOut = document.getElementById("error")

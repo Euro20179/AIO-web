@@ -33,13 +33,6 @@ const statsOutput = document.getElementById("result-stats") as HTMLElement
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
 
-librarySelector.onchange = function() {
-    let val = librarySelector.value
-    globalsNewUi.viewingLibrary = BigInt(val)
-
-    loadSearch()
-}
-
 function getUserExtra(user: UserEntry, prop: string) {
     return JSON.parse(user.Extra).AIOWeb?.[prop] || null
 }
@@ -411,6 +404,22 @@ async function refreshInfo() {
 }
 
 async function main() {
+
+    const urlParams = new URLSearchParams(document.location.search)
+    if (!urlParams.has("uid")) {
+        setError("No user id selected")
+        return
+    }
+    uid = urlParams.get("uid") as string
+
+
+    const initialSearch = urlParams.get("q")
+
+    const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
+    if (searchInput && initialSearch) {
+        searchInput.value = decodeURIComponent(initialSearch)
+    }
+
     await refreshInfo()
 
     listTypes().then(types => {
@@ -429,6 +438,12 @@ async function main() {
         }
     })
 
+    librarySelector.onchange = function() {
+        let val = librarySelector.value
+        globalsNewUi.viewingLibrary = BigInt(val)
+
+        loadSearch()
+    }
 
     if (initialSearch) {
         let entries = await doQuery3(initialSearch)
