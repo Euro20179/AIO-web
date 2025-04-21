@@ -421,7 +421,7 @@ async function main() {
             return
         }
 
-        for (let type of types) {
+        for (let type of types.sort()) {
             const option = document.createElement("option")
             option.value = type
             option.innerText = type
