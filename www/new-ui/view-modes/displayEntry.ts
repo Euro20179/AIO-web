@@ -619,6 +619,7 @@ class NotesTagNode implements NotesNode {
     getHTML(): string {
         let startTag = ""
         let endTag = ""
+        let selfClosing = false
         switch (this.name) {
             case "i":
                 startTag = "<i>"
@@ -636,6 +637,29 @@ class NotesTagNode implements NotesNode {
                 startTag = `<font color='${this.propertyValue}'>`
                 endTag = "</font>"
                 break
+            case "img":
+                let properties = this.propertyValue.split(",")
+                let width = "", height = ""
+                for (let prop of properties) {
+                    let [key, value] = prop.split(":")
+                    switch (key) {
+                        case "id":
+                            let id = value
+                            //the thumbnail should be the item's thumbnail
+                            this.propertyValue = findMetadataById(BigInt(id))?.Thumbnail || ""
+                            break
+
+                        case "w":
+                            width = value + "px"
+                            break
+                        case "h":
+                            height = value + "px"
+                            break
+                    }
+                }
+                startTag = `<img src="${this.propertyValue}" height="${height}" width="${width}" alt="${this.innerText.replaceAll('"', "")}" style="vertical-align: middle">`
+                selfClosing = true
+                break
             case "item":
                 if (this.propertyValue.match(/[^\d]/)) {
                     startTag = "<span>"
@@ -647,7 +671,10 @@ class NotesTagNode implements NotesNode {
                 }
                 break
         }
-        return startTag + parseNotes(this.innerText) + endTag
+        if (!selfClosing) {
+            return startTag + parseNotes(this.innerText) + endTag
+        }
+        return startTag
     }
 }
 
