@@ -282,6 +282,7 @@
     }
 
     #notes {
+        text-wrap: wrap;
         white-space: pre;
     }
 
