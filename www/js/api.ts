@@ -348,6 +348,20 @@ async function newEntry(params: NewEntryParams) {
 
 async function signin(): Promise<string> {
     const loginPopover = document.getElementById("login") as HTMLDialogElement
+
+    //if the popover is already open, something already called this function for the user to sign in
+    if(loginPopover.matches(":popover-open")) {
+        return await new Promise((res, rej) => {
+            //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
+            setInterval(() => {
+                let auth = sessionStorage.getItem("userAuth")
+                if(auth) {
+                    res(auth)
+                }
+            }, 16)
+        })
+    }
+
     loginPopover.showPopover()
 
     return await new Promise((res, rej) => {
