@@ -412,8 +412,8 @@ async function main() {
     }
     uid = urlParams.get("uid") as string
 
-
-    const initialSearch = urlParams.get("q")
+    const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
+    const display_item_only = urlParams.has("display")
 
     const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
     if (searchInput && initialSearch) {
@@ -467,6 +467,12 @@ async function main() {
 
         globalsNewUi.results = tree
         renderSidebar(tree)
+    }
+
+    if(display_item_only) {
+        for(let elem of document.querySelectorAll("#main-ui > :not(#viewing-area)")) {
+            elem.style.display = "none"
+        }
     }
 }
 
