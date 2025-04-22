@@ -231,7 +231,10 @@ async function finalizeIdentify(identifiedId: string, provider: string, applyTo:
 }
 
 async function updateThumbnail(id: bigint, thumbnail: string) {
-    return await authorizedRequest(`${apiPath}/metadata/mod-entry?id=${id}&thumbnail=${encodeURIComponent(thumbnail)}`)
+    return await authorizedRequest(`${apiPath}/metadata/set-thumbnail?id=${id}`, {
+        method: "POST",
+        body: thumbnail
+    })
 }
 
 async function setParent(id: bigint, parent: bigint) {
