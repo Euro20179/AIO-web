@@ -38,6 +38,13 @@
         display: none;
     }
 
+    p:has(#login-reason) {
+        text-align: center;
+    }
+    p:has(#login-reason:empty) {
+        display: none;
+    }
+
     #entry-output, #graph-output, #calc-output, #gallery-output {
         &:target {
             display: inherit;

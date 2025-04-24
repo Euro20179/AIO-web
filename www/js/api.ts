@@ -10,25 +10,25 @@ type UserEntry = {
 
 
 type UserStatus = "" |
-				 "Viewing" |
-				 "Finished" |
-				 "Dropped" |
-				 "Planned" |
-				 "ReViewing" |
-				 "Paused"
+    "Viewing" |
+    "Finished" |
+    "Dropped" |
+    "Planned" |
+    "ReViewing" |
+    "Paused"
 
 type EntryType = "Show" |
-				 "Movie" |
-				 "MovieShort" |
-				 "Game" |
-				 "BoardGame" |
-				 "Song" |
-				 "Book" |
-				 "Manga" |
-				 "Collection" |
-				 "Picture" |
-				 "Meme" |
-				 "Library"
+    "Movie" |
+    "MovieShort" |
+    "Game" |
+    "BoardGame" |
+    "Song" |
+    "Book" |
+    "Manga" |
+    "Collection" |
+    "Picture" |
+    "Meme" |
+    "Library"
 
 type UserEvent = {
     ItemId: bigint
@@ -78,7 +78,7 @@ type IdentifyResult = {
 
 type Status = string
 
-let formats: {[key: number]: string} = {}
+let formats: { [key: number]: string } = {}
 
 function canBegin(status: Status) {
     return status === "Finished" || status === "Dropped" || status === "Planned" || status === ""
@@ -93,11 +93,11 @@ function canResume(status: Status) {
 }
 
 async function listFormats() {
-    if(Object.keys(formats).length > 0) return formats
+    if (Object.keys(formats).length > 0) return formats
 
     const res = await fetch(`${apiPath}/type/format`)
 
-    if(res.status !== 200) {
+    if (res.status !== 200) {
         return formats
     }
 
@@ -156,14 +156,16 @@ async function loadList<T>(endpoint: string): Promise<T[]> {
 
 function fixThumbnailURL(url: string) {
     //a / url assumes that the aio server is the same as the web server
-    if(url.startsWith("/")) {
+    if (url.startsWith("/")) {
         return `${AIO}${url}`
     }
     return url
 }
 
 async function copyUserInfo(oldid: bigint, newid: bigint) {
-    return await authorizedRequest(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`).catch(console.error)
+    return await authorizedRequest(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`, {
+        ["signin-reason"]: "copy user info"
+    }).catch(console.error)
 }
 
 function typeToSymbol(type: string) {
@@ -233,7 +235,8 @@ async function finalizeIdentify(identifiedId: string, provider: string, applyTo:
 async function updateThumbnail(id: bigint, thumbnail: string) {
     return await authorizedRequest(`${apiPath}/metadata/set-thumbnail?id=${id}`, {
         method: "POST",
-        body: thumbnail
+        body: thumbnail,
+        "signin-reason": "update thumbnail"
     })
 }
 
@@ -340,11 +343,11 @@ type NewEntryParams = {
 
 async function newEntry(params: NewEntryParams) {
     let qs = ""
-    for(let p in params) {
+    for (let p in params) {
         let v = params[p as keyof NewEntryParams]
-        if(typeof v === 'bigint') {
+        if (typeof v === 'bigint') {
             v = String(v)
-        } else if(typeof v !== 'undefined') {
+        } else if (typeof v !== 'undefined') {
             v = encodeURIComponent(v)
         } else {
             continue
@@ -354,16 +357,17 @@ async function newEntry(params: NewEntryParams) {
     return await authorizedRequest(`${apiPath}/add-entry${qs}`)
 }
 
-async function signin(): Promise<string> {
+async function signin(reason?: string): Promise<string> {
     const loginPopover = document.getElementById("login") as HTMLDialogElement
+    (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
 
     //if the popover is already open, something already called this function for the user to sign in
-    if(loginPopover.matches(":popover-open")) {
+    if (loginPopover.matches(":popover-open")) {
         return await new Promise((res, rej) => {
             //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
             setInterval(() => {
                 let auth = sessionStorage.getItem("userAuth")
-                if(auth) {
+                if (auth) {
                     res(auth)
                 }
             }, 16)
@@ -386,11 +390,11 @@ async function signin(): Promise<string> {
 
 
 let userAuth = sessionStorage.getItem("userAuth") || ""
-async function authorizedRequest(url: string | URL, options?: RequestInit): Promise<Response>{
+async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response> {
     options ||= {}
     options.headers ||= {}
-    if(userAuth == "") {
-        userAuth = await signin()
+    if (userAuth == "") {
+        userAuth = await signin(options?.["signin-reason"])
         sessionStorage.setItem("userAuth", userAuth)
     }
     options.headers["Authorization"] = `Basic ${userAuth}`
@@ -415,11 +419,15 @@ async function deleteEntryTags(itemId: bigint, tags: string[]) {
 }
 
 async function deleteEntry(itemId: bigint) {
-    return await authorizedRequest(`${apiPath}/delete-entry?id=${itemId}`)
+    return await authorizedRequest(`${apiPath}/delete-entry?id=${itemId}`, {
+        "signin-reason": "delete this entry"
+    })
 }
 
 async function overwriteMetadataEntry(itemId: bigint) {
-    return authorizedRequest(`${apiPath}/metadata/fetch?id=${itemId}`)
+    return authorizedRequest(`${apiPath}/metadata/fetch?id=${itemId}`, {
+        "signin-reason": "automatically update metadata"
+    })
 }
 
 async function updateInfoTitle(itemId: bigint, newTitle: string) {
