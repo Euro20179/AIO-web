@@ -112,7 +112,7 @@ function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment 
 
     let img = root.getElementById("calc-thumbnail") as HTMLImageElement
     if (meta?.Thumbnail) {
-        img.src = meta?.Thumbnail
+        img.src = fixThumbnailURL(meta?.Thumbnail)
     }
     parent.append(el)
     el.setAttribute("data-expression-output", String(val.jsStr()))
