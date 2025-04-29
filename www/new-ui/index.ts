@@ -271,7 +271,7 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
             }
         } else if (filter.startsWith("filter")) {
             let expr = filter.slice("filter".length).trim()
-            entries = entries.filter(() => eval(expr))
+            entries = entries.filter((item) => eval(expr))
         } else if (filter === "!child") {
             entries = entries.filter(v => v.ParentId === 0n)
         } else if (filter === "!copy") {
