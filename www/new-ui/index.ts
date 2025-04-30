@@ -446,14 +446,20 @@ async function main() {
     }
 
     if (initialSearch) {
-        let entries = await doQuery3(initialSearch)
+        let formData = new FormData()
+        formData.set("search-query", initialSearch)
+        formData.set("sort-by", "rating")
+
+        let filters = parseClientsideSearchFiltering(formData)
+        let entries = await doQuery3(String(filters.newSearch) || "#")
+        entries = applyClientsideSearchFiltering(entries, filters)
 
         setResultStat("results", entries.length)
 
         globalsNewUi.results = entries
 
         if (entries.length === 0) {
-            alert("No results")
+            setError("No results")
             return
         }
         renderSidebar(entries)
