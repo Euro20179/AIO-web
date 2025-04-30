@@ -80,6 +80,30 @@ type Status = string
 
 let formats: { [key: number]: string } = {}
 
+function mkStrItemId(jsonl: string) {
+    return jsonl
+        .replace(/"ItemId":\s*(\d+),/, "\"ItemId\": \"$1\",")
+        .replace(/"ParentId":\s*(\d+),/, "\"ParentId\": \"$1\",")
+        .replace(/"CopyOf":\s*(\d+)(,)?/, "\"CopyOf\": \"$1\"$2")
+        .replace(/"Library":\s*(\d+)(,)?/, "\"Library\": \"$1\"$2")
+}
+
+function mkIntItemId(jsonl: string) {
+    return jsonl
+        .replace(/"ItemId":"(\d+)",/, "\"ItemId\": $1,")
+        .replace(/"ParentId":"(\d+)",/, "\"ParentId\": $1,")
+        .replace(/"CopyOf":"(\d+)"(,)?/, "\"CopyOf\": $1$2")
+        .replace(/"Library":"(\d+)"(,)?/, "\"Library\": $1$2")
+}
+
+function serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent) {
+    return mkIntItemId(
+        JSON.stringify(
+            entry, (_, v) => typeof v === "bigint" ? String(v) : v
+        )
+    )
+}
+
 function canBegin(status: Status) {
     return status === "Finished" || status === "Dropped" || status === "Planned" || status === ""
 }
@@ -109,22 +133,6 @@ async function listFormats() {
 async function listTypes() {
     const res = await fetch(`${apiPath}/type/type`)
     return await res.json()
-}
-
-function mkStrItemId(jsonl: string) {
-    return jsonl
-        .replace(/"ItemId":\s*(\d+),/, "\"ItemId\": \"$1\",")
-        .replace(/"ParentId":\s*(\d+),/, "\"ParentId\": \"$1\",")
-        .replace(/"CopyOf":\s*(\d+)(,)?/, "\"CopyOf\": \"$1\"$2")
-        .replace(/"Library":\s*(\d+)(,)?/, "\"Library\": \"$1\"$2")
-}
-
-function mkIntItemId(jsonl: string) {
-    return jsonl
-        .replace(/"ItemId":"(\d+)",/, "\"ItemId\": $1,")
-        .replace(/"ParentId":"(\d+)",/, "\"ParentId\": $1,")
-        .replace(/"CopyOf":"(\d+)"(,)?/, "\"CopyOf\": $1$2")
-        .replace(/"Library":"(\d+)"(,)?/, "\"Library\": $1$2")
 }
 
 function parseJsonL(jsonl: string) {

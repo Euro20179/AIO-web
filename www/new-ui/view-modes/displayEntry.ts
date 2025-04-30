@@ -150,7 +150,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     let engagementSet = authorizedRequest(`${apiPath}/engagement/set-entry`, {
         body: userStringified,
-        method: "POST"
+        method: "POST",
     })
         .then(res => res.text())
         .then(console.log)
@@ -1120,8 +1120,13 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     hookActionButtons(root, item)
 
     const notesEditBox = root.getElementById("notes-edit-box") as HTMLTextAreaElement
+
+    let editTO: number | undefined;
     notesEditBox.onchange = function() {
         user.Notes = notesEditBox.value
+
+        const userStringified = serializeEntry(user)
+
         updateInfo({
             entries: {
                 [String(item.ItemId)]: item
@@ -1130,6 +1135,25 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
                 [String(item.ItemId)]: user
             }
         })
+
+        if(editTO) {
+            clearTimeout(editTO)
+        }
+        editTO = setTimeout(() => {
+            authorizedRequest(`${apiPath}/engagement/set-entry`, {
+                body: userStringified,
+                method: "POST",
+                "signin-reason": "save notes"
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        alert("Notes saved")
+                    } else {
+                        alert("Failed to save notes")
+                    }
+                })
+                .catch(() => alert("Failed to save notes"))
+        }, 1000)
     }
 
     const newTag = (root.getElementById("create-tag")) as HTMLButtonElement
