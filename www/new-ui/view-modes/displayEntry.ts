@@ -126,25 +126,9 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
     updateWithTable(metaTable, meta)
 
 
-    const infoStringified = mkIntItemId(
-        JSON.stringify(
-            item,
-            (_, v) => typeof v === 'bigint' ? String(v) : v
-        )
-    )
-
-    const metaStringified = mkIntItemId(
-        JSON.stringify(
-            meta, (_, v) => typeof v === 'bigint' ? String(v) : v
-        )
-    )
-
-    const userStringified = mkIntItemId(
-        JSON.stringify(
-            userEntry,
-            (_, v) => typeof v === "bigint" ? String(v) : v
-        )
-    )
+    const infoStringified = serializeEntry(item)
+    const metaStringified = serializeEntry(meta)
+    const userStringified = serializeEntry(userEntry)
 
     let promises = []
 
