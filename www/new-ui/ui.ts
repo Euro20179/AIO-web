@@ -21,6 +21,27 @@ function deleteEntryUI(item: InfoEntry) {
     })
 }
 
+async function fetchLocationUI(id: bigint, provider?: string) {
+    let res = await fetchLocation(id, provider)
+    if (res.status !== 200) {
+        alert("Failed to get location")
+        return
+    }
+
+    let newLocation = await res.text()
+
+    let item = findInfoEntryById(id) as InfoEntry
+
+    item.Location = newLocation
+
+    updateInfo({
+        entries: {
+            [String(item.ItemId)]: item
+        }
+    })
+    alert(`Location set to: ${newLocation}`)
+}
+
 function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     if (!confirm("Are you sure you want to overwrite the metadata with a refresh")) {
         return
@@ -32,14 +53,17 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
             alert("Failed to get metadata")
             return
         }
-        loadMetadata()
-            .then(() => {
-                updateInfo({
-                    entries: {
-                        [String(item.ItemId)]: item
-                    }
+        alert("Metadata set")
+        fetchLocationUI(item.ItemId).then(() =>
+            loadMetadata()
+                .then(() => {
+                    updateInfo({
+                        entries: {
+                            [String(item.ItemId)]: item
+                        }
+                    })
                 })
-            })
+        )
     })
 }
 
@@ -64,7 +88,7 @@ async function newEntryUI(form: HTMLFormElement) {
         validEntries[name] = value
     }
 
-    if(validEntries["libraryId"] && validEntries["libraryId"] == "0") {
+    if (validEntries["libraryId"] && validEntries["libraryId"] == "0") {
         delete validEntries["libraryId"]
     }
 

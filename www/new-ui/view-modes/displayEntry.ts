@@ -34,6 +34,12 @@ async function itemIdentification(form: HTMLFormElement) {
         .then(loadMetadata)
         .then(() => {
             let newItem = globalsNewUi.entries[itemId]
+
+            //if the provider also has a location provider might as well get the location for it
+            if(["steam", "sonarr"].includes(provider)) {
+                fetchLocationUI(BigInt(itemId), provider)
+            }
+
             updateInfo({ entries: { [String(itemId)]: newItem } })
         })
 }
