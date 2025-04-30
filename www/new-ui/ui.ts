@@ -54,16 +54,14 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
             return
         }
         alert("Metadata set")
-        fetchLocationUI(item.ItemId).then(() =>
-            loadMetadata()
-                .then(() => {
-                    updateInfo({
-                        entries: {
-                            [String(item.ItemId)]: item
-                        }
-                    })
+        loadMetadata()
+            .then(() => {
+                updateInfo({
+                    entries: {
+                        [String(item.ItemId)]: item
+                    }
                 })
-        )
+            })
     })
 }
 
