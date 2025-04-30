@@ -68,6 +68,8 @@ type MetadataEntry = {
     Datapoints: string
     Title: string
     Native_Title: string
+    Provider: string
+    ProviderID: string
 }
 
 

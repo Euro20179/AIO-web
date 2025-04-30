@@ -53,15 +53,24 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
             alert("Failed to get metadata")
             return
         }
+
         alert("Metadata set")
-        loadMetadata()
-            .then(() => {
-                updateInfo({
-                    entries: {
-                        [String(item.ItemId)]: item
-                    }
-                })
+
+        res.json().then((newMeta: MetadataEntry) => {
+            let sId = String(item.ItemId)
+            updateInfo({
+                entries: {
+                    [sId]: item
+                },
+                metadataEntries: {
+                    [sId]: newMeta
+                }
             })
+
+            if (newMeta.Provider === "steam") {
+                fetchLocationUI(item.ItemId, "steam")
+            }
+        })
     })
 }
 
