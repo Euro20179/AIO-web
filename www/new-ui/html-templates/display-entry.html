@@ -71,7 +71,7 @@
         <button class="delete" onclick="displayEntryDelete(this)" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <div class="grid" style="grid-auto-flow: column">
+        <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
             <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
             <button id="fetch-location" onclick="displayEntryFetchLocation(this)" title="find location of this item">📍</button>
             <button class="identify" title="identify item" popovertarget="item-identification-form">ℹ</button>
