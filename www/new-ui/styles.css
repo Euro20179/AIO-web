@@ -3,6 +3,7 @@
 @layer general, utility, components;
 
 @layer general {
+
     html,
     body {
         height: 100%;
@@ -41,11 +42,15 @@
     p:has(#login-reason) {
         text-align: center;
     }
+
     p:has(#login-reason:empty) {
         display: none;
     }
 
-    #entry-output, #graph-output, #calc-output, #gallery-output {
+    #entry-output,
+    #graph-output,
+    #calc-output,
+    #gallery-output {
         &:target {
             display: inherit;
         }
@@ -95,6 +100,10 @@
         }
     }
 
+    #main-ui.display-mode> :not(#viewing-area) {
+        display: none;
+    }
+
     #main-ui {
         flex-grow: 1;
 
@@ -111,15 +120,19 @@
             grid-template-rows: min-content 1fr 1fr;
         }
 
-        @container body (width < 800px) {
-            grid-template-rows: max-content min-content 3fr;
-            grid-template-columns: 1fr 1fr 0.5fr;
-            grid-template-areas:
-                "form form form"
-                "sidebar sidebar sidebar"
-                "main main main";
+        /*in display mode, the grid template doesn't work too well, not sure why
+        * doesn't really matter, since there's only one item in the grid anyway*/
+        &:not(.display-mode) {
+            @container body (width < 800px) {
+                grid-template-rows: max-content min-content 3fr;
+                grid-template-columns: 1fr 1fr 0.5fr;
+                grid-template-areas:
+                    "form form form"
+                    "sidebar sidebar sidebar"
+                    "main main main";
 
-            position: relative;
+                position: relative;
+            }
         }
     }
 
@@ -140,7 +153,8 @@
             width: 100%;
             margin-bottom: 10px;
         }
-        @container (width >= 70ch) {
+
+        @container (width >=70ch) {
             justify-self: end;
         }
 
@@ -196,7 +210,7 @@
 
     #result-stats {
         @container (width < 115ch) {
-                justify-self: center;
+            justify-self: center;
         }
 
         display: flex;
@@ -209,6 +223,7 @@
             padding-right: 10px;
             border-right: 1px dashed white;
         }
+
         * {
             align-content: center;
         }
@@ -299,7 +314,7 @@
             float: right;
             align-content: start;
 
-            > * {
+            >* {
                 height: fit-content;
             }
         }

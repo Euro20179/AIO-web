@@ -476,9 +476,8 @@ async function main() {
     }
 
     if(display_item_only) {
-        for(let elem of document.querySelectorAll("#main-ui > :not(#viewing-area)")) {
-            elem.style.display = "none"
-        }
+        let mainUI = document.getElementById("main-ui")
+        mainUI?.classList.add("display-mode")
     }
 }
 
