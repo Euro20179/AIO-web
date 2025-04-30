@@ -214,7 +214,7 @@ async function nameToFormat(name: string): Promise<number> {
 
 }
 
-async function formatToName(format: number) {
+async function formatToName(format: number): Promise<string> {
     const DIGI_MOD = 0x1000
     let out = ""
     if ((format & DIGI_MOD) === DIGI_MOD) {
@@ -440,4 +440,15 @@ async function overwriteMetadataEntry(itemId: bigint) {
 
 async function updateInfoTitle(itemId: bigint, newTitle: string) {
     return authorizedRequest(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
+}
+
+async function fetchLocation(itemId: bigint, provider?: string) {
+    if (provider) {
+        return authorizedRequest(`${apiPath}/metadata/fetch-location?uid=${uid}&id=${itemId}&provider=${provider}`, {
+            "signin-reason": "set location"
+        })
+    }
+    return authorizedRequest(`${apiPath}/metadata/fetch-location?uid=${uid}&id=${itemId}`, {
+        "signin-reason": "set location"
+    })
 }

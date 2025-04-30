@@ -1120,7 +1120,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             }
         })
 
-        if(editTO) {
+        if (editTO) {
             clearTimeout(editTO)
         }
         editTO = setTimeout(() => {
@@ -1205,8 +1205,30 @@ function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot) => any) {
     }
 }
 
+function _fetchLocation(item: InfoEntry) {
+    fetchLocation(item.ItemId)
+        .then(async (res) => {
+            if (res.status !== 200) {
+                alert("Failed to get location")
+                return
+            }
+
+            let newLocation = await res.text()
+
+            item.Location = newLocation
+
+            updateInfo({
+                entries: {
+                    [String(item.ItemId)]: item
+                }
+            })
+            alert(`Location set to: ${newLocation}`)
+        })
+}
+
 const displayEntryDelete = displayEntryAction(item => deleteEntryUI(item))
 const displayEntryRefresh = displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item))
+const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item))
 const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item))
 const displayEntryClose = displayEntryAction(item => deselectItem(item))
 
