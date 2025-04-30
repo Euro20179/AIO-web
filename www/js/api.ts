@@ -408,7 +408,12 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
         sessionStorage.setItem("userAuth", userAuth)
     }
     options.headers["Authorization"] = `Basic ${userAuth}`
-    return await fetch(url, options)
+    let res = await fetch(url, options)
+    if(res.status === 401) {
+        userAuth = ""
+        return await authorizedRequest(url, options)
+    }
+    return res
 }
 
 async function apiDeleteEvent(itemId: bigint, ts: number, after: number) {
