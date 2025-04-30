@@ -120,19 +120,19 @@
             grid-template-rows: min-content 1fr 1fr;
         }
 
-        /*in display mode, the grid template doesn't work too well, not sure why
-        * doesn't really matter, since there's only one item in the grid anyway*/
-        &:not(.display-mode) {
-            @container body (width < 800px) {
-                grid-template-rows: max-content min-content 3fr;
-                grid-template-columns: 1fr 1fr 0.5fr;
-                grid-template-areas:
-                    "form form form"
-                    "sidebar sidebar sidebar"
-                    "main main main";
+        @container body (width < 800px) {
+            grid-template-rows: max-content min-content 3fr;
+            grid-template-columns: 1fr 1fr 0.5fr;
+            grid-template-areas:
+                "form form form"
+                "sidebar sidebar sidebar"
+                "main main main";
 
-                position: relative;
-            }
+            position: relative;
+        }
+
+        &.display-mode {
+            display: block;
         }
     }
 
