@@ -459,3 +459,9 @@ async function fetchLocation(itemId: bigint, provider?: string) {
         "signin-reason": "set location"
     })
 }
+
+async function username2UID(username: string): Promise<number> {
+    let res = await fetch(`${AIO}/account/username2id?username=${encodeURIComponent(username)}`)
+    const n = await res.text()
+    return Number(n.trim())
+}

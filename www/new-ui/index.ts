@@ -404,13 +404,20 @@ async function refreshInfo() {
 }
 
 async function main() {
-
     const urlParams = new URLSearchParams(document.location.search)
-    if (!urlParams.has("uid")) {
+
+    if(urlParams.has("uname")) {
+        uid = String(await username2UID(urlParams.get("uname") as string))
+        if(uid == "0") {
+            setError(`username: ${urlParams.get("uname")} does not exist`)
+            return
+        }
+    } else if(urlParams.has("uid")) {
+        uid = urlParams.get("uid") as string
+    } else {
         setError("No user id selected")
         return
     }
-    uid = urlParams.get("uid") as string
 
     const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
     const display_item_only = urlParams.has("display")
