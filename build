@@ -50,11 +50,11 @@ handle_configts_from_ini
 esbuild $(find . -regex '.*\.ts$') --minify --outdir=www $esbuildOpts
 
 #compile html into one BIG html to avoid having to have all of this in one massive file while working on it. It gets really annoying lol
-idx="./www/new-ui/index.html"
+idx="./www/ui/index.html"
 #copy the initial template file to the final output
-cp "./www/new-ui/index-template.html" "$idx"
+cp "./www/ui/index-template.html" "$idx"
 #for each template
-for file in ./www/new-ui/html-templates/*.html; do
+for file in ./www/ui/html-templates/*.html; do
     name="${file##*/}"
     name="${name%.html}"
     #create a template html tag and put it into the final output html file

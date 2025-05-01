@@ -49,7 +49,7 @@
             Welcome to the AIO LIMAS, basic usage information can be found <a href="/usage">here</a>, and a history and philosophy can be found in the <a href="/about">about</a>
     </p>
     <p>
-            The server comes with two UIs. A <a href="/lite">simple one</a> that is HTML and view only, and a <a href="/new-ui">full webapp</a>.
+            The server comes with two UIs. A <a href="/lite">simple one</a> that is HTML and view only, and a <a href="/ui">full webapp</a>.
     </p>
 
     <h2 class="">Users</h2>
@@ -73,7 +73,7 @@
         const params = new URLSearchParams(document.location.search)
         const uid = params.get("uid")
         if (uid) {
-            window.location = `/new-ui/?uid=${uid}`
+            window.location = `/ui/?uid=${uid}`
         }
 
         function deleteaccount(uid) {
@@ -95,7 +95,7 @@
                     if (!user) return
 
                     const [id, name] = user.split(":")
-                    const html = `<div style="display: flex; gap: 2ch; flex-direction: row; justify-content: left;"><a href="/new-ui?uid=${id}">${name}</a> <button onclick="deleteaccount(${id})">delete</button></div>`
+                    const html = `<div style="display: flex; gap: 2ch; flex-direction: row; justify-content: left;"><a href="/ui?uid=${id}">${name}</a> <button onclick="deleteaccount(${id})">delete</button></div>`
                     usersOutput.innerHTML += html
                 })
             })
