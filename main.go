@@ -53,6 +53,16 @@ func root(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func userRedirect(w http.ResponseWriter, req *http.Request) {
+	name := req.PathValue("username")
+	http.Redirect(w, req, fmt.Sprintf("/ui?uname=%s", name), http.StatusPermanentRedirect)
+}
+
+func userIDRedirect(w http.ResponseWriter, req *http.Request) {
+	name := req.PathValue("uid")
+	http.Redirect(w, req, fmt.Sprintf("/ui?uid=%s", name), http.StatusPermanentRedirect)
+}
+
 func main() {
 	data, err := ini.Load("./server-config.ini")
 	if err != nil {
@@ -78,6 +88,10 @@ func main() {
 	port = portKey.String()
 
 	start:
+
+	http.HandleFunc("/user/{username}", userRedirect)
+	http.HandleFunc("/uid/{uid}", userIDRedirect)
+
 	http.HandleFunc("/", root)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }
