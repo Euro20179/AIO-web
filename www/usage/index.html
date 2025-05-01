@@ -16,18 +16,26 @@
         <p>
             I would like to keep this brief so:<br>
             If you would like to know what a button does, hover over it.<br>
-            Any changes made in the tables on the sidebar can be saved by clicking the save button above the thumbnail<br>
+            Any changes made in the tables on the sidebar can be saved by clicking the save button above the
+            thumbnail<br>
         </p>
     </section>
 
     <section>
         <h3>Configuration</h3>
         <p>
+            <em>
+                This section describes configuration for the server, as such it will eventually be moved to the server
+                documentation section
+            </em>
+        </p>
+        <p>
             By default, configuration is stored in <code>$AIO_DIR</code>, which by default is
             <code>$XDG_DATA_HOME/aio-limas</code>.
         </p>
         <p>
-            Configuration is done <b>per user</b> within the <code>settings.json</code> file stored in <code>$AIO_DIR/users/[user-id]</code>.
+            Configuration is done <b>per user</b> within the <code>settings.json</code> file stored in
+            <code>$AIO_DIR/users/[user-id]</code>.
         </p>
         Configuration schema:
         <script type="application/json" style="display: block; white-space: pre; font-family: monospace;">
@@ -94,13 +102,16 @@
             <li>ItemId</li>
             <li>En_Title (string): The user specified name for the item</li>
             <li>Native_Title (string): The user specified native name for the item</li>
-            <li>Format (int): The format the entry is stored on, also see: <a href="#format-list">format list</a>, and the #f macro</li>
+            <li>Format (int): The format the entry is stored on, also see: <a href="#format-list">format list</a>, and
+                the #f macro</li>
             <li>Location (string): Location (on disk) of the entry</li>
             <li>PurchasePrice (float): The price the user bought the entry for</li>
-            <li>Collection (string): <del>An \x1F seperated list of tags</del> <ins>use the #tag macro instead</ins></li>
+            <li>Collection (string): <del>An \x1F seperated list of tags</del> <ins>use the #tag macro instead</ins>
+            </li>
             <li>ParentId (int): 0 or the entry's parent</li>
             <li>Type (string): The type of the entry, also see: <a href="#type-list">type list</a></li>
-            <li>ArtStyle (int): A bitfield of the entry's different art styles, also see: <a href="#art-styles">art styles</a></li>
+            <li>ArtStyle (int): A bitfield of the entry's different art styles, also see: <a href="#art-styles">art
+                    styles</a></li>
             <li>CopyOf (int): 0 or the entry that this item is a copy of</li>
             <li>Library (int): 0 or the library that the entry is appart of</li>
         </ul>
@@ -126,7 +137,8 @@
             <li>Description (string): description of the entry</li>
             <li>ReleaseYear (int): release year of the entry</li>
             <li>Thumbnail (string): url to a thumbnail</li>
-            <li>MediaDependant (string): a json object containing miscellanious information about an entry that depends on the type of media </li>
+            <li>MediaDependant (string): a json object containing miscellanious information about an entry that depends
+                on the type of media </li>
             <li>Datapoints (string): a json object containing miscellanious information (unused)</li>
             <li>Title (string): Title of the entry</li>
             <li>Native_Title (string): Official native title</li>
@@ -166,8 +178,9 @@
             The <b>s:</b> macro indicates a status, eg: <code>#s:v</code> expands to <code>Status = "Viewing"</code>
         </p>
         <p>
-                The <b>tag:</b> macro searches for a tag. eg: <code>#tag:ghibli</code>, this is equivelent to <code>Collection ~ '%\x1Fghibli\x1F%'</code><br>
-                The reason the equivelent is so horrible is because it's an <code>\x1F</code> deliminated list of tags
+            The <b>tag:</b> macro searches for a tag. eg: <code>#tag:ghibli</code>, this is equivelent to
+            <code>Collection ~ '%\x1Fghibli\x1F%'</code><br>
+            The reason the equivelent is so horrible is because it's an <code>\x1F</code> deliminated list of tags
         </p>
         <p>
             The <b>md:</b> and <b>mdi:</b> macros help query against a mediaDependant json value.<br>
@@ -194,11 +207,32 @@
             <li>head n: get the <code>n</code> top items</li>
             <li>tail n: get the <code>n</code> bottom items</li>
             <li>shuf: shuffle the items</li>
-            <li>sort b: sort by <code>b</code> which can be <code>a</code> for alphabetical or <code>e</code> for js eval</li>
+            <li>sort b: sort by <code>b</code> which can be <code>a</code> for alphabetical or <code>e</code> for js
+                eval</li>
             <li>!child: to ensure the item is not a child</li>
             <li>!copy: to ensure the item is not a copy</li>
         </ul>
         <p>If the filter begins and ends with a <code>/</code> a regex search will be performed</p>
+    </section>
+
+    <hr>
+
+    <section>
+        <h3>Url Parameters</h3>
+        <p>
+            the <code>/new-ui</code> has a few url parameters.
+        </p>
+        <ul>
+            <li>
+                <code>uid</code>: the user's id to display<br>
+                This parameter or <code>uname</code> is required in order to know which user's items to display
+                <code>uname</code>: the username to display
+                <code>q</code>: an initial search query
+                <code>item-id</code>: the item id to show (same as <code>?q=ItemId%20=id</code>
+                <code>display</code>: get rid of the ui elements, and display the first result found by <code>q</code>,
+                or the item specified by <code>item-id</code>
+            </li>
+        </ul>
     </section>
 
     <hr>
@@ -223,7 +257,8 @@
             <li>14: VINYL</li>
             <li>15: IMAGE</li>
             <li>16: UNOWNED</li>
-            <li>4096: DIGITAL MODIFIER, can be bitwise anded to any of the above to say that it is a digital version of that format</li>
+            <li>4096: DIGITAL MODIFIER, can be bitwise anded to any of the above to say that it is a digital version of
+                that format</li>
         </ul>
 
         <h3 id="type-list">Type List</h3>
