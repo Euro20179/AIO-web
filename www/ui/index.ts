@@ -156,8 +156,25 @@ async function loadInfoEntries() {
     return globalsNewUi.entries = obj
 }
 
+function defaultMetadata(id: bigint): MetadataEntry {
+    return {
+        ItemId: id,
+        Rating: 0,
+        RatingMax: 0,
+        Description: "",
+        ReleaseYear: 0,
+        Thumbnail: "",
+        MediaDependant: "{}",
+        Datapoints: "{}",
+        Native_Title: "",
+        Title: "",
+        Provider: "",
+        ProviderID: ""
+    }
+}
+
 function findMetadataById(id: bigint): MetadataEntry | null {
-    return globalsNewUi.metadataEntries[String(id)]
+    return globalsNewUi.metadataEntries[String(id)] || defaultMetadata(id)
 }
 
 function findUserEntryById(id: bigint): UserEntry | null {
@@ -427,7 +444,16 @@ async function main() {
         searchInput.value = decodeURIComponent(initialSearch)
     }
 
-    await refreshInfo()
+    await Promise.all([loadLibraries(), loadInfoEntries(), loadUserEntries(), loadUserEntries()])
+
+    loadMetadata().then(() => {
+        clearSidebar()
+
+        for(let item of globalsNewUi.results) {
+            mode?.refresh?.(item.ItemId)
+            renderSidebarItem(item)
+        }
+    })
 
     listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")

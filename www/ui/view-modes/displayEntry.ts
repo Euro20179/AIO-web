@@ -280,7 +280,10 @@ const modeDisplayEntry: DisplayMode = {
         let info = findInfoEntryById(id)
         if (!info) return
 
-        refreshDisplayItem(info)
+        let el = document.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+        //only refresh if the item is on screen
+        if(el)
+            refreshDisplayItem(info)
     },
 
     addList(entry, updateStats = true) {
