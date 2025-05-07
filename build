@@ -36,8 +36,9 @@ handle_configts_from_ini() {
         esac
     done < ./server-config.ini
 
-    cat <<-EOF > ./www/config.ts
-const AIO = "${host:-http://localhost:8080}"
+    cat <<-EOF > "$AIO_CONFIGTS"
+//making this not a constant so that a tampermonkey script can change it because i want to change it with a tampermonkey script
+let AIO = "${host:-http://localhost:8080}"
 const API = "${api:-/api/v1}"
 EOF
 }

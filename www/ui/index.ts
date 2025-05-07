@@ -444,7 +444,7 @@ async function main() {
         searchInput.value = decodeURIComponent(initialSearch)
     }
 
-    await Promise.all([loadLibraries(), loadInfoEntries(), loadUserEntries(), loadUserEntries()])
+    await Promise.all([loadLibraries(), loadInfoEntries(), loadUserEntries(), loadUserEvents()])
 
     loadMetadata().then(() => {
         clearSidebar()
