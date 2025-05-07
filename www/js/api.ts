@@ -395,21 +395,30 @@ async function signin(reason?: string): Promise<string> {
             loginPopover.hidePopover()
             res(btoa(`${username}:${password}`))
         }
+
+        setTimeout(() => {
+            loginPopover.hidePopover()
+            rej(null)
+        }, 60000)
     })
 }
 
 
 let userAuth = sessionStorage.getItem("userAuth") || ""
-async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response> {
+async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response | null> {
     options ||= {}
     options.headers ||= {}
     if (userAuth == "") {
-        userAuth = await signin(options?.["signin-reason"])
-        sessionStorage.setItem("userAuth", userAuth)
+        try {
+            userAuth = await signin(options?.["signin-reason"])
+            sessionStorage.setItem("userAuth", userAuth)
+        } catch(err) {
+            return null
+        }
     }
     options.headers["Authorization"] = `Basic ${userAuth}`
     let res = await fetch(url, options)
-    if(res.status === 401) {
+    if (res.status === 401) {
         userAuth = ""
         return await authorizedRequest(url, options)
     }

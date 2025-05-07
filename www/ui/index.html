@@ -10,6 +10,13 @@
 
 <body>
 
+    <dialog id="search-existing-items" popover>
+        <center>
+            <h3>Find Item</h3>
+            <input>
+        </center>
+    </dialog>
+
     <dialog id="login" popover>
         <h3 class="center">Login</h3>
         <form action="javascript:void(0)" class="flex column" style="align-content: center">
@@ -33,7 +40,8 @@
                     <select name="type" title="The type of media" required>
                         <option value="">Type</option>
                     </select>
-                    <label for="fetch-metadata"><input id="fetch-metadata" type="checkbox" name="get-metadata"> Get metadata</label>
+                    <label for="fetch-metadata"><input id="fetch-metadata" type="checkbox" name="get-metadata"> Get
+                        metadata</label>
                 </div>
                 <details class="flex column" open>
                     <summary>
@@ -48,8 +56,8 @@
                     <label for="is-digital"><input type="checkbox" name="is-digital" id="is-digital">
                         Digitally drawn </label>
                     <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-                    <label for="is-live-action"><input type="checkbox" name="is-live-action"
-                            id="is-live-action"> Live action</label>
+                    <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
+                        action</label>
                 </details>
                 <!-- <label for="is-anime">anime?: <input type="checkbox" id="is-anime" name="is-anime"></label> -->
             </div>
@@ -82,8 +90,7 @@
                     <option value="15">Image</option>
                     <option value="13">Other</option>
                 </select>
-                <label for="is-digital">digital? <input type="checkbox" id='is-digital'
-                        name="is-digital"></label>
+                <label for="is-digital">digital? <input type="checkbox" id='is-digital' name="is-digital"></label>
             </div>
             <input type="text" placeholder="tags (',' separated)" name="tags" value="">
             <div>
@@ -106,7 +113,8 @@
                     <select name="sort-by" title="sort by">
                         <option value="rating">User Rating</option>
                         <option value="general-rating">General rating</option>
-                        <option value="rating-disparity" title="How different your rating is from the general consensous">
+                        <option value="rating-disparity"
+                            title="How different your rating is from the general consensous">
                             Rating disparity</option>
                         <option value="release-year">Release year</option>
                         <option value="cost">Cost</option>
@@ -128,7 +136,8 @@
             </div>
             <nav class="sidebar overflow" id="sidebar">
                 <div class="sidebar--navigation" id="sidebar-navigation">
-                    <label class="center block" style="width: 100%; align-content: center;"><input type="checkbox" name="view-all" id="view-all">View all</label>
+                    <label class="center block" style="width: 100%; align-content: center;"><input type="checkbox"
+                            name="view-all" id="view-all">View all</label>
                     <select id="library-selector">
                     </select>
                 </div>
@@ -138,12 +147,12 @@
             <section id="viewing-area" class="flex column overflow">
 
                 <nav id="selected-item-actions">
-                        <button onclick="addTagsToSelected()">Add tag(s) to selected</button>
-                        <button onclick="putSelectedToCollection()">Put selected in collection</button>
+                    <button onclick="addTagsToSelected()">Add tag(s) to selected</button>
+                    <button onclick="putSelectedToCollection()">Put selected in collection</button>
                 </nav>
 
                 <div id="error-output">
-                        <p id="error"></p>
+                    <p id="error"></p>
                 </div>
 
                 <div id="entry-output" class="overflow">
@@ -223,7 +232,7 @@
         location.hash ||= "entry-output"
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="/config.js"></script>
+    <script src="/config.js"></script>
     <script src="/ui/calculator.js"></script>
     <script src="/ui/components.js"></script>
     <script src="/ui/globals.js"></script>
@@ -418,7 +427,7 @@
             </div>
             <div class="flex" style="gap: 1ch">
                 <button id="new-child" title="Create new item as a child of this">New</button>
-                <input id="new-child-by-id" placeholder="By item id">
+                <button id="new-child-by-id" onclick="displayEntryAddExistingItemAsChild(this)">Add Existing</button>
             </div>
         </div>
     </section>

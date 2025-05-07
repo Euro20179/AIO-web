@@ -36,7 +36,7 @@ async function itemIdentification(form: HTMLFormElement) {
             let newItem = globalsNewUi.entries[itemId]
 
             //if the provider also has a location provider might as well get the location for it
-            if(["steam", "sonarr"].includes(provider)) {
+            if (["steam", "sonarr"].includes(provider)) {
                 fetchLocationUI(BigInt(itemId), provider)
             }
 
@@ -282,7 +282,7 @@ const modeDisplayEntry: DisplayMode = {
 
         let el = document.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
-        if(el)
+        if (el)
             refreshDisplayItem(info)
     },
 
@@ -1240,6 +1240,29 @@ const displayEntryRefresh = displayEntryAction((item, root) => overwriteEntryMet
 const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item))
 const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item))
 const displayEntryClose = displayEntryAction(item => deselectItem(item))
+
+const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
+    selectExistingItem().then(id => {
+        if (!id) {
+            alert("Could not set child")
+            return
+        }
+        setParent(id, item.ItemId).then(() => {
+            let info = findInfoEntryById(id)
+            if (!info)  {
+                alert("could not find child id")
+                return
+            }
+            info.ParentId = item.ItemId
+            updateInfo({
+                entries: {
+                    [String(item.ItemId)]: item,
+                    [String(id)]: info
+                }
+            })
+        })
+    })
+})
 
 const displayEntryEditStyles = displayEntryAction((item, root) => {
     const styleEditor = root.getElementById("style-editor") as HTMLTextAreaElement

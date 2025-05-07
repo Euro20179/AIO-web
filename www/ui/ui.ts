@@ -111,7 +111,7 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let json = parseJsonL(mkStrItemId(text))
-    getEntryMetadata(json.ItemId).then(async(res) => {
+    getEntryMetadata(json.ItemId).then(async (res) => {
         if (res.status !== 200) {
             alert("Failed to load new item metadata, please reload")
             return
@@ -137,6 +137,67 @@ async function newEntryUI(form: HTMLFormElement) {
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
 newItemForm.onsubmit = function() {
     newEntryUI(newItemForm)
+}
+
+
+async function selectExistingItem(): Promise<null | bigint> {
+    const popover = document.getElementById("search-existing-items") as HTMLDivElement
+
+    popover.innerHTML = ""
+
+    const container = popover.querySelector("div") || document.createElement("div")
+    container.classList.add("grid")
+    container.classList.add("center")
+    container.style.gridTemplateColumns = "1fr 1fr 1fr"
+
+    for (let id in globalsNewUi.metadataEntries) {
+        //no need to re-render the element (thumbnail or title might be different, that's ok)
+        if (container.querySelector(`[data-item-id="${id}"]`)) {
+            continue
+        }
+
+        const meta = globalsNewUi.metadataEntries[id]
+        const item = globalsNewUi.entries[id]
+
+        const title = item.En_Title || item.Native_Title || meta.Title || meta.Native_Title
+
+        const fig = document.createElement("figure")
+
+        fig.style.cursor = "pointer"
+
+        fig.setAttribute("data-item-id", String(id))
+
+        const img = document.createElement("img")
+        img.src = fixThumbnailURL(meta.Thumbnail)
+        img.width = 100
+        img.loading = "lazy"
+        const caption = document.createElement("figcaption")
+        caption.innerText = title
+
+        fig.append(img)
+        fig.append(caption)
+
+        container.append(fig)
+    }
+
+    popover.append(container)
+
+    popover.showPopover()
+
+    return await new Promise((res, rej) => {
+        for (let fig of container.querySelectorAll("figure")) {
+            const id = fig.getAttribute("data-item-id")
+            fig.onclick = () => {
+                popover.hidePopover()
+                res(BigInt(id as string))
+            }
+        }
+
+        setTimeout(() => {
+            rej(null)
+            popover.hidePopover()
+        }, 60000)
+    })
 }
 
 
