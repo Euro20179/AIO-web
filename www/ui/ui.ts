@@ -117,7 +117,7 @@ async function newEntryUI(form: HTMLFormElement) {
             return
         }
 
-        const data = await res.json()
+        const data = parseJsonL(mkStrItemId(await res.text()))
 
         updateInfo({
             entries: { [json.ItemId]: json },
