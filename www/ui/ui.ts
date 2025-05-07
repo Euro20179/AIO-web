@@ -111,16 +111,28 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let json = parseJsonL(mkStrItemId(text))
-    loadMetadata().then(() => {
+    getEntryMetadata(json.ItemId).then(async(res) => {
+        if (res.status !== 200) {
+            alert("Failed to load new item metadata, please reload")
+            return
+        }
+
+        const data = await res.json()
+
         updateInfo({
             entries: { [json.ItemId]: json },
+            metadataEntries: { [data.ItemId]: data }
         })
+
+        clearItems()
+
+        selectItem(json, mode, true)
+
+        clearSidebar()
+        renderSidebarItem(json)
+    }).catch(() => {
+        alert("Failed to load new item metadata, please reload")
     })
-
-    clearItems()
-
-    selectItem(json, mode, true)
-    renderSidebarItem(json)
 }
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
 newItemForm.onsubmit = function() {

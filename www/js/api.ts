@@ -449,6 +449,10 @@ async function updateInfoTitle(itemId: bigint, newTitle: string) {
     return authorizedRequest(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
 }
 
+async function getEntryMetadata(itemId: bigint) {
+    return await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
+}
+
 async function fetchLocation(itemId: bigint, provider?: string) {
     if (provider) {
         return authorizedRequest(`${apiPath}/metadata/fetch-location?uid=${uid}&id=${itemId}&provider=${provider}`, {
