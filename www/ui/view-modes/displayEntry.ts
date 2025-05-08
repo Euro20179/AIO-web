@@ -372,7 +372,15 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             }
 
             authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
-                .then(res => res.text())
+                .then(res => {
+                    if (res && res.status === 200) {
+                        updateStatus(action, shadowRoot)
+                    } else if (!res) {
+                        alert("Could not update status")
+                        return ""
+                    }
+                    return res.text()
+                })
                 .then(text => {
                     alert(text)
 
@@ -408,8 +416,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
 
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
             authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
-                .then(res =>  {
-                    if(res && res.status === 200) {
+                .then(res => {
+                    if (res && res.status === 200) {
                         updateStatus(action, shadowRoot)
                     } else if (!res) {
                         alert("Could not update status")
@@ -1271,7 +1279,7 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
         }
         setParent(id, item.ItemId).then(() => {
             let info = findInfoEntryById(id)
-            if (!info)  {
+            if (!info) {
                 alert("could not find child id")
                 return
             }
@@ -1332,7 +1340,7 @@ const displayEntryViewCount = displayEntryAction(item => {
 const displayEntryProgress = displayEntryAction(async (item, root) => {
     let progress = root.getElementById("entry-progressbar") as HTMLProgressElement
 
-    let newEp = promptNumber("Current position:", "Not a number, current position")
+    let newEp = prompt("Current position:")
     if (!newEp) return
 
     await setPos(item.ItemId, String(newEp))
