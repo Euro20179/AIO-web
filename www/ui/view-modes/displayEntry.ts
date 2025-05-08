@@ -104,9 +104,10 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     let infoTable = root.getElementById("info-raw")
     let metaTable = root.getElementById("meta-info-raw")
-    if (!infoTable || !metaTable) return
+    let userTable = root.getElementById("user-info-raw")
+    if (!infoTable || !metaTable || !userTable) return
 
-    const updateWithTable: (table: Element, item: InfoEntry | MetadataEntry) => void = (table, item) => {
+    const updateWithTable: (table: Element, item: InfoEntry | MetadataEntry | UserEntry) => void = (table, item) => {
         for (let row of table?.querySelectorAll("tr") || []) {
             let nameChild = row.firstElementChild as HTMLElement
             let valueChild = row.firstElementChild?.nextElementSibling as HTMLElement
@@ -130,6 +131,8 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
     let meta = findMetadataById(item.ItemId)
     if (!meta) return
     updateWithTable(metaTable, meta)
+
+    updateWithTable(userTable, userEntry)
 
 
     const infoStringified = serializeEntry(item)
@@ -508,7 +511,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
             el.innerText = child.En_Title
         }
         elementParent.append(el)
-        el.onclick = () => toggleItem(child)
+        el.onclick = (e) => toggleItem(child)
     }
 }
 
@@ -812,6 +815,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const audienceRatingEl = el.getElementById("audience-rating") as HTMLElement
     const infoRawTbl = el.getElementById("info-raw") as HTMLTableElement
     const metaRawtbl = el.getElementById("meta-info-raw") as HTMLTableElement
+    const userRawtbl = el.getElementById("user-info-raw") as HTMLTableElement
     const viewCountEl = el.getElementById("view-count") as HTMLSpanElement
     const progressEl = el.getElementById("entry-progressbar") as HTMLProgressElement
     const captionEl = el.getElementById("entry-progressbar-position-label") as HTMLElement
@@ -936,6 +940,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     let data = meta
     mkGenericTbl(metaRawtbl, data)
 
+    mkGenericTbl(userRawtbl, user)
+
     //View count
     let viewCount = user.ViewCount
     if (viewCount) {
@@ -976,10 +982,10 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     if (mediaDeptData[`${type}-episodes`] && user.Status === "Viewing") {
         progressEl.max = mediaDeptData[`${type}-episodes`]
 
-        let pos = Number(user.CurrentPosition)
+        let pos = parseInt(user.CurrentPosition)
         progressEl.value = pos
 
-        captionEl.innerText = `${pos}/${progressEl.max}`
+        captionEl.innerText = `${user.CurrentPosition}/${progressEl.max}`
         captionEl.title = `${Math.round(pos / progressEl.max * 1000) / 10}%`
     }
 
