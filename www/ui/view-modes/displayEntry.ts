@@ -388,7 +388,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
     }
 
     for (let btn of shadowRoot.querySelectorAll("[data-action]") || []) {
-        let action = btn.getAttribute("data-action")
+        let action = btn.getAttribute("data-action") as string
 
         //this action does multiple things
         if (action?.includes("+")) continue
@@ -408,7 +408,15 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
 
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
             authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
-                .then(res => res.text())
+                .then(res =>  {
+                    if(res && res.status === 200) {
+                        updateStatus(action, shadowRoot)
+                    } else if (!res) {
+                        alert("Could not update status")
+                        return ""
+                    }
+                    return res.text()
+                })
                 .then(text => {
                     alert(text)
                     loadUserEvents().then(() =>
@@ -805,6 +813,11 @@ function parseNotes(notes: string) {
     return text
 }
 
+function updateStatus(newStatus: string, el: ShadowRoot) {
+    const statusText = el.getElementById("current-status") as HTMLSpanElement
+    statusText.innerText = newStatus
+}
+
 function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
     const displayEntryTitle = el.getElementById("main-title") as HTMLHeadingElement
     const displayEntryNativeTitle = el.getElementById("official-native-title") as HTMLHeadingElement
@@ -824,6 +837,9 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const customStyles = el.getElementById("custom-styles") as HTMLStyleElement
 
     const notesEditBox = el.getElementById("notes-edit-box") as HTMLTextAreaElement
+
+    //status
+    updateStatus(user.Status, el)
 
     //Cost
     updateCostDisplay(el, item)
