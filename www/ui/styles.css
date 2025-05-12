@@ -60,6 +60,10 @@
         }
     }
 
+    #script-output:not(:target) {
+        display: none;
+    }
+
     #help-link {
         text-align: center;
         display: block;
@@ -247,6 +251,33 @@
     :has(#graph-output:target, #gallery-output:target) {
         #selected-item-actions {
             display: none;
+        }
+    }
+
+    #script-output {
+        height: 100%;
+        width: 100%;
+        display: grid;
+        grid-template-areas: "script"
+                             "output";
+        grid-template-rows: 1fr 4fr;
+        #script-output {
+            grid-area: output;
+        }
+
+        textarea {
+            flex-grow: 1;
+        }
+
+        :first-child {
+            display: flex;
+            gap: 10px;
+        }
+
+        #script-execute-output {
+            width: 100%;
+            height: 100%;
+            border: 1px solid;
         }
     }
 
