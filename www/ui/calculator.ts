@@ -163,7 +163,7 @@ function parseExpression(input: string, symbols: SymbolTable) {
     // return ast(tokens);
 }
 
-function buildNumber(text: string, curPos: number): [string, number]{
+function buildNumber(text: string, curPos: number): [string, number] {
     let num = text[curPos]
     while ("0123456789".includes(text[++curPos])) {
         num += text[curPos]
@@ -534,7 +534,7 @@ class Func extends Type {
 
 class Num extends Type {
     call(params: Type[]) {
-        if(params.length > 1) {
+        if (params.length > 1) {
             console.error("Multiple values to multiply number by")
             return new Num(this.jsValue)
         }
@@ -681,6 +681,22 @@ class SymbolTable {
                 }
             }
             return min
+        }))
+
+        this.symbols.set("setrating", new Func((...params) => {
+            let [itemId, newRating, done] = params;
+            setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async(res) => {
+                if (!res) {
+                    if (done) {
+                        done.call([new Str("FAIL"), new Num(0)])
+                    }
+                    return
+                }
+                if (done) {
+                    done.call([new Str(await res.text()), new Num(res.status)])
+                }
+            })
+            return new Num(0)
         }))
     }
     set(name: string, value: Type) {
@@ -829,7 +845,7 @@ function jsVal2CalcVal(value: any): Type {
         case 'boolean':
             return new Num(Number(value))
         case 'bigint':
-            return new Num(Number(value))
+            return new Num(BigInt(value))
         case 'function':
             return new Func(function() {
                 return jsVal2CalcVal(value(...arguments))

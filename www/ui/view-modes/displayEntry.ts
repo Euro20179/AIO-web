@@ -1410,14 +1410,20 @@ const displayEntryViewCount = displayEntryAction(item => {
 })
 
 const displayEntryProgress = displayEntryAction(async (item, root) => {
-    let progress = root.getElementById("entry-progressbar") as HTMLProgressElement
-
     let newEp = prompt("Current position:")
     if (!newEp) return
 
     await setPos(item.ItemId, String(newEp))
-    root.host.setAttribute("data-user-current-position", String(newEp))
-    progress.value = Number(newEp)
+    const user = findUserEntryById(item.ItemId) as UserEntry
+    user.CurrentPosition = String(newEp)
+    updateInfo( {
+        entries: {
+            [String(item.ItemId)]: item,
+        },
+        userEntries: {
+            [String(item.ItemId)]: user
+        }
+    })
 })
 
 const displayEntryRating = displayEntryAction(item => {
@@ -1431,7 +1437,7 @@ const displayEntryRating = displayEntryAction(item => {
         return
     }
 
-    authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&rating=${newRating}`)
+    setRating(item.ItemId, newRating)
         .then(() => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {

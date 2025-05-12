@@ -204,5 +204,3 @@ async function selectExistingItem(): Promise<null | bigint> {
         }, 60000)
     })
 }
-
-

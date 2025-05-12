@@ -483,3 +483,7 @@ async function username2UID(username: string): Promise<number> {
     const n = await res.text()
     return Number(n.trim())
 }
+
+async function setRating(itemId: bigint, rating: string) {
+    return await authorizedRequest(`${apiPath}/engagement/mod-entry?id=${itemId}&rating=${rating}`)
+}
