@@ -10,8 +10,8 @@ type DisplayMode = {
     [key: string]: any
 }
 
-const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting]
-const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output"]
+const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery]
+const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output"]
 
 let idx = modeOutputIds.indexOf(location.hash.slice(1))
 
