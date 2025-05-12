@@ -714,6 +714,10 @@ class NotesTagNode implements NotesNode {
                     endTag = "</button>"
                 }
                 break
+            case "link":
+                startTag = `<a href="${this.propertyValue}">`
+                endTag = "</a>"
+                break
         }
         if (!selfClosing) {
             return startTag + parseNotes(this.innerText) + endTag
