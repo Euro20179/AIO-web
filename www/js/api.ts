@@ -191,7 +191,8 @@ function typeToSymbol(type: string) {
         "BoardGame": "🎲︎",
         "Picture": "🖼",
         "Meme": "🃏",
-        "Unowned": "X"
+        "Video": "📼",
+        "Unowned": "X",
     }
     if (type in conversion) {
         //@ts-ignore
