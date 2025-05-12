@@ -236,10 +236,13 @@ async function identify(title: string, provider: string) {
     return await authorizedRequest(`${apiPath}/metadata/identify?title=${encodeURIComponent(title)}&provider=${provider}`)
 }
 
-async function finalizeIdentify(identifiedId: string, provider: string, applyTo: bigint) {
+async function finalizeIdentify(identifiedId: string, provider: string, applyTo?: bigint) {
     identifiedId = encodeURIComponent(identifiedId)
     provider = encodeURIComponent(provider)
-    return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}&apply-to=${applyTo}`)
+    if(applyTo)
+        return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}&apply-to=${applyTo}`)
+    else
+        return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}`)
 }
 
 async function updateThumbnail(id: bigint, thumbnail: string) {
@@ -462,13 +465,15 @@ async function getEntryMetadata(itemId: bigint) {
     return await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
 }
 
-async function fetchLocation(itemId: bigint, provider?: string) {
-    if (provider) {
-        return authorizedRequest(`${apiPath}/metadata/fetch-location?uid=${uid}&id=${itemId}&provider=${provider}`, {
-            "signin-reason": "set location"
-        })
+async function fetchLocation(itemId: bigint, provider?: string, providerId?: string) {
+    let qs = `?uid=${uid}&id=${itemId}`
+    if(provider) {
+        qs += `&provider=${provider}`
     }
-    return authorizedRequest(`${apiPath}/metadata/fetch-location?uid=${uid}&id=${itemId}`, {
+    if(providerId) {
+        qs += `&provider-id=${providerId}`
+    }
+    return authorizedRequest(`${apiPath}/metadata/fetch-location${qs}`, {
         "signin-reason": "set location"
     })
 }

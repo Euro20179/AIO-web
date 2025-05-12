@@ -139,10 +139,8 @@ newItemForm.onsubmit = function() {
     newEntryUI(newItemForm)
 }
 
-
-async function selectExistingItem(): Promise<null | bigint> {
-    const popover = document.getElementById("search-existing-items") as HTMLDivElement
-
+function fillItemListing(entries: Record<string, MetadataEntry>) {
+    const popover = document.getElementById("items-listing") as HTMLDivElement
     popover.innerHTML = ""
 
     const container = popover.querySelector("div") || document.createElement("div")
@@ -150,16 +148,16 @@ async function selectExistingItem(): Promise<null | bigint> {
     container.classList.add("center")
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
 
-    for (let id in globalsNewUi.metadataEntries) {
+    for (let id in entries) {
         //no need to re-render the element (thumbnail or title might be different, that's ok)
         if (container.querySelector(`[data-item-id="${id}"]`)) {
             continue
         }
 
-        const meta = globalsNewUi.metadataEntries[id]
-        const item = globalsNewUi.entries[id]
+        const entry = entries[id]
 
-        const title = item.En_Title || item.Native_Title || meta.Title || meta.Native_Title
+
+        const title = entry.Title || entry.Native_Title || "unknown"
 
         const fig = document.createElement("figure")
 
@@ -168,7 +166,7 @@ async function selectExistingItem(): Promise<null | bigint> {
         fig.setAttribute("data-item-id", String(id))
 
         const img = document.createElement("img")
-        img.src = fixThumbnailURL(meta.Thumbnail)
+        img.src = fixThumbnailURL(entry.Thumbnail)
         img.width = 100
         img.loading = "lazy"
         const caption = document.createElement("figcaption")
@@ -181,6 +179,13 @@ async function selectExistingItem(): Promise<null | bigint> {
     }
 
     popover.append(container)
+    return container
+}
+
+async function selectExistingItem(): Promise<null | bigint> {
+    const popover = document.getElementById("items-listing") as HTMLDivElement
+
+    const container = fillItemListing(globalsNewUi.metadataEntries)
 
     popover.showPopover()
 

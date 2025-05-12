@@ -1244,15 +1244,87 @@ function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot) => any) {
     }
 }
 
+function _fetchLocationBackup(item: InfoEntry) {
+    const listing = document.getElementById("items-listing")
+
+    let provider = item.Type === "Show" ? "sonarr" : "radarr"
+    alert(`Using ${provider} to find location`)
+
+    const popover = document.getElementById("items-listing") as HTMLDivElement
+
+    async function onfetchLocation(res: Response | null) {
+        if (!res) {
+            alert("Failed to set location")
+            return
+        }
+        if (res.status !== 200) {
+            console.error(await res.text())
+            alert("Failed to set location")
+            return
+        }
+
+        const newLocation = await res.text()
+        alert(`Location set to: ${newLocation}`)
+        item.Location = newLocation
+        updateInfo({ entries: { [String(item.ItemId)]: item } })
+        popover.hidePopover()
+    }
+
+    identify(item.En_Title || item.Native_Title, provider).then(async (res) => {
+        if (!res) return
+
+        if (res.status !== 200) {
+            console.log(await res.text())
+            alert("Failed to find entries")
+            return
+        }
+
+        const [_, metaText] = (await res.text()).split("\x02")
+        const metaInfo = metaText.trim().split("\n").map(parseJsonL)
+
+        //TODO: if the length is 0, ask the user for a search query
+
+        if (metaInfo.length === 1) {
+            fetchLocation(item.ItemId, provider, metaInfo[0].ItemId).then(onfetchLocation)
+            return
+        }
+
+        const metaRecord = Object.fromEntries(metaInfo.map(v => [v.ItemId, v]))
+
+        console.table(metaRecord)
+        const container = fillItemListing(metaRecord)
+
+        const figs = container.querySelectorAll("figure")
+        for (const fig of figs) {
+            fig.onclick = function() {
+                const id = fig.getAttribute("data-item-id") as string
+                fetchLocation(item.ItemId, provider, id)
+                    .then(onfetchLocation)
+            }
+        }
+
+        popover.showPopover()
+    })
+}
+
 function _fetchLocation(item: InfoEntry) {
     fetchLocation(item.ItemId)
         .then(async (res) => {
-            if (res.status !== 200) {
+            if (res == null) {
                 alert("Failed to get location")
                 return
             }
 
             let newLocation = await res.text()
+            console.log(newLocation)
+
+            if (res.status !== 200) {
+                alert("Failed to get location, loading possible options")
+                if (newLocation.includes("could not")) {
+                    _fetchLocationBackup(item)
+                }
+                return
+            }
 
             item.Location = newLocation
 
