@@ -23,11 +23,9 @@ const keywords = [
 ]
 
 class Token {
-    /**
-     * @param {keyof TT} ty
-     * @param {string} value
-     */
-    constructor(ty, value) {
+    ty: keyof typeof TT
+    value: string
+    constructor(ty: keyof typeof TT, value: string) {
         this.ty = ty
         this.value = value
     }
@@ -35,10 +33,8 @@ class Token {
 
 // AST node types
 class NodePar {
-    /**
-    *@param {NodePar?} child
-    */
-    constructor(child = null) {
+    children: NodePar[]
+    constructor(child: NodePar | null = null) {
         /**@type {NodePar[]}*/
         this.children = []
         if (child) {
@@ -46,71 +42,56 @@ class NodePar {
         }
     }
 
-    /**
-     * @param {NodePar} child
-     */
-    addChild(child) {
+    addChild(child: NodePar) {
         this.children.push(child)
     }
 }
 
 class NumNode extends NodePar {
-    /**
-    * @param {number} value
-    */
-    constructor(value) {
+    value: number
+    constructor(value: number) {
         super()
         this.value = value;
     }
 }
 
 class WordNode extends NodePar {
-    /**
-     * @param {string} value
-     */
-    constructor(value) {
+    value: string
+    constructor(value: string) {
         super()
         this.value = value
     }
 }
 
 class StringNode extends NodePar {
-    /**
-     * @param {string} value
-     */
-    constructor(value) {
+    value: string
+    constructor(value: string) {
         super()
         this.value = value
     }
 }
 
 class ErrorNode extends NodePar {
-    /**
-     * @param {string} value
-     */
-    constructor(value) {
+    value: string
+    constructor(value: string) {
         super()
         this.value = value
     }
 }
 
 class RUnOpNode extends NodePar {
-    /**
-     * @param {Token} operator
-     * @param {NodePar} left
-     */
-    constructor(left, operator) {
+    left: NodePar
+    operator: Token
+    constructor(left: NodePar, operator: Token) {
         super()
         this.left = left
         this.operator = operator
     }
 }
 class LUnOpNode extends NodePar {
-    /**
-     * @param {NodePar} right
-     * @param {Token} operator
-     */
-    constructor(right, operator) {
+    right: NodePar
+    operator: Token
+    constructor(right: NodePar, operator: Token) {
         super()
         this.right = right
         this.operator = operator
@@ -118,12 +99,10 @@ class LUnOpNode extends NodePar {
 }
 
 class BinOpNode extends NodePar {
-    /**
-    * @param {NodePar} left
-    * @param {Token} operator
-    * @param {NodePar} right
-    */
-    constructor(left, operator, right) {
+    left: NodePar
+    operator: Token
+    right: NodePar
+    constructor(left: NodePar, operator: Token, right: NodePar) {
         super(); // Use the first token type as default
         this.left = left;
         this.operator = operator;
@@ -132,11 +111,9 @@ class BinOpNode extends NodePar {
 }
 
 class VarDefNode extends NodePar {
-    /**
-     * @param {Token} name
-     * @param {NodePar} expr
-     */
-    constructor(name, expr) {
+    name: Token
+    expr: NodePar
+    constructor(name: Token, expr: NodePar) {
         super()
         this.name = name
         this.expr = expr
@@ -144,11 +121,10 @@ class VarDefNode extends NodePar {
 }
 
 class FuncDefNode extends NodePar {
-    /**
-     * @param {Token} name
-     * @param {ProgramNode} program
-     */
-    constructor(name, program) {
+    name: Token
+    program: ProgramNode
+    closure: SymbolTable
+    constructor(name: Token, program: ProgramNode) {
         super()
         this.name = name
         this.program = program
@@ -158,22 +134,18 @@ class FuncDefNode extends NodePar {
 
 
 class CallNode extends NodePar {
-    /**
-     * @param {NodePar} callable
-     * @param {NodePar[]} inner
-     */
-    constructor(callable, inner) {
+    callable: NodePar
+    inner: NodePar[]
+    constructor(callable: NodePar, inner: NodePar[]) {
         super()
-        this.callabale = callable
+        this.callable = callable
         this.inner = inner
     }
 }
 
 class ExprNode extends NodePar {
-    /**
-     * @param {NodePar} value
-     */
-    constructor(value) {
+    value: NodePar
+    constructor(value: NodePar) {
         super()
         this.value = value
     }
@@ -181,11 +153,7 @@ class ExprNode extends NodePar {
 
 class ProgramNode extends NodePar { }
 
-/**
-* @param {string} input
-* @param {SymbolTable} symbols
-*/
-function parseExpression(input, symbols) {
+function parseExpression(input: string, symbols: SymbolTable) {
     const tokens = lex(input);
     let parser = new Parser(tokens)
     const tree = parser.ast()
@@ -195,12 +163,7 @@ function parseExpression(input, symbols) {
     // return ast(tokens);
 }
 
-/**
- * @param {string} text
- * @param {number} curPos
- * @returns {[string, number]}
- */
-function buildNumber(text, curPos) {
+function buildNumber(text: string, curPos: number): [string, number]{
     let num = text[curPos]
     while ("0123456789".includes(text[++curPos])) {
         num += text[curPos]
@@ -208,12 +171,7 @@ function buildNumber(text, curPos) {
     return [num, curPos]
 }
 
-/**
- * @param {string} text
- * @param {number} curPos
- * @returns {[string, number]}
- */
-function buildWord(text, curPos) {
+function buildWord(text: string, curPos: number): [string, number] {
     let word = text[curPos]
     while (text[++curPos]?.match(/[a-zA-Z0-9_]/)) {
         word += text[curPos]
@@ -221,12 +179,7 @@ function buildWord(text, curPos) {
     return [word, curPos]
 }
 
-/**
- * @param {string} text
- * @param {number} curPos
- * @returns {[string, number]}
- */
-function buildString(text, curPos) {
+function buildString(text: string, curPos: number): [string, number] {
     let str = text[curPos]
     let escaped = false
     for (let i = curPos + 1; i < text.length; i++) {
@@ -250,11 +203,7 @@ function buildString(text, curPos) {
     return [str, curPos + str.length + 1]
 }
 
-/**
-* @param {string} input
-* @returns {Token[]}
-*/
-function lex(input) {
+function lex(input: string): Token[] {
     let pos = 0;
 
     let tokens = [];
@@ -309,8 +258,7 @@ function lex(input) {
         }
         else {
             let foundTok = false
-            /**@type {keyof TT}*/
-            let tok
+            let tok: keyof typeof TT
             for (tok in TT) {
                 if (ch === TT[tok]) {
                     tokens.push(new Token(tok, ch))
@@ -330,10 +278,9 @@ function lex(input) {
 }
 
 class Parser {
-    /**
-     * @param {Token[]} tokens
-     */
-    constructor(tokens) {
+    tokens: Token[]
+    i: number
+    constructor(tokens: Token[]) {
         this.i = 0
         this.tokens = tokens
     }
@@ -350,10 +297,7 @@ class Parser {
     curTok() {
         return this.tokens[this.i]
     }
-    /**
-     * @returns {NodePar}
-     */
-    atom() {
+    atom(): NodePar {
         let tok = this.curTok()
         if (!tok) return new ErrorNode("Ran out of tokens")
 
@@ -366,12 +310,12 @@ class Parser {
             return new StringNode(tok.value)
         } else if (tok.ty === "Lparen") {
             let node = this.ast_expr()
-            if(!(this.curTok()?.ty === "Rparen")) {
+            if (!(this.curTok()?.ty === "Rparen")) {
                 return new ErrorNode("Missing matching ')'")
             }
             this.next() //skip Rparen
             return node
-        } else if(tok.ty === "Word") {
+        } else if (tok.ty === "Word") {
             return new WordNode(tok.value)
         }
         return new ErrorNode(`Invalid token: (${tok.ty} ${tok.value})`)
@@ -387,24 +331,20 @@ class Parser {
         return this.atom()
     }
 
-    r_unop() {
+    r_unop(): NodePar {
         let left = this.l_unop()
 
         let tok = this.curTok()
 
-        if(!tok) return left
+        if (!tok) return left
 
-        if(tok.ty == "Lparen") {
+        if (tok.ty == "Lparen") {
             return this.funcCall(left)
         }
         return left
     }
 
-    /**
-     * @param {string} ops
-     * @param {(this: Parser) => NodePar} lower/
-     */
-    binop(ops, lower) {
+    binop(ops: string, lower: (this: Parser) => NodePar) {
         let left = lower.bind(this)()
         let op = this.curTok()
         while (op && ops.includes(op.value)) {
@@ -436,11 +376,7 @@ class Parser {
         return left
     }
 
-    /**
-     * @param {NodePar} callable
-     * @returns {NodePar}
-     */
-    funcCall(callable) {
+    funcCall(callable: NodePar): NodePar {
         this.next() //skip Lparen
         if (this.curTok().ty === 'Rparen') {
             this.next()
@@ -460,10 +396,7 @@ class Parser {
         return node
     }
 
-    /**
-     * @returns {NodePar}
-     */
-    varDef() {
+    varDef(): NodePar {
         this.next() // skip "var"
 
         if (this.curTok().ty === "Lparen") {
@@ -530,10 +463,8 @@ class Parser {
 }
 
 class Type {
-    /**
-     * @param {any} jsValue
-     */
-    constructor(jsValue) {
+    jsValue: any
+    constructor(jsValue: any) {
         this.jsValue = jsValue
     }
 
@@ -549,133 +480,95 @@ class Type {
         return new Num(Number(this.jsValue))
     }
 
-    /**
-     * @param {Type} right
-     */
-    add(right) {
+    add(right: Type) {
         console.error(`Unable to add ${this.constructor.name} and ${right.constructor.name}`)
         return right
     }
-    /**
-     * @param {Type} right
-     */
-    sub(right) {
+    sub(right: Type) {
         console.error(`Unable to add ${this.constructor.name} and ${right.constructor.name}`)
         return right
     }
-    /**
-     * @param {Type} right
-     */
-    mul(right) {
+    mul(right: Type) {
         console.error(`Unable to add ${this.constructor.name} and ${right.constructor.name}`)
         return right
     }
-    /**
-     * @param {Type} right
-     */
-    div(right) {
+    div(right: Type) {
         console.error(`Unable to add ${this.constructor.name} and ${right.constructor.name}`)
         return right
     }
 
-    /**
-     * @param {Type} right
-     */
-    lt(right) {
+    lt(right: Type) {
         console.error(`Unable to compare ${this.constructor.name} < ${right.constructor.name}`)
         return new Num(0)
     }
 
-    /**
-     * @param {Type} right
-     */
-    gt(right) {
+    gt(right: Type) {
         console.error(`Unable to compare ${this.constructor.name} > ${right.constructor.name}`)
         return new Num(0)
     }
 
-    /**
-     * @param {Type} right
-     */
-    eq(right) {
+    eq(right: Type) {
         console.error(`Unable to compare ${this.constructor.name} == ${right.constructor.name}`)
         return new Num(0)
     }
 
-    /**
-     * @param {Type[]} params
-     */
-    call(params) {
+    call(params: Type[]) {
         console.error(`Cannot call ${this.constructor.name}`)
         return new Num(0)
     }
 }
 
 class Func extends Type {
-    /**
-     * @param {(...params: Type[]) => Type} fn
-     */
-    constructor(fn) {
+    constructor(fn: (...params: Type[]) => Type) {
         super(fn)
     }
-    /**
-     * @param {Type[]} params
-     */
-    call(params) {
+
+    toStr(): Str {
+        return new Str("[Function]")
+    }
+
+    call(params: Type[]) {
         return this.jsValue(...params)
     }
 }
 
 class Num extends Type {
-    /**
-     * @param {Type} right
-     */
-    add(right) {
+    call(params: Type[]) {
+        if(params.length > 1) {
+            console.error("Multiple values to multiply number by")
+            return new Num(this.jsValue)
+        }
+        return new Num(this.jsValue * params[0].toNum().jsValue)
+    }
+
+    add(right: Type) {
         return new Num(this.jsValue + right.toNum().jsValue)
     }
 
-    /**
-     * @param {Type} right
-     */
-    sub(right) {
+    sub(right: Type) {
         return new Num(this.jsValue - right.toNum().jsValue)
     }
 
-    /**
-     * @param {Type} right
-     */
-    mul(right) {
+    mul(right: Type) {
         return new Num(this.jsValue * right.toNum().jsValue)
     }
 
-    /**
-     * @param {Type} right
-     */
-    div(right) {
+    div(right: Type) {
         return new Num(this.jsValue / right.toNum().jsValue)
     }
 
-    /**
-     * @param {Type} right
-     */
-    lt(right) {
+    lt(right: Type) {
         if (this.jsValue < Number(right.jsValue)) {
             return new Num(1)
         }
         return new Num(0)
     }
 
-    /**
-     * @param {Type} right
-     */
-    gt(right) {
+    gt(right: Type) {
         return new Num(Number(this.jsValue > Number(right.jsValue)))
     }
 
-    /**
-     * @param {Type} right
-     */
-    eq(right) {
+    eq(right: Type) {
         return new Num(Number(this.jsValue === right.toNum().jsValue))
     }
 
@@ -685,32 +578,20 @@ class Num extends Type {
 }
 
 class Str extends Type {
-    /**
-     * @param {Type} right
-     */
-    add(right) {
+    add(right: Type) {
         this.jsValue += String(right.jsValue)
         return this
     }
-    /**
-     * @param {Type} right
-     */
-    sub(right) {
+    sub(right: Type) {
         this.jsValue = this.jsValue.replaceAll(String(right.jsValue), "")
         return this
     }
-    /**
-     * @param {Type} right
-     */
-    mul(right) {
+    mul(right: Type) {
         this.jsValue = this.jsValue.repeat(Number(right.jsValue))
         return this
     }
 
-    /**
-     * @param {Type} right
-     */
-    eq(right) {
+    eq(right: Type) {
         return new Num(Number(this.jsValue === right.toStr().jsValue))
     }
 }
@@ -725,10 +606,7 @@ class List extends Type {
         return str.slice(0, -1)
     }
 
-    /**
-     * @param {Type} right
-     */
-    eq(right) {
+    eq(right: Type) {
         if (!(right instanceof List)) {
             return new Num(0)
         }
@@ -740,10 +618,10 @@ class List extends Type {
         }
         return new Num(0)
     }
-
 }
 
 class SymbolTable {
+    symbols: Map<string, Type>
     constructor() {
         this.symbols = new Map()
 
@@ -753,6 +631,10 @@ class SymbolTable {
         //@ts-ignore
         this.symbols.set("abs", new Func(n => {
             return new Num(Math.abs(n.toNum().jsValue))
+        }))
+
+        this.symbols.set("pow", new Func((x, y) => {
+            return new Num(x.toNum().jsValue ** y.toNum().jsValue)
         }))
 
         this.symbols.set("len", new Func(n => {
@@ -801,17 +683,10 @@ class SymbolTable {
             return min
         }))
     }
-    /**
-     * @param {string} name
-     * @param {Type} value
-     */
-    set(name, value) {
+    set(name: string, value: Type) {
         this.symbols.set(name, value)
     }
-    /**
-     * @param {string} name
-     */
-    get(name) {
+    get(name: string) {
         return this.symbols.get(name)
     }
 
@@ -825,43 +700,29 @@ class SymbolTable {
 }
 
 class Interpreter {
-    /**
-    * @param {NodePar} tree
-    * @param {SymbolTable} symbolTable 
-    */
-    constructor(tree, symbolTable) {
+    tree: NodePar
+    symbolTable: SymbolTable
+    constructor(tree: NodePar, symbolTable: SymbolTable) {
         this.tree = tree
         this.symbolTable = symbolTable
     }
 
-    /**
-    * @param {NumNode} node
-    */
-    NumNode(node) {
+    NumNode(node: NumNode) {
         return new Num(node.value)
     }
 
-    /**
-    * @param {WordNode} node
-    */
-    StringNode(node) {
+    StringNode(node: WordNode) {
         return new Str(node.value)
     }
 
-    /**
-    * @param {WordNode} node
-    */
-    WordNode(node) {
+    WordNode(node: WordNode) {
         if (this.symbolTable.get(node.value)) {
             return this.symbolTable.get(node.value)
         }
         return new Str(node.value)
     }
 
-    /**
-     * @param {LUnOpNode} node
-     */
-    LUnOpNode(node) {
+    LUnOpNode(node: LUnOpNode) {
         let right = this.interpretNode(node.right)
         if (node.operator.ty === "Add") {
             return right
@@ -870,10 +731,7 @@ class Interpreter {
         }
     }
 
-    /**
-     * @param {BinOpNode} node
-     */
-    BinOpNode(node) {
+    BinOpNode(node: BinOpNode) {
         let left = this.interpretNode(node.left)
         let right = this.interpretNode(node.right)
 
@@ -905,48 +763,29 @@ class Interpreter {
         return right
     }
 
-    /**
-     * @param {NodePar} node
-     *
-     * @returns {Type}
-     */
-    interpretNode(node) {
+    interpretNode(node: NodePar): Type {
         //@ts-ignore
         return this[node.constructor.name](node)
     }
 
-    /**
-     * @param {ErrorNode} node
-     */
-    ErrorNode(node) {
+    ErrorNode(node: ErrorNode) {
         console.error(node.value)
         return new Str(node.value)
     }
 
-    /**
-     * @param {CallNode} node
-     *
-     * @returns {Type}
-     */
-    CallNode(node) {
+    CallNode(node: CallNode): Type {
         let inner = node.inner.map(this.interpretNode.bind(this))
-        let callable = this.interpretNode(node.callabale)
+        let callable = this.interpretNode(node.callable)
         return callable.call(inner)
     }
 
-    /**
-     * @param {VarDefNode} node
-     */
-    VarDefNode(node) {
+    VarDefNode(node: VarDefNode) {
         let val = this.interpretNode(node.expr)
         this.symbolTable.set(node.name.value, val)
         return val
     }
 
-    /**
-     * @param {FuncDefNode} node
-     */
-    FuncDefNode(node) {
+    FuncDefNode(node: FuncDefNode) {
         node.closure = this.symbolTable.copy()
 
         this.symbolTable.set(node.name.value, new Func((...items) => {
@@ -960,17 +799,11 @@ class Interpreter {
         return this.symbolTable.get(node.name.value)
     }
 
-    /**
-     * @param {ExprNode} node
-     */
-    ExprNode(node) {
+    ExprNode(node: ExprNode) {
         return this.interpretNode(node.value)
     }
 
-    /**
-    * @param {ProgramNode} node
-    */
-    ProgramNode(node) {
+    ProgramNode(node: ProgramNode) {
         let values = []
         for (let child of node.children) {
             if (!(child.constructor.name in this)) {
@@ -987,11 +820,7 @@ class Interpreter {
     }
 }
 
-/**
- * @param {any} value
- * @returns {Type}
- */
-function jsVal2CalcVal(value) {
+function jsVal2CalcVal(value: any): Type {
     switch (typeof value) {
         case 'string':
             return new Str(value)
@@ -1010,11 +839,7 @@ function jsVal2CalcVal(value) {
     }
 }
 
-/**
-* @param {object} obj
-* @returns {SymbolTable}
-*/
-function makeSymbolsTableFromObj(obj) {
+function makeSymbolsTableFromObj(obj: object): SymbolTable {
     let symbols = new SymbolTable()
     for (let name in obj) {
         //@ts-ignore
