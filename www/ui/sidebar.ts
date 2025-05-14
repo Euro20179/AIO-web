@@ -110,7 +110,6 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 
     if(below) {
         const renderBelow = sidebarParent.querySelector(`[data-entry-id="${below}"]`) as HTMLElement
-        console.log(renderBelow)
         renderBelow?.insertAdjacentElement("afterend", elem)
     } else {
         sidebarParent.append(elem)
