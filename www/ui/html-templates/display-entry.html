@@ -72,7 +72,6 @@
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
-            <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
             <button id="fetch-location" onclick="displayEntryFetchLocation(this)" title="find location of this item">📍</button>
             <button class="identify" title="identify item" popovertarget="item-identification-form">ℹ</button>
             <button class="refresh" onclick="displayEntryRefresh(this)" title="refresh metadata">🗘</button>
@@ -80,7 +79,7 @@
         <input type="file" hidden id="thumbnail-file-upload">
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
-        <hr>
+        <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
         <details>
             <summary>Raw Info</summary>
             <table class="info-raw" id="info-raw"></table>

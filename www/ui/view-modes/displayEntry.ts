@@ -488,7 +488,7 @@ function updateCostDisplay(el: ShadowRoot, item: InfoEntry) {
     costEl.innerText = String(costTotal)
 }
 
-function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<InfoEntry>) {
+function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<InfoEntry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.En_Title)
     relationships = relationships.sort((a, b) => {
@@ -509,7 +509,41 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
             el.innerText = child.En_Title
         }
         elementParent.append(el)
-        el.onclick = (e) => toggleItem(child)
+        el.addEventListener("click", (e) => {
+            toggleItem(child)
+        })
+        el.addEventListener("contextmenu", e => {
+            e.preventDefault()
+            const confirmationText = {
+                "descendants": "Would you like to remove this item as a descendant of it's parent",
+                "copies": "Would you like to remove this item as a copy"
+            }
+            if (confirm(confirmationText[relationType])) {
+                let thisId
+                switch (relationType) {
+                    case "copies":
+                        thisId = child.CopyOf
+                        child.CopyOf = 0n
+                        break
+                    case "descendants":
+                        thisId = child.ParentId
+                        child.ParentId = 0n
+                        break
+                }
+                setItem("", child).then((res) => {
+                    if (!res || res.status !== 200) {
+                        alert("Failed to update item")
+                        return
+                    }
+                    updateInfo({
+                        entries: {
+                            [String(child.ItemId)]: child
+                        }
+                    })
+                    refreshDisplayItem(findInfoEntryById(thisId) as InfoEntry)
+                })
+            }
+        })
     }
 }
 
@@ -1010,7 +1044,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
         let relationshipEl = el.getElementById(relationship[0]) as HTMLElement
         relationshipEl.innerHTML = ""
-        createRelationButtons(relationshipEl, relationship[1](item.ItemId))
+        createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
     //Events
@@ -1381,7 +1415,7 @@ function copyThis(item: InfoEntry) {
         "user-rating": user.UserRating,
         "get-metadata": false,
         type: item.Type,
-    }).then(async(res) => {
+    }).then(async (res) => {
         if (!res || res.status !== 200) {
             alert("failed to create copy")
             return
@@ -1389,22 +1423,22 @@ function copyThis(item: InfoEntry) {
 
         const text = await res.text()
         const itemCopy = parseJsonL(mkStrItemId(text.trim()))
-        const userCopy = {...user}
+        const userCopy = { ...user }
         userCopy.ItemId = itemCopy.ItemId
-        const metaCopy = {...meta}
+        const metaCopy = { ...meta }
         metaCopy.ItemId = itemCopy.ItemId
 
         const promises = []
         promises.push(setItem("", itemCopy))
         promises.push(setItem("engagement/", userCopy))
         promises.push(setItem("metadata/", metaCopy))
-        for(let event of events) {
+        for (let event of events) {
             promises.push(apiRegisterEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
         }
         Promise.all(promises)
             .then(responses => {
-                for(let res of responses) {
-                    if(res?.status !== 200) {
+                for (let res of responses) {
+                    if (res?.status !== 200) {
                         alert("Failed to make a complete copy")
                         return
                     }
@@ -1413,8 +1447,8 @@ function copyThis(item: InfoEntry) {
                 globalsNewUi.entries[String(itemCopy.ItemId)] = itemCopy
                 globalsNewUi.userEntries[String(itemCopy.ItemId)] = userCopy
                 globalsNewUi.metadataEntries[String(itemCopy.ItemId)] = metaCopy
-                for(let event of events) {
-                    let eventCopy = {...event}
+                for (let event of events) {
+                    let eventCopy = { ...event }
                     eventCopy.ItemId = itemCopy.ItemId
                     globalsNewUi.events.push(eventCopy)
                 }
