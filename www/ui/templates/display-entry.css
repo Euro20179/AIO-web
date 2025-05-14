@@ -229,7 +229,7 @@
         gap: 2ch;
 
         /*div containing the tags which includes the new tag button*/
-        div:has(> &) {
+        div:has(> &:not(:empty)) {
             display: flex;
             gap: 3ch;
         }
