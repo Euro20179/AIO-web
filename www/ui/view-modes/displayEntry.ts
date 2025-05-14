@@ -1098,7 +1098,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         const info = findInfoEntryById(item.ItemId) as InfoEntry
         const user = findUserEntryById(item.ItemId) as UserEntry
 
-        user.Status = selector.value
+        user.Status = selector.value as UserStatus
         const infoStringified = serializeEntry(user)
         authorizedRequest(`${apiPath}/engagement/set-entry`, {
             body: infoStringified,

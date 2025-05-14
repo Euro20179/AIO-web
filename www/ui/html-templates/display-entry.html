@@ -153,14 +153,14 @@
     <textarea id="style-editor" hidden>
     </textarea>
 
-    <div class="descriptors">
+    <div class="descriptors" id="descriptors">
         <section>
             <h4 class="center">Description</h4>
             <p class="description" id="description"></p>
         </section>
         <section>
-            <div class="flex" style="gap: 5ch;"><button id="edit-notes" popovertarget="notes-edit-dialog">✏</button><h4 class="center">Notes</h4></div>
-             <p class="notes" id="notes" id="notes"></p>
+            <h4 class="center">Notes</h4>
+            <p class="notes" id="notes" id="notes" popovertarget="notes-edit-dialog"></p>
             <dialog id="notes-edit-dialog" popover>
                 <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button><p class="center">Be sure to hit save when done :)</p>
                 <textarea id="notes-edit-box"></textarea>

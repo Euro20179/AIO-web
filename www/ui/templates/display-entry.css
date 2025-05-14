@@ -12,11 +12,14 @@
             border: 1px solid;
         }
     }
+
     * {
         box-sizing: border-box;
     }
 
-    input, button, select {
+    input,
+    button,
+    select {
         border-color: var(--input-border-color);
     }
 
@@ -27,6 +30,7 @@
 }
 
 @layer util {
+
     /*for begin/finish/etc... action buttons*/
     .action {
         font-size: 1.2rem;
@@ -146,7 +150,7 @@
     }
 
     /*if the table has events, we no longer need the new event button*/
-    #user-actions:has(*) + #new-event-button {
+    #user-actions:has(*)+#new-event-button {
         display: none;
     }
 
@@ -211,7 +215,7 @@
     }
 
     #notes:empty::before {
-        content: "Edit me!";
+        content: "Click to edit!";
         opacity: 50%;
     }
 
@@ -220,12 +224,6 @@
         display: flex;
         gap: 2ch;
 
-        /*the section containing the tags (which includes a header and notes)*/
-        section:has(&) {
-            display: flex;
-            flex-direction: column;
-        }
-
         /*div containing the tags which includes the new tag button*/
         div:has(> &) {
             display: flex;
@@ -233,7 +231,7 @@
         }
 
         /*each div in #tags contains a delete button and the tag itself*/
-        & > div {
+        &>div {
             display: flex;
             flex-wrap: wrap;
         }
@@ -251,18 +249,27 @@
     }
 
     button:has(~ .tag) {
-        vertical-align:  middle;
+        vertical-align: middle;
     }
 
-    .descriptors {
+    #descriptors {
         display: grid;
+        gap: 5cqi;
+
+        margin-top: 2ex;
+
         @container (width > 800px) {
             grid-template-columns: 1fr 1fr;
         }
-        @container (width <= 800px) {
+
+        @container (width <=800px) {
             grid-template-rows: 1fr 1fr;
         }
-        gap: 5cqi;
+    }
+
+    #descriptors>section {
+        border: 5px solid var(--secondary);
+        border-radius: 15px;
     }
 
     :is(#description, #notes) {
@@ -275,7 +282,7 @@
     }
 
     hgroup {
-        > * {
+        >* {
             text-wrap: balance;
         }
 
@@ -290,7 +297,7 @@
             content: " (on " attr(data-format-name)")";
         }
 
-        &[data-format-name="UNOWNED"]::after  {
+        &[data-format-name="UNOWNED"]::after {
             text-transform: lowercase;
             content: " (unowned)";
         }
