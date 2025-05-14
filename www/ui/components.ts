@@ -19,11 +19,10 @@ function fillElement(root, selector, text, fillmode = "append") {
     }
 }
 
-/**
- * @param {number} rating
- * @param {HTMLElement} root
- */
-function applyUserRating(rating, root) {
+function applyUserRating(rating: number, root: HTMLElement) {
+    for(const tier of ["splus", "s", "a", "b", "c", "d", "f", "z"]) {
+        root.classList.remove(`${tier}-tier`)
+    }
     if (rating > 100) {
         root.classList.add("splus-tier")
     } else if (rating > 96) {
@@ -44,10 +43,11 @@ function applyUserRating(rating, root) {
 }
 
 customElements.define("display-entry", class extends HTMLElement {
+    root: ShadowRoot
     constructor() {
         super()
-        let template = /**@type {HTMLTemplateElement}*/(document.getElementById("display-entry"))
-        let content = /**@type {HTMLElement}*/(template.content.cloneNode(true))
+        let template = document.getElementById("display-entry") as HTMLTemplateElement
+        let content = template.content.cloneNode(true) as HTMLElement
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
         this.root = root
