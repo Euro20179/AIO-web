@@ -128,13 +128,13 @@
             <div class="flex">
                 <button data-action="Plan" class="action" title="plan">🗓</button>
                 <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
+                <button data-action="Wait" class="action" title="wait">⌚︎</button>
             </div>
             <div class="flex">
-                <button data-action="Wait" class="action" title="wait">⌚︎</button>
                 <button data-action="Finish" class="action" title="finish">🏁</button>
                 <button data-action="Drop" class="action" title="drop">⏹</button>
+                <span id="current-status" style="align-self: center;"></span>
             </div>
-            <span id="current-status" style="align-self: center;"></span>
         </div>
         <div class="tables flex column" id="event-table-area">
             <table class="user-actions" id="user-actions"></table>
