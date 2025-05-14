@@ -93,6 +93,7 @@
             border-bottom: 1px solid var(--secondary);
             white-space: pre;
             background: var(--main);
+            border: 2px solid var(--secondary);
         }
 
         .notification::before {
