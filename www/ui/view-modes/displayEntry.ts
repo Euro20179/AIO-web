@@ -374,7 +374,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
                 .then(res => {
                     if (res && res.status === 200) {
-                        updateStatus(action, shadowRoot)
+                        updateStatusDisplay(action, shadowRoot)
                     } else if (!res) {
                         alert("Could not update status")
                         return ""
@@ -384,10 +384,12 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
                 .then(text => {
                     alert(text)
 
+                    const info = findInfoEntryById(item.ItemId) as InfoEntry
+
                     loadUserEvents().then(() =>
                         updateInfo({
                             entries: {
-                                [String(item.ItemId)]: item
+                                [String(item.ItemId)]: info
                             },
                         })
                     )
@@ -418,7 +420,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
                 .then(res => {
                     if (res && res.status === 200) {
-                        updateStatus(action, shadowRoot)
+                        updateStatusDisplay(action, shadowRoot)
                     } else if (!res) {
                         alert("Could not update status")
                         return ""
@@ -825,9 +827,10 @@ function parseNotes(notes: string) {
     return text
 }
 
-function updateStatus(newStatus: string, el: ShadowRoot) {
-    const statusText = el.getElementById("current-status") as HTMLSpanElement
-    statusText.innerText = newStatus
+function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
+    const statusText = el.getElementById("status-selector") as HTMLSelectElement
+    statusText.value = newStatus
+    // statusText.innerText = newStatus
 }
 
 function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
@@ -851,7 +854,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const notesEditBox = el.getElementById("notes-edit-box") as HTMLTextAreaElement
 
     //status
-    updateStatus(user.Status, el)
+    updateStatusDisplay(user.Status, el)
 
     //Cost
     updateCostDisplay(el, item)
@@ -1099,14 +1102,48 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     let root = el.shadowRoot
     if (!root) return
 
-    const includeSelf = (root.getElementById("include-self-in-cost") as HTMLInputElement)
-    const includeChildren = (root.getElementById("include-children-in-cost") as HTMLInputElement)
-    const includeCopies = (root.getElementById("include-copies-in-cost") as HTMLInputElement)
+    const includeSelf = root.getElementById("include-self-in-cost") as HTMLInputElement
+    const includeChildren = root.getElementById("include-children-in-cost") as HTMLInputElement
+    const includeCopies = root.getElementById("include-copies-in-cost") as HTMLInputElement
+    const statusSelector = root.getElementById("status-selector") as HTMLSelectElement
 
     for (let input of [includeSelf, includeCopies, includeChildren]) {
         input.onchange = function() {
             updateCostDisplay(root, item)
         }
+    }
+
+    statusSelector.onchange = function(e) {
+        const selector = e.target as HTMLSelectElement
+        const info = findInfoEntryById(item.ItemId) as InfoEntry
+        const user = findUserEntryById(item.ItemId) as UserEntry
+
+        user.Status = selector.value
+        const infoStringified = serializeEntry(user)
+        authorizedRequest(`${apiPath}/engagement/set-entry`, {
+            body: infoStringified,
+            method: "POST"
+        })
+            .then(res => {
+                if (!res) {
+                    alert("Could not update status")
+                    return
+                }
+                if (res.status !== 200) {
+                    alert("Failed to update status")
+                    return
+                }
+                res.text().then(() => alert(`Updated status to ${user.Status}`))
+                updateInfo({
+                    entries: {
+                        [String(info.ItemId)]: info,
+                    },
+                    userEntries: {
+                        [String(user.ItemId)]: user
+                    }
+                })
+            })
+            .catch(console.error)
     }
 
 
@@ -1420,7 +1457,7 @@ const displayEntryProgress = displayEntryAction(async (item, root) => {
     await setPos(item.ItemId, String(newEp))
     const user = findUserEntryById(item.ItemId) as UserEntry
     user.CurrentPosition = String(newEp)
-    updateInfo( {
+    updateInfo({
         entries: {
             [String(item.ItemId)]: item,
         },

@@ -133,7 +133,15 @@
             <div class="flex">
                 <button data-action="Finish" class="action" title="finish">🏁</button>
                 <button data-action="Drop" class="action" title="drop">⏹</button>
-                <span id="current-status" style="align-self: center;"></span>
+                <select id="status-selector">
+                    <option value="Planned">Planned</option>
+                    <option value="Viewing">Viewing</option>
+                    <option value="ReViewing">ReViewing</option>
+                    <option value="Paused">Paused</option>
+                    <option value="Waiting">Waiting</option>
+                    <option value="Finished">Finished</option>
+                    <option value="Dropped">Dropped</option>
+                </select>
             </div>
         </div>
         <div class="tables flex column" id="event-table-area">

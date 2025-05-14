@@ -15,7 +15,8 @@ type UserStatus = "" |
     "Dropped" |
     "Planned" |
     "ReViewing" |
-    "Paused"
+    "Paused" |
+    "Waiting"
 
 type EntryType = "Show" |
     "Movie" |
