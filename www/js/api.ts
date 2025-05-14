@@ -1,6 +1,6 @@
 type UserEntry = {
     ItemId: bigint
-    Status: string
+    Status: UserStatus
     ViewCount: number
     UserRating: number
     Notes: string
@@ -49,7 +49,7 @@ type InfoEntry = {
     Native_Title: string
     ParentId: bigint
     PurchasePrice: number
-    Type: string
+    Type: EntryType
     En_Title: string
     CopyOf: bigint
     Library: bigint
@@ -145,7 +145,9 @@ async function listTypes() {
 function parseJsonL(jsonl: string) {
     const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library"]
     try {
-        return JSON.parse(jsonl, (key, v) => bigIntProperties.includes(key) ? BigInt(v) : v)
+        return JSON.parse(jsonl, (key, v) => {
+            return bigIntProperties.includes(key) ? BigInt(v) : v
+        })
     }
     catch (err) {
         console.error("Could not parse json", err)
@@ -350,18 +352,19 @@ type NewEntryParams = {
     "copyOf"?: bigint,
     "parentId"?: bigint,
     "native-title": string,
-    "tags": string,
-    "location": string,
-    "get-metadata": boolean,
-    "metadata-provider": string,
-    "user-rating": number,
-    "user-status": UserStatus,
-    "user-view-count": number,
-    "user-notes": string
+    "tags"?: string,
+    "location"?: string,
+    "get-metadata"?: boolean,
+    "metadata-provider"?: string,
+    "user-rating"?: number,
+    "user-status"?: UserStatus,
+    "user-view-count"?: number,
+    "user-notes"?: string
 }
 
 async function newEntry(params: NewEntryParams) {
-    let qs = ""
+    let qs = "?"
+    let i = 0
     for (let p in params) {
         let v = params[p as keyof NewEntryParams]
         if (typeof v === 'bigint') {
@@ -371,8 +374,13 @@ async function newEntry(params: NewEntryParams) {
         } else {
             continue
         }
+
+        if(i !== 0) qs += `&`
+
         qs += `${p}=${v}`
+        i++
     }
+    console.log(qs)
     return await authorizedRequest(`${apiPath}/add-entry${qs}`)
 }
 
@@ -438,8 +446,8 @@ async function apiDeleteEvent(itemId: bigint, ts: number, after: number) {
     return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
 }
 
-async function apiRegisterEvent(itemId: bigint, name: string, ts: number, after: number) {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+async function apiRegisterEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string) {
+    tz ||= Intl.DateTimeFormat().resolvedOptions().timeZone
     return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}`)
 }
 
@@ -481,6 +489,14 @@ async function fetchLocation(itemId: bigint, provider?: string, providerId?: str
     }
     return authorizedRequest(`${apiPath}/metadata/fetch-location${qs}`, {
         "signin-reason": "set location"
+    })
+}
+
+async function setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry) {
+    const serialized = serializeEntry(item)
+    return authorizedRequest(`${apiPath}/${subpath}set-entry`, {
+        body: serialized,
+        method: "POST",
     })
 }
 

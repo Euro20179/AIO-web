@@ -134,41 +134,21 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
     updateWithTable(userTable, userEntry)
 
-
-    const infoStringified = serializeEntry(item)
-    const metaStringified = serializeEntry(meta)
-    const userStringified = serializeEntry(userEntry)
-
-    let promises = []
-
-    let engagementSet = authorizedRequest(`${apiPath}/engagement/set-entry`, {
-        body: userStringified,
-        method: "POST",
-    })
-        .then(res => res.text())
+    setItem("engagement/", userEntry)
+        .then(res => res?.text())
+        .then(console.log)
+        .catch(console.error)
+    setItem("", item)
+        .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
 
-    promises.push(engagementSet)
-
-    let entrySet = authorizedRequest(`${apiPath}/set-entry`, {
-        body: infoStringified,
-        method: "POST"
-    })
-        .then(res => res.text())
+    setItem("metadata/", meta)
+        .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
 
-    promises.push(entrySet)
 
-    let metaSet = authorizedRequest(`${apiPath}/metadata/set-entry`, {
-        body: metaStringified,
-        method: "POST"
-    }).then(res => res.text())
-        .then(console.log)
-        .catch(console.error)
-
-    promises.push(metaSet)
     updateInfo({
         entries: { [String(item.ItemId)]: item },
         userEntries: { [String(item.ItemId)]: userEntry },
@@ -1378,11 +1358,79 @@ function _fetchLocation(item: InfoEntry) {
         })
 }
 
+function copyThis(item: InfoEntry) {
+    const user = findUserEntryById(item.ItemId) as UserEntry
+    const meta = findMetadataById(item.ItemId) as MetadataEntry
+    const events = findUserEventsById(item.ItemId) as UserEvent[]
+
+    newEntry({
+        title: item.En_Title,
+        "native-title": item.Native_Title,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        format: item.Format,
+        price: item.PurchasePrice,
+        "art-style": item.ArtStyle,
+        libraryId: item.Library || undefined,
+        copyOf: item.ItemId,
+        parentId: item.ParentId || undefined,
+        tags: item.Collection,
+        location: item.Location,
+        "user-notes": user.Notes,
+        "user-status": user.Status,
+        "user-view-count": user.ViewCount,
+        "user-rating": user.UserRating,
+        "get-metadata": false,
+        type: item.Type,
+    }).then(async(res) => {
+        if (!res || res.status !== 200) {
+            alert("failed to create copy")
+            return
+        }
+
+        const text = await res.text()
+        const itemCopy = parseJsonL(mkStrItemId(text.trim()))
+        const userCopy = {...user}
+        userCopy.ItemId = itemCopy.ItemId
+        const metaCopy = {...meta}
+        metaCopy.ItemId = itemCopy.ItemId
+
+        const promises = []
+        promises.push(setItem("", itemCopy))
+        promises.push(setItem("engagement/", userCopy))
+        promises.push(setItem("metadata/", metaCopy))
+        for(let event of events) {
+            promises.push(apiRegisterEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
+        }
+        Promise.all(promises)
+            .then(responses => {
+                for(let res of responses) {
+                    if(res?.status !== 200) {
+                        alert("Failed to make a complete copy")
+                        return
+                    }
+                }
+                alert(`Coppied: ${item.En_Title}`)
+                globalsNewUi.entries[String(itemCopy.ItemId)] = itemCopy
+                globalsNewUi.userEntries[String(itemCopy.ItemId)] = userCopy
+                globalsNewUi.metadataEntries[String(itemCopy.ItemId)] = metaCopy
+                for(let event of events) {
+                    let eventCopy = {...event}
+                    eventCopy.ItemId = itemCopy.ItemId
+                    globalsNewUi.events.push(eventCopy)
+                }
+                mode.add(itemCopy, true)
+                renderSidebarItem(itemCopy)
+            })
+            .catch(console.error)
+    })
+}
+
 const displayEntryDelete = displayEntryAction(item => deleteEntryUI(item))
 const displayEntryRefresh = displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item))
 const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item))
 const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item))
 const displayEntryClose = displayEntryAction(item => deselectItem(item))
+const displayEntryCopyThis = displayEntryAction(item => copyThis(item))
 
 const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
     selectExistingItem().then(id => {
