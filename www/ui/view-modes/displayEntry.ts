@@ -1419,7 +1419,7 @@ function copyThis(item: InfoEntry) {
                     globalsNewUi.events.push(eventCopy)
                 }
                 mode.add(itemCopy, true)
-                renderSidebarItem(itemCopy)
+                renderSidebarItem(itemCopy, sidebarItems, String(item.ItemId))
             })
             .catch(console.error)
     })

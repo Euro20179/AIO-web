@@ -96,7 +96,10 @@ function updateSidebarThumbnail(id: bigint, src: string) {
     img.src = fixThumbnailURL(src)
 }
 
-function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems) {
+/**
+  * @description below is an itemid that the item gets rendered below
+*/
+function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems, below?: string) {
     let elem = document.createElement("sidebar-entry")
 
     sidebarObserver.observe(elem)
@@ -105,7 +108,13 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     let user = findUserEntryById(item.ItemId)
     if (!user || !meta) return elem
 
-    sidebarParent.append(elem)
+    if(below) {
+        const renderBelow = sidebarParent.querySelector(`[data-entry-id="${below}"]`) as HTMLElement
+        console.log(renderBelow)
+        renderBelow?.insertAdjacentElement("afterend", elem)
+    } else {
+        sidebarParent.append(elem)
+    }
 
     let img = elem.shadowRoot?.querySelector("img") as HTMLImageElement
     if (img) {
