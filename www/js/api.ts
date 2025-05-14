@@ -115,7 +115,11 @@ function canPause(status: Status) {
 }
 
 function canResume(status: Status) {
-    return status === "Paused"
+    return status === "Paused" || status == "Waiting"
+}
+
+function canWait(status: Status) {
+    return status == "Viewing" || status == "ReViewing"
 }
 
 async function listFormats() {
