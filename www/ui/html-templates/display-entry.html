@@ -1,4 +1,3 @@
-
 <style>
     @import "/ui/templates/display-entry.css";
 </style>
@@ -51,10 +50,12 @@
         the id is different depending on which provider is chosen.
     </p>
     <p>
-        the id that should be used is the id for that provider. For example, the id for steam should be the appid of the steam game you want.
+        the id that should be used is the id for that provider. For example, the id for steam should be the appid of the
+        steam game you want.
     </p>
     <p>
-        the id MUST be an int, (I hope to fix this later), as a consequence the id for omdb is the imdb id with the tt prefix removed.
+        the id MUST be an int, (I hope to fix this later), as a consequence the id for omdb is the imdb id with the tt
+        prefix removed.
     </p>
 </dialog>
 
@@ -63,16 +64,15 @@
 
 <div class="root" id="root">
     <div class="item-interactions" id="item-interactions">
-        <button class="close" onclick="displayEntryClose(this)"
-            title="remove item from inspection area">X</button>
-        <button class="copy-to" onclick="displayEntryCopyTo(this)"
-            title="copy user info to another item">➡</button>
+        <button class="close" onclick="displayEntryClose(this)" title="remove item from inspection area">X</button>
+        <button class="copy-to" onclick="displayEntryCopyTo(this)" title="copy user info to another item">➡</button>
         <button class="edit-styles" onclick="displayEntryEditStyles(this)" title="edit item's stylesheet">🖌</button>
         <button class="delete" onclick="displayEntryDelete(this)" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
-            <button id="fetch-location" onclick="displayEntryFetchLocation(this)" title="find location of this item">📍</button>
+            <button id="fetch-location" onclick="displayEntryFetchLocation(this)"
+                title="find location of this item">📍</button>
             <button class="identify" title="identify item" popovertarget="item-identification-form">ℹ</button>
             <button class="refresh" onclick="displayEntryRefresh(this)" title="refresh metadata">🗘</button>
         </div>
@@ -95,7 +95,7 @@
     </figure>
     <hgroup>
         <h2 class="title center" id="main-title"></h2>
-        <div class="flex column wrap j-center" style="gap: 2ch" >
+        <div class="flex column wrap j-center" style="gap: 2ch">
             <h3 class="center official-native-title" id="official-native-title"></h3>
         </div>
     </hgroup>
@@ -104,13 +104,14 @@
             <span>Include in cost</span>
             <div id="cost-calculation-modifiers" class="flex row j-center">
                 <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked> Self</label>
-                <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost"> Children</label>
+                <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
+                    Children</label>
                 <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost"> Copies</label>
             </div>
             <span class="cost" id="cost"></span>
         </div>
         <div style="justify-content: center; gap: 1ch; font-size: 1.1em;" class="flex">
-            <span class="rating" id="user-rating"  onclick="displayEntryRating(this)" title="your rating">??</span>
+            <span class="rating" id="user-rating" onclick="displayEntryRating(this)" title="your rating">??</span>
             <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
         </div>
         <figure class="entry-progress">
@@ -159,9 +160,11 @@
         </section>
         <section>
             <h4 class="center">Notes</h4>
-            <p class="notes" id="notes" id="notes" onclick="this.parentElement.querySelector(`[id='notes-edit-dialog']`).showPopover()"></p>
+            <p class="notes" id="notes" id="notes"
+                onclick="this.parentElement.querySelector(`[id='notes-edit-dialog']`).showPopover()"></p>
             <dialog id="notes-edit-dialog" popover>
-                <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button><p class="center">Notes save automatically after 3 seconds of no editing</p>
+                <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button>
+                <p class="center">Notes save automatically after 3 seconds of no editing</p>
                 <textarea id="notes-edit-box"></textarea>
             </dialog>
             <div>
@@ -170,25 +173,30 @@
             </div>
         </section>
     </div>
-    <section class="descendants" id="descendants-section">
-        <h4>Children</h4>
-        <div>
-            <div id="descendants">
+
+    <div id="relationship-display" class="flex" style="gap: 5ch">
+        <section class="descendants" id="descendants-section">
+            <h4>Children</h4>
+            <div>
+                <div id="descendants">
+                </div>
+                <div class="flex" style="gap: 1ch">
+                    <button id="new-child" title="Create new item as a child of this">New</button>
+                    <button id="new-child-by-id" onclick="displayEntryAddExistingItemAsChild(this)">Add
+                        Existing</button>
+                </div>
             </div>
-            <div class="flex" style="gap: 1ch">
-                <button id="new-child" title="Create new item as a child of this">New</button>
-                <button id="new-child-by-id" onclick="displayEntryAddExistingItemAsChild(this)">Add Existing</button>
+        </section>
+        <section class="copies" id="copies-section">
+            <h4>Copies</h4>
+            <div>
+                <div id="copies">
+                </div>
+                <div class="flex" style="gap: 1ch">
+                    <button id="copy-from-this" title="Create a new item that is an exact copy of this"
+                        onclick="displayEntryCopyThis(this)">Copy this</button>
+                </div>
             </div>
-        </div>
-    </section>
-    <section class="copies" id="copies-section">
-        <h4>Copies</h4>
-        <div>
-            <div id="copies">
-            </div>
-            <div class="flex" style="gap: 1ch">
-                <button id="copy-from-this" title="Create a new item that is an exact copy of this" onclick="displayEntryCopyThis(this)">Copy this</button>
-            </div>
-        </div>
-    </section>
+        </section>
+    </div>
 </div>

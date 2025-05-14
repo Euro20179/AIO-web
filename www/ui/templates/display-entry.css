@@ -27,6 +27,10 @@
         border-style: dashed;
         border-color: var(--text-color);
     }
+
+    :host(display-entry) {
+        --small-gap: 2ex;
+    }
 }
 
 @layer util {
@@ -256,7 +260,7 @@
         display: grid;
         gap: 2cqi;
 
-        margin-top: 2ex;
+        margin-top: var(--small-gap);
 
         @container (width > 800px) {
             grid-template-columns: 1fr 1fr;
@@ -267,9 +271,13 @@
         }
     }
 
-    #descriptors>section {
+    #descriptors>section, #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: 15px;
+    }
+
+    #relationship-display {
+        margin-top: var(--small-gap);
     }
 
     :is(#description, #notes) {
