@@ -233,7 +233,7 @@
     }
 
     #notes:empty::before {
-        content: "Click to edit!";
+        content: "Edit me!";
         opacity: 50%;
     }
 
