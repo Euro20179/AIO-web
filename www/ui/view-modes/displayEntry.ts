@@ -378,11 +378,14 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
 
                     const info = findInfoEntryById(item.ItemId) as InfoEntry
 
-                    loadUserEvents().then(() =>
+                    Promise.all([loadUserEvents(), items_loadUserEntries()]).then(() =>
                         updateInfo({
                             entries: {
                                 [String(item.ItemId)]: info
                             },
+                            userEntries: {
+                                [String(item.ItemId)]: findUserEntryById(item.ItemId) as UserEntry
+                            }
                         })
                     )
                 })
