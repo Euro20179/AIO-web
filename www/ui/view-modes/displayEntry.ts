@@ -90,12 +90,12 @@ async function titleIdentification(provider: string, search: string, selectionEl
 }
 
 
-function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
+function saveItemChanges(root: ShadowRoot, itemId: bigint) {
     if (!confirm("Are you sure you want to save changes?")) {
         return
     }
 
-    let userEntry = findUserEntryById(item.ItemId)
+    let userEntry = findUserEntryById(itemId)
     if (!userEntry) return
 
     let infoTable = root.getElementById("info-raw")
@@ -122,11 +122,13 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
         }
     }
 
+    let info = findInfoEntryById(itemId)
+    if(!info) return
     if(infoTable) {
-        updateWithTable(infoTable, item)
+        updateWithTable(infoTable, info)
     }
 
-    let meta = findMetadataById(item.ItemId)
+    let meta = findMetadataById(itemId)
     if(!meta) return
 
     if(metaTable)
@@ -150,7 +152,7 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
         .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
-    api_setItem("", item)
+    api_setItem("", info)
         .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
@@ -162,9 +164,9 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
 
 
     updateInfo({
-        entries: { [String(item.ItemId)]: item },
-        userEntries: { [String(item.ItemId)]: userEntry },
-        metadataEntries: { [String(item.ItemId)]: meta }
+        entries: { [String(itemId)]: info },
+        userEntries: { [String(itemId)]: userEntry },
+        metadataEntries: { [String(itemId)]: meta }
     })
 }
 
@@ -263,22 +265,19 @@ const observer = new IntersectionObserver(onIntersection, {
 const modeDisplayEntry: DisplayMode = {
     add(entry, updateStats = true) {
         updateStats && changeResultStatsWithItem(entry)
-        renderDisplayItem(entry)
+        renderDisplayItem(entry.ItemId)
     },
 
     sub(entry, updateStats = true) {
         updateStats && changeResultStatsWithItem(entry, -1)
-        removeDisplayItem(entry)
+        removeDisplayItem(entry.ItemId)
     },
 
     refresh(id) {
-        let info = findInfoEntryById(id)
-        if (!info) return
-
         let el = document.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
         if (el)
-            refreshDisplayItem(info)
+            refreshDisplayItem(id)
     },
 
     addList(entry, updateStats = true) {
@@ -289,7 +288,7 @@ const modeDisplayEntry: DisplayMode = {
             if (i > 5) {
                 displayQueue.push(entry[i])
             } else {
-                renderDisplayItem(entry[i])
+                renderDisplayItem(entry[i].ItemId)
             }
         }
     },
@@ -301,7 +300,7 @@ const modeDisplayEntry: DisplayMode = {
         displayQueue = displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
 
         for (let item of entry) {
-            removeDisplayItem(item)
+            removeDisplayItem(item.ItemId)
         }
     },
 
@@ -333,15 +332,15 @@ const modeDisplayEntry: DisplayMode = {
     }
 }
 
-function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
+function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
     let multiActionButton = shadowRoot.querySelector('[data-action="Begin+Pause+Resume"]')
 
     if (multiActionButton) {
         multiActionButton.addEventListener("click", _ => {
-            item = findInfoEntryById(item.ItemId) as InfoEntry
+            const item = findInfoEntryById(itemId) as InfoEntry
 
-            let user = findUserEntryById(item.ItemId)
+            let user = findUserEntryById(itemId)
             if (!user) return
 
             let action = ""
@@ -401,7 +400,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
         if (action?.includes("+")) continue
 
         btn.addEventListener("click", _ => {
-            item = findInfoEntryById(item.ItemId) as InfoEntry
+            const item = findInfoEntryById(itemId) as InfoEntry
 
             if (!confirm(`Are you sure you want to ${action} this entry`)) {
                 return
@@ -448,6 +447,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
 
     if (fileUpload && "files" in fileUpload && Array.isArray(fileUpload.files)) {
         fileUpload.onchange = async function(_) {
+            const item = findInfoEntryById(itemId) as InfoEntry
+
             const reader = new FileReader()
             const blob = (fileUpload.files as Array<Blob>)?.[0]
             if (!blob) return
@@ -460,7 +461,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
                         let meta = findMetadataById(item.ItemId)
                         if (!meta) {
                             refreshInfo().then(() => {
-                                refreshDisplayItem(item)
+                                refreshDisplayItem(itemId)
                                 refreshSidebarItem(item)
                             })
                         } else {
@@ -484,14 +485,16 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             if (!fileUpload || !("value" in fileUpload)) return
 
             fileUpload.click()
-            console.log(fileUpload.value)
         }
     }
 }
 
-function updateCostDisplay(el: ShadowRoot, item: InfoEntry) {
+function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if(!costEl) return
+
+    const info = findInfoEntryById(itemId)
+    if(!info) return
 
     //@ts-ignore
     const includeSelf = (el.getElementById("include-self-in-cost"))?.checked
@@ -502,16 +505,16 @@ function updateCostDisplay(el: ShadowRoot, item: InfoEntry) {
 
     let costTotal = 0
     if (includeSelf) {
-        costTotal += item.PurchasePrice
+        costTotal += info.PurchasePrice
     }
     if (includeChildren) {
-        let children = Object.values(globalsNewUi.entries).filter(v => v.ParentId === item.ItemId)
+        let children = Object.values(globalsNewUi.entries).filter(v => v.ParentId === itemId)
         for (let child of children) {
             costTotal += child.PurchasePrice
         }
     }
     if (includeCopies) {
-        let copies = Object.values(globalsNewUi.entries).filter(v => v.CopyOf === item.ItemId)
+        let copies = Object.values(globalsNewUi.entries).filter(v => v.CopyOf === itemId)
         for (let copy of copies) {
             costTotal += copy.PurchasePrice
         }
@@ -550,7 +553,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                 "copies": "Would you like to remove this item as a copy"
             }
             if (confirm(confirmationText[relationType])) {
-                let thisId
+                let thisId: bigint
                 switch (relationType) {
                     case "copies":
                         thisId = child.CopyOf
@@ -571,7 +574,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                             [String(child.ItemId)]: child
                         }
                     })
-                    refreshDisplayItem(findInfoEntryById(thisId) as InfoEntry)
+                    refreshDisplayItem(thisId)
                 })
             }
         })
@@ -753,7 +756,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     updateStatusDisplay(user.Status, el)
 
     //Cost
-    updateCostDisplay(el, item)
+    updateCostDisplay(el, item.ItemId)
 
     let userExtra = getUserExtra(user, "styles")
     let styles = userExtra || ""
@@ -998,12 +1001,13 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     }
 }
 
-function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = displayItems) {
+function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems) {
     let el = document.createElement("display-entry")
-    let root = el.shadowRoot
+    let root = el.shadowRoot as ShadowRoot
     if (!root) return
 
-    let user = findUserEntryById(item.ItemId)
+
+    let user = findUserEntryById(itemId) as UserEntry
 
     let template;
     if (user && (template = getUserExtra(user, "template")?.trim())) {
@@ -1012,9 +1016,10 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 
     observer.observe(el)
 
-    let meta = findMetadataById(item.ItemId)
-    let events = findUserEventsById(item.ItemId)
-    if (!user || !meta || !events) return
+    let meta = findMetadataById(itemId)
+    let events = findUserEventsById(itemId)
+    const item = findInfoEntryById(itemId)
+    if (!item || !user || !meta || !events) return
 
     parent.append(el)
 
@@ -1127,7 +1132,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         }
     }
 
-    hookActionButtons(root, item)
+    hookActionButtons(root, itemId)
 
     const notesEditBox = root.getElementById("notes-edit-box")
 
@@ -1197,24 +1202,27 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     changeDisplayItemData(item, user, meta, events, el)
 }
 
-function removeDisplayItem(item: InfoEntry) {
-    displayEntryIntersected.delete(String(item.ItemId))
-    const el = /**@type {HTMLElement}*/(displayItems.querySelector(`[data-item-id="${item.ItemId}"]`))
+function removeDisplayItem(itemId: bigint) {
+    displayEntryIntersected.delete(String(itemId))
+    const el = /**@type {HTMLElement}*/(displayItems.querySelector(`[data-item-id="${itemId}"]`))
     if (!el) return
     el.remove()
     observer.unobserve(el)
 }
 
-function refreshDisplayItem(item: InfoEntry) {
-    let el = document.querySelector(`display-entry[data-item-id="${item.ItemId}"]`) as HTMLElement
+function refreshDisplayItem(itemId: bigint) {
+    let el = document.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
+    let info = findInfoEntryById(itemId)
+    if(!info) return
+
     if (el) {
-        let user = findUserEntryById(item.ItemId)
-        let events = findUserEventsById(item.ItemId)
-        let meta = findMetadataById(item.ItemId)
-        if (!user || !events || !meta) return
-        changeDisplayItemData(item, user, meta, events, el)
+        let user = findUserEntryById(itemId)
+        let events = findUserEventsById(itemId)
+        let meta = findMetadataById(itemId)
+        if (!info || !user || !events || !meta) return
+        changeDisplayItemData(info, user, meta, events, el)
     } else {
-        renderDisplayItem(item)
+        renderDisplayItem(itemId)
     }
 }
 
@@ -1235,8 +1243,10 @@ function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot) => any) {
     }
 }
 
-function _fetchLocationBackup(item: InfoEntry) {
+function _fetchLocationBackup(itemId: bigint) {
     const listing = document.getElementById("items-listing")
+
+    const item = findInfoEntryById(itemId) as InfoEntry
 
     let provider = item.Type === "Show" ? "sonarr" : "radarr"
     alert(`Using ${provider} to find location`)
@@ -1298,8 +1308,8 @@ function _fetchLocationBackup(item: InfoEntry) {
     })
 }
 
-function _fetchLocation(item: InfoEntry) {
-    api_fetchLocation(item.ItemId)
+function _fetchLocation(itemId: bigint) {
+    api_fetchLocation(itemId)
         .then(async (res) => {
             if (res == null) {
                 alert("Failed to get location")
@@ -1312,16 +1322,17 @@ function _fetchLocation(item: InfoEntry) {
             if (res.status !== 200) {
                 alert("Failed to get location, loading possible options")
                 if (newLocation.includes("could not")) {
-                    _fetchLocationBackup(item)
+                    _fetchLocationBackup(itemId)
                 }
                 return
             }
 
-            item.Location = newLocation
+            const info = findInfoEntryById(itemId) as InfoEntry
+            info.Location = newLocation
 
             updateInfo({
                 entries: {
-                    [String(item.ItemId)]: item
+                    [String(itemId)]: info
                 }
             })
             alert(`Location set to: ${newLocation}`)
@@ -1397,8 +1408,8 @@ function copyThis(item: InfoEntry) {
 
 const displayEntryDelete = displayEntryAction(item => deleteEntryUI(item))
 const displayEntryRefresh = displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item))
-const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item))
-const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item))
+const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item.ItemId))
+const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item.ItemId))
 const displayEntryClose = displayEntryAction(item => deselectItem(item))
 const displayEntryCopyThis = displayEntryAction(item => copyThis(item))
 
@@ -1540,7 +1551,7 @@ const displayEntryViewCount = displayEntryAction(item => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
                 refreshInfo().then(() => {
-                    refreshDisplayItem(item)
+                    refreshDisplayItem(item.ItemId)
                 })
             } else {
                 user.ViewCount = Number(count)
