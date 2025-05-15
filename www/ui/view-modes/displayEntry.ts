@@ -860,10 +860,16 @@ function updateObjectTbl(obj: object, el: ShadowRoot, clear = true) {
 
     for (let key in obj) {
         let val = obj[key as keyof typeof obj] as any
+        //if the key alr is in the table, and we aren't clearing, then skip
+        //otherwise the key will get duplicated
+        if(objectTbl.querySelector(`[data-keyname="${key}"]`) && !clear) {
+            continue;
+        }
         const tr = document.createElement("tr")
         const nameTd = document.createElement("td")
         const valTd = document.createElement("td")
 
+        nameTd.setAttribute("data-keyname", key)
         nameTd.innerText = key
 
         valTd.setAttribute("data-type", typeof val)
