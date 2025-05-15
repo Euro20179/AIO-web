@@ -150,10 +150,7 @@ async function loadInfoEntries() {
     const text = await res.text()
     let jsonL = text.split("\n").filter(Boolean)
     let obj: Record<string, InfoEntry> = {}
-    for (let item of jsonL
-        .map(mkStrItemId)
-        .map(parseJsonL)
-    ) {
+    for (let item of deserializeJsonl(jsonL)) {
         obj[item.ItemId] = item
     }
 

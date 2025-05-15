@@ -83,7 +83,7 @@ type Status = string
 
 let formats: { [key: number]: string } = {}
 
-function mkStrItemId(jsonl: string) {
+function _api_mkStrItemId(jsonl: string) {
     return jsonl
         .replace(/"ItemId":\s*(\d+),/, "\"ItemId\": \"$1\",")
         .replace(/"ParentId":\s*(\d+),/, "\"ParentId\": \"$1\",")
@@ -91,7 +91,7 @@ function mkStrItemId(jsonl: string) {
         .replace(/"Library":\s*(\d+)(,)?/, "\"Library\": \"$1\"$2")
 }
 
-function mkIntItemId(jsonl: string) {
+function _api_mkIntItemId(jsonl: string) {
     return jsonl
         .replace(/"ItemId":"(\d+)",/, "\"ItemId\": $1,")
         .replace(/"ParentId":"(\d+)",/, "\"ParentId\": $1,")
@@ -99,8 +99,17 @@ function mkIntItemId(jsonl: string) {
         .replace(/"Library":"(\d+)"(,)?/, "\"Library\": $1$2")
 }
 
+function* deserializeJsonl(jsonl: string | string[]) {
+    if(typeof jsonl === 'string') {
+        jsonl = jsonl.split("\n")
+    }
+    for(let line of jsonl) {
+        yield parseJsonL(_api_mkStrItemId(line))
+    }
+}
+
 function serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent) {
-    return mkIntItemId(
+    return _api_mkIntItemId(
         JSON.stringify(
             entry, (_, v) => typeof v === "bigint" ? String(v) : v
         )
@@ -166,9 +175,7 @@ async function loadList<T>(endpoint: string): Promise<T[]> {
     }
 
     const lines = text.split("\n").filter(Boolean)
-    return lines
-        .map(mkStrItemId)
-        .map(parseJsonL)
+    return [...deserializeJsonl(lines)]
 }
 
 function fixThumbnailURL(url: string) {
@@ -276,11 +283,7 @@ async function doQuery3(searchString: string) {
     }
 
     try {
-        let jsonL = itemsText.split("\n")
-            .filter(Boolean)
-            .map(mkStrItemId)
-            .map(parseJsonL)
-        return jsonL
+        return [...deserializeJsonl(itemsText.split("\n").filter(Boolean))]
     } catch (err) {
         console.error(err)
     }

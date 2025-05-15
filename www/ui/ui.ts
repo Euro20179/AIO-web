@@ -110,14 +110,14 @@ async function newEntryUI(form: HTMLFormElement) {
         return
     }
 
-    let json = parseJsonL(mkStrItemId(text))
+    let json = deserializeJsonl(text).next().value
     getEntryMetadata(json.ItemId).then(async (res) => {
         if (res.status !== 200) {
             alert("Failed to load new item metadata, please reload")
             return
         }
 
-        const data = parseJsonL(mkStrItemId(await res.text()))
+        const data = deserializeJsonl(await res.text()).next().value
 
         updateInfo({
             entries: { [json.ItemId]: json },

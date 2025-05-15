@@ -1642,7 +1642,7 @@ function copyThis(item: InfoEntry) {
         }
 
         const text = await res.text()
-        const itemCopy = parseJsonL(mkStrItemId(text.trim()))
+        const itemCopy = deserializeJsonl(text.trim()).next().value
         const userCopy = { ...user }
         userCopy.ItemId = itemCopy.ItemId
         const metaCopy = { ...meta }
