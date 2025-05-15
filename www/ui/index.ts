@@ -33,6 +33,19 @@ const statsOutput = document.getElementById("result-stats") as HTMLElement
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
 
+async function loadUserEntries(): Promise<Record<string, UserEntry>> {
+    let items = await api_loadList<UserEntry>("engagement/list-entries")
+    let obj: Record<string, UserEntry> = {}
+    for (let item of items) {
+        obj[String(item.ItemId)] = item
+    }
+    return globalsNewUi.userEntries = obj
+}
+
+async function loadUserEvents() {
+    return globalsNewUi.events = await api_loadList("engagement/list-events")
+}
+
 function getUserExtra(user: UserEntry, prop: string) {
     return JSON.parse(user.Extra).AIOWeb?.[prop] || null
 }
@@ -130,7 +143,7 @@ function updateLibraryDropdown() {
 }
 
 async function loadLibraries() {
-    const items = await doQuery3("type = 'Library'")
+    const items = await api_queryV3("type = 'Library'")
 
     librarySelector.innerHTML = '<option value="0">Library</option>'
     for (let item of items) {
@@ -150,7 +163,7 @@ async function loadInfoEntries() {
     const text = await res.text()
     let jsonL = text.split("\n").filter(Boolean)
     let obj: Record<string, InfoEntry> = {}
-    for (let item of deserializeJsonl(jsonL)) {
+    for (let item of api_deserializeJsonl(jsonL)) {
         obj[item.ItemId] = item
     }
 
@@ -192,21 +205,8 @@ function findInfoEntryById(id: bigint): InfoEntry | null {
     return globalsNewUi.entries[String(id)]
 }
 
-async function loadUserEntries(): Promise<Record<string, UserEntry>> {
-    let items = await loadList<UserEntry>("engagement/list-entries")
-    let obj: Record<string, UserEntry> = {}
-    for (let item of items) {
-        obj[String(item.ItemId)] = item
-    }
-    return globalsNewUi.userEntries = obj
-}
-
-async function loadUserEvents() {
-    return globalsNewUi.events = await loadList("engagement/list-events")
-}
-
 async function loadMetadata(): Promise<Record<string, MetadataEntry>> {
-    let items = await loadList<MetadataEntry>("metadata/list-entries")
+    let items = await api_loadList<MetadataEntry>("metadata/list-entries")
     let obj: Record<string, MetadataEntry> = {}
     for (let item of items) {
         obj[String(item.ItemId)] = item
@@ -314,7 +314,7 @@ async function loadSearch() {
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = await doQuery3(String(filters.newSearch) || "#")
+    let entries = await api_queryV3(String(filters.newSearch) || "#")
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -427,7 +427,7 @@ async function main() {
     const urlParams = new URLSearchParams(document.location.search)
 
     if(urlParams.has("uname")) {
-        uid = String(await username2UID(urlParams.get("uname") as string))
+        uid = String(await api_username2UID(urlParams.get("uname") as string))
         if(uid == "0") {
             setError(`username: ${urlParams.get("uname")} does not exist`)
             return
@@ -458,7 +458,7 @@ async function main() {
         }
     })
 
-    listTypes().then(types => {
+    api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
 
         if (typeDropdown === null) {
@@ -487,7 +487,7 @@ async function main() {
         formData.set("sort-by", "rating")
 
         let filters = parseClientsideSearchFiltering(formData)
-        let entries = await doQuery3(String(filters.newSearch) || "#")
+        let entries = await api_queryV3(String(filters.newSearch) || "#")
         entries = applyClientsideSearchFiltering(entries, filters)
 
         setResultStat("results", entries.length)
@@ -551,7 +551,7 @@ async function remote2LocalThumbService() {
         }).then(hash => {
             if (!hash) return
             console.log(`THUMBNAIL HASH: ${hash}`)
-            updateThumbnail(metadata.ItemId, `${apiPath}/resource/get-thumbnail?hash=${hash}`).then(res => res.text()).then(console.log)
+            api_setThumbnail(metadata.ItemId, `${apiPath}/resource/get-thumbnail?hash=${hash}`).then(res => res.text()).then(console.log)
         })
 
         await new Promise(res => setTimeout(res, 200))

@@ -8,7 +8,7 @@ function deleteEntryUI(item: InfoEntry) {
         return
     }
 
-    deleteEntry(item.ItemId).then(res => {
+    api_deleteEntry(item.ItemId).then(res => {
         if (res?.status != 200) {
             console.error(res)
             alert("Failed to delete item")
@@ -22,7 +22,7 @@ function deleteEntryUI(item: InfoEntry) {
 }
 
 async function fetchLocationUI(id: bigint, provider?: string) {
-    let res = await fetchLocation(id, provider)
+    let res = await api_fetchLocation(id, provider)
     if (res.status !== 200) {
         alert("Failed to get location")
         return
@@ -47,7 +47,7 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
         return
     }
 
-    overwriteMetadataEntry(item.ItemId).then(res => {
+    api_overwriteMetadataEntry(item.ItemId).then(res => {
         if (res.status !== 200) {
             console.error(res)
             alert("Failed to get metadata")
@@ -110,14 +110,14 @@ async function newEntryUI(form: HTMLFormElement) {
         return
     }
 
-    let json = deserializeJsonl(text).next().value
-    getEntryMetadata(json.ItemId).then(async (res) => {
+    let json = api_deserializeJsonl(text).next().value
+    api_getEntryMetadata(json.ItemId).then(async (res) => {
         if (res.status !== 200) {
             alert("Failed to load new item metadata, please reload")
             return
         }
 
-        const data = deserializeJsonl(await res.text()).next().value
+        const data = api_deserializeJsonl(await res.text()).next().value
 
         updateInfo({
             entries: { [json.ItemId]: json },
@@ -201,6 +201,41 @@ async function selectExistingItem(): Promise<null | bigint> {
         setTimeout(() => {
             rej(null)
             popover.hidePopover()
+        }, 60000)
+    })
+}
+
+async function signinUI(reason: string): Promise<string> {
+    const loginPopover = document.getElementById("login") as HTMLDialogElement
+    (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
+
+    //if the popover is already open, something already called this function for the user to sign in
+    if (loginPopover.matches(":popover-open")) {
+        return await new Promise((res, rej) => {
+            //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
+            setInterval(() => {
+                let auth = sessionStorage.getItem("userAuth")
+                if (auth) {
+                    res(auth)
+                }
+            }, 16)
+        })
+    }
+
+    loginPopover.showPopover()
+    return await new Promise((res, rej) => {
+        const form = loginPopover.querySelector("form") as HTMLFormElement
+        form.onsubmit = function() {
+            let data = new FormData(form)
+            let username = data.get("username")
+            let password = data.get("password")
+            loginPopover.hidePopover()
+            res(btoa(`${username}:${password}`))
+        }
+
+        setTimeout(() => {
+            loginPopover.hidePopover()
+            rej(null)
         }, 60000)
     })
 }

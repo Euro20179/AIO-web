@@ -685,7 +685,7 @@ class SymbolTable {
 
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
-            setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async(res) => {
+            api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async(res) => {
                 if (!res) {
                     if (done) {
                         done.call([new Str("FAIL"), new Num(0)])

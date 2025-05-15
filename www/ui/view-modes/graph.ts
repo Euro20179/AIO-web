@@ -217,7 +217,7 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
             return `${century}00s`
         },
         "Type": i => i.Type,
-        "Format": i => formats[i.Format] || "N/A",
+        "Format": i => api_formatsCache()[i.Format] || "N/A",
         "Status": i => globalsNewUi.userEntries[String(i.ItemId)].Status,
         "View-count": i => globalsNewUi.userEntries[String(i.ItemId)].ViewCount,
         "Is-anime": i => (i.ArtStyle & 1) == 1,

@@ -30,7 +30,7 @@ async function itemIdentification(form: HTMLFormElement) {
             finalItemId = search
             break
     }
-    finalizeIdentify(finalItemId, provider, BigInt(itemId))
+    api_finalizeIdentify(finalItemId, provider, BigInt(itemId))
         .then(loadMetadata)
         .then(() => {
             let newItem = globalsNewUi.entries[itemId]
@@ -45,7 +45,7 @@ async function itemIdentification(form: HTMLFormElement) {
 }
 
 async function titleIdentification(provider: string, search: string, selectionElemOutput: HTMLElement): Promise<string> {
-    let res = await identify(search, provider)
+    let res = await api_identify(search, provider)
     let text = await res.text()
     let [_, rest] = text.split("\x02")
 
@@ -146,16 +146,16 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
         setUserExtra(userEntry, "template", val)
     }
 
-    setItem("engagement/", userEntry)
+    api_setItem("engagement/", userEntry)
         .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
-    setItem("", item)
+    api_setItem("", item)
         .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
 
-    setItem("metadata/", meta)
+    api_setItem("metadata/", meta)
         .then(res => res?.text())
         .then(console.log)
         .catch(console.error)
@@ -234,7 +234,7 @@ function newEvent(form: HTMLFormElement) {
         afterts = 0
     }
     const itemId = getIdFromDisplayElement(form)
-    apiRegisterEvent(itemId, name.toString(), ts, afterts)
+    api_registerEvent(itemId, name.toString(), ts, afterts)
         .then(res => res.text())
         .then(() => {
             updateInfo({
@@ -312,7 +312,7 @@ const modeDisplayEntry: DisplayMode = {
 
         let waiting = []
         for (let item of selected) {
-            waiting.push(setParent(item.ItemId, BigInt(collectionName)))
+            waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
         }
         Promise.all(waiting).then(res => {
             for (let r of res) {
@@ -327,7 +327,7 @@ const modeDisplayEntry: DisplayMode = {
 
         const tagsList = tags.split(",")
         for (let item of globalsNewUi.selectedEntries) {
-            addEntryTags(item.ItemId, tagsList)
+            api_addEntryTags(item.ItemId, tagsList)
         }
         //FIXME: tags do not update immediately
     }
@@ -445,7 +445,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
             reader.onload = () => {
                 if (!reader.result) return
                 let result = reader.result.toString()
-                updateThumbnail(item.ItemId, result)
+                api_setThumbnail(item.ItemId, result)
                     .then(() => {
                         let meta = findMetadataById(item.ItemId)
                         if (!meta) {
@@ -551,7 +551,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                         child.ParentId = 0n
                         break
                 }
-                setItem("", child).then((res) => {
+                api_setItem("", child).then((res) => {
                     if (!res || res.status !== 200) {
                         alert("Failed to update item")
                         return
@@ -1059,7 +1059,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
             del.classList.add("delete")
 
             del.onclick = function() {
-                deleteEntryTags(item.ItemId, [tag])
+                api_deleteEntryTags(item.ItemId, [tag])
                     .then(res => {
                         if (res.status !== 200) return ""
                         res.text().then(() => {
@@ -1339,7 +1339,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         const user = findUserEntryById(item.ItemId) as UserEntry
 
         user.Status = selector.value as UserStatus
-        const infoStringified = serializeEntry(user)
+        const infoStringified = api_serializeEntry(user)
         authorizedRequest(`${apiPath}/engagement/set-entry`, {
             body: infoStringified,
             method: "POST"
@@ -1400,7 +1400,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             let info = findInfoEntryById(childId)
             if (!info) return
             info.ParentId = item.ItemId
-            setParent(childId, item.ItemId).then(() => {
+            api_setParent(childId, item.ItemId).then(() => {
                 updateInfo({
                     entries: {
                         [String(item.ItemId)]: item,
@@ -1420,7 +1420,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         notesEditBox.onchange = function() {
             user.Notes = String(notesEditBox.value)
 
-            const userStringified = serializeEntry(user)
+            const userStringified = api_serializeEntry(user)
 
             updateInfo({
                 entries: {
@@ -1459,7 +1459,7 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             if (!name) return
             let names = name.split(",")
             item.Tags = item.Tags?.concat(names) || names
-            addEntryTags(item.ItemId, name.split(","))
+            api_addEntryTags(item.ItemId, name.split(","))
                 .then(res => {
                     if (res.status !== 200) return ""
                     res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
@@ -1545,7 +1545,7 @@ function _fetchLocationBackup(item: InfoEntry) {
         popover.hidePopover()
     }
 
-    identify(item.En_Title || item.Native_Title, provider).then(async (res) => {
+    api_identify(item.En_Title || item.Native_Title, provider).then(async (res) => {
         if (!res) return
 
         if (res.status !== 200) {
@@ -1555,12 +1555,12 @@ function _fetchLocationBackup(item: InfoEntry) {
         }
 
         const [_, metaText] = (await res.text()).split("\x02")
-        const metaInfo = metaText.trim().split("\n").map(parseJsonL)
+        const metaInfo = [...api_deserializeJsonl(metaText.trim().split("\n"))]
 
         //TODO: if the length is 0, ask the user for a search query
 
         if (metaInfo.length === 1) {
-            fetchLocation(item.ItemId, provider, metaInfo[0].ItemId).then(onfetchLocation)
+            api_fetchLocation(item.ItemId, provider, metaInfo[0].ItemId).then(onfetchLocation)
             return
         }
 
@@ -1573,7 +1573,7 @@ function _fetchLocationBackup(item: InfoEntry) {
         for (const fig of figs) {
             fig.onclick = function() {
                 const id = fig.getAttribute("data-item-id") as string
-                fetchLocation(item.ItemId, provider, id)
+                api_fetchLocation(item.ItemId, provider, id)
                     .then(onfetchLocation)
             }
         }
@@ -1583,7 +1583,7 @@ function _fetchLocationBackup(item: InfoEntry) {
 }
 
 function _fetchLocation(item: InfoEntry) {
-    fetchLocation(item.ItemId)
+    api_fetchLocation(item.ItemId)
         .then(async (res) => {
             if (res == null) {
                 alert("Failed to get location")
@@ -1617,7 +1617,7 @@ function copyThis(item: InfoEntry) {
     const meta = findMetadataById(item.ItemId) as MetadataEntry
     const events = findUserEventsById(item.ItemId) as UserEvent[]
 
-    newEntry({
+    api_createEntry({
         title: item.En_Title,
         "native-title": item.Native_Title,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -1642,18 +1642,18 @@ function copyThis(item: InfoEntry) {
         }
 
         const text = await res.text()
-        const itemCopy = deserializeJsonl(text.trim()).next().value
+        const itemCopy = api_deserializeJsonl(text.trim()).next().value
         const userCopy = { ...user }
         userCopy.ItemId = itemCopy.ItemId
         const metaCopy = { ...meta }
         metaCopy.ItemId = itemCopy.ItemId
 
         const promises = []
-        promises.push(setItem("", itemCopy))
-        promises.push(setItem("engagement/", userCopy))
-        promises.push(setItem("metadata/", metaCopy))
+        promises.push(api_setItem("", itemCopy))
+        promises.push(api_setItem("engagement/", userCopy))
+        promises.push(api_setItem("metadata/", metaCopy))
         for (let event of events) {
-            promises.push(apiRegisterEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
+            promises.push(api_registerEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
         }
         Promise.all(promises)
             .then(responses => {
@@ -1727,7 +1727,7 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
 
     const strId = String(item.ItemId)
     if (editedObject === "user-extra") {
-        setItem("engagement/", into as UserEntry)
+        api_setItem("engagement/", into as UserEntry)
             .then(res => res?.text())
             .then(console.log)
             .catch(console.error)
@@ -1740,7 +1740,7 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
             }
         })
     } else {
-        setItem("metadata/", into as MetadataEntry)
+        api_setItem("metadata/", into as MetadataEntry)
             .then(res => res?.text())
             .then(console.log)
             .catch(console.error)
@@ -1774,7 +1774,7 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
             alert("Could not set child")
             return
         }
-        setParent(id, item.ItemId).then(() => {
+        api_setParent(id, item.ItemId).then(() => {
             let info = findInfoEntryById(id)
             if (!info) {
                 alert("could not find child id")
@@ -1808,7 +1808,7 @@ const displayEntryCopyTo = displayEntryAction(item => {
     if (id === null) return
     let idInt = BigInt(id)
 
-    copyUserInfo(item.ItemId, idInt)
+    api_copyUserInfo(item.ItemId, idInt)
         .then(res => res?.text())
         .then(console.log)
 })
@@ -1845,7 +1845,7 @@ const displayEntryProgress = displayEntryAction(async (item, root) => {
     let newEp = prompt("Current position:")
     if (!newEp) return
 
-    await setPos(item.ItemId, String(newEp))
+    await api_setPos(item.ItemId, String(newEp))
     const user = findUserEntryById(item.ItemId) as UserEntry
     user.CurrentPosition = String(newEp)
     updateInfo({
@@ -1869,7 +1869,7 @@ const displayEntryRating = displayEntryAction(item => {
         return
     }
 
-    setRating(item.ItemId, newRating)
+    api_setRating(item.ItemId, newRating)
         .then(() => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
@@ -1886,7 +1886,7 @@ const displayEntryRating = displayEntryAction(item => {
             })
         })
         .catch(console.error)
-    apiRegisterEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
+    api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
 })
 
 function deleteEvent(el: HTMLElement, ts: number, after: number) {
@@ -1894,7 +1894,7 @@ function deleteEvent(el: HTMLElement, ts: number, after: number) {
         return
     }
     const itemId = getIdFromDisplayElement(el)
-    apiDeleteEvent(itemId, ts, after)
+    api_deleteEvent(itemId, ts, after)
         .then(res => res.text())
         .then(() =>
             loadUserEvents()

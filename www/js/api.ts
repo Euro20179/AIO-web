@@ -8,7 +8,6 @@ type UserEntry = {
     Extra: string
 }
 
-
 type UserStatus = "" |
     "Viewing" |
     "Finished" |
@@ -39,7 +38,6 @@ type UserEvent = {
     TimeZone: string
 }
 
-
 type InfoEntry = {
     ItemId: bigint
     Collection: string
@@ -57,7 +55,6 @@ type InfoEntry = {
     Tags: string[]
 }
 
-
 type MetadataEntry = {
     ItemId: bigint
     Rating: number
@@ -73,7 +70,6 @@ type MetadataEntry = {
     ProviderID: string
 }
 
-
 type IdentifyResult = {
     Description: string
     Thumbnail: string
@@ -82,6 +78,8 @@ type IdentifyResult = {
 type Status = string
 
 let formats: { [key: number]: string } = {}
+
+let _api_types_cache: EntryType[] = []
 
 function _api_mkStrItemId(jsonl: string) {
     return jsonl
@@ -99,16 +97,28 @@ function _api_mkIntItemId(jsonl: string) {
         .replace(/"Library":"(\d+)"(,)?/, "\"Library\": $1$2")
 }
 
-function* deserializeJsonl(jsonl: string | string[]) {
+function _api_parseJsonL(jsonl: string) {
+    const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library"]
+    try {
+        return JSON.parse(jsonl, (key, v) => {
+            return bigIntProperties.includes(key) ? BigInt(v) : v
+        })
+    }
+    catch (err) {
+        console.error("Could not parse json", err)
+    }
+}
+
+function* api_deserializeJsonl(jsonl: string | string[]) {
     if(typeof jsonl === 'string') {
         jsonl = jsonl.split("\n")
     }
     for(let line of jsonl) {
-        yield parseJsonL(_api_mkStrItemId(line))
+        yield _api_parseJsonL(_api_mkStrItemId(line))
     }
 }
 
-function serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent) {
+function api_serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent) {
     return _api_mkIntItemId(
         JSON.stringify(
             entry, (_, v) => typeof v === "bigint" ? String(v) : v
@@ -132,7 +142,11 @@ function canWait(status: Status) {
     return status == "Viewing" || status == "ReViewing"
 }
 
-async function listFormats() {
+function api_formatsCache() {
+    return formats
+}
+
+async function api_listFormats() {
     if (Object.keys(formats).length > 0) return formats
 
     const res = await fetch(`${apiPath}/type/format`)
@@ -146,24 +160,15 @@ async function listFormats() {
     return formats
 }
 
-async function listTypes() {
+async function api_listTypes() {
+    if(_api_types_cache.length) return _api_types_cache
+
     const res = await fetch(`${apiPath}/type/type`)
-    return await res.json()
+    _api_types_cache = await res.json()
+    return _api_types_cache
 }
 
-function parseJsonL(jsonl: string) {
-    const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library"]
-    try {
-        return JSON.parse(jsonl, (key, v) => {
-            return bigIntProperties.includes(key) ? BigInt(v) : v
-        })
-    }
-    catch (err) {
-        console.error("Could not parse json", err)
-    }
-}
-
-async function loadList<T>(endpoint: string): Promise<T[]> {
+async function api_loadList<T>(endpoint: string): Promise<T[]> {
     const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
     if (!res) {
         return []
@@ -175,83 +180,21 @@ async function loadList<T>(endpoint: string): Promise<T[]> {
     }
 
     const lines = text.split("\n").filter(Boolean)
-    return [...deserializeJsonl(lines)]
+    return [...api_deserializeJsonl(lines)]
 }
 
-function fixThumbnailURL(url: string) {
-    //a / url assumes that the aio server is the same as the web server
-    if (url.startsWith("/")) {
-        return `${AIO}${url}`
-    }
-    return url
-}
-
-async function copyUserInfo(oldid: bigint, newid: bigint) {
+async function api_copyUserInfo(oldid: bigint, newid: bigint) {
     return await authorizedRequest(`${apiPath}/engagement/copy?src-id=${oldid}&dest-id=${newid}`, {
         ["signin-reason"]: "copy user info"
     }).catch(console.error)
 }
 
-function typeToSymbol(type: string) {
-    const conversion = {
-        "Show": "📺︎",
-        "Movie": "📽",
-        "MovieShort": "⏯",
-        "Book": "📚︎",
-        "Manga": "本",
-        "Game": "🎮︎",
-        "Song": "♫",
-        "Collection": "🗄",
-        "BoardGame": "🎲︎",
-        "Picture": "🖼",
-        "Meme": "🃏",
-        "Video": "📼",
-        "Unowned": "X",
-    }
-    if (type in conversion) {
-        //@ts-ignore
-        return conversion[type]
-    }
-    return type
-}
 
-async function nameToFormat(name: string): Promise<number> {
-    const DIGI_MOD = 0x1000
-    let val = 0
-    name = name.toLowerCase()
-    if (name.includes("+digital")) {
-        name = name.replace("+digital", "")
-        val |= DIGI_MOD
-    }
-
-    const formats = Object.fromEntries(Object.entries(await listFormats()).map(([k, v]) => [v, Number(k)]))
-
-    val |= formats[name as keyof typeof formats]
-    return val
-
-}
-
-async function formatToName(format: number): Promise<string> {
-    const DIGI_MOD = 0x1000
-    let out = ""
-    if ((format & DIGI_MOD) === DIGI_MOD) {
-        format -= DIGI_MOD
-        out = " +digital"
-    }
-
-    const formats = await listFormats()
-
-    if (format >= Object.keys(formats).length) {
-        return `unknown${out}`
-    }
-    return `${formats[format].toUpperCase()}${out}`
-}
-
-async function identify(title: string, provider: string) {
+async function api_identify(title: string, provider: string) {
     return await authorizedRequest(`${apiPath}/metadata/identify?title=${encodeURIComponent(title)}&provider=${provider}`)
 }
 
-async function finalizeIdentify(identifiedId: string, provider: string, applyTo?: bigint) {
+async function api_finalizeIdentify(identifiedId: string, provider: string, applyTo?: bigint) {
     identifiedId = encodeURIComponent(identifiedId)
     provider = encodeURIComponent(provider)
     if(applyTo)
@@ -260,7 +203,7 @@ async function finalizeIdentify(identifiedId: string, provider: string, applyTo?
         return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}`)
 }
 
-async function updateThumbnail(id: bigint, thumbnail: string) {
+async function api_setThumbnail(id: bigint, thumbnail: string) {
     return await authorizedRequest(`${apiPath}/metadata/set-thumbnail?id=${id}`, {
         method: "POST",
         body: thumbnail,
@@ -268,11 +211,11 @@ async function updateThumbnail(id: bigint, thumbnail: string) {
     })
 }
 
-async function setParent(id: bigint, parent: bigint) {
+async function api_setParent(id: bigint, parent: bigint) {
     return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
-async function doQuery3(searchString: string) {
+async function api_queryV3(searchString: string) {
     const res = await fetch(`${apiPath}/query-v3?search=${encodeURIComponent(searchString)}&uid=${uid}`).catch(console.error)
     if (!res) return []
 
@@ -283,7 +226,7 @@ async function doQuery3(searchString: string) {
     }
 
     try {
-        return [...deserializeJsonl(itemsText.split("\n").filter(Boolean))]
+        return [...api_deserializeJsonl(itemsText.split("\n").filter(Boolean))]
     } catch (err) {
         console.error(err)
     }
@@ -291,55 +234,8 @@ async function doQuery3(searchString: string) {
     return []
 }
 
-async function setPos(id: bigint, pos: string) {
+async function api_setPos(id: bigint, pos: string) {
     return authorizedRequest(`${apiPath}/engagement/mod-entry?id=${id}&current-position=${pos}`)
-}
-
-function sortEntries(entries: InfoEntry[], sortBy: string) {
-    if (sortBy != "") {
-        if (sortBy == "rating") {
-            entries = entries.sort((a, b) => {
-                let aUInfo = findUserEntryById(a.ItemId)
-                let bUInfo = findUserEntryById(b.ItemId)
-                if (!aUInfo || !bUInfo) return 0
-                return bUInfo?.UserRating - aUInfo?.UserRating
-            })
-        } else if (sortBy == "cost") {
-            entries = entries.sort((a, b) => {
-                return b.PurchasePrice - a.PurchasePrice
-            })
-        } else if (sortBy == "general-rating") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                if (!bm || !am) return 0
-                return normalizeRating(bm.Rating, bm.RatingMax || 100) - normalizeRating(am.Rating, am.RatingMax || 100)
-            })
-        } else if (sortBy == "rating-disparity") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let au = findUserEntryById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                let bu = findUserEntryById(b.ItemId)
-                if (!bm || !am) return 0
-                let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
-                let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
-
-                let aUser = Number(au?.UserRating)
-                let bUser = Number(bu?.UserRating)
-
-
-                return (aGeneral - aUser) - (bGeneral - bUser)
-            })
-        } else if (sortBy == "release-year") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
-            })
-        }
-    }
-    return entries
 }
 
 type NewEntryParams = {
@@ -365,7 +261,7 @@ type NewEntryParams = {
     "user-notes"?: string
 }
 
-async function newEntry(params: NewEntryParams) {
+async function api_createEntry(params: NewEntryParams) {
     let qs = "?"
     let i = 0
     for (let p in params) {
@@ -383,44 +279,7 @@ async function newEntry(params: NewEntryParams) {
         qs += `${p}=${v}`
         i++
     }
-    console.log(qs)
     return await authorizedRequest(`${apiPath}/add-entry${qs}`)
-}
-
-async function signin(reason?: string): Promise<string> {
-    const loginPopover = document.getElementById("login") as HTMLDialogElement
-    (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
-
-    //if the popover is already open, something already called this function for the user to sign in
-    if (loginPopover.matches(":popover-open")) {
-        return await new Promise((res, rej) => {
-            //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
-            setInterval(() => {
-                let auth = sessionStorage.getItem("userAuth")
-                if (auth) {
-                    res(auth)
-                }
-            }, 16)
-        })
-    }
-
-    loginPopover.showPopover()
-
-    return await new Promise((res, rej) => {
-        const form = loginPopover.querySelector("form") as HTMLFormElement
-        form.onsubmit = function() {
-            let data = new FormData(form)
-            let username = data.get("username")
-            let password = data.get("password")
-            loginPopover.hidePopover()
-            res(btoa(`${username}:${password}`))
-        }
-
-        setTimeout(() => {
-            loginPopover.hidePopover()
-            rej(null)
-        }, 60000)
-    })
 }
 
 
@@ -430,7 +289,7 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     options.headers ||= {}
     if (userAuth == "") {
         try {
-            userAuth = await signin(options?.["signin-reason"])
+            userAuth = await signinUI(options?.["signin-reason"] || "")
             sessionStorage.setItem("userAuth", userAuth)
         } catch(err) {
             return null
@@ -445,44 +304,44 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     return res
 }
 
-async function apiDeleteEvent(itemId: bigint, ts: number, after: number) {
+async function api_deleteEvent(itemId: bigint, ts: number, after: number) {
     return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
 }
 
-async function apiRegisterEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string) {
+async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string) {
     tz ||= Intl.DateTimeFormat().resolvedOptions().timeZone
     return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}`)
 }
 
-async function addEntryTags(itemId: bigint, tags: string[]) {
+async function api_addEntryTags(itemId: bigint, tags: string[]) {
     return await authorizedRequest(`${apiPath}/add-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
 }
 
-async function deleteEntryTags(itemId: bigint, tags: string[]) {
+async function api_deleteEntryTags(itemId: bigint, tags: string[]) {
     return await authorizedRequest(`${apiPath}/delete-tags?tags=${encodeURIComponent(tags.join("\x1F"))}&id=${itemId}`)
 }
 
-async function deleteEntry(itemId: bigint) {
+async function api_deleteEntry(itemId: bigint) {
     return await authorizedRequest(`${apiPath}/delete-entry?id=${itemId}`, {
         "signin-reason": "delete this entry"
     })
 }
 
-async function overwriteMetadataEntry(itemId: bigint) {
+async function api_overwriteMetadataEntry(itemId: bigint) {
     return authorizedRequest(`${apiPath}/metadata/fetch?id=${itemId}`, {
         "signin-reason": "automatically update metadata"
     })
 }
 
-async function updateInfoTitle(itemId: bigint, newTitle: string) {
+async function api_updateInfoTitle(itemId: bigint, newTitle: string) {
     return authorizedRequest(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
 }
 
-async function getEntryMetadata(itemId: bigint) {
+async function api_getEntryMetadata(itemId: bigint) {
     return await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
 }
 
-async function fetchLocation(itemId: bigint, provider?: string, providerId?: string) {
+async function api_fetchLocation(itemId: bigint, provider?: string, providerId?: string) {
     let qs = `?uid=${uid}&id=${itemId}`
     if(provider) {
         qs += `&provider=${provider}`
@@ -495,20 +354,20 @@ async function fetchLocation(itemId: bigint, provider?: string, providerId?: str
     })
 }
 
-async function setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry) {
-    const serialized = serializeEntry(item)
+async function api_setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry) {
+    const serialized = api_serializeEntry(item)
     return authorizedRequest(`${apiPath}/${subpath}set-entry`, {
         body: serialized,
         method: "POST",
     })
 }
 
-async function username2UID(username: string): Promise<number> {
+async function api_username2UID(username: string): Promise<number> {
     let res = await fetch(`${AIO}/account/username2id?username=${encodeURIComponent(username)}`)
     const n = await res.text()
     return Number(n.trim())
 }
 
-async function setRating(itemId: bigint, rating: string) {
+async function api_setRating(itemId: bigint, rating: string) {
     return await authorizedRequest(`${apiPath}/engagement/mod-entry?id=${itemId}&rating=${rating}`)
 }

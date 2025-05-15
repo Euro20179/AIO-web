@@ -46,7 +46,7 @@ const modeCalc: DisplayMode = {
 
         let waiting = []
         for (let item of this._getValidEntries()) {
-            waiting.push(setParent(item.ItemId, BigInt(collectionName)))
+            waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
         }
         Promise.all(waiting).then(res => {
             for (let r of res) {
@@ -61,7 +61,7 @@ const modeCalc: DisplayMode = {
 
         const tagsList = tags.split(",")
         for (let item of this._getValidEntries()) {
-            addEntryTags(item.ItemId, tagsList)
+            api_addEntryTags(item.ItemId, tagsList)
         }
     }
 }

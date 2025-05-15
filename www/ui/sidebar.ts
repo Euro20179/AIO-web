@@ -131,7 +131,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     if(title) {
         title.onchange = function() {
             if(title.value)
-                updateInfoTitle(item.ItemId, title.value)
+                api_updateInfoTitle(item.ItemId, title.value)
         }
     }
 
