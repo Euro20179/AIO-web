@@ -28,6 +28,12 @@
     <button popovertarget="new-event-form">Close</button>
 </dialog>
 
+<dialog id="notes-edit-dialog" popover>
+    <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button>
+    <p class="center">Notes save automatically after 3 seconds of no editing</p>
+    <textarea id="notes-edit-box"></textarea>
+</dialog>
+
 <dialog id="item-identification-form" popover>
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
@@ -62,34 +68,35 @@
 <dialog id="identify-items" popover>
 </dialog>
 
+<dialog id="display-info-object-editor-popup" popover>
+    <div class="flex j-center" style="gap: var(--small-gap);">
+        <button id="save-object-editor" style="align-self: center; height: fit-content;"
+            onclick="displayEntrySaveObject(this)">💾︎</button>
+        <h3 class="center">Object Editor</h3>
+    </div>
+    <div class="center">
+        <select id="current-edited-object">
+            <option value="user-extra">User Extra</option>
+            <option value="meta-datapoints">Metadata Datapoints</option>
+            <option value="meta-media-dependant">Metadata Media Dependant</option>
+        </select>
+    </div>
+    <table id="display-info-object-tbl" style="width: 100%;">
+        <tr>
+            <th style="position: relative;"><button onclick="displayEntryNewObjectField(this)"
+                    style="position: absolute; left: 0" id="new-user-extra-field">+</button> Name</th>
+            <th>value</th>
+        </tr>
+    </table>
+</dialog>
 <div class="root" id="root">
 
-    <!--TODO: make this also work for Datapoints, and MediaDependant-->
-    <dialog id="display-info-object-editor-popup" popover>
-        <div class="flex j-center" style="gap: var(--small-gap);">
-            <button id="save-object-editor" style="align-self: center; height: fit-content;" onclick="displayEntrySaveObject(this)">💾︎</button>
-            <h3 class="center">Object Editor</h3>
-        </div>
-        <div class="center">
-            <select id="current-edited-object">
-                <option value="user-extra">User Extra</option>
-                <option value="meta-datapoints">Metadata Datapoints</option>
-                <option value="meta-media-dependant">Metadata Media Dependant</option>
-            </select>
-        </div>
-        <table id="display-info-object-tbl" style="width: 100%;">
-            <tr>
-                <th style="position: relative;"><button onclick="displayEntryNewObjectField(this)"
-                        style="position: absolute; left: 0" id="new-user-extra-field">+</button> Name</th>
-                <th>value</th>
-            </tr>
-        </table>
-    </dialog>
 
     <div class="item-interactions" id="item-interactions">
         <button class="close" onclick="displayEntryClose(this)" title="remove item from inspection area">X</button>
         <button class="copy-to" onclick="displayEntryCopyTo(this)" title="copy user info to another item">➡</button>
         <button class="edit-styles" onclick="displayEntryEditStyles(this)" title="edit item's stylesheet">🖌</button>
+        <button class="edit-styles" onclick="displayEntryEditTemplate(this)" title="edit item's html template">&lt;&gt;</button>
         <button class="delete" onclick="displayEntryDelete(this)" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
@@ -108,15 +115,15 @@
         </div>
         <details>
             <summary>Raw Info</summary>
-            <table class="info-raw" id="info-raw"></table>
+            <table class="info-raw" put-tbl="info" id="info-raw"></table>
         </details>
         <details>
             <summary>Raw meta info</summary>
-            <table class="meta-info-raw" id="meta-info-raw"></table>
+            <table class="meta-info-raw" put-tbl="meta" id="meta-info-raw"></table>
         </details>
         <details>
             <summary>Raw user info</summary>
-            <table id="user-info-raw"></table>
+            <table id="user-info-raw" put-tbl="user"></table>
         </details>
     </figure>
     <hgroup>
@@ -171,7 +178,8 @@
             </div>
             <figure class="entry-progress">
                 <div class="viewing">
-                    <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"></span>
+                    <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"
+                        put-data="ViewCount"></span>
                     <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress" min="0"
                         value="0"></progress>
                     <figcaption id="entry-progressbar-position-label"></figcaption>
@@ -180,13 +188,13 @@
         </div>
     </div>
 
-    <textarea id="style-editor" hidden>
-    </textarea>
+    <textarea id="style-editor" hidden></textarea>
+    <textarea id="template-editor" hidden></textarea>
 
     <div class="descriptors" id="descriptors">
         <section>
             <h4 class="center">Description</h4>
-            <p class="description" id="description"></p>
+            <p class="description" id="description" put-data="Description"></p>
         </section>
         <section>
             <div
@@ -196,12 +204,7 @@
                     style="justify-self: start; aspect-ratio: 1 / 1; margin-left: var(--small-gap); z-index: 1;">✏</button>
                 <h4 class="center" style="margin: 0;">Notes</h4>
             </div>
-            <p class="notes" id="notes" id="notes"></p>
-            <dialog id="notes-edit-dialog" popover>
-                <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button>
-                <p class="center">Notes save automatically after 3 seconds of no editing</p>
-                <textarea id="notes-edit-box"></textarea>
-            </dialog>
+            <p class="notes" id="notes" put-data="Notes"></p>
             <div>
                 <div class="tags" id="tags"></div>
                 <button id="create-tag">+</button>

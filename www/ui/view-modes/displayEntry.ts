@@ -101,7 +101,6 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
     let infoTable = root.getElementById("info-raw")
     let metaTable = root.getElementById("meta-info-raw")
     let userTable = root.getElementById("user-info-raw")
-    if (!infoTable || !metaTable || !userTable) return
 
     const updateWithTable: (table: Element, item: InfoEntry | MetadataEntry | UserEntry) => void = (table, item) => {
         for (let row of table?.querySelectorAll("tr") || []) {
@@ -123,16 +122,29 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
         }
     }
 
-    updateWithTable(infoTable, item)
+    if(infoTable) {
+        updateWithTable(infoTable, item)
+    }
+
     let meta = findMetadataById(item.ItemId)
-    if (!meta) return
-    updateWithTable(metaTable, meta)
+    if(!meta) return
 
-    updateWithTable(userTable, userEntry)
+    if(metaTable)
+        updateWithTable(metaTable, meta)
 
-    const customStylesElem = root.getElementById("style-editor") as HTMLTextAreaElement
+    if(userTable)
+        updateWithTable(userTable, userEntry)
 
-    setUserExtra(userEntry, "styles", customStylesElem.value)
+    const customStylesElem = root.getElementById("style-editor")
+    const customTemplElem = root.getElementById("template-editor")
+
+    if(customStylesElem && "value" in customStylesElem)
+        setUserExtra(userEntry, "styles", String(customStylesElem.value))
+
+    if(customTemplElem && "value" in customTemplElem) {
+        let val = String(customTemplElem.value).trim()
+        setUserExtra(userEntry, "template", val)
+    }
 
     setItem("engagement/", userEntry)
         .then(res => res?.text())
@@ -421,53 +433,62 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
     }
 
 
-    let imgEl = shadowRoot.getElementById("thumbnail") as HTMLImageElement
-    const fileUpload = (shadowRoot.getElementById("thumbnail-file-upload")) as HTMLInputElement
+    let imgEl = shadowRoot.getElementById("thumbnail")
+    const fileUpload = shadowRoot.getElementById("thumbnail-file-upload")
 
-    fileUpload.onchange = async function(_) {
-        const reader = new FileReader()
-        const blob = fileUpload.files?.[0]
-        if (!blob) return
-        reader.readAsDataURL(blob)
-        reader.onload = () => {
-            if (!reader.result) return
-            let result = reader.result.toString()
-            updateThumbnail(item.ItemId, result)
-                .then(() => {
-                    let meta = findMetadataById(item.ItemId)
-                    if (!meta) {
-                        refreshInfo().then(() => {
-                            refreshDisplayItem(item)
-                            refreshSidebarItem(item)
-                        })
-                    } else {
-                        meta.Thumbnail = result
-                        updateInfo({
-                            entries: {
-                                [String(item.ItemId)]: item
-                            },
-                            metadataEntries: {
-                                [String(item.ItemId)]: meta
-                            }
-                        })
-                    }
-                })
+    if (fileUpload && "files" in fileUpload && Array.isArray(fileUpload.files)) {
+        fileUpload.onchange = async function(_) {
+            const reader = new FileReader()
+            const blob = (fileUpload.files as Array<Blob>)?.[0]
+            if (!blob) return
+            reader.readAsDataURL(blob)
+            reader.onload = () => {
+                if (!reader.result) return
+                let result = reader.result.toString()
+                updateThumbnail(item.ItemId, result)
+                    .then(() => {
+                        let meta = findMetadataById(item.ItemId)
+                        if (!meta) {
+                            refreshInfo().then(() => {
+                                refreshDisplayItem(item)
+                                refreshSidebarItem(item)
+                            })
+                        } else {
+                            meta.Thumbnail = result
+                            updateInfo({
+                                entries: {
+                                    [String(item.ItemId)]: item
+                                },
+                                metadataEntries: {
+                                    [String(item.ItemId)]: meta
+                                }
+                            })
+                        }
+                    })
+            }
         }
     }
-    imgEl.onclick = function(_) {
-        if (!fileUpload) return
 
-        fileUpload.click()
-        console.log(fileUpload.value)
+    if (imgEl) {
+        imgEl.onclick = function(_) {
+            if (!fileUpload || !("value" in fileUpload)) return
+
+            fileUpload.click()
+            console.log(fileUpload.value)
+        }
     }
 }
 
 function updateCostDisplay(el: ShadowRoot, item: InfoEntry) {
-    const costEl = el.getElementById("cost") as HTMLSpanElement
+    const costEl = el.getElementById("cost")
+    if(!costEl) return
 
-    const includeSelf = (el.getElementById("include-self-in-cost") as HTMLInputElement).checked
-    const includeChildren = (el.getElementById("include-children-in-cost") as HTMLInputElement).checked
-    const includeCopies = (el.getElementById("include-copies-in-cost") as HTMLInputElement).checked
+    //@ts-ignore
+    const includeSelf = (el.getElementById("include-self-in-cost"))?.checked
+    //@ts-ignore
+    const includeChildren = (el.getElementById("include-children-in-cost"))?.checked
+    //@ts-ignore
+    const includeCopies = (el.getElementById("include-copies-in-cost"))?.checked
 
     let costTotal = 0
     if (includeSelf) {
@@ -842,7 +863,9 @@ function parseNotes(notes: string) {
 }
 
 function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
-    const statusText = el.getElementById("status-selector") as HTMLSelectElement
+    const statusText = el.getElementById("status-selector")
+    if(!statusText || !("value" in statusText)) return
+
     statusText.value = newStatus
     // statusText.innerText = newStatus
 }
@@ -906,25 +929,106 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
 
 }
 
-function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
-    const displayEntryTitle = el.getElementById("main-title") as HTMLHeadingElement
-    const displayEntryNativeTitle = el.getElementById("official-native-title") as HTMLHeadingElement
-    const imgEl = el.getElementById("thumbnail") as HTMLImageElement
-    const descEl = el.getElementById("description") as HTMLParagraphElement
-    const notesEl = el.getElementById("notes") as HTMLParagraphElement
-    const ratingEl = el.getElementById("user-rating") as HTMLSpanElement
-    const audienceRatingEl = el.getElementById("audience-rating") as HTMLElement
-    const infoRawTbl = el.getElementById("info-raw") as HTMLTableElement
-    const metaRawtbl = el.getElementById("meta-info-raw") as HTMLTableElement
-    const userRawtbl = el.getElementById("user-info-raw") as HTMLTableElement
-    const viewCountEl = el.getElementById("view-count") as HTMLSpanElement
-    const progressEl = el.getElementById("entry-progressbar") as HTMLProgressElement
-    const captionEl = el.getElementById("entry-progressbar-position-label") as HTMLElement
-    const mediaInfoTbl = el.getElementById("media-info") as HTMLTableElement
-    const eventsTbl = el.getElementById("user-actions") as HTMLTableElement
-    const customStyles = el.getElementById("custom-styles") as HTMLStyleElement
+/**
+ * @description updates all put-data elements with their respective contents
+ */
+function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot) {
+    //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
+    for (let elem of root.querySelectorAll("[put-data]")) {
+        let keys = elem.getAttribute("put-data")?.split(",")
+        if (!keys || !keys.length) continue
 
-    const notesEditBox = el.getElementById("notes-edit-box") as HTMLTextAreaElement
+        for (let key of keys) {
+            let data
+
+            if (key.includes(".")) {
+                let [from, realKey] = key.split(".")
+                switch (from.toLowerCase()) {
+                    case "info":
+                        data = item[realKey as keyof typeof item]
+                        break
+                    case "meta":
+                        data = meta[realKey as keyof typeof meta]
+                        break
+                    case "user":
+                        data = user[realKey as keyof typeof user]
+                        break
+                }
+
+            } else if (key in item) {
+                data = String(item[key as keyof typeof item])
+            } else if (key in meta) {
+                data = String(meta[key as keyof typeof meta])
+            } else if (key in user) {
+                data = String(user[key as keyof typeof user])
+            }
+
+            if (!data) continue
+
+            if (elem.getAttribute("put-data-mode") === "html") {
+                elem.innerHTML = String(data)
+            } else {
+                elem.textContent = String(data)
+                // elem.append(String(data))
+            }
+
+            break
+        }
+    }
+
+    //put-tbl, for raw objects such as user.Extra
+    for (let elem of root.querySelectorAll("[put-tbl]")) {
+        let requestedObj = elem.getAttribute("put-tbl") || ""
+
+        switch (requestedObj) {
+            case "user.Extra":
+            case "Extra":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(user.Extra))
+                break
+            case "Datapoints":
+            case "meta.Datapoints":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.Datapoints))
+                break
+            case "MediaDependant":
+            case "meta.MediaDependant":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.MediaDependant))
+                break
+            case "info":
+                mkGenericTbl(elem as HTMLElement, item)
+                break
+            case "user":
+                mkGenericTbl(elem as HTMLElement, user)
+                break
+            case "meta":
+                mkGenericTbl(elem as HTMLElement, meta)
+                break
+            default:
+                elem.append(`Invalid object: ${requestedObj}`)
+
+        }
+    }
+}
+
+/**
+ * @description updates special-case legacy elements
+ */
+function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+    updateBasicDisplayEntryContents(item, user, meta, el)
+
+    const displayEntryTitle = el.getElementById("main-title")
+    const displayEntryNativeTitle = el.getElementById("official-native-title")
+    const imgEl = el.getElementById("thumbnail")
+    const notesEl = el.getElementById('notes')
+    const ratingEl = el.getElementById('user-rating')
+    const audienceRatingEl = el.getElementById('audience-rating')
+    const viewCountEl = el.getElementById('view-count')
+    const progressEl = el.getElementById("entry-progressbar")
+    const captionEl = el.getElementById("entry-progressbar-position-label")
+    const mediaInfoTbl = el.getElementById("media-info")
+    const eventsTbl = el.getElementById("user-actions")
+    const customStyles = el.getElementById("custom-styles")
+
+    const notesEditBox = el.getElementById("notes-edit-box")
 
     //object editor table
     updateObjectTbl(JSON.parse(getCurrentObjectInObjEditor(item.ItemId, el)), el)
@@ -937,48 +1041,52 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
     let userExtra = getUserExtra(user, "styles")
     let styles = userExtra || ""
-    customStyles.innerText = styles
+    if (customStyles) {
+        customStyles.innerText = styles
+    }
 
     //tags
-    const tagsRoot = el.getElementById("tags") as HTMLDivElement
-    tagsRoot.innerHTML = ""
-    for (let tag of item.Tags || []) {
-        tag = tag.trim()
-        if (!tag) continue
-        const outer = document.createElement("div")
+    const tagsRoot = el.getElementById("tags")
+    if (tagsRoot) {
+        tagsRoot.innerHTML = ""
+        for (let tag of item.Tags || []) {
+            tag = tag.trim()
+            if (!tag) continue
+            const outer = document.createElement("div")
 
-        const del = document.createElement("button")
-        del.innerText = "🗑"
-        del.classList.add("delete")
+            const del = document.createElement("button")
+            del.innerText = "🗑"
+            del.classList.add("delete")
 
-        del.onclick = function() {
-            deleteEntryTags(item.ItemId, [tag])
-                .then(res => {
-                    if (res.status !== 200) return ""
-                    res.text().then(() => {
-                        item.Tags = item.Tags.filter((t: string) => t != tag)
-                        changeDisplayItemData(item, user, meta, events, el.host as HTMLElement)
+            del.onclick = function() {
+                deleteEntryTags(item.ItemId, [tag])
+                    .then(res => {
+                        if (res.status !== 200) return ""
+                        res.text().then(() => {
+                            item.Tags = item.Tags.filter((t: string) => t != tag)
+                            changeDisplayItemData(item, user, meta, events, el.host as HTMLElement)
+                        })
                     })
-                })
-                .catch(console.error)
+                    .catch(console.error)
+            }
+
+            outer.append(del)
+
+            const btn = document.createElement("button")
+            btn.classList.add("tag")
+            btn.innerText = tag
+            outer.append(btn)
+
+            btn.onclick = function(e) {
+                let btn = e.target as HTMLButtonElement
+                let tag = btn.innerText
+                const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
+                searchInput.value = `#tag:${tag}`
+                searchInput.form?.submit()
+            }
+
+            tagsRoot?.append(outer)
         }
-
-        outer.append(del)
-
-        const btn = document.createElement("button")
-        btn.classList.add("tag")
-        btn.innerText = tag
-        outer.append(btn)
-
-        btn.onclick = function(e) {
-            let btn = e.target as HTMLButtonElement
-            let tag = btn.innerText
-            const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
-            searchInput.value = `#tag:${tag}`
-            searchInput.form?.submit()
-        }
-
-        tagsRoot?.append(outer)
     }
 
     //type icon
@@ -993,43 +1101,47 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
 
     //Title
-    displayEntryTitle.innerText = meta.Title || item.En_Title
+    if (displayEntryTitle)
+        displayEntryTitle.innerText = meta.Title || item.En_Title
     //only set the title of the heading to the user's title if the metadata title exists
     //otherwise it looks dumb
-    if (meta.Title && item.En_Title) {
+    if (displayEntryTitle && meta.Title && item.En_Title) {
         displayEntryTitle.title = item.En_Title
     }
 
     //Native title
-    displayEntryNativeTitle.innerText = meta.Native_Title || item.Native_Title
+    if (displayEntryNativeTitle)
+        displayEntryNativeTitle.innerText = meta.Native_Title || item.Native_Title
     //Same as with the regular title
-    if (meta.Native_Title && item.Native_Title) {
+    if (displayEntryNativeTitle && meta.Native_Title && item.Native_Title) {
         displayEntryNativeTitle.title = item.Native_Title
     }
 
     //Thumbnail
-    imgEl.alt = meta.Title || item.En_Title
-    imgEl.src = fixThumbnailURL(meta.Thumbnail)
-
-
-    //Description
-    descEl.innerHTML = meta.Description
+    if (imgEl && imgEl.tagName === "IMG") {
+        //@ts-ignore
+        imgEl.alt = meta.Title || item.En_Title
+        //@ts-ignore
+        imgEl.src = fixThumbnailURL(meta.Thumbnail)
+    }
 
     //Notes
-    notesEditBox.value = user.Notes
-    notesEl.innerHTML = parseNotes(user.Notes)
+    if (notesEditBox && "value" in notesEditBox)
+        notesEditBox.value = user.Notes
+    if (notesEl)
+        notesEl.innerHTML = parseNotes(user.Notes)
 
     //Rating
-    if (user.UserRating) {
+    if (ratingEl && user.UserRating) {
         applyUserRating(user.UserRating, ratingEl)
         ratingEl.innerHTML = String(user.UserRating)
-    } else {
+    } else if (ratingEl) {
         ratingEl.innerText = "Unrated"
     }
 
     //Audience Rating
     let max = meta.RatingMax
-    if (meta.Rating) {
+    if (meta.Rating && audienceRatingEl) {
         let rating = meta.Rating
         let normalizedRating = rating
         if (max !== 0) {
@@ -1042,17 +1154,14 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     }
 
     //Info table raw
-    mkGenericTbl(infoRawTbl, item)
+    // if (infoRawTbl) mkGenericTbl(infoRawTbl, item)
 
     //Meta table raw
     let data = meta
-    mkGenericTbl(metaRawtbl, data)
-
-    mkGenericTbl(userRawtbl, user)
 
     //View count
     let viewCount = user.ViewCount
-    if (viewCount) {
+    if (viewCountEl && viewCount) {
         let mediaDependant
         try {
             mediaDependant = JSON.parse(data["MediaDependant"])
@@ -1066,8 +1175,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
 
     //Media dependant
-    let type = item.Type
-    type = String(type)
+    let type = String(item.Type)
     let mediaDeptData
     try {
         mediaDeptData = JSON.parse(meta.MediaDependant)
@@ -1076,42 +1184,52 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         console.error("Could not parse json", meta.MediaDependant)
         return
     }
-    //remove the <Media>- part from the key looks ugly
-    let modifiedKeys: { [k: string]: string } = {}
-    for (let key in mediaDeptData) {
-        const val = mediaDeptData[key]
-        key = key.split("-").slice(1).join(" ")
-        modifiedKeys[key] = val
-    }
-    mkGenericTbl(mediaInfoTbl, modifiedKeys)
 
+    if (mediaInfoTbl) {
+        //remove the <Media>- part from the key looks ugly
+        let modifiedKeys: { [k: string]: string } = {}
+        for (let key in mediaDeptData) {
+            const val = mediaDeptData[key]
+            key = key.split("-").slice(1).join(" ")
+            modifiedKeys[key] = val
+        }
+        mkGenericTbl(mediaInfoTbl, modifiedKeys)
+    }
+
+
+    let userPos = parseInt(user.CurrentPosition)
 
     el.host.setAttribute("data-user-status", user.Status)
-    if (mediaDeptData[`${type}-episodes`] && user.Status === "Viewing") {
+    if (progressEl && "max" in progressEl && "value" in progressEl && mediaDeptData[`${type}-episodes`] && user.Status === "Viewing") {
         progressEl.max = mediaDeptData[`${type}-episodes`]
 
-        let pos = parseInt(user.CurrentPosition)
-        progressEl.value = pos
+        progressEl.value = userPos
 
-        captionEl.innerText = `${user.CurrentPosition}/${progressEl.max}`
-        captionEl.title = `${Math.round(pos / progressEl.max * 1000) / 10}%`
+    }
+    if (captionEl) {
+        captionEl.innerText = `${user.CurrentPosition}/${mediaDeptData[`${type}-episodes`]}`
+        captionEl.title = `${Math.round(userPos / parseInt(mediaDeptData[`${type}-episodes`]) * 1000) / 10}%`
     }
 
     //Current position
-    progressEl.title = user.CurrentPosition
-    if (progressEl.max) {
-        progressEl.title = `${user.CurrentPosition}/${progressEl.max}`
+    if (progressEl) {
+        progressEl.title = user.CurrentPosition
+        if ("max" in progressEl && progressEl.max) {
+            progressEl.title = `${user.CurrentPosition}/${progressEl.max}`
+        }
     }
 
     //relation elements
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
-        let relationshipEl = el.getElementById(relationship[0]) as HTMLElement
+        let relationshipEl = el.getElementById(relationship[0])
+        if(!relationshipEl) continue
+
         relationshipEl.innerHTML = ""
         createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
     //Events
-    if (events.length) {
+    if (eventsTbl && events.length) {
         let html = `
             <thead>
                 <tr>
@@ -1158,7 +1276,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         }
         html += "</tbody>"
         eventsTbl.innerHTML = html
-    } else {
+    } else if (eventsTbl) {
         //there are no events
         eventsTbl.innerHTML = ""
     }
@@ -1166,47 +1284,56 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
 function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = displayItems) {
     let el = document.createElement("display-entry")
+    let root = el.shadowRoot
+    if (!root) return
+
+    let user = findUserEntryById(item.ItemId)
+
+    let template;
+    if (user && (template = getUserExtra(user, "template")?.trim())) {
+        (root.getElementById("root") as HTMLDivElement).innerHTML = template
+    }
 
     observer.observe(el)
 
     let meta = findMetadataById(item.ItemId)
-    let user = findUserEntryById(item.ItemId)
     let events = findUserEventsById(item.ItemId)
     if (!user || !meta || !events) return
 
     parent.append(el)
 
-    let root = el.shadowRoot
-    if (!root) return
 
-    const currentEditedObj = root.getElementById("current-edited-object") as HTMLSelectElement
-    currentEditedObj.onchange = function() {
-        meta = findMetadataById(item.ItemId) as MetadataEntry
-        switch (currentEditedObj.value) {
-            case "user-extra":
-                updateObjectTbl(JSON.parse(user.Extra), root)
-                break
-            case "meta-datapoints":
-                updateObjectTbl(JSON.parse(meta.Datapoints), root)
-                break
-            case "meta-media-dependant":
-                updateObjectTbl(JSON.parse(meta.MediaDependant), root)
-                break
+    const currentEditedObj = root.getElementById("current-edited-object")
+    if (currentEditedObj && "value" in currentEditedObj) {
+        currentEditedObj.onchange = function() {
+            meta = findMetadataById(item.ItemId) as MetadataEntry
+            switch (currentEditedObj.value) {
+                case "user-extra":
+                    updateObjectTbl(JSON.parse(user.Extra), root)
+                    break
+                case "meta-datapoints":
+                    updateObjectTbl(JSON.parse(meta.Datapoints), root)
+                    break
+                case "meta-media-dependant":
+                    updateObjectTbl(JSON.parse(meta.MediaDependant), root)
+                    break
+            }
         }
     }
 
-    const includeSelf = root.getElementById("include-self-in-cost") as HTMLInputElement
-    const includeChildren = root.getElementById("include-children-in-cost") as HTMLInputElement
-    const includeCopies = root.getElementById("include-copies-in-cost") as HTMLInputElement
-    const statusSelector = root.getElementById("status-selector") as HTMLSelectElement
+    const includeSelf = root.getElementById("include-self-in-cost")
+    const includeChildren = root.getElementById("include-children-in-cost")
+    const includeCopies = root.getElementById("include-copies-in-cost")
+    const statusSelector = root.getElementById("status-selector")
 
     for (let input of [includeSelf, includeCopies, includeChildren]) {
+        if (!input) continue
         input.onchange = function() {
             updateCostDisplay(root, item)
         }
     }
 
-    statusSelector.onchange = function(e) {
+    statusSelector && (statusSelector.onchange = function(e) {
         const selector = e.target as HTMLSelectElement
         const info = findInfoEntryById(item.ItemId) as InfoEntry
         const user = findUserEntryById(item.ItemId) as UserEntry
@@ -1237,94 +1364,108 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
                 })
             })
             .catch(console.error)
-    }
+    });
 
 
     let extra = getUserExtra(user, "styles")
 
-    let styleEditor = root.getElementById("style-editor") as HTMLTextAreaElement
-    styleEditor.value = extra || ""
-    styleEditor.addEventListener("change", e => {
-        const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
-        customStyles.innerText = styleEditor.value
-    })
-
-    let newChildButton = root.getElementById("new-child") as HTMLButtonElement
-    newChildButton.addEventListener("click", e => {
-        const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
-        const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
-        parentIdInput.value = String(item.ItemId)
-        newEntryDialog.showPopover()
-    })
-
-    const newChildByIdInput = root.getElementById("new-child-by-id") as HTMLInputElement
-
-    newChildByIdInput.onchange = function() {
-        let childId = BigInt(newChildByIdInput.value)
-        let info = findInfoEntryById(childId)
-        if (!info) return
-        info.ParentId = item.ItemId
-        setParent(childId, item.ItemId).then(() => {
-            updateInfo({
-                entries: {
-                    [String(item.ItemId)]: item,
-                    [newChildByIdInput.value]: info
-                }
-            })
+    let styleEditor = root.getElementById("style-editor")
+    if (styleEditor && styleEditor.tagName === "TEXTAREA") {
+        (styleEditor as HTMLTextAreaElement).value = extra || ""
+        styleEditor.addEventListener("change", e => {
+            const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
+            customStyles.innerText = (styleEditor as HTMLTextAreaElement).value
         })
+    }
+    let templEditor = root.getElementById("template-editor")
+    if (templEditor && templEditor.tagName === "TEXTAREA") {
+        (templEditor as HTMLTextAreaElement).value = getUserExtra(user, "template") || ""
+    }
+
+    let newChildButton = root.getElementById("new-child")
+    if (newChildButton) {
+        newChildButton.addEventListener("click", e => {
+            const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
+            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
+            parentIdInput.value = String(item.ItemId)
+            newEntryDialog.showPopover()
+        })
+    }
+
+    const newChildByIdInput = root.getElementById("new-child-by-id")
+
+    if (newChildByIdInput && "value" in newChildByIdInput) {
+        newChildByIdInput.onchange = function() {
+            let childId = BigInt(String(newChildByIdInput.value))
+            let info = findInfoEntryById(childId)
+            if (!info) return
+            info.ParentId = item.ItemId
+            setParent(childId, item.ItemId).then(() => {
+                updateInfo({
+                    entries: {
+                        [String(item.ItemId)]: item,
+                        [String(newChildByIdInput.value)]: info
+                    }
+                })
+            })
+        }
     }
 
     hookActionButtons(root, item)
 
-    const notesEditBox = root.getElementById("notes-edit-box") as HTMLTextAreaElement
+    const notesEditBox = root.getElementById("notes-edit-box")
 
     let editTO: number | undefined;
-    notesEditBox.onchange = function() {
-        user.Notes = notesEditBox.value
+    if (notesEditBox && "value" in notesEditBox) {
+        notesEditBox.onchange = function() {
+            user.Notes = String(notesEditBox.value)
 
-        const userStringified = serializeEntry(user)
+            const userStringified = serializeEntry(user)
 
-        updateInfo({
-            entries: {
-                [String(item.ItemId)]: item
-            },
-            userEntries: {
-                [String(item.ItemId)]: user
-            }
-        })
-
-        if (editTO) {
-            clearTimeout(editTO)
-        }
-        editTO = setTimeout(() => {
-            authorizedRequest(`${apiPath}/engagement/set-entry`, {
-                body: userStringified,
-                method: "POST",
-                "signin-reason": "save notes"
+            updateInfo({
+                entries: {
+                    [String(item.ItemId)]: item
+                },
+                userEntries: {
+                    [String(item.ItemId)]: user
+                }
             })
-                .then(res => {
-                    if (res.status === 200) {
-                        alert("Notes saved")
-                    } else {
-                        alert("Failed to save notes")
-                    }
+
+            if (editTO) {
+                clearTimeout(editTO)
+            }
+            editTO = setTimeout(() => {
+                authorizedRequest(`${apiPath}/engagement/set-entry`, {
+                    body: userStringified,
+                    method: "POST",
+                    "signin-reason": "save notes"
                 })
-                .catch(() => alert("Failed to save notes"))
-        }, 1000)
+                    .then(res => {
+                        if (res.status === 200) {
+                            alert("Notes saved")
+                        } else {
+                            alert("Failed to save notes")
+                        }
+                    })
+                    .catch(() => alert("Failed to save notes"))
+            }, 1000)
+        }
     }
 
-    const newTag = (root.getElementById("create-tag")) as HTMLButtonElement
-    newTag.onclick = function() {
-        const name = prompt("Tag name (, seperated)")
-        if (!name) return
-        let names = name.split(",")
-        item.Tags = item.Tags?.concat(names) || names
-        addEntryTags(item.ItemId, name.split(","))
-            .then(res => {
-                if (res.status !== 200) return ""
-                res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
-            })
-            .catch(console.error)
+    const newTag = root.getElementById("create-tag")
+    if (newTag) {
+        newTag.onclick = function() {
+            const name = prompt("Tag name (, seperated)")
+            if (!name) return
+            let names = name.split(",")
+            item.Tags = item.Tags?.concat(names) || names
+            addEntryTags(item.ItemId, name.split(","))
+                .then(res => {
+                    if (res.status !== 200) return ""
+                    res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
+                })
+                .catch(console.error)
+        }
     }
 
     el.addEventListener("data-changed", function(_e) {
@@ -1651,8 +1792,15 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
 })
 
 const displayEntryEditStyles = displayEntryAction((item, root) => {
-    const styleEditor = root.getElementById("style-editor") as HTMLTextAreaElement
+    const styleEditor = root.getElementById("style-editor")
+    if(!styleEditor) return
     styleEditor.hidden = !styleEditor.hidden
+})
+
+const displayEntryEditTemplate = displayEntryAction((item, root) => {
+    const templEditor = root.getElementById("template-editor")
+    if(!templEditor) return
+    templEditor.hidden = !templEditor.hidden
 })
 
 const displayEntryCopyTo = displayEntryAction(item => {

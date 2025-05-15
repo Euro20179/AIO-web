@@ -1,10 +1,4 @@
-/**
- * @param {HTMLElement | ShadowRoot} root
- * @param {string} selector
- * @param {string} text
- * @param {"append" | "innerhtml" | `attribute=${string}`} [fillmode="append"] 
- */
-function fillElement(root, selector, text, fillmode = "append") {
+function fillElement(root: HTMLElement | ShadowRoot , selector: string, text: string, fillmode: "append" | "innerhtml" | `attribute=${string}` = "append") {
     let elem = /**@type {HTMLElement}*/(root.querySelector(selector))
     if (!elem) {
         return
