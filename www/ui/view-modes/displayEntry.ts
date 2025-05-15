@@ -339,6 +339,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
 
     if (multiActionButton) {
         multiActionButton.addEventListener("click", _ => {
+            item = findInfoEntryById(item.ItemId) as InfoEntry
+
             let user = findUserEntryById(item.ItemId)
             if (!user) return
 
@@ -399,6 +401,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
         if (action?.includes("+")) continue
 
         btn.addEventListener("click", _ => {
+            item = findInfoEntryById(item.ItemId) as InfoEntry
+
             if (!confirm(`Are you sure you want to ${action} this entry`)) {
                 return
             }
@@ -424,10 +428,13 @@ function hookActionButtons(shadowRoot: ShadowRoot, item: InfoEntry) {
                 })
                 .then(text => {
                     alert(text)
-                    loadUserEvents().then(() =>
+                    Promise.all([loadUserEvents(), items_loadUserEntries()]).then(() =>
                         updateInfo({
                             entries: {
                                 [String(item.ItemId)]: item
+                            },
+                            userEntries: {
+                                [String(item.ItemId)]: findUserEntryById(item.ItemId) as UserEntry
                             }
                         })
                     )
