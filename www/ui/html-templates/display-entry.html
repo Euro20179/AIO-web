@@ -164,7 +164,8 @@
         </section>
         <section>
             <div style="justify-self: center; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid; margin-top: var(--small-gap); width: 100%;">
-                <button popovertarget="notes-edit-dialog" style="justify-self: start; aspect-ratio: 1 / 1; margin-left: var(--small-gap);">✏</button>
+                <!--this z-index is because i cant click the button because its under things for some reason-->
+                <button popovertarget="notes-edit-dialog" style="justify-self: start; aspect-ratio: 1 / 1; margin-left: var(--small-gap); z-index: 1;">✏</button>
                 <h4 class="center"  style="margin: 0;">Notes</h4>
             </div>
             <p class="notes" id="notes" id="notes"></p>
