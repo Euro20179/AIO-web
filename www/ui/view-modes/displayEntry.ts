@@ -98,10 +98,6 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
     let userEntry = findUserEntryById(item.ItemId)
     if (!userEntry) return
 
-    const customStylesElem = root.getElementById("style-editor") as HTMLTextAreaElement
-
-    setUserExtra(userEntry, "styles", customStylesElem.value)
-
     let infoTable = root.getElementById("info-raw")
     let metaTable = root.getElementById("meta-info-raw")
     let userTable = root.getElementById("user-info-raw")
@@ -133,6 +129,10 @@ function saveItemChanges(root: ShadowRoot, item: InfoEntry) {
     updateWithTable(metaTable, meta)
 
     updateWithTable(userTable, userEntry)
+
+    const customStylesElem = root.getElementById("style-editor") as HTMLTextAreaElement
+
+    setUserExtra(userEntry, "styles", customStylesElem.value)
 
     setItem("engagement/", userEntry)
         .then(res => res?.text())
