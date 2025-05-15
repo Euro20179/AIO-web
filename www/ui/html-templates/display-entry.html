@@ -95,8 +95,6 @@
     <div class="item-interactions" id="item-interactions">
         <button class="close" onclick="displayEntryClose(this)" title="remove item from inspection area">X</button>
         <button class="copy-to" onclick="displayEntryCopyTo(this)" title="copy user info to another item">➡</button>
-        <button class="edit-styles" onclick="displayEntryEditStyles(this)" title="edit item's stylesheet">🖌</button>
-        <button class="edit-styles" onclick="displayEntryEditTemplate(this)" title="edit item's html template">&lt;&gt;</button>
         <button class="delete" onclick="displayEntryDelete(this)" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
@@ -111,7 +109,9 @@
         <table class="media-info" id="media-info"></table>
         <div class="grid column">
             <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
-            <button popovertarget="display-info-object-editor-popup">E✏</button>
+            <button popovertarget="display-info-object-editor-popup">T✏</button>
+            <button class="edit-styles" onclick="displayEntryEditStyles(this)" title="edit item's stylesheet">🖌</button>
+            <button class="edit-template" onclick="displayEntryEditTemplate(this)" title="edit item's html template">&lt;&gt;</button>
         </div>
         <details>
             <summary>Raw Info</summary>
