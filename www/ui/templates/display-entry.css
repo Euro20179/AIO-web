@@ -195,13 +195,15 @@
     }
 
     #header-subtitle {
-        display: grid;
-        align-items: center;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-
-        font-size: 0.85em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
 
         text-align: center;
+
+        gap: var(--small-gap);
+
+        font-size: 0.85em;
     }
 
     #actions {

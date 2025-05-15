@@ -99,54 +99,58 @@
             <h3 class="center official-native-title" id="official-native-title"></h3>
         </div>
     </hgroup>
-    <div class="header-subtitle" id="header-subtitle">
+    <div class="grid" style="grid-template-columns: 2fr 1fr">
         <div>
-            <span>Include in cost</span>
-            <div id="cost-calculation-modifiers" class="flex row j-center">
-                <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked> Self</label>
-                <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
-                    Children</label>
-                <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost"> Copies</label>
+            <div class="actions flex wrap" id="actions">
+                <div class="flex">
+                    <button data-action="Plan" class="action" title="plan">🗓</button>
+                    <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
+                    <button data-action="Wait" class="action" title="wait">⌚︎</button>
+                </div>
+                <div class="flex">
+                    <button data-action="Finish" class="action" title="finish">🏁</button>
+                    <button data-action="Drop" class="action" title="drop">⏹</button>
+                    <select id="status-selector">
+                        <option value="Planned">Planned</option>
+                        <option value="Viewing">Viewing</option>
+                        <option value="ReViewing">ReViewing</option>
+                        <option value="Paused">Paused</option>
+                        <option value="Waiting">Waiting</option>
+                        <option value="Finished">Finished</option>
+                        <option value="Dropped">Dropped</option>
+                    </select>
+                </div>
             </div>
-            <span class="cost" id="cost"></span>
-        </div>
-        <div style="justify-content: center; gap: 1ch; font-size: 1.1em;" class="flex">
-            <span class="rating" id="user-rating" onclick="displayEntryRating(this)" title="your rating">??</span>
-            <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
-        </div>
-        <figure class="entry-progress">
-            <div class="viewing">
-                <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"></span>
-                <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress" min="0"
-                    value="0"></progress>
-                <figcaption id="entry-progressbar-position-label"></figcaption>
-            </div>
-        </figure>
-    </div>
-    <div>
-        <div class="actions flex wrap" id="actions">
-            <div class="flex">
-                <button data-action="Plan" class="action" title="plan">🗓</button>
-                <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
-                <button data-action="Wait" class="action" title="wait">⌚︎</button>
-            </div>
-            <div class="flex">
-                <button data-action="Finish" class="action" title="finish">🏁</button>
-                <button data-action="Drop" class="action" title="drop">⏹</button>
-                <select id="status-selector">
-                    <option value="Planned">Planned</option>
-                    <option value="Viewing">Viewing</option>
-                    <option value="ReViewing">ReViewing</option>
-                    <option value="Paused">Paused</option>
-                    <option value="Waiting">Waiting</option>
-                    <option value="Finished">Finished</option>
-                    <option value="Dropped">Dropped</option>
-                </select>
+            <div class="tables flex column" id="event-table-area">
+                <table class="user-actions" id="user-actions"></table>
+                <button id="new-event-button" popovertarget="new-event-form">New Event</button>
             </div>
         </div>
-        <div class="tables flex column" id="event-table-area">
-            <table class="user-actions" id="user-actions"></table>
-            <button id="new-event-button" popovertarget="new-event-form">New Event</button>
+        <div class="header-subtitle" id="header-subtitle">
+            <div>
+                <span>Include in cost</span>
+                <div id="cost-calculation-modifiers" class="flex row j-center">
+                    <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
+                        Self</label>
+                    <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
+                        Children</label>
+                    <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
+                        Copies</label>
+                </div>
+                <span class="cost" id="cost"></span>
+            </div>
+            <div style="justify-content: center; gap: 1ch; font-size: 1.1em;" class="flex">
+                <span class="rating" id="user-rating" onclick="displayEntryRating(this)" title="your rating">??</span>
+                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
+            </div>
+            <figure class="entry-progress">
+                <div class="viewing">
+                    <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"></span>
+                    <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress" min="0"
+                        value="0"></progress>
+                    <figcaption id="entry-progressbar-position-label"></figcaption>
+                </div>
+            </figure>
         </div>
     </div>
 
