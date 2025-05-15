@@ -862,7 +862,7 @@ function updateObjectTbl(obj: object, el: ShadowRoot, clear = true) {
         let val = obj[key as keyof typeof obj] as any
         //if the key alr is in the table, and we aren't clearing, then skip
         //otherwise the key will get duplicated
-        if(objectTbl.querySelector(`[data-keyname="${key}"]`) && !clear) {
+        if (objectTbl.querySelector(`[data-keyname="${key}"]`) && !clear) {
             continue;
         }
         const tr = document.createElement("tr")
@@ -973,6 +973,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         btn.onclick = function(e) {
             let btn = e.target as HTMLButtonElement
             let tag = btn.innerText
+            const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
             searchInput.value = `#tag:${tag}`
             searchInput.form?.submit()
         }
