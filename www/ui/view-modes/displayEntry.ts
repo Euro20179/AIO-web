@@ -847,6 +847,59 @@ function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
     // statusText.innerText = newStatus
 }
 
+function updateObjectTbl(obj: object, el: ShadowRoot, clear = true) {
+    const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
+
+    if (clear) {
+        const firstTr = objectTbl.firstElementChild
+        //remove all rows except the first
+        while (objectTbl.lastElementChild && objectTbl.lastElementChild !== firstTr) {
+            objectTbl.removeChild(objectTbl.lastElementChild)
+        }
+    }
+
+    for (let key in obj) {
+        let val = obj[key as keyof typeof obj] as any
+        const tr = document.createElement("tr")
+        const nameTd = document.createElement("td")
+        const valTd = document.createElement("td")
+
+        nameTd.innerText = key
+
+        valTd.setAttribute("data-type", typeof val)
+        if (typeof val !== 'string' && typeof val !== 'number') {
+            val = JSON.stringify(val)
+        }
+        valTd.innerText = val
+
+        valTd.contentEditable = "true"
+        nameTd.contentEditable = "true"
+
+        tr.append(nameTd)
+        tr.append(valTd)
+
+        objectTbl.append(tr)
+    }
+}
+
+function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
+    const editedObject = (el.getElementById("current-edited-object") as HTMLSelectElement).value
+    const user = findUserEntryById(itemId) as UserEntry
+    const meta = findMetadataById(itemId) as MetadataEntry
+
+    switch (editedObject) {
+        case "user-extra":
+            return user.Extra || "{}"
+        case "meta-datapoints":
+            return meta.Datapoints || "{}"
+        case "meta-media-dependant":
+            return meta.MediaDependant || "{}"
+        default:
+            return "{}"
+    }
+
+}
+
 function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
     const displayEntryTitle = el.getElementById("main-title") as HTMLHeadingElement
     const displayEntryNativeTitle = el.getElementById("official-native-title") as HTMLHeadingElement
@@ -866,6 +919,9 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const customStyles = el.getElementById("custom-styles") as HTMLStyleElement
 
     const notesEditBox = el.getElementById("notes-edit-box") as HTMLTextAreaElement
+
+    //object editor table
+    updateObjectTbl(JSON.parse(getCurrentObjectInObjEditor(item.ItemId, el)), el)
 
     //status
     updateStatusDisplay(user.Status, el)
@@ -1115,6 +1171,22 @@ function renderDisplayItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 
     let root = el.shadowRoot
     if (!root) return
+
+    const currentEditedObj = root.getElementById("current-edited-object") as HTMLSelectElement
+    currentEditedObj.onchange = function() {
+        meta = findMetadataById(item.ItemId) as MetadataEntry
+        switch (currentEditedObj.value) {
+            case "user-extra":
+                updateObjectTbl(JSON.parse(user.Extra), root)
+                break
+            case "meta-datapoints":
+                updateObjectTbl(JSON.parse(meta.Datapoints), root)
+                break
+            case "meta-media-dependant":
+                updateObjectTbl(JSON.parse(meta.MediaDependant), root)
+                break
+        }
+    }
 
     const includeSelf = root.getElementById("include-self-in-cost") as HTMLInputElement
     const includeChildren = root.getElementById("include-children-in-cost") as HTMLInputElement
@@ -1465,6 +1537,88 @@ const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(it
 const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item))
 const displayEntryClose = displayEntryAction(item => deselectItem(item))
 const displayEntryCopyThis = displayEntryAction(item => copyThis(item))
+
+const displayEntrySaveObject = displayEntryAction((item, root) => {
+    const tbl = root.getElementById("display-info-object-tbl")
+
+    const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
+
+    let into: Record<string, any>
+    let keyName
+    if (editedObject === "user-extra") {
+        into = findUserEntryById(item.ItemId) as UserEntry
+        keyName = "Extra"
+    } else if (editedObject === "meta-datapoints") {
+        into = findMetadataById(item.ItemId) as MetadataEntry
+        keyName = "Datapoints"
+    } else if (editedObject === "meta-media-dependant") {
+        into = findMetadataById(item.ItemId) as MetadataEntry
+        keyName = "MediaDependant"
+    } else {
+        alert(`${editedObject} saving is not implemented yet`)
+        return
+    }
+
+    let newObj: Record<string, any> = {}
+    for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
+        let key = row.firstElementChild?.textContent || ""
+        let valueEl = row.firstElementChild?.nextElementSibling
+        if (!valueEl) continue
+        let value = valueEl?.textContent || ""
+        if (key == "") continue
+
+        let valueType = valueEl.getAttribute("data-type")
+        if (valueType !== "string") {
+            newObj[key] = JSON.parse(value)
+        } else {
+            newObj[key] = value
+        }
+    }
+
+    into[keyName] = JSON.stringify(newObj)
+
+    const strId = String(item.ItemId)
+    if (editedObject === "user-extra") {
+        setItem("engagement/", into as UserEntry)
+            .then(res => res?.text())
+            .then(console.log)
+            .catch(console.error)
+        updateInfo({
+            entries: {
+                [strId]: item
+            },
+            userEntries: {
+                [strId]: into as UserEntry
+            }
+        })
+    } else {
+        setItem("metadata/", into as MetadataEntry)
+            .then(res => res?.text())
+            .then(console.log)
+            .catch(console.error)
+        updateInfo({
+            entries: {
+                [strId]: item
+            },
+            metadataEntries: {
+                [strId]: into as MetadataEntry
+            }
+        })
+    }
+})
+
+const displayEntryNewObjectField = displayEntryAction((item, root) => {
+    const name = prompt("Field name")
+    if (!name) return
+
+    const strObj = getCurrentObjectInObjEditor(item.ItemId, root) as string
+    const obj = JSON.parse(strObj)
+    if (name in obj) return
+
+    obj[name] = ""
+
+    updateObjectTbl(obj, root, false)
+})
 
 const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
     selectExistingItem().then(id => {
