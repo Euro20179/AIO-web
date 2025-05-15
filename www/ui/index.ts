@@ -15,36 +15,12 @@ type GlobalsNewUi = {
     viewingLibrary: bigint
 }
 
-let globalsNewUi: GlobalsNewUi = {
-    userEntries: {},
-    metadataEntries: {},
-    entries: {},
-    results: [],
-    events: [],
-    selectedEntries: [],
-    libraries: {},
-    viewingLibrary: 0n,
-}
-
 const displayItems = document.getElementById("entry-output") as HTMLElement
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
-
-async function loadUserEntries(): Promise<Record<string, UserEntry>> {
-    let items = await api_loadList<UserEntry>("engagement/list-entries")
-    let obj: Record<string, UserEntry> = {}
-    for (let item of items) {
-        obj[String(item.ItemId)] = item
-    }
-    return globalsNewUi.userEntries = obj
-}
-
-async function loadUserEvents() {
-    return globalsNewUi.events = await api_loadList("engagement/list-events")
-}
 
 function getUserExtra(user: UserEntry, prop: string) {
     return JSON.parse(user.Extra).AIOWeb?.[prop] || null
@@ -62,18 +38,6 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
     AIOWeb[prop] = value
     extra.AIOWeb = AIOWeb
     user.Extra = JSON.stringify(extra)
-}
-
-function* findDescendants(itemId: bigint) {
-    let entries = Object.values(globalsNewUi.entries)
-    yield* entries.values()
-        .filter(v => v.ParentId === itemId)
-}
-
-function* findCopies(itemId: bigint) {
-    let entries = Object.values(globalsNewUi.entries)
-    yield* entries.values()
-        .filter(v => v.CopyOf === itemId)
 }
 
 function resetResultStats() {
@@ -143,33 +107,16 @@ function updateLibraryDropdown() {
 }
 
 async function loadLibraries() {
-    const items = await api_queryV3("type = 'Library'")
-
-    librarySelector.innerHTML = '<option value="0">Library</option>'
-    for (let item of items) {
-        globalsNewUi.libraries[String(item["ItemId"])] = item
-    }
+    await items_loadLibraries()
     updateLibraryDropdown()
 }
 
 async function loadInfoEntries() {
-    const res = await fetch(`${apiPath}/list-entries?uid=${uid}`).catch(console.error)
+    await items_loadInfoEntries()
 
-    if (!res) {
-        alert("Could not load all entries")
-        return
-    }
+    setResultStat("results", Object.keys(globalsNewUi.entries).length)
 
-    const text = await res.text()
-    let jsonL = text.split("\n").filter(Boolean)
-    let obj: Record<string, InfoEntry> = {}
-    for (let item of api_deserializeJsonl(jsonL)) {
-        obj[item.ItemId] = item
-    }
-
-    setResultStat("results", jsonL.length)
-
-    return globalsNewUi.entries = obj
+    return globalsNewUi.entries
 }
 
 function defaultMetadata(id: bigint): MetadataEntry {
@@ -187,31 +134,6 @@ function defaultMetadata(id: bigint): MetadataEntry {
         Provider: "",
         ProviderID: ""
     }
-}
-
-function findMetadataById(id: bigint): MetadataEntry | null {
-    return globalsNewUi.metadataEntries[String(id)] || defaultMetadata(id)
-}
-
-function findUserEntryById(id: bigint): UserEntry | null {
-    return globalsNewUi.userEntries[String(id)]
-}
-
-function findUserEventsById(id: bigint): UserEvent[] {
-    return globalsNewUi.events.filter(v => v.ItemId === id)
-}
-
-function findInfoEntryById(id: bigint): InfoEntry | null {
-    return globalsNewUi.entries[String(id)]
-}
-
-async function loadMetadata(): Promise<Record<string, MetadataEntry>> {
-    let items = await api_loadList<MetadataEntry>("metadata/list-entries")
-    let obj: Record<string, MetadataEntry> = {}
-    for (let item of items) {
-        obj[String(item.ItemId)] = item
-    }
-    return globalsNewUi.metadataEntries = obj
 }
 
 
@@ -417,8 +339,8 @@ async function refreshInfo() {
     return Promise.all([
         loadLibraries(),
         loadInfoEntries(),
-        loadMetadata(),
-        loadUserEntries(),
+        items_loadMetadata(),
+        items_loadUserEntries(),
         loadUserEvents()
     ])
 }
@@ -447,9 +369,9 @@ async function main() {
         searchInput.value = decodeURIComponent(initialSearch)
     }
 
-    await Promise.all([loadLibraries(), loadInfoEntries(), loadUserEntries(), loadUserEvents()])
+    await Promise.all([loadLibraries(), loadInfoEntries(), items_loadUserEntries(), loadUserEvents()])
 
-    loadMetadata().then(() => {
+    items_loadMetadata().then(() => {
         clearSidebar()
 
         for(let item of globalsNewUi.results) {
