@@ -25,6 +25,35 @@ function findInfoEntryById(id: bigint): InfoEntry | null {
     return globalsNewUi.entries[String(id)]
 }
 
+function genericMetadata(itemId: bigint): MetadataEntry {
+    return {
+        ItemId: itemId,
+        Rating: 0,
+        RatingMax: 0,
+        Description: "",
+        ReleaseYear: 0,
+        Thumbnail: "",
+        MediaDependant: "",
+        Datapoints: "{}",
+        Title: "",
+        Native_Title: "",
+        Provider: "",
+        ProviderID: ""
+    }
+}
+
+function genericUserEntry(itemId: bigint): UserEntry {
+    return {
+        ItemId: itemId,
+        Status: "",
+        ViewCount: 0,
+        UserRating: 0,
+        Notes: "",
+        CurrentPosition: "",
+        Extra: "{}",
+    }
+}
+
 
 async function items_loadUserEntries(): Promise<Record<string, UserEntry>> {
     let items = await api_loadList<UserEntry>("engagement/list-entries")

@@ -257,33 +257,6 @@ function normalizeRating(rating: number, maxRating: number) {
     return rating / maxRating * 100
 }
 
-function genericMetadata(itemId: bigint): MetadataEntry {
-    return {
-        ItemId: itemId,
-        Rating: 0,
-        RatingMax: 0,
-        Description: "",
-        ReleaseYear: 0,
-        Thumbnail: "",
-        MediaDependant: "",
-        Datapoints: "{}",
-        Title: "",
-        Native_Title: "",
-    }
-}
-
-function genericUserEntry(itemId: bigint): UserEntry {
-    return {
-        ItemId: itemId,
-        Status: "",
-        ViewCount: 0,
-        UserRating: 0,
-        Notes: "",
-        CurrentPosition: "",
-        Extra: "{}",
-    }
-}
-
 /**
  * @description Updates information in the global information table, also refreshes the mode's dispaly info, and the sidebar info
  */
