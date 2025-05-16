@@ -295,6 +295,7 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
             return null
         }
     }
+    //@ts-ignore
     options.headers["Authorization"] = `Basic ${userAuth}`
     let res = await fetch(url, options)
     if (res.status === 401) {

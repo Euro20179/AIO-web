@@ -24,15 +24,30 @@ async function itemIdentification(form: HTMLFormElement) {
     switch (queryType) {
         case "by-title":
             let titleSearchContainer = shadowRoot.getElementById("identify-items") as HTMLDialogElement
-            finalItemId = await titleIdentification(provider, search, titleSearchContainer)
+            finalItemId = await titleIdentification(provider, search, titleSearchContainer) || ""
+
+            if (!finalItemId) {
+                alert("Failed to identify item")
+                return
+            }
+
             break
         case "by-id":
             finalItemId = search
             break
     }
+
     api_finalizeIdentify(finalItemId, provider, BigInt(itemId))
-        .then(items_loadMetadata)
-        .then(() => {
+        .then((res) => res?.text())
+        .then((json) => {
+            if (!json) {
+                console.log(json)
+                alert(`Failed to reload meta: ${json}, please refresh`)
+                return
+            }
+
+            const newMeta = [...api_deserializeJsonl(json)][0]
+
             let newItem = globalsNewUi.entries[itemId]
 
             //if the provider also has a location provider might as well get the location for it
@@ -40,12 +55,22 @@ async function itemIdentification(form: HTMLFormElement) {
                 fetchLocationUI(BigInt(itemId), provider)
             }
 
-            updateInfo({ entries: { [String(itemId)]: newItem } })
+            updateInfo({
+                entries: {
+                    [String(itemId)]: newItem
+                },
+                metadataEntries: {
+                    [String(itemId)]: newMeta
+                }
+            })
         })
 }
 
-async function titleIdentification(provider: string, search: string, selectionElemOutput: HTMLElement): Promise<string> {
+async function titleIdentification(provider: string, search: string, selectionElemOutput: HTMLElement): Promise<string | null> {
     let res = await api_identify(search, provider)
+    if (!res) {
+        return null
+    }
     let text = await res.text()
     let [_, rest] = text.split("\x02")
 
@@ -237,7 +262,7 @@ function newEvent(form: HTMLFormElement) {
     }
     const itemId = getIdFromDisplayElement(form)
     api_registerEvent(itemId, name.toString(), ts, afterts)
-        .then(res => res.text())
+        .then(res => res?.text())
         .then(() => {
             updateInfo({
                 events: [
@@ -315,7 +340,7 @@ const modeDisplayEntry: DisplayMode = {
         }
         Promise.all(waiting).then(res => {
             for (let r of res) {
-                console.log(r.status)
+                console.log(r?.status)
             }
         })
     },
@@ -379,7 +404,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
                     const info = findInfoEntryById(item.ItemId) as InfoEntry
 
-                    Promise.all([loadUserEvents(), items_loadUserEntries()]).then(() =>
+                    Promise.all([loadUserEvents(getUidUI()), items_loadUserEntries(getUidUI())]).then(() =>
                         updateInfo({
                             entries: {
                                 [String(item.ItemId)]: info
@@ -427,7 +452,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 })
                 .then(text => {
                     alert(text)
-                    Promise.all([loadUserEvents(), items_loadUserEntries()]).then(() =>
+                    Promise.all([loadUserEvents(getUidUI()), items_loadUserEntries(getUidUI())]).then(() =>
                         updateInfo({
                             entries: {
                                 [String(item.ItemId)]: item
@@ -780,7 +805,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
             del.onclick = function() {
                 api_deleteEntryTags(item.ItemId, [tag])
                     .then(res => {
-                        if (res.status !== 200) return ""
+                        if (res?.status !== 200) return ""
                         res.text().then(() => {
                             item.Tags = item.Tags.filter((t: string) => t != tag)
                             changeDisplayItemData(item, user, meta, events, el.host as HTMLElement)
@@ -1027,7 +1052,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
         currentEditedObj.onchange = function() {
-            meta = findMetadataById(item.ItemId) as MetadataEntry
             switch (currentEditedObj.value) {
                 case "user-extra":
                     updateObjectTbl(JSON.parse(user.Extra), root)
@@ -1050,7 +1074,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     for (let input of [includeSelf, includeCopies, includeChildren]) {
         if (!input) continue
         input.onchange = function() {
-            updateCostDisplay(root, item)
+            updateCostDisplay(root, item.ItemId)
         }
     }
 
@@ -1162,7 +1186,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                     "signin-reason": "save notes"
                 })
                     .then(res => {
-                        if (res.status === 200) {
+                        if (res?.status === 200) {
                             alert("Notes saved")
                         } else {
                             alert("Failed to save notes")
@@ -1182,7 +1206,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             item.Tags = item.Tags?.concat(names) || names
             api_addEntryTags(item.ItemId, name.split(","))
                 .then(res => {
-                    if (res.status !== 200) return ""
+                    if (res?.status !== 200) return ""
                     res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
                 })
                 .catch(console.error)
@@ -1286,7 +1310,7 @@ function _fetchLocationBackup(itemId: bigint) {
         //TODO: if the length is 0, ask the user for a search query
 
         if (metaInfo.length === 1) {
-            api_fetchLocation(item.ItemId, provider, metaInfo[0].ItemId).then(onfetchLocation)
+            api_fetchLocation(item.ItemId, getUidUI(), provider, metaInfo[0].ItemId).then(onfetchLocation)
             return
         }
 
@@ -1299,7 +1323,7 @@ function _fetchLocationBackup(itemId: bigint) {
         for (const fig of figs) {
             fig.onclick = function() {
                 const id = fig.getAttribute("data-item-id") as string
-                api_fetchLocation(item.ItemId, provider, id)
+                api_fetchLocation(item.ItemId, getUidUI(), provider, id)
                     .then(onfetchLocation)
             }
         }
@@ -1309,7 +1333,7 @@ function _fetchLocationBackup(itemId: bigint) {
 }
 
 function _fetchLocation(itemId: bigint) {
-    api_fetchLocation(itemId)
+    api_fetchLocation(itemId, getUidUI())
         .then(async (res) => {
             if (res == null) {
                 alert("Failed to get location")
@@ -1545,7 +1569,7 @@ const displayEntryViewCount = displayEntryAction(item => {
     if (count === null) return
 
     authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
-        .then(res => res.text())
+        .then(res => res?.text())
         .then(alert)
         .then(() => {
             let user = findUserEntryById(item.ItemId)
@@ -1622,9 +1646,9 @@ function deleteEvent(el: HTMLElement, ts: number, after: number) {
     }
     const itemId = getIdFromDisplayElement(el)
     api_deleteEvent(itemId, ts, after)
-        .then(res => res.text())
+        .then(res => res?.text())
         .then(() =>
-            loadUserEvents()
+            loadUserEvents(getUidUI())
                 .then(() => updateInfo({
                     entries: { [String(itemId)]: globalsNewUi.entries[String(itemId)] }
                 }))

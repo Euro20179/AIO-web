@@ -250,7 +250,6 @@ async function loadSearch() {
 
     globalsNewUi.results = entries
 
-    console.log(entries)
     clearItems()
     if (entries.length === 0) {
         setError("No results")
@@ -474,7 +473,7 @@ async function remote2LocalThumbService() {
         }).then(hash => {
             if (!hash) return
             console.log(`THUMBNAIL HASH: ${hash}`)
-            api_setThumbnail(metadata.ItemId, `${apiPath}/resource/get-thumbnail?hash=${hash}`).then(res => res.text()).then(console.log)
+            api_setThumbnail(metadata.ItemId, `${apiPath}/resource/get-thumbnail?hash=${hash}`).then(res => res?.text()).then(console.log)
         })
 
         await new Promise(res => setTimeout(res, 200))
