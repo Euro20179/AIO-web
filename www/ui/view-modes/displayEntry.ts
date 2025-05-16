@@ -41,7 +41,6 @@ async function itemIdentification(form: HTMLFormElement) {
         .then((res) => res?.text())
         .then((json) => {
             if (!json) {
-                console.log(json)
                 alert(`Failed to reload meta: ${json}, please refresh`)
                 return
             }
