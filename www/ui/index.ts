@@ -22,6 +22,11 @@ const statsOutput = document.getElementById("result-stats") as HTMLElement
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
 
+const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
+userSelector.onchange = function() {
+    refreshInfo().then(() => loadSearch())
+}
+
 function getUserExtra(user: UserEntry, prop: string) {
     return JSON.parse(user.Extra).AIOWeb?.[prop] || null
 }
@@ -85,6 +90,7 @@ function changeResultStats(key: keyof ResultStats, value: number) {
 }
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
+    if(!item) return
     changeResultStats("totalCost", item.PurchasePrice * multiplier)
     changeResultStats("count", 1 * multiplier)
 }
@@ -107,12 +113,12 @@ function updateLibraryDropdown() {
 }
 
 async function loadLibraries() {
-    await items_loadLibraries()
+    await items_loadLibraries(getUidUI())
     updateLibraryDropdown()
 }
 
 async function loadInfoEntries() {
-    await items_loadInfoEntries()
+    await items_loadInfoEntries(getUidUI())
 
     setResultStat("results", Object.keys(globalsNewUi.entries).length)
 
@@ -236,7 +242,7 @@ async function loadSearch() {
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = await api_queryV3(String(filters.newSearch) || "#")
+    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -244,6 +250,7 @@ async function loadSearch() {
 
     globalsNewUi.results = entries
 
+    console.log(entries)
     clearItems()
     if (entries.length === 0) {
         setError("No results")
@@ -309,29 +316,44 @@ function updateInfo({
 }
 
 async function refreshInfo() {
+    const uid = getUidUI()
     return Promise.all([
         loadLibraries(),
         loadInfoEntries(),
-        items_loadMetadata(),
-        items_loadUserEntries(),
-        loadUserEvents()
+        items_loadMetadata(uid),
+        items_loadUserEntries(uid),
+        loadUserEvents(uid)
     ])
 }
 
 async function main() {
     const urlParams = new URLSearchParams(document.location.search)
 
+    const accounts = await api_listAccounts()
+
+    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
+    if(!uidSelector) {
+        alert("Failed to H Y D R A T E the user selection list, aborting")
+        return
+    }
+
+    for(let acc of accounts) {
+        const opt = document.createElement("option")
+        const [id, name] = acc.split(":")
+        opt.value = id
+        opt.innerText = name
+        uidSelector.append(opt)
+    }
+
     if(urlParams.has("uname")) {
-        uid = String(await api_username2UID(urlParams.get("uname") as string))
+        let uid = String(await api_username2UID(urlParams.get("uname") as string))
         if(uid == "0") {
             setError(`username: ${urlParams.get("uname")} does not exist`)
             return
         }
+        uidSelector.value = uid
     } else if(urlParams.has("uid")) {
-        uid = urlParams.get("uid") as string
-    } else {
-        setError("No user id selected")
-        return
+        uidSelector.value = urlParams.get("uid") as string
     }
 
     const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
@@ -342,9 +364,10 @@ async function main() {
         searchInput.value = decodeURIComponent(initialSearch)
     }
 
-    await Promise.all([loadLibraries(), loadInfoEntries(), items_loadUserEntries(), loadUserEvents()])
+    const uid = getUidUI()
+    await Promise.all([loadLibraries(), loadInfoEntries(), items_loadUserEntries(uid), loadUserEvents(uid)])
 
-    items_loadMetadata().then(() => {
+    items_loadMetadata(uid).then(() => {
         clearSidebar()
 
         for(let item of globalsNewUi.results) {
@@ -382,7 +405,7 @@ async function main() {
         formData.set("sort-by", "rating")
 
         let filters = parseClientsideSearchFiltering(formData)
-        let entries = await api_queryV3(String(filters.newSearch) || "#")
+        let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
         entries = applyClientsideSearchFiltering(entries, filters)
 
         setResultStat("results", entries.length)

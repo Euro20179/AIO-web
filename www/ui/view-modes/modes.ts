@@ -41,7 +41,8 @@ function toggleItem(item: InfoEntry, updateStats: boolean = true) {
 }
 
 function clearItems() {
-    mode.subList(globalsNewUi.selectedEntries)
+    //FIXME: for some reason selectedEntries has an `undefined` item in it when the user has not items
+    mode.subList(globalsNewUi.selectedEntries.filter(Boolean))
     globalsNewUi.selectedEntries = []
 }
 

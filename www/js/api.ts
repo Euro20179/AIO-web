@@ -168,7 +168,7 @@ async function api_listTypes() {
     return _api_types_cache
 }
 
-async function api_loadList<T>(endpoint: string): Promise<T[]> {
+async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
     const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
     if (!res) {
         return []
@@ -215,7 +215,7 @@ async function api_setParent(id: bigint, parent: bigint) {
     return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
-async function api_queryV3(searchString: string) {
+async function api_queryV3(searchString: string, uid: number) {
     const res = await fetch(`${apiPath}/query-v3?search=${encodeURIComponent(searchString)}&uid=${uid}`).catch(console.error)
     if (!res) return []
 
@@ -337,11 +337,11 @@ async function api_updateInfoTitle(itemId: bigint, newTitle: string) {
     return authorizedRequest(`${apiPath}/mod-entry?id=${itemId}&en-title=${newTitle}`)
 }
 
-async function api_getEntryMetadata(itemId: bigint) {
+async function api_getEntryMetadata(itemId: bigint, uid: number) {
     return await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
 }
 
-async function api_fetchLocation(itemId: bigint, provider?: string, providerId?: string) {
+async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
     let qs = `?uid=${uid}&id=${itemId}`
     if(provider) {
         qs += `&provider=${provider}`
@@ -370,4 +370,10 @@ async function api_username2UID(username: string): Promise<number> {
 
 async function api_setRating(itemId: bigint, rating: string) {
     return await authorizedRequest(`${apiPath}/engagement/mod-entry?id=${itemId}&rating=${rating}`)
+}
+
+async function api_listAccounts() {
+    const res = await fetch(`${AIO}/account/list`)
+    const users = (await res.text()).split("\n").filter(Boolean)
+    return users
 }

@@ -3,6 +3,11 @@
  * with client-side inputs
 */
 
+function getUidUI() {
+    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
+    return Number(uidSelector.value)
+}
+
 function deleteEntryUI(item: InfoEntry) {
     if (!confirm("Are you sure you want to delete this item")) {
         return
@@ -111,7 +116,7 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let json = api_deserializeJsonl(text).next().value
-    api_getEntryMetadata(json.ItemId).then(async (res) => {
+    api_getEntryMetadata(json.ItemId, getUidUI()).then(async (res) => {
         if (res.status !== 200) {
             alert("Failed to load new item metadata, please reload")
             return

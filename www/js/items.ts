@@ -55,8 +55,8 @@ function genericUserEntry(itemId: bigint): UserEntry {
 }
 
 
-async function items_loadUserEntries(): Promise<Record<string, UserEntry>> {
-    let items = await api_loadList<UserEntry>("engagement/list-entries")
+async function items_loadUserEntries(uid: number): Promise<Record<string, UserEntry>> {
+    let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
     let obj: Record<string, UserEntry> = {}
     for (let item of items) {
         obj[String(item.ItemId)] = item
@@ -64,8 +64,8 @@ async function items_loadUserEntries(): Promise<Record<string, UserEntry>> {
     return globalsNewUi.userEntries = obj
 }
 
-async function items_loadInfoEntries() {
-    const items = await api_loadList<InfoEntry>("list-entries")
+async function items_loadInfoEntries(uid: number) {
+    const items = await api_loadList<InfoEntry>("list-entries", uid)
 
     let obj: Record<string, InfoEntry> = {}
     for (let item of items) {
@@ -75,8 +75,8 @@ async function items_loadInfoEntries() {
     return globalsNewUi.entries = obj
 }
 
-async function items_loadLibraries() {
-    const items = await api_queryV3("type = 'Library'")
+async function items_loadLibraries(uid: number) {
+    const items = await api_queryV3("type = 'Library'", uid)
 
     librarySelector.innerHTML = '<option value="0">Library</option>'
     for (let item of items) {
@@ -84,8 +84,8 @@ async function items_loadLibraries() {
     }
 }
 
-async function items_loadMetadata(): Promise<Record<string, MetadataEntry>> {
-    let items = await api_loadList<MetadataEntry>("metadata/list-entries")
+async function items_loadMetadata(uid: number): Promise<Record<string, MetadataEntry>> {
+    let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)
     let obj: Record<string, MetadataEntry> = {}
     for (let item of items) {
         obj[String(item.ItemId)] = item
@@ -105,8 +105,8 @@ function* findCopies(itemId: bigint) {
         .filter(v => v.CopyOf === itemId)
 }
 
-async function loadUserEvents() {
-    return globalsNewUi.events = await api_loadList("engagement/list-events")
+async function loadUserEvents(uid: number) {
+    return globalsNewUi.events = await api_loadList("engagement/list-events", uid)
 }
 
 function sortEntries(entries: InfoEntry[], sortBy: string) {

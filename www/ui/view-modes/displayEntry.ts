@@ -123,27 +123,27 @@ function saveItemChanges(root: ShadowRoot, itemId: bigint) {
     }
 
     let info = findInfoEntryById(itemId)
-    if(!info) return
-    if(infoTable) {
+    if (!info) return
+    if (infoTable) {
         updateWithTable(infoTable, info)
     }
 
     let meta = findMetadataById(itemId)
-    if(!meta) return
+    if (!meta) return
 
-    if(metaTable)
+    if (metaTable)
         updateWithTable(metaTable, meta)
 
-    if(userTable)
+    if (userTable)
         updateWithTable(userTable, userEntry)
 
     const customStylesElem = root.getElementById("style-editor")
     const customTemplElem = root.getElementById("template-editor")
 
-    if(customStylesElem && "value" in customStylesElem)
+    if (customStylesElem && "value" in customStylesElem)
         setUserExtra(userEntry, "styles", String(customStylesElem.value))
 
-    if(customTemplElem && "value" in customTemplElem) {
+    if (customTemplElem && "value" in customTemplElem) {
         let val = String(customTemplElem.value).trim()
         setUserExtra(userEntry, "template", val)
     }
@@ -491,10 +491,10 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
 function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
-    if(!costEl) return
+    if (!costEl) return
 
     const info = findInfoEntryById(itemId)
-    if(!info) return
+    if (!info) return
 
     //@ts-ignore
     const includeSelf = (el.getElementById("include-self-in-cost"))?.checked
@@ -583,7 +583,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
 
 function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
     const statusText = el.getElementById("status-selector")
-    if(!statusText || !("value" in statusText)) return
+    if (!statusText || !("value" in statusText)) return
 
     statusText.value = newStatus
     // statusText.innerText = newStatus
@@ -941,7 +941,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //relation elements
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
         let relationshipEl = el.getElementById(relationship[0])
-        if(!relationshipEl) continue
+        if (!relationshipEl) continue
 
         relationshipEl.innerHTML = ""
         createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
@@ -1213,7 +1213,7 @@ function removeDisplayItem(itemId: bigint) {
 function refreshDisplayItem(itemId: bigint) {
     let el = document.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
-    if(!info) return
+    if (!info) return
 
     if (el) {
         let user = findUserEntryById(itemId)
@@ -1520,13 +1520,13 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
 
 const displayEntryEditStyles = displayEntryAction((item, root) => {
     const styleEditor = root.getElementById("style-editor")
-    if(!styleEditor) return
+    if (!styleEditor) return
     styleEditor.hidden = !styleEditor.hidden
 })
 
 const displayEntryEditTemplate = displayEntryAction((item, root) => {
     const templEditor = root.getElementById("template-editor")
-    if(!templEditor) return
+    if (!templEditor) return
     templEditor.hidden = !templEditor.hidden
 })
 

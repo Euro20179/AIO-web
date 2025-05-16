@@ -1,5 +1,4 @@
 const apiPath = `${AIO}${API}`
-let uid: string
 
 function setError(text: string) {
     const errorOut = document.getElementById("error")

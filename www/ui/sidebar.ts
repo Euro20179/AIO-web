@@ -156,6 +156,8 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 }
 
 function renderSidebar(entries: InfoEntry[]) {
+    if(!entries.length) return
+
     if (viewAllElem.checked) {
         selectItemList(entries, mode)
     } else {
