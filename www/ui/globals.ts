@@ -1,5 +1,7 @@
 const apiPath = `${AIO}${API}`
 
+const ACCOUNTS: Record<number, string> = {}
+
 function setError(text: string) {
     const errorOut = document.getElementById("error")
     errorOut?.setAttribute("data-error", text)

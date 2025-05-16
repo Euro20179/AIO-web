@@ -329,29 +329,33 @@ async function refreshInfo() {
 async function main() {
     const urlParams = new URLSearchParams(document.location.search)
 
-    const accounts = await api_listAccounts()
-
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
     if(!uidSelector) {
-        alert("Failed to H Y D R A T E the user selection list, aborting")
+        alert("Failed to 💧H Y D R A T E💧 the user selection list, aborting")
         return
     }
 
-    for(let acc of accounts) {
-        const opt = document.createElement("option")
-        const [id, name] = acc.split(":")
-        opt.value = id
-        opt.innerText = name
-        uidSelector.append(opt)
-    }
+    api_listAccounts().then(accounts => {
+        for(let acc of accounts) {
+            const opt = document.createElement("option")
+            const [id, name] = acc.split(":")
+
+            ACCOUNTS[Number(id)] = name
+
+            opt.value = id
+            opt.innerText = name
+            uidSelector.append(opt)
+        }
+    })
 
     if(urlParams.has("uname")) {
-        let uid = String(await api_username2UID(urlParams.get("uname") as string))
-        if(uid == "0") {
+        let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
+
+        if(!uid) {
             setError(`username: ${urlParams.get("uname")} does not exist`)
             return
         }
-        uidSelector.value = uid
+        uidSelector.value = String(uid)
     } else if(urlParams.has("uid")) {
         uidSelector.value = urlParams.get("uid") as string
     }
@@ -367,6 +371,7 @@ async function main() {
     const uid = getUidUI()
     await Promise.all([loadLibraries(), loadInfoEntries(), items_loadUserEntries(uid), loadUserEvents(uid)])
 
+    //do this second because metadata can get really large, and having to wait for it could take a while
     items_loadMetadata(uid).then(() => {
         clearSidebar()
 
