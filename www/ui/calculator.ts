@@ -8,6 +8,8 @@ const TT = {
     Div: "/",
     Lparen: "(",
     Rparen: ")",
+    Lbracket: "[",
+    Rbracket: "]",
     Comma: ",",
     Semi: ";",
     Eq: "=",
@@ -56,6 +58,14 @@ class NumNode extends NodePar {
     constructor(value: number) {
         super()
         this.value = value;
+    }
+}
+
+class ArrNode extends NodePar {
+    nodes: NodePar[]
+    constructor(nodes: NodePar[]) {
+        super(nodes[0])
+        this.nodes = nodes
     }
 }
 
@@ -323,6 +333,22 @@ class Parser {
 
         if (tok.ty === "Num") {
             return new NumNode(Number(tok.value))
+        }
+        else if(tok.ty == "Lbracket") {
+            let nodes: NodePar[] = []
+            tok = this.curTok()
+            while(tok?.ty !== "Rbracket") {
+                console.log(tok)
+                let item = this.ast_expr()
+                nodes.push(item)
+                tok = this.curTok()
+                if(tok?.ty === "Comma") {
+                    this.next()
+                }
+                tok = this.curTok()
+            }
+            this.next()
+            return new ArrNode(nodes)
         }
         else if (tok.ty === "String") {
             return new StringNode(tok.value)
@@ -941,6 +967,10 @@ class Interpreter {
 
     NumNode(node: NumNode) {
         return new Num(node.value)
+    }
+
+    ArrNode(node: ArrNode) {
+        return new Arr(node.nodes.map(v => this.interpretNode(v)))
     }
 
     StringNode(node: WordNode) {
