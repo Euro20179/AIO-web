@@ -19,7 +19,11 @@ const TT = {
 }
 
 const keywords = [
-    "var"
+    "var",
+    "for",
+    "rav",
+    "rof",
+    "do"
 ]
 
 class Token {
@@ -117,6 +121,20 @@ class VarDefNode extends NodePar {
         super()
         this.name = name
         this.expr = expr
+    }
+}
+
+class ForNode extends NodePar {
+    varName: Token
+    start: NodePar
+    end: NodePar
+    body: NodePar
+    constructor(varName: Token, start: NodePar, end: NodePar, body: NodePar) {
+        super()
+        this.varName = varName
+        this.start = start
+        this.end = end
+        this.body = body
     }
 }
 
@@ -417,6 +435,46 @@ class Parser {
         return new VarDefNode(name, this.ast_expr())
     }
 
+    forLoop(): NodePar {
+        this.next() // skip "for"
+        if (this.curTok().ty !== "Word") {
+            console.error("Expected variable name")
+            return new NumNode(0)
+        }
+        const name = this.curTok()
+        this.next()
+        if (this.curTok().ty !== "Eq") {
+            console.error("Expected =")
+            return new NumNode(0)
+        }
+        this.next()
+        let start = this.atom()
+        if (this.curTok().ty !== "Comma") {
+            console.error("Expected comma")
+            return new NumNode(0)
+        }
+        this.next() //skip comma
+        let end = this.atom()
+
+        if(this.curTok().ty !== "Word" || this.curTok().value !== "do") {
+            console.error("Expected 'do'")
+            return new NumNode(0)
+        }
+
+        this.next()
+
+        let body = this.ast_expr()
+
+        if(this.curTok().ty !== "Word" || this.curTok().value !== "rof") {
+            console.error("Expected 'rof'")
+            return new NumNode(0)
+        }
+
+        this.next()
+
+        return new ForNode(name, start, end, body)
+    }
+
     funcDef() {
         this.next() //skip "("
         this.next() //skip ")"
@@ -439,8 +497,13 @@ class Parser {
 
     ast_expr() {
         let t = this.curTok()
-        if (t.ty === "Word" && t.value === "var") {
-            return this.varDef()
+        if (t.ty === "Word") {
+            switch (t.value) {
+                case "var":
+                    return this.varDef()
+                case "for":
+                    return this.forLoop()
+            }
         }
         let expr = new ExprNode(this.comparison())
         return expr
@@ -518,6 +581,33 @@ class Type {
     call(params: Type[]): Type {
         console.error(`Cannot call ${this.constructor.name}`)
         return new Num(0)
+    }
+}
+
+class Arr extends Type {
+    constructor(values: Type[]) {
+        super(values)
+    }
+
+    call(params: Type[]) {
+        let idx = params[0].toNum().jsValue
+        return this.jsValue[idx]
+    }
+
+    toStr(): Str {
+        let str = ""
+        for(let item of this.jsValue) {
+            str += item.jsStr()
+        }
+        return new Str(str)
+    }
+
+    jsStr(): string {
+        return this.toStr().jsValue
+    }
+
+    toNum(): Num {
+        return new Num(this.jsValue.length)
     }
 }
 
@@ -753,9 +843,9 @@ class SymbolTable {
 
         this.symbols.set("entrybyid", new Func((id) => {
             const s = id.jsStr()
-            if(s === "s-rand") {
+            if (s === "s-rand") {
                 return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
-            } else if(s === "a-rand") {
+            } else if (s === "a-rand") {
                 const v = Object.values(globalsNewUi.entries)
                 return new Obj(v[Math.floor(Math.random() * v.length)])
             }
@@ -917,6 +1007,19 @@ class Interpreter {
         let val = this.interpretNode(node.expr)
         this.symbolTable.set(node.name.value, val)
         return val
+    }
+
+    ForNode(node: ForNode) {
+        let name = node.varName.value
+        let start = this.interpretNode(node.start).toNum().jsValue
+        let end = this.interpretNode(node.end).toNum().jsValue
+
+        let vals: Type[] = []
+        for (let i = start; i < end; i++) {
+            this.symbolTable.set(name, new Num(i))
+            vals.push(this.interpretNode(node.body))
+        }
+        return new Arr(vals)
     }
 
     FuncDefNode(node: FuncDefNode) {
