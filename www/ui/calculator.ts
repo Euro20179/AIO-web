@@ -401,6 +401,16 @@ class Parser {
             this.next() //skip Rparen
             return node
         } else if (tok.ty === "Word") {
+            if (tok.ty === "Word") {
+                switch (tok.value) {
+                    case "var":
+                        return this.varDef()
+                    case "for":
+                        return this.forLoop()
+                    case "if":
+                        return this.ifStatement()
+                }
+            }
             return new WordNode(tok.value)
         }
         return new ErrorNode(`Invalid token: (${tok.ty} ${tok.value})`)
@@ -516,8 +526,6 @@ class Parser {
     }
 
     varDef(): NodePar {
-        this.next() // skip "var"
-
         if (this.curTok().ty === "Lparen") {
             return this.funcDef()
         }
@@ -534,8 +542,6 @@ class Parser {
     }
 
     ifStatement(): NodePar {
-        this.next() //skip "if"
-
         let condition = this.ast_expr()
 
         if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") {
@@ -562,7 +568,6 @@ class Parser {
     }
 
     forLoop(): NodePar {
-        this.next() // skip "for"
         if (this.curTok().ty !== "Word") {
             console.error("Expected variable name")
             return new NumNode(0)
@@ -627,17 +632,6 @@ class Parser {
     }
 
     ast_expr() {
-        let t = this.curTok()
-        if (t.ty === "Word") {
-            switch (t.value) {
-                case "var":
-                    return this.varDef()
-                case "for":
-                    return this.forLoop()
-                case "if":
-                    return this.ifStatement()
-            }
-        }
         let expr = new ExprNode(this.pipe())
         return expr
     }
@@ -904,7 +898,7 @@ class Num extends Type {
 
 class Str extends Type {
     add(right: Type) {
-        this.jsValue += String(right.jsValue)
+        this.jsValue += right.jsStr()
         return this
     }
     sub(right: Type) {
