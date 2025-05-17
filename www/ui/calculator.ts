@@ -171,6 +171,16 @@ class CallNode extends NodePar {
     }
 }
 
+class PropertyAccessNode extends NodePar {
+    of: NodePar
+    value: NodePar
+    constructor(of: NodePar, value: NodePar) {
+        super(value)
+        this.value = value
+        this.of = of
+    }
+}
+
 class ExprNode extends NodePar {
     value: NodePar
     constructor(value: NodePar) {
@@ -334,15 +344,14 @@ class Parser {
         if (tok.ty === "Num") {
             return new NumNode(Number(tok.value))
         }
-        else if(tok.ty == "Lbracket") {
+        else if (tok.ty == "Lbracket") {
             let nodes: NodePar[] = []
             tok = this.curTok()
-            while(tok?.ty !== "Rbracket") {
-                console.log(tok)
+            while (tok?.ty !== "Rbracket") {
                 let item = this.ast_expr()
                 nodes.push(item)
                 tok = this.curTok()
-                if(tok?.ty === "Comma") {
+                if (tok?.ty === "Comma") {
                     this.next()
                 }
                 tok = this.curTok()
@@ -384,9 +393,17 @@ class Parser {
 
         if (!tok) return left
 
-        while (tok?.ty == "Lparen") {
-            left = this.funcCall(left)
-            tok = this.curTok()
+        while (tok?.ty == "Lparen" || tok?.ty == "Lbracket") {
+            switch (tok.ty) {
+                case "Lparen":
+                    left = this.funcCall(left)
+                    tok = this.curTok()
+                    break
+                case "Lbracket":
+                    left = this.propertyAccess(left)
+                    tok = this.curTok()
+                    break
+            }
         }
         return left
     }
@@ -421,6 +438,17 @@ class Parser {
             op = this.curTok()
         }
         return left
+    }
+
+    propertyAccess(of: NodePar) {
+        this.next() //skip [
+        let val = this.ast_expr()
+        if(this.curTok()?.ty !== "Rbracket") {
+            console.error("Expected ']'")
+            return new NumNode(0)
+        }
+        this.next()
+        return new PropertyAccessNode(of, val)
     }
 
     funcCall(callable: NodePar): NodePar {
@@ -482,7 +510,7 @@ class Parser {
         this.next() //skip comma
         let end = this.atom()
 
-        if(this.curTok().ty !== "Word" || this.curTok().value !== "do") {
+        if (this.curTok().ty !== "Word" || this.curTok().value !== "do") {
             console.error("Expected 'do'")
             return new NumNode(0)
         }
@@ -491,7 +519,7 @@ class Parser {
 
         let body = this.ast_expr()
 
-        if(this.curTok().ty !== "Word" || this.curTok().value !== "rof") {
+        if (this.curTok().ty !== "Word" || this.curTok().value !== "rof") {
             console.error("Expected 'rof'")
             return new NumNode(0)
         }
@@ -608,6 +636,11 @@ class Type {
         console.error(`Cannot call ${this.constructor.name}`)
         return new Num(0)
     }
+
+    access(prop: Type): Type {
+        console.error(`Unable to access ${prop.jsStr()} in ${this.constructor.name}`)
+        return new Num(0)
+    }
 }
 
 class Arr extends Type {
@@ -622,7 +655,7 @@ class Arr extends Type {
 
     toStr(): Str {
         let str = ""
-        for(let item of this.jsValue) {
+        for (let item of this.jsValue) {
             str += item.jsStr()
         }
         return new Str(str)
@@ -635,11 +668,23 @@ class Arr extends Type {
     toNum(): Num {
         return new Num(this.jsValue.length)
     }
+
+    access(prop: Type): Type {
+        return this.call([prop])
+    }
 }
 
 class Obj extends Type {
     constructor(value: object) {
         super(value)
+    }
+
+    jsStr(): string {
+        return JSON.stringify(this.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v)
+    }
+
+    toStr(): Str {
+        return new Str(JSON.stringify(this.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
     }
 
     call(params: Type[]) {
@@ -660,10 +705,13 @@ class Obj extends Type {
             case 'undefined':
                 return new Str("undefined")
             case 'object':
-                return new Str(JSON.stringify(curObj))
+                return new Str(JSON.stringify(curObj, (_, v) => typeof v === "bigint" ? String(v) : v))
             case 'function':
                 return new Str(String(curObj))
         }
+    }
+    access(prop: Type): Type {
+        return this.call([prop])
     }
 }
 
@@ -935,7 +983,7 @@ class SymbolTable {
 
         this.symbols.set("env", new Func(() => {
             let res = ""
-            for(let key of this.symbols.keys()) {
+            for (let key of this.symbols.keys()) {
                 res += key + "\n"
             }
             return new Str(res.trim())
@@ -1039,6 +1087,12 @@ class Interpreter {
         let inner = node.inner.map(this.interpretNode.bind(this))
         let callable = this.interpretNode(node.callable)
         return callable.call(inner)
+    }
+
+    PropertyAccessNode(node: PropertyAccessNode): Type {
+        let of = this.interpretNode(node.of)
+        let inner = this.interpretNode(node.value)
+        return of.access(inner)
     }
 
     VarDefNode(node: VarDefNode) {
