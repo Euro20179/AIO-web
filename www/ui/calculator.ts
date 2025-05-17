@@ -323,12 +323,14 @@ class Parser {
 
     l_unop() {
         let tok = this.curTok()
-        if ("+-".includes(tok.value)) {
+        let right
+        while ("+-".includes(tok?.value)) {
             this.next()
-            let right = this.atom()
-            return new LUnOpNode(right, tok)
+            right ||= this.atom()
+            right = new LUnOpNode(right, tok)
+            tok = this.curTok()
         }
-        return this.atom()
+        return right || this.atom()
     }
 
     r_unop(): NodePar {
@@ -338,8 +340,9 @@ class Parser {
 
         if (!tok) return left
 
-        if (tok.ty == "Lparen") {
-            return this.funcCall(left)
+        while (tok?.ty == "Lparen") {
+            left = this.funcCall(left)
+            tok = this.curTok()
         }
         return left
     }
@@ -749,6 +752,14 @@ class SymbolTable {
         }))
 
         this.symbols.set("entrybyid", new Func((id) => {
+            const s = id.jsStr()
+            if(s === "s-rand") {
+                return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
+            } else if(s === "a-rand") {
+                const v = Object.values(globalsNewUi.entries)
+                return new Obj(v[Math.floor(Math.random() * v.length)])
+            }
+
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
