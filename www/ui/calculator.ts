@@ -374,7 +374,7 @@ class Parser {
         else if (tok.ty === "String") {
             return new StringNode(tok.value)
         } else if (tok.ty === "Lparen") {
-            let node = this.ast_expr()
+            let node = this.program()
             if (!(this.curTok()?.ty === "Rparen")) {
                 return new ErrorNode("Missing matching ')'")
             }
@@ -838,15 +838,6 @@ class Str extends Type {
 
     eq(right: Type) {
         return new Num(Number(this.jsValue === right.toStr().jsValue))
-    }
-
-    toNum(): Num {
-        let n = Number(this.jsValue)
-        if(!isNaN(n)) {
-            return new Num(n)
-        }
-
-        return new Num(parseInt(this.jsValue))
     }
 }
 
