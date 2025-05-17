@@ -181,7 +181,7 @@ function organizeDataByExpr(entries: InfoEntry[]): Record<string, InfoEntry[]> {
     let group: Record<string, InfoEntry[]> = Object.groupBy(entries, item => {
         let meta = findMetadataById(item.ItemId)
         let user = findUserEntryById(item.ItemId)
-        let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user })
+        let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
 
         return parseExpression(expr, symbols).toStr().jsValue
     }) as Record<string, InfoEntry[]>

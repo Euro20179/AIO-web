@@ -80,7 +80,7 @@ function updateExpressionOutput(item: InfoEntry) {
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
 
-    let all = { ...item, ...meta, ...user }
+    let all = { ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 }
     let symbols = makeSymbolsTableFromObj(all)
 
     let val = new Str(`${meta?.Description || ""}<br>${meta?.Rating || 0}`)
