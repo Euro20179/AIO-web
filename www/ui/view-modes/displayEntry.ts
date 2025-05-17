@@ -1028,7 +1028,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems) {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
-    if (!root) return
+    if (!root) return el
 
 
     let user = findUserEntryById(itemId) as UserEntry
@@ -1043,7 +1043,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let meta = findMetadataById(itemId)
     let events = findUserEventsById(itemId)
     const item = findInfoEntryById(itemId)
-    if (!item || !user || !meta || !events) return
+    if (!item || !user || !meta || !events) return el
 
     parent.append(el)
 
@@ -1223,6 +1223,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     })
 
     changeDisplayItemData(item, user, meta, events, el)
+    return el
 }
 
 function removeDisplayItem(itemId: bigint) {

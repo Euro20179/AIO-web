@@ -6,7 +6,8 @@ const modeScripting: DisplayMode = {
     add(entry) {
         console.log(mode, mode === modeScripting, entry)
         if (mode !== modeScripting) return
-        renderDisplayItem(entry.ItemId, scriptOutput)
+        const e = renderDisplayItem(entry.ItemId, scriptOutput)
+        e.style.display = "block"
     },
     sub(entry) {
         if (mode !== modeScripting) return
