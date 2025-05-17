@@ -25,7 +25,9 @@ const keywords = [
     "for",
     "rav",
     "rof",
-    "do"
+    "do",
+    "if",
+    "fi"
 ]
 
 class Token {
@@ -145,6 +147,16 @@ class ForNode extends NodePar {
         this.start = start
         this.end = end
         this.body = body
+    }
+}
+
+class IfNode extends NodePar {
+    condition: NodePar
+    body: NodePar
+    constructor(condition: NodePar, body: NodePar) {
+        super()
+        this.body = body
+        this.condition = condition
     }
 }
 
@@ -489,6 +501,28 @@ class Parser {
         return new VarDefNode(name, this.ast_expr())
     }
 
+    ifStatement(): NodePar {
+        this.next() //skip "if"
+
+        let condition = this.ast_expr()
+
+        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") {
+            console.error("Expected 'do' after if")
+            return new NumNode(0)
+        }
+        this.next()
+
+        let body = this.ast_expr()
+
+        if(this.curTok()?.ty !== "Word" || this.curTok()?.value !== "fi") {
+            console.error("Expected 'fi'")
+            return new NumNode(0)
+        }
+
+        this.next()
+        return new IfNode(condition, body)
+    }
+
     forLoop(): NodePar {
         this.next() // skip "for"
         if (this.curTok().ty !== "Word") {
@@ -557,6 +591,8 @@ class Parser {
                     return this.varDef()
                 case "for":
                     return this.forLoop()
+                case "if":
+                    return this.ifStatement()
             }
         }
         let expr = new ExprNode(this.comparison())
@@ -803,6 +839,15 @@ class Str extends Type {
     eq(right: Type) {
         return new Num(Number(this.jsValue === right.toStr().jsValue))
     }
+
+    toNum(): Num {
+        let n = Number(this.jsValue)
+        if(!isNaN(n)) {
+            return new Num(n)
+        }
+
+        return new Num(parseInt(this.jsValue))
+    }
 }
 
 class List extends Type {
@@ -964,6 +1009,20 @@ class SymbolTable {
                         return new Obj(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
                     default:
                         return findMetadataById(i)
+                }
+            })
+        }))
+
+        this.symbols.set("userbyid", new Func((id) => {
+            return findByid(id, i => {
+                switch (i) {
+                    case "s-rand":
+                        return new Obj(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
+                    case "a-rand":
+                        const v = Object.values(globalsNewUi.entries)
+                        return new Obj(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
+                    default:
+                        return findUserEntryById(i)
                 }
             })
         }))
@@ -1142,6 +1201,17 @@ class Interpreter {
             vals.push(this.interpretNode(node.body))
         }
         return new Arr(vals)
+    }
+
+    IfNode(node: IfNode) {
+        let shouldEval = this.interpretNode(node.condition).toNum().jsValue !== 0
+
+        if(shouldEval) {
+            let b = this.interpretNode(node.body)
+            return b
+        }
+
+        return new Num(0)
     }
 
     FuncDefNode(node: FuncDefNode) {
