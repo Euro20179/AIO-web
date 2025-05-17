@@ -906,6 +906,14 @@ class SymbolTable {
             })
             return new Num(0)
         }))
+
+        this.symbols.set("env", new Func(() => {
+            let res = ""
+            for(let key of this.symbols.keys()) {
+                res += key + "\n"
+            }
+            return new Str(res.trim())
+        }))
     }
     set(name: string, value: Type) {
         this.symbols.set(name, value)
