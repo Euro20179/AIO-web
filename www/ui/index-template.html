@@ -134,6 +134,7 @@
                         <option value="graph-output">Graph mode</option>
                         <option value="calc-output">Calc mode</option>
                         <option value="gallery-output">Gallery mode</option>
+                        <option value="script-output">Script mode</option>
                     </select>
                 </div>
             </div>
@@ -156,6 +157,14 @@
 
                 <div id="error-output">
                     <p id="error"></p>
+                </div>
+
+                <div id="script-output">
+                    <div id="script-root">
+                        <button id="script-execute">▶</button>
+                        <textarea id="script"></textarea>
+                        <div id="script-execute-output"></div>
+                    </div>
                 </div>
 
                 <div id="entry-output" class="overflow">
@@ -247,6 +256,7 @@
     <script src="/ui/view-modes/displayEntry.js"></script>
     <script src="/ui/view-modes/calc.js"></script>
     <script src="/ui/view-modes/gallery.js"></script>
+    <script src="/ui/view-modes/scriptMode.js"></script>
     <script src="/ui/view-modes/modes.js"></script>
     <script src="/ui/ui.js"></script>
     <script src="/ui/index.js"></script>

@@ -50,7 +50,8 @@
     #entry-output,
     #graph-output,
     #calc-output,
-    #gallery-output {
+    #gallery-output,
+    #script-output {
         &:target {
             display: inherit;
         }
@@ -424,5 +425,39 @@
 
     #result-info {
         grid-area: results;
+    }
+
+    
+    #script-root {
+        display: grid;
+        grid-template-areas:
+            "input run-button"
+            "output output";
+
+        grid-template-rows: max-content 1fr;
+        grid-template-columns: 1fr max-content;
+
+        gap: var(--small-gap);
+
+        width: 100cqw;
+        height: 100cqh;
+
+        padding: 0 10ch;
+
+        #script-execute {
+            grid-area: run-button;
+            height: 100%;
+        margin-inline: 2ch;
+            align-self: center;
+        }
+
+        #script-execute-output {
+            grid-area: output;
+        }
+
+        #script {
+            resize: vertical;
+            grid-area: input;
+        }
     }
 }

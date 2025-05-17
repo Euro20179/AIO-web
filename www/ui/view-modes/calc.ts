@@ -102,6 +102,7 @@ function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment 
     let root = el.shadowRoot
     if (!root) return
 
+    el.setAttribute("data-item-id", String(item.ItemId))
 
     let meta = findMetadataById(item.ItemId)
 

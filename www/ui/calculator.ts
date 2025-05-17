@@ -518,6 +518,18 @@ class Type {
     }
 }
 
+class Entry extends Type {
+    constructor(entry: InfoEntry) {
+        super(entry)
+    }
+
+    jsStr(): string {
+        const fragment = document.createElement("div")
+        renderDisplayItem(this.jsValue, fragment)
+        return String(fragment.innerHTML)
+    }
+}
+
 class Func extends Type {
     constructor(fn: (...params: Type[]) => Type) {
         super(fn)
@@ -681,6 +693,52 @@ class SymbolTable {
                 }
             }
             return min
+        }))
+
+        this.symbols.set("int", new Func((n) => {
+            return new Num(BigInt(n.jsStr()))
+        }))
+
+        this.symbols.set("openbyid", new Func((id) => {
+            const jsId = id.toNum().jsValue
+            if(typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            if(mode_isSelected(jsId)) {
+                return new Str(`${id} already selected`)
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if(!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            selectItem(entry, mode)
+            return new Str("")
+        }))
+
+        this.symbols.set("clear", new Func(() => {
+            if("clear" in mode) {
+                mode.clear()
+                return new Num(0)
+            }
+            return new Num(1)
+        }))
+
+        this.symbols.set("put", new Func((...values) => {
+            if("put" in mode) {
+                for(let str of values.map(v => v.jsStr())) {
+                    mode.put(str)
+                }
+                return new Str("")
+            }
+            return new Num(1)
+        }))
+
+        this.symbols.set("clearitems", new Func(() => {
+            clearItems()
+            return new Num(0)
         }))
 
         this.symbols.set("setrating", new Func((...params) => {

@@ -10,8 +10,17 @@ type DisplayMode = {
     [key: string]: any
 }
 
-const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery]
-const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output"]
+function mode_isSelected(id: bigint) {
+    for(let item of globalsNewUi.selectedEntries) {
+        if(item.ItemId === id) {
+            return true
+        }
+    }
+    return false
+}
+
+const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting]
+const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output"]
 
 let idx = modeOutputIds.indexOf(location.hash.slice(1))
 
@@ -40,9 +49,9 @@ function toggleItem(item: InfoEntry, updateStats: boolean = true) {
     }
 }
 
-function clearItems() {
+function clearItems(items?: InfoEntry[]) {
     //FIXME: for some reason selectedEntries has an `undefined` item in it when the user has not items
-    mode.subList(globalsNewUi.selectedEntries.filter(Boolean))
+    mode.subList(items || globalsNewUi.selectedEntries.filter(Boolean))
     globalsNewUi.selectedEntries = []
 }
 
