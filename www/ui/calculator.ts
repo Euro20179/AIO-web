@@ -512,9 +512,39 @@ class Type {
         return new Num(0)
     }
 
-    call(params: Type[]) {
+    call(params: Type[]): Type {
         console.error(`Cannot call ${this.constructor.name}`)
         return new Num(0)
+    }
+}
+
+class Obj extends Type {
+    constructor(value: object) {
+        super(value)
+    }
+
+    call(params: Type[]) {
+        let curObj = this.jsValue
+        for (let param of params) {
+            curObj = curObj[param.jsStr()]
+        }
+        switch (typeof curObj) {
+            case 'string':
+                return new Str(curObj)
+            case 'number':
+            case 'bigint':
+                return new Num(curObj)
+            case 'boolean':
+                return new Num(Number(curObj))
+            case 'symbol':
+                return new Str(String(curObj))
+            case 'undefined':
+                return new Str("undefined")
+            case 'object':
+                return new Str(JSON.stringify(curObj))
+            case 'function':
+                return new Str(String(curObj))
+        }
     }
 }
 
@@ -701,16 +731,16 @@ class SymbolTable {
 
         this.symbols.set("openbyid", new Func((id) => {
             const jsId = id.toNum().jsValue
-            if(typeof jsId !== 'bigint') {
+            if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
             }
 
-            if(mode_isSelected(jsId)) {
+            if (mode_isSelected(jsId)) {
                 return new Str(`${id} already selected`)
             }
             const entry = findInfoEntryById(jsId)
 
-            if(!entry) {
+            if (!entry) {
                 return new Str(`${id} not found`)
             }
 
@@ -718,8 +748,27 @@ class SymbolTable {
             return new Str("")
         }))
 
+        this.symbols.set("entrybyid", new Func((id) => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            return new Obj(entry)
+        }))
+
+        this.symbols.set("serialize", new Func((obj) => {
+            return new Str(JSON.stringify(obj.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
+        }))
+
         this.symbols.set("clear", new Func(() => {
-            if("clear" in mode) {
+            if ("clear" in mode) {
                 mode.clear()
                 return new Num(0)
             }
@@ -727,8 +776,8 @@ class SymbolTable {
         }))
 
         this.symbols.set("put", new Func((...values) => {
-            if("put" in mode) {
-                for(let str of values.map(v => v.jsStr())) {
+            if ("put" in mode) {
+                for (let str of values.map(v => v.jsStr())) {
                     mode.put(str)
                 }
                 return new Str("")
@@ -743,7 +792,7 @@ class SymbolTable {
 
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
-            api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async(res) => {
+            api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async (res) => {
                 if (!res) {
                     if (done) {
                         done.call([new Str("FAIL"), new Num(0)])
