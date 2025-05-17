@@ -76,9 +76,8 @@ async function items_loadInfoEntries(uid: number) {
 }
 
 async function items_loadLibraries(uid: number) {
-    const items = await api_queryV3("type = 'Library'", uid)
+    const items = await api_queryV3(`type = 'Library' . entryInfo.uid = ${uid}`, uid)
 
-    librarySelector.innerHTML = '<option value="0">Library</option>'
     for (let item of items) {
         globalsNewUi.libraries[String(item["ItemId"])] = item
     }

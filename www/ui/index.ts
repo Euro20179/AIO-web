@@ -102,6 +102,7 @@ function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 
 }
 
 function updateLibraryDropdown() {
+    librarySelector.innerHTML = '<option value="0">Library</option>'
     for (let i in globalsNewUi.libraries) {
         let item = globalsNewUi.libraries[i]
         const opt = document.createElement("option")
