@@ -27,6 +27,7 @@ const keywords = [
     "rof",
     "do",
     "if",
+    "else",
     "fi"
 ]
 
@@ -153,10 +154,12 @@ class ForNode extends NodePar {
 class IfNode extends NodePar {
     condition: NodePar
     body: NodePar
-    constructor(condition: NodePar, body: NodePar) {
+    elsePart: NodePar
+    constructor(condition: NodePar, body: NodePar, elsePart: NodePar) {
         super()
         this.body = body
         this.condition = condition
+        this.elsePart = elsePart
     }
 }
 
@@ -514,13 +517,19 @@ class Parser {
 
         let body = this.ast_expr()
 
+        let elsePart: NodePar = new NumNode(0)
+        if(this.curTok()?.ty === "Word" && this.curTok()?.value === "else") {
+            this.next()
+            elsePart = this.ast_expr()
+        }
+
         if(this.curTok()?.ty !== "Word" || this.curTok()?.value !== "fi") {
             console.error("Expected 'fi'")
             return new NumNode(0)
         }
 
         this.next()
-        return new IfNode(condition, body)
+        return new IfNode(condition, body, elsePart)
     }
 
     forLoop(): NodePar {
@@ -1201,8 +1210,7 @@ class Interpreter {
             let b = this.interpretNode(node.body)
             return b
         }
-
-        return new Num(0)
+        return this.interpretNode(node.elsePart)
     }
 
     FuncDefNode(node: FuncDefNode) {
