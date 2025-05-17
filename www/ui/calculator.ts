@@ -972,6 +972,18 @@ class SymbolTable {
             return max
         }))
 
+        this.symbols.set("map", new Func((list, fn) => {
+            if(!(list instanceof Arr)) {
+                return new Num(1)
+            }
+
+            let newList = []
+            for(let item of list.jsValue) {
+                newList.push(fn.call([item]))
+            }
+            return new Arr(newList)
+        }))
+
         this.symbols.set("filter", new Func((list, fn) => {
             if(!(list instanceof Arr)) {
                 return new Num(1)
