@@ -443,7 +443,7 @@ class Parser {
     propertyAccess(of: NodePar) {
         this.next() //skip [
         let val = this.ast_expr()
-        if(this.curTok()?.ty !== "Rbracket") {
+        if (this.curTok()?.ty !== "Rbracket") {
             console.error("Expected ']'")
             return new NumNode(0)
         }
@@ -915,13 +915,15 @@ class SymbolTable {
             return new Str("")
         }))
 
-        this.symbols.set("entrybyid", new Func((id) => {
+        const findByid = (id: Type, finder: (id: bigint | "s-rand" | "a-rand") => any) => {
             const s = id.jsStr()
             if (s === "s-rand") {
-                return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
+                return finder(s)
+                // return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
             } else if (s === "a-rand") {
-                const v = Object.values(globalsNewUi.entries)
-                return new Obj(v[Math.floor(Math.random() * v.length)])
+                // const v = Object.values(globalsNewUi.entries)
+                return finder(s)
+                // return new Obj(v[Math.floor(Math.random() * v.length)])
             }
 
             const jsId = id.toNum().jsValue
@@ -929,13 +931,41 @@ class SymbolTable {
                 return new Str("id is not a bigint")
             }
 
-            const entry = findInfoEntryById(jsId)
+            const entry = finder(jsId)
 
             if (!entry) {
                 return new Str(`${id} not found`)
             }
 
             return new Obj(entry)
+        }
+
+        this.symbols.set("entrybyid", new Func((id) => {
+            return findByid(id, i => {
+                switch (i) {
+                    case "s-rand":
+                        return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
+                    case "a-rand":
+                        const v = Object.values(globalsNewUi.entries)
+                        return new Obj(v[Math.floor(Math.random() * v.length)])
+                    default:
+                        return findInfoEntryById(i)
+                }
+            })
+        }))
+
+        this.symbols.set("metabyid", new Func((id) => {
+            return findByid(id, i => {
+                switch (i) {
+                    case "s-rand":
+                        return new Obj(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as MetadataEntry)
+                    case "a-rand":
+                        const v = Object.values(globalsNewUi.entries)
+                        return new Obj(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
+                    default:
+                        return findMetadataById(i)
+                }
+            })
         }))
 
         this.symbols.set("serialize", new Func((obj) => {
