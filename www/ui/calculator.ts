@@ -576,8 +576,13 @@ class Parser {
         this.next() //skip "("
         this.next() //skip ")"
 
-        let name = this.curTok()
-        this.next()
+        let name = new Token("Word", "")
+
+        if(this.curTok()?.ty === "Word") {
+            name = this.curTok()
+            this.next()
+        }
+
         if (this.curTok()?.ty !== "Eq") {
             console.error("Expected '='")
             return new NumNode(0)
@@ -682,8 +687,13 @@ class Type {
         return new Num(0)
     }
 
-    access(prop: Type): Type {
+    getattr(prop: Type): Type {
         console.error(`Unable to access ${prop.jsStr()} in ${this.constructor.name}`)
+        return new Num(0)
+    }
+
+    setattr(name: Type, value: Type): Type {
+        console.error(`Unable to set property ${name.jsStr()} in ${this.constructor.name}`)
         return new Num(0)
     }
 }
@@ -714,7 +724,7 @@ class Arr extends Type {
         return new Num(this.jsValue.length)
     }
 
-    access(prop: Type): Type {
+    getattr(prop: Type): Type {
         return this.call([prop])
     }
 }
@@ -750,13 +760,21 @@ class Obj extends Type {
             case 'undefined':
                 return new Str("undefined")
             case 'object':
+                if(curObj instanceof Type) {
+                    return curObj
+                }
                 return new Str(JSON.stringify(curObj, (_, v) => typeof v === "bigint" ? String(v) : v))
             case 'function':
                 return new Str(String(curObj))
         }
     }
-    access(prop: Type): Type {
+
+    getattr(prop: Type): Type {
         return this.call([prop])
+    }
+
+    setattr(name: Type, value: Type): Type {
+        return this.jsValue[name.jsStr()] = value
     }
 }
 
@@ -939,6 +957,13 @@ class SymbolTable {
 
         this.symbols.set("int", new Func((n) => {
             return new Num(BigInt(n.jsStr()))
+        }))
+
+        this.symbols.set("set", new Func((obj, name, val) => {
+            return obj.setattr(name, val)
+        }))
+        this.symbols.set("obj", new Func(() => {
+            return new Obj({})
         }))
 
         this.symbols.set("openbyid", new Func((id) => {
@@ -1181,7 +1206,7 @@ class Interpreter {
     PropertyAccessNode(node: PropertyAccessNode): Type {
         let of = this.interpretNode(node.of)
         let inner = this.interpretNode(node.value)
-        return of.access(inner)
+        return of.getattr(inner)
     }
 
     VarDefNode(node: VarDefNode) {
@@ -1216,15 +1241,18 @@ class Interpreter {
     FuncDefNode(node: FuncDefNode) {
         node.closure = this.symbolTable.copy()
 
-        this.symbolTable.set(node.name.value, new Func((...items) => {
+        let fun = new Func((...items) => {
             for (let i = 0; i < items.length; i++) {
                 node.closure.set(`arg${i}`, items[i])
             }
             let interpreter = new Interpreter(node.program, node.closure)
             return interpreter.interpretNode(node.program)
-        }))
+        })
 
-        return this.symbolTable.get(node.name.value)
+        if(node.name.value) {
+            this.symbolTable.set(node.name.value, fun)
+        }
+        return fun
     }
 
     ExprNode(node: ExprNode) {
