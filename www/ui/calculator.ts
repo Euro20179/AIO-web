@@ -18,6 +18,7 @@ const TT = {
     Le: "<=",
     Ge: ">=",
     DEq: "==",
+    Arrow: "->"
 }
 
 const keywords = [
@@ -124,6 +125,12 @@ class BinOpNode extends NodePar {
         this.left = left;
         this.operator = operator;
         this.right = right;
+    }
+}
+class PipeNode extends NodePar {
+    constructor(children: NodePar[]) {
+        super()
+        this.children = children
     }
 }
 
@@ -309,6 +316,15 @@ function lex(input: string): Token[] {
                 tokens.push(new Token("Gt", ">"))
             }
         }
+        else if (ch === "-") {
+            pos++
+            if (input[pos] === ">") {
+                pos++
+                tokens.push(new Token("Arrow", "->"))
+            } else {
+                tokens.push(new Token("Sub", "-"))
+            }
+        }
         else {
             let foundTok = false
             let tok: keyof typeof TT
@@ -350,6 +366,7 @@ class Parser {
     curTok() {
         return this.tokens[this.i]
     }
+
     atom(): NodePar {
         let tok = this.curTok()
         if (!tok) return new ErrorNode("Ran out of tokens")
@@ -455,6 +472,18 @@ class Parser {
         return left
     }
 
+    pipe() {
+        let left = [this.comparison()]
+        let tok = this.curTok()
+        while (tok?.ty === "Arrow") {
+            this.next()
+            let right = this.comparison()
+            left.push(right)
+            tok = this.curTok()
+        }
+        return new PipeNode(left)
+    }
+
     propertyAccess(of: NodePar) {
         this.next() //skip [
         let val = this.ast_expr()
@@ -518,12 +547,12 @@ class Parser {
         let body = this.ast_expr()
 
         let elsePart: NodePar = new NumNode(0)
-        if(this.curTok()?.ty === "Word" && this.curTok()?.value === "else") {
+        if (this.curTok()?.ty === "Word" && this.curTok()?.value === "else") {
             this.next()
             elsePart = this.ast_expr()
         }
 
-        if(this.curTok()?.ty !== "Word" || this.curTok()?.value !== "fi") {
+        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "fi") {
             console.error("Expected 'fi'")
             return new NumNode(0)
         }
@@ -578,7 +607,7 @@ class Parser {
 
         let name = new Token("Word", "")
 
-        if(this.curTok()?.ty === "Word") {
+        if (this.curTok()?.ty === "Word") {
             name = this.curTok()
             this.next()
         }
@@ -609,7 +638,7 @@ class Parser {
                     return this.ifStatement()
             }
         }
-        let expr = new ExprNode(this.comparison())
+        let expr = new ExprNode(this.pipe())
         return expr
     }
 
@@ -636,6 +665,10 @@ class Type {
     jsValue: any
     constructor(jsValue: any) {
         this.jsValue = jsValue
+    }
+
+    truthy() {
+        return false
     }
 
     jsStr() {
@@ -703,6 +736,10 @@ class Arr extends Type {
         super(values)
     }
 
+    truthy(): boolean {
+        return this.jsValue.length > 0
+    }
+
     call(params: Type[]) {
         let idx = params[0].toNum().jsValue
         return this.jsValue[idx]
@@ -734,6 +771,10 @@ class Obj extends Type {
         super(value)
     }
 
+    truthy(): boolean {
+        return Object.keys(this.jsValue).length > 0
+    }
+
     jsStr(): string {
         return JSON.stringify(this.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v)
     }
@@ -760,7 +801,7 @@ class Obj extends Type {
             case 'undefined':
                 return new Str("undefined")
             case 'object':
-                if(curObj instanceof Type) {
+                if (curObj instanceof Type) {
                     return curObj
                 }
                 return new Str(JSON.stringify(curObj, (_, v) => typeof v === "bigint" ? String(v) : v))
@@ -783,6 +824,10 @@ class Entry extends Type {
         super(entry)
     }
 
+    truthy(): boolean {
+        return true
+    }
+
     jsStr(): string {
         const fragment = document.createElement("div")
         renderDisplayItem(this.jsValue, fragment)
@@ -793,6 +838,10 @@ class Entry extends Type {
 class Func extends Type {
     constructor(fn: (...params: Type[]) => Type) {
         super(fn)
+    }
+
+    truthy(): boolean {
+        return true
     }
 
     toStr(): Str {
@@ -811,6 +860,10 @@ class Num extends Type {
             return new Num(this.jsValue)
         }
         return new Num(this.jsValue * params[0].toNum().jsValue)
+    }
+
+    truthy(): boolean {
+        return this.jsValue !== 0
     }
 
     add(right: Type) {
@@ -866,29 +919,9 @@ class Str extends Type {
     eq(right: Type) {
         return new Num(Number(this.jsValue === right.toStr().jsValue))
     }
-}
 
-class List extends Type {
-
-    jsStr() {
-        let str = ""
-        for (let item of this.jsValue) {
-            str += item.jsStr() + ","
-        }
-        return str.slice(0, -1)
-    }
-
-    eq(right: Type) {
-        if (!(right instanceof List)) {
-            return new Num(0)
-        }
-
-        let l = new Set(this.jsValue)
-        let r = new Set(right.jsValue)
-        if (l.difference(r).size === 0) {
-            return new Num(1)
-        }
-        return new Num(0)
+    truthy(): boolean {
+        return this.jsValue.length !== 0
     }
 }
 
@@ -943,6 +976,19 @@ class SymbolTable {
                 }
             }
             return max
+        }))
+
+        this.symbols.set("filter", new Func((list, fn) => {
+            if(!(list instanceof Arr)) {
+                return new Num(1)
+            }
+            let newList = []
+            for(let item of list.jsValue) {
+                if(fn.call([item]).truthy()) {
+                    newList.push(item)
+                }
+            }
+            return new Arr(newList)
         }))
 
         this.symbols.set("min", new Func((...items) => {
@@ -1103,6 +1149,9 @@ class SymbolTable {
             return new Str(res.trim())
         }))
     }
+    delete(name: string) {
+        this.symbols.delete(name)
+    }
     set(name: string, value: Type) {
         this.symbols.set(name, value)
     }
@@ -1183,13 +1232,26 @@ class Interpreter {
                 return new Num(1)
             }
             return new Num(0)
-        }
-        return right
+        } return right
     }
 
-    interpretNode(node: NodePar): Type {
+    PipeNode(node: PipeNode) {
+        let val = this.interpretNode(node.children[0])
+        for(let child of node.children.slice(1)) {
+            this.symbolTable.set("_", val)
+            if(child instanceof CallNode) {
+                val = this.interpretNode(child, val)
+            } else {
+                val = this.interpretNode(child).call([val])
+            }
+        }
+        this.symbolTable.delete("_")
+        return val
+    }
+
+    interpretNode(node: NodePar, pipeValue?: Type): Type {
         //@ts-ignore
-        return this[node.constructor.name](node)
+        return this[node.constructor.name](node, pipeValue)
     }
 
     ErrorNode(node: ErrorNode) {
@@ -1197,8 +1259,11 @@ class Interpreter {
         return new Str(node.value)
     }
 
-    CallNode(node: CallNode): Type {
+    CallNode(node: CallNode, pipeValue?: Type): Type {
         let inner = node.inner.map(this.interpretNode.bind(this))
+        if(pipeValue) {
+            inner = [pipeValue, ...inner]
+        }
         let callable = this.interpretNode(node.callable)
         return callable.call(inner)
     }
@@ -1229,9 +1294,9 @@ class Interpreter {
     }
 
     IfNode(node: IfNode) {
-        let shouldEval = this.interpretNode(node.condition).toNum().jsValue !== 0
+        let shouldEval = this.interpretNode(node.condition).truthy()
 
-        if(shouldEval) {
+        if (shouldEval) {
             let b = this.interpretNode(node.body)
             return b
         }
@@ -1249,7 +1314,7 @@ class Interpreter {
             return interpreter.interpretNode(node.program)
         })
 
-        if(node.name.value) {
+        if (node.name.value) {
             this.symbolTable.set(node.name.value, fun)
         }
         return fun
