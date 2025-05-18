@@ -1119,8 +1119,12 @@ class Func extends Type {
         return true
     }
 
+    jsStr(): string {
+        return "[Function]"
+    }
+
     toStr(): Str {
-        return new Str("[Function]")
+        return new Str(this.jsStr())
     }
 
     call(params: Type[]) {
@@ -1420,25 +1424,6 @@ class SymbolTable {
             return new Obj(obj)
         }))
 
-        this.symbols.set("openbyid", new Func((id) => {
-            const jsId = id.toNum().jsValue
-            if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
-            }
-
-            if (mode_isSelected(jsId)) {
-                return new Str(`${id} already selected`)
-            }
-            const entry = findInfoEntryById(jsId)
-
-            if (!entry) {
-                return new Str(`${id} not found`)
-            }
-
-            selectItem(entry, mode)
-            return new Str("")
-        }))
-
         const findByid = (id: Type, finder: (id: bigint | "s-rand" | "a-rand") => Type) => {
             const s = id.jsStr()
             if (s === "s-rand") {
@@ -1599,10 +1584,65 @@ class SymbolTable {
             return new Num(1)
         }))
 
-        this.symbols.set("clearitems", new Func(() => {
+        this.symbols.set("ui_search", new Func((query, cb) => {
+            let form = document.getElementById("sidebar-form") as HTMLFormElement
+            (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
+            loadSearch().then(() => {
+                cb?.call([])
+            }).catch(console.error)
+            return new Num(0)
+        }))
+        this.symbols.set("ui_setmode", new Func((modeName) => {
+            let name = modeName.jsStr()
+            if(!modeOutputIds.includes(name)) {
+                return new Str("Invalid mode")
+            }
+            mode_setMode(name)
+            return new Num(0)
+        }))
+        this.symbols.set("ui_clearitems", new Func(() => {
             clearItems()
             return new Num(0)
         }))
+
+        this.symbols.set("ui_clearsidebar", new Func(() => {
+            clearSidebar()
+            return new Num(0)
+        }))
+
+        this.symbols.set("ui_opensidebarbyid", new Func((id) => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+            renderSidebarItem(entry)
+            return new Num(0)
+        }))
+
+        this.symbols.set("ui_openbyid", new Func((id) => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            if (mode_isSelected(jsId)) {
+                return new Str(`${id} already selected`)
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            selectItem(entry, mode)
+            return new Str("")
+        }))
+
 
         this.symbols.set("setuidstate", new Func((newUid) => {
             const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
@@ -1618,22 +1658,14 @@ class SymbolTable {
             return new Num(0)
         }))
 
-        this.symbols.set("setmode", new Func((modeName) => {
-            let name = modeName.jsStr()
-            if(!modeOutputIds.includes(name)) {
-                return new Str("Invalid mode")
-            }
-            mode_setMode(name)
-            return new Num(0)
-        }))
-
         this.symbols.set("search", new Func((query, cb) => {
             api_queryV3(query.jsStr(), getUidUI()).then(entries => {
                 let es = new Arr(entries.map(v => new Entry(v)))
-                cb.call([es])
+                cb?.call([es])
             }).catch(console.error)
             return new Num(0)
         }))
+
 
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
