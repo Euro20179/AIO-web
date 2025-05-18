@@ -192,7 +192,7 @@ class PipeFunNode extends NodePar {
 
     serialize(): string {
         return `${this.input.serialize()} ${this.funs.map(v => {
-            switch (v.name.ty) {
+            switch (v.paramNames[0].ty) {
                 case "FilterArrow":
                     return `?> ${v.program.serialize()} `
                 case "TransformArrow":
