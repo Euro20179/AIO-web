@@ -177,11 +177,13 @@ class FuncDefNode extends NodePar {
     name: Token
     program: ProgramNode
     closure: SymbolTable
-    constructor(name: Token, program: ProgramNode) {
+    paramNames: Token[]
+    constructor(name: Token, program: ProgramNode, paramNames: Token[]) {
         super()
         this.name = name
         this.program = program
         this.closure = new SymbolTable()
+        this.paramNames = paramNames
     }
 }
 
@@ -330,9 +332,9 @@ function lex(input: string): Token[] {
             } else {
                 tokens.push(new Token("Sub", "-"))
             }
-        } else if(ch === "?") {
+        } else if (ch === "?") {
             pos++
-            if(input[pos] === ">") {
+            if (input[pos] === ">") {
                 pos++
                 tokens.push(new Token("FilterArrow", "?>"))
             } else {
@@ -503,7 +505,7 @@ class Parser {
         while (["TransformArrow", "FilterArrow"].includes(op?.ty)) {
             this.next()
             let right = this.pipeOPS()
-            let f = new FuncDefNode(new Token("Word", ""), right)
+            let f = new FuncDefNode(new Token("Word", ""), right, [])
             left = new BinOpNode(left, op, f)
             op = this.curTok()
         }
@@ -554,13 +556,18 @@ class Parser {
     }
 
     varDef(): NodePar {
+        //lambda
         if (this.curTok().ty === "Lparen") {
-            return this.funcDef()
+            return this.funcDef(new Token("Word", ""))
         }
 
         let name = this.curTok()
-
         this.next()
+
+        if (this.curTok().ty === "Lparen") {
+            return this.funcDef(name)
+        }
+
         if (this.curTok()?.ty !== "Eq") {
             console.error("Expected '='")
             return new NumNode(0)
@@ -632,16 +639,23 @@ class Parser {
         return new ForNode(name, start, end, body)
     }
 
-    funcDef() {
+    funcDef(name: Token) {
+        let paramNames: Token[] = []
         this.next() //skip "("
-        this.next() //skip ")"
-
-        let name = new Token("Word", "")
-
-        if (this.curTok()?.ty === "Word") {
-            name = this.curTok()
+        while (this.curTok()?.ty !== "Rparen" && this.curTok()?.ty === "Word") {
+            paramNames.push(this.curTok())
             this.next()
+
+            //be friendly and skip the comma
+            if (this.curTok()?.ty === "Comma") {
+                this.next()
+            }
         }
+        if (this.curTok()?.ty !== "Rparen") {
+            console.error("Expected ')'")
+            return new NumNode(0)
+        }
+        this.next() //skip ")"
 
         if (this.curTok()?.ty !== "Eq") {
             console.error("Expected '='")
@@ -654,7 +668,7 @@ class Parser {
             return new NumNode(0)
         }
         this.next()
-        return new FuncDefNode(name, program)
+        return new FuncDefNode(name, program, paramNames)
     }
 
     ast_expr() {
@@ -797,13 +811,13 @@ class Obj extends Type {
 
     jsStr(): string {
         return JSON.stringify(this.jsValue, (_, v) => {
-            if(typeof v === 'bigint') {
+            if (typeof v === 'bigint') {
                 return String(v)
             }
-            if(v instanceof Obj) {
+            if (v instanceof Obj) {
                 return v.jsValue
             }
-            if(v instanceof Type) {
+            if (v instanceof Type) {
                 return v.jsStr()
             }
             return v
@@ -1045,7 +1059,7 @@ class SymbolTable {
         }))
 
         this.symbols.set("sort", new Func((list, fn) => {
-            if(!(list instanceof Arr)) {
+            if (!(list instanceof Arr)) {
                 return new Num(1)
             }
 
@@ -1084,11 +1098,11 @@ class SymbolTable {
             return obj
         }))
         this.symbols.set("obj", new Func((...items) => {
-            if(items.length % 2 !== 0) {
+            if (items.length % 2 !== 0) {
                 return new Num(0)
             }
             let obj: Record<string, Type> = {}
-            for(let i = 0; i < items.length; i += 2) {
+            for (let i = 0; i < items.length; i += 2) {
                 obj[items[i].jsStr()] = items[i + 1]
             }
             return new Obj(obj)
@@ -1140,7 +1154,7 @@ class SymbolTable {
 
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
-            if(v === "entry") {
+            if (v === "entry") {
                 return new Arr(Object.values(globalsNewUi.entries).map(v => new Obj(v)))
             } else if (v === "user") {
                 return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Obj(v)))
@@ -1150,7 +1164,7 @@ class SymbolTable {
             return new Arr([])
         }))
 
-        this.symbols.set("entrybyid", new Func((id) => {
+        this.symbols.set("entry", new Func((id) => {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
@@ -1164,7 +1178,7 @@ class SymbolTable {
             })
         }))
 
-        this.symbols.set("metabyid", new Func((id) => {
+        this.symbols.set("meta", new Func((id) => {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
@@ -1178,7 +1192,7 @@ class SymbolTable {
             })
         }))
 
-        this.symbols.set("userbyid", new Func((id) => {
+        this.symbols.set("user", new Func((id) => {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
@@ -1190,6 +1204,54 @@ class SymbolTable {
                         return findUserEntryById(i)
                 }
             })
+        }))
+
+        this.symbols.set("withfmt", new Func((o, fmtStr) => {
+            let f = fmtStr.jsStr()
+            let obj
+            if (o instanceof Num) {
+                const i = o.toNum().jsValue
+                let user = findUserEntryById(i)
+                let meta = findMetadataById(i)
+                let info = findInfoEntryById(i)
+                if (!user || !meta || !info) return new Num(0)
+                obj = new Obj({
+                    u: user,
+                    m: meta,
+                    i: info
+                })
+            } else {
+                obj = o
+            }
+
+
+            let final = ""
+            let braceC = 0
+            let curFmtName = ""
+            for (let i = 0; i < f.length; i++) {
+                let ch = f[i]
+                if (ch === "{") {
+                    braceC++
+                    continue
+                } else if (ch === "}") {
+                    braceC--
+
+                    if (braceC === 0) {
+                        let params = curFmtName.split(".").map(v => new Str(v))
+                        final += obj.call(params).jsStr()
+                        curFmtName = ""
+                        continue
+                    }
+                }
+
+                if (braceC > 0) {
+                    curFmtName += ch
+                } else {
+                    final += ch
+                }
+            }
+
+            return new Str(final)
         }))
 
         this.symbols.set("serialize", new Func((obj) => {
@@ -1347,7 +1409,7 @@ class Interpreter {
             let items = []
             //FilterArrow for loop
             for (let item of left.jsValue) {
-                if(right.call([item]).truthy()) {
+                if (right.call([item]).truthy()) {
                     items.push(item)
                 }
             }
@@ -1430,6 +1492,9 @@ class Interpreter {
         let fun = new Func((...items) => {
             for (let i = 0; i < items.length; i++) {
                 node.closure.set(`arg${i}`, items[i])
+            }
+            for (let i = 0; i < node.paramNames.length; i++) {
+                node.closure.set(node.paramNames[i].value, items[i])
             }
             let interpreter = new Interpreter(node.program, node.closure)
             return interpreter.interpretNode(node.program)
