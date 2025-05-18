@@ -189,7 +189,7 @@ class PipeFunNode extends NodePar {
 
     serialize(): string {
         return `${this.input.serialize()} ${this.funs.map(v => {
-            switch(v.name.ty) {
+            switch (v.name.ty) {
                 case "FilterArrow":
                     return `?> ${v.program.serialize()} `
                 case "TransformArrow":
@@ -497,7 +497,7 @@ class Parser {
         if (tok.ty === "Num") {
             return new NumNode(Number(tok.value))
         }
-        else if(tok.ty == "Bs") {
+        else if (tok.ty == "Bs") {
             let v = this.atom()
             return new EscapedNode(v)
         }
@@ -828,6 +828,11 @@ class Type {
         this.jsValue = jsValue
     }
 
+    len(): Num {
+        console.error(`Unable to get the len of ${this.constructor.name}`)
+        return new Num(0)
+    }
+
     truthy() {
         return false
     }
@@ -899,6 +904,10 @@ class Code extends Type {
         this.code = code
     }
 
+    len(): Num {
+        return new Num(this.code.children.length)
+    }
+
     truthy(): boolean {
         let int = new Interpreter(this.code, new SymbolTable)
         return int.interpret().truthy()
@@ -906,7 +915,7 @@ class Code extends Type {
 
     call(params: Type[]): Type {
         let tbl = new SymbolTable()
-        for(let i = 0; i < params.length; i++) {
+        for (let i = 0; i < params.length; i++) {
             tbl.set(`arg${i}`, params[i])
         }
         let int = new Interpreter(this.code, tbl)
@@ -922,7 +931,7 @@ class Code extends Type {
     }
 
     add(right: Type): Type {
-        if(!(right instanceof Code)) {
+        if (!(right instanceof Code)) {
             return super.add(right)
         }
 
@@ -944,6 +953,10 @@ class Arr extends Type {
 
     truthy(): boolean {
         return this.jsValue.length > 0
+    }
+
+    len(): Num {
+        return new Num(this.jsValue.length)
     }
 
     call(params: Type[]) {
@@ -1143,6 +1156,10 @@ class Str extends Type {
     truthy(): boolean {
         return this.jsValue.length !== 0
     }
+
+    len(): Num {
+        return new Num(this.jsValue.length)
+    }
 }
 
 class SymbolTable {
@@ -1155,7 +1172,7 @@ class SymbolTable {
     setupDefaultFunctions() {
 
         this.symbols.set("eval", new Func(code => {
-            if(!(code instanceof Code)) {
+            if (!(code instanceof Code)) {
                 return new Num(0)
             }
             let int = new Interpreter(code.code, this)
@@ -1163,10 +1180,7 @@ class SymbolTable {
         }))
 
         this.symbols.set("len", new Func(n => {
-            if (!(n instanceof Str) && !(n instanceof Arr)) {
-                return new Num(0)
-            }
-            return new Num(n.jsValue.length)
+            return n.len()
         }))
 
         this.symbols.set("str", new Func(n => {
@@ -1229,14 +1243,14 @@ class SymbolTable {
         }))
 
         this.symbols.set("map", new Func((list, fn) => {
-            if (!(list instanceof Arr)) {
-                return new Num(1)
-            }
 
             let newList = []
-            for (let item of list.jsValue) {
+            let len = list.len().jsValue
+            for (let i = 0; i < len; i++) {
+                let item = list.getattr(new Num(i))
                 newList.push(fn.call([item]))
             }
+
             return new Arr(newList)
         }))
 
@@ -1249,15 +1263,15 @@ class SymbolTable {
         }))
 
         this.symbols.set("filter", new Func((list, fn) => {
-            if (!(list instanceof Arr)) {
-                return new Num(1)
-            }
             let newList = []
-            for (let item of list.jsValue) {
+            let len = list.len().jsValue
+            for (let i = 0; i < len; i++) {
+                let item = list.getattr(new Num(i))
                 if (fn.call([item]).truthy()) {
                     newList.push(item)
                 }
             }
+
             return new Arr(newList)
         }))
 
@@ -1615,14 +1629,14 @@ class Interpreter {
                     return new Num(0)
                 case "xor": {
                     let right = this.interpretNode(node.right)
-                    if((left || right) && !(left && right)) {
+                    if ((left || right) && !(left && right)) {
                         return new Num(1)
                     }
                     return new Num(0)
                 }
                 case "nand": {
                     let right = this.interpretNode(node.right)
-                    if(!(left && right)) {
+                    if (!(left && right)) {
                         return new Num(1)
                     }
                     return new Num(0)
@@ -1634,9 +1648,6 @@ class Interpreter {
 
     PipeFunNode(node: PipeFunNode) {
         let input = this.interpretNode(node.input)
-        if (!(input instanceof Arr)) {
-            return new Num(0)
-        }
 
         let compiledFuncs: [Type, keyof typeof TT][] = []
         for (let f of node.funs) {
@@ -1644,7 +1655,9 @@ class Interpreter {
         }
 
         let newItems = []
-        for (let item of input.jsValue) {
+        let len = input.len().jsValue
+        for (let i = 0; i < len; i++) {
+            let item = input.getattr(new Num(i))
             let finalItem = item
             let shouldAdd = true
             for (let [f, ty] of compiledFuncs) {
