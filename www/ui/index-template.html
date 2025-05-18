@@ -161,7 +161,10 @@
 
                 <div id="script-output">
                     <div id="script-root">
-                        <button id="script-execute">▶</button>
+                        <div style="grid-area: run-button;">
+                            <button id="script-execute">▶</button>
+                            <label for="script-execute-output-clear">clear on run <input type="checkbox" id="script-execute-output-clear" style="vertical-align: middle;" checked></label>
+                        </div>
                         <textarea id="script"></textarea>
                         <div id="script-execute-output"></div>
                     </div>

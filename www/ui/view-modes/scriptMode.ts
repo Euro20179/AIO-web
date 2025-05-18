@@ -41,6 +41,11 @@ run.onclick = function() {
     let tbl = new SymbolTable()
     tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
 
+    //@ts-ignore
+    if(document.getElementById("script-execute-output-clear")?.checked) {
+        modeScripting.clear()
+    }
+
     const value = parseExpression(script, tbl)
     scriptOutput.append(value.jsStr())
 }

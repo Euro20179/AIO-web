@@ -447,7 +447,7 @@
         #script-execute {
             grid-area: run-button;
             height: 100%;
-        margin-inline: 2ch;
+            margin-inline: 2ch;
             align-self: center;
         }
 
