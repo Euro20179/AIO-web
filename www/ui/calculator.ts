@@ -796,11 +796,22 @@ class Obj extends Type {
     }
 
     jsStr(): string {
-        return JSON.stringify(this.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v)
+        return JSON.stringify(this.jsValue, (_, v) => {
+            if(typeof v === 'bigint') {
+                return String(v)
+            }
+            if(v instanceof Obj) {
+                return v.jsValue
+            }
+            if(v instanceof Type) {
+                return v.jsStr()
+            }
+            return v
+        })
     }
 
     toStr(): Str {
-        return new Str(JSON.stringify(this.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
+        return new Str(this.jsStr())
     }
 
     call(params: Type[]) {
@@ -1061,10 +1072,18 @@ class SymbolTable {
         }))
 
         this.symbols.set("set", new Func((obj, name, val) => {
-            return obj.setattr(name, val)
+            obj.setattr(name, val)
+            return obj
         }))
-        this.symbols.set("obj", new Func(() => {
-            return new Obj({})
+        this.symbols.set("obj", new Func((...items) => {
+            if(items.length % 2 !== 0) {
+                return new Num(0)
+            }
+            let obj: Record<string, Type> = {}
+            for(let i = 0; i < items.length; i += 2) {
+                obj[items[i].jsStr()] = items[i + 1]
+            }
+            return new Obj(obj)
         }))
 
         this.symbols.set("openbyid", new Func((id) => {
