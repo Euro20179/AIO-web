@@ -570,7 +570,7 @@ class Parser {
     }
 
     ifStatement(): NodePar {
-        let condition = this.ast_expr()
+        let condition = this.atom()
 
         if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") {
             console.error("Expected 'do' after if")
@@ -578,20 +578,18 @@ class Parser {
         }
         this.next()
 
-        let body = this.ast_expr()
+        let body = this.atom()
 
         let elsePart: NodePar = new NumNode(0)
         if (this.curTok()?.ty === "Word" && this.curTok()?.value === "else") {
             this.next()
-            elsePart = this.ast_expr()
+            elsePart = this.atom()
         }
 
-        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "fi") {
-            console.error("Expected 'fi'")
-            return new NumNode(0)
+        if (this.curTok()?.ty === "Word" && this.curTok()?.value === "fi") {
+            this.next()
         }
 
-        this.next()
         return new IfNode(condition, body, elsePart)
     }
 
@@ -1112,6 +1110,18 @@ class SymbolTable {
 
             return new Obj(entry)
         }
+
+        this.symbols.set("getall", new Func((of) => {
+            let v = of.jsStr()
+            if(v === "entry") {
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new Obj(v)))
+            } else if (v === "user") {
+                return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Obj(v)))
+            } else if (v === "meta") {
+                return new Arr(Object.values(globalsNewUi.metadataEntries).map(v => new Obj(v)))
+            }
+            return new Arr([])
+        }))
 
         this.symbols.set("entrybyid", new Func((id) => {
             return findByid(id, i => {
