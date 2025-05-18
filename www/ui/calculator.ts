@@ -1050,8 +1050,9 @@ class Obj extends Type {
 }
 
 class Entry extends Type {
-    constructor(entry: InfoEntry) {
-        super(entry)
+    constructor(entry: InfoEntry | MetadataEntry | UserEntry) {
+        //create a copy, dont let the user accidentally fuck shit up
+        super({...entry})
     }
 
     truthy(): boolean {
@@ -1059,9 +1060,41 @@ class Entry extends Type {
     }
 
     jsStr(): string {
-        const fragment = document.createElement("div")
-        renderDisplayItem(this.jsValue, fragment)
-        return String(fragment.innerHTML)
+        return (new Obj(this.jsValue)).jsStr()
+    }
+
+    toStr(): Str {
+        return new Str(this.jsStr())
+    }
+
+    getattr(prop: Type): Type {
+        let v = this.jsValue[prop.jsStr()] 
+        switch (typeof v) {
+            case 'string':
+                return new Str(v)
+            case 'number':
+            case 'bigint':
+                return new Num(v)
+            case 'boolean':
+                return new Num(Number(v))
+            case 'symbol':
+                return new Str(String(v))
+            case 'undefined':
+                return new Str("undefined")
+            case 'object':
+                return new Str(JSON.stringify(v, (_, v) => typeof v === "bigint" ? String(v) : v))
+            case 'function':
+                return new Str(String(v))
+        }
+    }
+
+    setattr(name: Type, value: Type): Type {
+        let n = name.jsStr()
+        if(n === "ItemId" || n === "Uid") {
+            console.error(`name cannot be ItemId or Uid`)
+            return new Num(0)
+        }
+        return this.jsValue[n] = value.jsValue
     }
 }
 
@@ -1353,7 +1386,7 @@ class SymbolTable {
                 return new Str(`${id} not found`)
             }
 
-            return new Obj(entry)
+            return new Entry(entry)
         }
 
         this.symbols.set("confirm", new Func((p) => {
@@ -1370,11 +1403,11 @@ class SymbolTable {
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
             if (v === "entry" || v === "info") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new Obj(v)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v)))
             } else if (v === "user") {
-                return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Obj(v)))
+                return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Entry(v)))
             } else if (v === "meta") {
-                return new Arr(Object.values(globalsNewUi.metadataEntries).map(v => new Obj(v)))
+                return new Arr(Object.values(globalsNewUi.metadataEntries).map(v => new Entry(v)))
             }
             return new Arr([])
         }))
@@ -1383,12 +1416,12 @@ class SymbolTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
+                        return new Entry(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Obj(v[Math.floor(Math.random() * v.length)])
+                        return new Entry(v[Math.floor(Math.random() * v.length)])
                     default:
-                        return findInfoEntryById(i)
+                        return new Entry(findInfoEntryById(i) as InfoEntry)
                 }
             })
         }))
@@ -1397,10 +1430,10 @@ class SymbolTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Obj(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as MetadataEntry)
+                        return new Entry(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as MetadataEntry)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Obj(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
+                        return new Entry(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
                     default:
                         return findMetadataById(i)
                 }
@@ -1411,10 +1444,10 @@ class SymbolTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Obj(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
+                        return new Entry(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Obj(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
+                        return new Entry(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
                     default:
                         return findUserEntryById(i)
                 }
@@ -1510,6 +1543,74 @@ class SymbolTable {
                 }
             })
             return new Num(0)
+        }))
+
+        this.symbols.set("setentry", new Func((entry) => {
+            if(!(entry instanceof Entry) || !probablyInfoEntry(entry.jsValue)) {
+                return new Str("NOT AN ENTRY")
+            }
+
+            api_setItem("", entry.jsValue).then(res => {
+                if(res?.status !== 200) {
+                    mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
+                } else {
+                    mode.put(`Updated: ${entry.jsValue.En_Title}`)
+                    updateInfo({ 
+                        entries: {
+                            [String(entry.jsValue.ItemId)]: entry.jsValue
+                        }
+                    })
+                }
+            })
+            return new Str("")
+        }))
+
+        this.symbols.set("setmeta", new Func((entry) => {
+            if(!(entry instanceof Entry) || !probablyMetaEntry(entry.jsValue)) {
+                return new Str("NOT AN ENTRY")
+            }
+
+            api_setItem("metadata/", entry.jsValue).then(res => {
+                let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
+                if(res?.status !== 200) {
+                    mode.put(`Failed to update: ${info.En_Title}'s metadata`)
+                } else {
+                    mode.put(`Updated: ${info.En_Title}`)
+                    updateInfo({ 
+                        entries: {
+                            [String(entry.jsValue.ItemId)]: info
+                        },
+                        metadataEntries: {
+                            [String(entry.jsValue.ItemId)]: entry.jsValue
+                        }
+                    })
+                }
+            })
+            return new Str("")
+        }))
+
+        this.symbols.set("setuser", new Func((entry) => {
+            if(!(entry instanceof Entry) || !probablyUserItem(entry.jsValue)) {
+                return new Str("NOT AN ENTRY")
+            }
+
+            api_setItem("engagement/", entry.jsValue).then(res => {
+                let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
+                if(res?.status !== 200) {
+                    mode.put(`Failed to update: ${info.En_Title}'s user entry`)
+                } else {
+                    mode.put(`Updated: ${info.En_Title}`)
+                    updateInfo({ 
+                        entries: {
+                            [String(entry.jsValue.ItemId)]: info
+                        },
+                        userEntries: {
+                            [String(entry.jsValue.ItemId)]: entry.jsValue
+                        }
+                    })
+                }
+            })
+            return new Str("")
         }))
 
         this.symbols.set("env", new Func(() => {

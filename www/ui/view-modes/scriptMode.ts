@@ -39,7 +39,7 @@ run.onclick = function() {
     const script = scriptBox.value
 
     let tbl = new SymbolTable()
-    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Obj(v))))
+    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
 
     const value = parseExpression(script, tbl)
     scriptOutput.append(value.jsStr())

@@ -1038,11 +1038,10 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }
 
-    observer.observe(el)
-
     let meta = findMetadataById(itemId)
     let events = findUserEventsById(itemId)
     const item = findInfoEntryById(itemId)
+
     if (!item || !user || !meta || !events) return el
 
     parent.append(el)

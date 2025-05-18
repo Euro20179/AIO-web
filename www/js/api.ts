@@ -8,6 +8,23 @@ type UserEntry = {
     Extra: string
 }
 
+function probablyUserItem(item: object) {
+    for (let key of [
+        "ItemId",
+        "Status",
+        "ViewCount",
+        "UserRating",
+        "Notes",
+        "CurrentPosition",
+        "Extra"
+    ]) {
+        if(!(key in item)) {
+            return false
+        }
+    }
+    return true
+}
+
 type UserStatus = "" |
     "Viewing" |
     "Finished" |
@@ -54,6 +71,27 @@ type InfoEntry = {
 
     Tags: string[]
 }
+function probablyInfoEntry(item: object) {
+    for (let key of [
+        "ItemId",
+        "Collection",
+        "Format",
+        "ArtStyle",
+        "Location",
+        "Native_Title",
+        "ParentId",
+        "PurchasePrice",
+        "Type",
+        "En_Title",
+        "CopyOf",
+        "Library",
+    ]) {
+        if(!(key in item)) {
+            return false
+        }
+    }
+    return true
+}
 
 type MetadataEntry = {
     ItemId: bigint
@@ -68,6 +106,28 @@ type MetadataEntry = {
     Native_Title: string
     Provider: string
     ProviderID: string
+}
+
+function probablyMetaEntry(item: object) {
+    for (let key of [
+        "ItemId",
+        "Rating",
+        "RatingMax",
+        "Description",
+        "ReleaseYear",
+        "Thumbnail",
+        "MediaDependant",
+        "Datapoints",
+        "Title",
+        "Native_Title",
+        "Provider",
+        "ProviderID",
+    ]) {
+        if(!(key in item)) {
+            return false
+        }
+    }
+    return true
 }
 
 type IdentifyResult = {
@@ -110,10 +170,10 @@ function _api_parseJsonL(jsonl: string) {
 }
 
 function* api_deserializeJsonl(jsonl: string | string[]) {
-    if(typeof jsonl === 'string') {
+    if (typeof jsonl === 'string') {
         jsonl = jsonl.split("\n")
     }
-    for(let line of jsonl) {
+    for (let line of jsonl) {
         yield _api_parseJsonL(_api_mkStrItemId(line))
     }
 }
@@ -161,7 +221,7 @@ async function api_listFormats() {
 }
 
 async function api_listTypes() {
-    if(_api_types_cache.length) return _api_types_cache
+    if (_api_types_cache.length) return _api_types_cache
 
     const res = await fetch(`${apiPath}/type/type`)
     _api_types_cache = await res.json()
@@ -197,7 +257,7 @@ async function api_identify(title: string, provider: string) {
 async function api_finalizeIdentify(identifiedId: string, provider: string, applyTo?: bigint) {
     identifiedId = encodeURIComponent(identifiedId)
     provider = encodeURIComponent(provider)
-    if(applyTo)
+    if (applyTo)
         return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}&apply-to=${applyTo}`)
     else
         return await authorizedRequest(`${apiPath}/metadata/finalize-identify?identified-id=${identifiedId}&provider=${provider}`)
@@ -274,7 +334,7 @@ async function api_createEntry(params: NewEntryParams) {
             continue
         }
 
-        if(i !== 0) qs += `&`
+        if (i !== 0) qs += `&`
 
         qs += `${p}=${v}`
         i++
@@ -291,7 +351,7 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
         try {
             userAuth = await signinUI(options?.["signin-reason"] || "")
             sessionStorage.setItem("userAuth", userAuth)
-        } catch(err) {
+        } catch (err) {
             return null
         }
     }
@@ -344,10 +404,10 @@ async function api_getEntryMetadata(itemId: bigint, uid: number) {
 
 async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
     let qs = `?uid=${uid}&id=${itemId}`
-    if(provider) {
+    if (provider) {
         qs += `&provider=${provider}`
     }
-    if(providerId) {
+    if (providerId) {
         qs += `&provider-id=${providerId}`
     }
     return authorizedRequest(`${apiPath}/metadata/fetch-location${qs}`, {
