@@ -982,6 +982,10 @@ class Arr extends Type {
     getattr(prop: Type): Type {
         return this.call([prop])
     }
+
+    setattr(name: Type, value: Type): Type {
+        return this.jsValue[name.toNum().jsValue] = value
+    }
 }
 
 class Obj extends Type {
@@ -1051,7 +1055,7 @@ class Obj extends Type {
 class Entry extends Type {
     constructor(entry: InfoEntry | MetadataEntry | UserEntry) {
         //create a copy, dont let the user accidentally fuck shit up
-        super({...entry})
+        super({ ...entry })
     }
 
     truthy(): boolean {
@@ -1067,7 +1071,7 @@ class Entry extends Type {
     }
 
     getattr(prop: Type): Type {
-        let v = this.jsValue[prop.jsStr()] 
+        let v = this.jsValue[prop.jsStr()]
         switch (typeof v) {
             case 'string':
                 return new Str(v)
@@ -1089,7 +1093,7 @@ class Entry extends Type {
 
     setattr(name: Type, value: Type): Type {
         let n = name.jsStr()
-        if(n === "ItemId" || n === "Uid") {
+        if (n === "ItemId" || n === "Uid") {
             console.error(`name cannot be ItemId or Uid`)
             return new Num(0)
         }
@@ -1192,6 +1196,10 @@ class Str extends Type {
     len(): Num {
         return new Num(this.jsValue.length)
     }
+
+    getattr(prop: Type): Type {
+        return new Str(this.jsValue[prop.toNum().jsValue])
+    }
 }
 
 class SymbolTable {
@@ -1210,6 +1218,10 @@ class SymbolTable {
             let int = new Interpreter(code.code, this)
             return int.interpret()
         }))
+
+        this.symbols.set("true", new Num(1))
+        this.symbols.set("false", new Num(0))
+        this.symbols.set("end", new Str(""))
 
         this.symbols.set("len", new Func(n => {
             return n.len()
@@ -1294,6 +1306,57 @@ class SymbolTable {
             return new Arr(list.jsValue.sort((a, b) => fn.call([a, b]).toNum().jsValue))
         }))
 
+        this.symbols.set("slice", new Func((list, start, end) => {
+            let newList = []
+            let len = list.len().jsValue
+            let s = 0, e = len
+
+            if (start && !end) {
+                e = start.toNum().jsValue
+            } else if (start && end) {
+                s = start.toNum().jsValue
+                e = end.toNum().jsValue
+            }
+
+            for(let i = s; i < e; i++) {
+                newList.push(list.getattr(new Num(i)))
+            }
+            return new Arr(newList)
+        }))
+
+        this.symbols.set("shuf", new Func((list) => {
+            let len = list.len().jsValue
+            let curIdx = len
+            while (curIdx != 0) {
+                let randIdx = Math.floor(Math.random() * curIdx)
+                curIdx--
+
+                let cur = list.getattr(new Num(curIdx))
+                let rand = list.getattr(new Num(randIdx))
+                list.setattr(new Num(curIdx), rand)
+                list.setattr(new Num(randIdx), cur)
+            }
+            return list
+        }))
+
+        this.symbols.set("randitem", new Func(list => {
+            let len = list.len().jsValue
+            let idx = Math.floor(Math.random() * len)
+            return list.getattr(new Num(idx))
+        }))
+
+        this.symbols.set("rand", new Func((low, high) => {
+            let l = 0, h = 100
+            if (low && !high) {
+                h = low.toNum().jsValue
+            } else if (low && high) {
+                l = low.toNum().jsValue
+                h = high.toNum().jsValue
+            }
+
+            return new Num(Math.floor(Math.random() * (h - l) + l))
+        }))
+
         this.symbols.set("filter", new Func((list, fn) => {
             let newList = []
             let len = list.len().jsValue
@@ -1333,6 +1396,10 @@ class SymbolTable {
             obj.setattr(name, val)
             return obj
         }))
+        this.symbols.set("get", new Func((obj, name) => {
+            return obj.getattr(name)
+        }))
+
         this.symbols.set("obj", new Func((...items) => {
             if (items.length % 2 !== 0) {
                 return new Num(0)
@@ -1528,6 +1595,28 @@ class SymbolTable {
             return new Num(0)
         }))
 
+        this.symbols.set("setuidstate", new Func((newUid) => {
+            const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
+            uidSelector.value = newUid.toNum().jsStr()
+            return new Str(uidSelector.value)
+        }))
+
+        this.symbols.set("uname2uid", new Func((name, cb) => {
+            let u = name.jsStr()
+            api_username2UID(u).then(res => {
+                cb.call([new Num(res)])
+            })
+            return new Num(0)
+        }))
+
+        this.symbols.set("search", new Func((query, cb) => {
+            api_queryV3(query.jsStr(), getUidUI()).then(entries => {
+                let es = new Arr(entries.map(v => new Entry(v)))
+                cb.call([es])
+            }).catch(console.error)
+            return new Num(0)
+        }))
+
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
             api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async (res) => {
@@ -1545,16 +1634,16 @@ class SymbolTable {
         }))
 
         this.symbols.set("setentry", new Func((entry) => {
-            if(!(entry instanceof Entry) || !probablyInfoEntry(entry.jsValue)) {
+            if (!(entry instanceof Entry) || !probablyInfoEntry(entry.jsValue)) {
                 return new Str("NOT AN ENTRY")
             }
 
             api_setItem("", entry.jsValue).then(res => {
-                if(res?.status !== 200) {
+                if (res?.status !== 200) {
                     mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
                 } else {
                     mode.put(`Updated: ${entry.jsValue.En_Title}`)
-                    updateInfo({ 
+                    updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: entry.jsValue
                         }
@@ -1565,17 +1654,17 @@ class SymbolTable {
         }))
 
         this.symbols.set("setmeta", new Func((entry) => {
-            if(!(entry instanceof Entry) || !probablyMetaEntry(entry.jsValue)) {
+            if (!(entry instanceof Entry) || !probablyMetaEntry(entry.jsValue)) {
                 return new Str("NOT AN ENTRY")
             }
 
             api_setItem("metadata/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if(res?.status !== 200) {
+                if (res?.status !== 200) {
                     mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 } else {
                     mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo({ 
+                    updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: info
                         },
@@ -1589,17 +1678,17 @@ class SymbolTable {
         }))
 
         this.symbols.set("setuser", new Func((entry) => {
-            if(!(entry instanceof Entry) || !probablyUserItem(entry.jsValue)) {
+            if (!(entry instanceof Entry) || !probablyUserItem(entry.jsValue)) {
                 return new Str("NOT AN ENTRY")
             }
 
             api_setItem("engagement/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if(res?.status !== 200) {
+                if (res?.status !== 200) {
                     mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 } else {
                     mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo({ 
+                    updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: info
                         },

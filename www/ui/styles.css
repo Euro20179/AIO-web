@@ -445,7 +445,6 @@
         padding: 0 10ch;
 
         #script-execute {
-            grid-area: run-button;
             height: 100%;
             margin-inline: 2ch;
             align-self: center;

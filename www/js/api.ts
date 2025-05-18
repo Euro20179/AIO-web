@@ -275,7 +275,7 @@ async function api_setParent(id: bigint, parent: bigint) {
     return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
-async function api_queryV3(searchString: string, uid: number) {
+async function api_queryV3(searchString: string, uid: number): Promise<InfoEntry[]> {
     const res = await fetch(`${apiPath}/query-v3?search=${encodeURIComponent(searchString)}&uid=${uid}`).catch(console.error)
     if (!res) return []
 
