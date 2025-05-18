@@ -937,7 +937,6 @@ class Code extends Type {
 
         let cpy = new ProgramNode
         cpy.children = [...this.code.children, ...right.code.children]
-        console.log(cpy.children)
         return new Code(cpy)
     }
 
@@ -1364,7 +1363,7 @@ class SymbolTable {
             return new Str("")
         }))
 
-        const findByid = (id: Type, finder: (id: bigint | "s-rand" | "a-rand") => any) => {
+        const findByid = (id: Type, finder: (id: bigint | "s-rand" | "a-rand") => Type) => {
             const s = id.jsStr()
             if (s === "s-rand") {
                 return finder(s)
@@ -1386,7 +1385,7 @@ class SymbolTable {
                 return new Str(`${id} not found`)
             }
 
-            return new Entry(entry)
+            return entry
         }
 
         this.symbols.set("confirm", new Func((p) => {
@@ -1435,7 +1434,7 @@ class SymbolTable {
                         const v = Object.values(globalsNewUi.entries)
                         return new Entry(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
                     default:
-                        return findMetadataById(i)
+                        return new Entry(findMetadataById(i) as MetadataEntry)
                 }
             })
         }))
@@ -1449,7 +1448,7 @@ class SymbolTable {
                         const v = Object.values(globalsNewUi.entries)
                         return new Entry(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
                     default:
-                        return findUserEntryById(i)
+                        return new Entry(findUserEntryById(i) as UserEntry)
                 }
             })
         }))
