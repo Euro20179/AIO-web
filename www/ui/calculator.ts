@@ -570,7 +570,7 @@ class Parser {
     }
 
     ifStatement(): NodePar {
-        let condition = this.atom()
+        let condition = this.ast_expr()
 
         if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") {
             console.error("Expected 'do' after if")
@@ -1042,6 +1042,14 @@ class SymbolTable {
                 newList.push(fn.call([item]))
             }
             return new Arr(newList)
+        }))
+
+        this.symbols.set("sort", new Func((list, fn) => {
+            if(!(list instanceof Arr)) {
+                return new Num(1)
+            }
+
+            return new Arr(list.jsValue.sort((a, b) => fn.call([a, b]).toNum().jsValue))
         }))
 
         this.symbols.set("filter", new Func((list, fn) => {
