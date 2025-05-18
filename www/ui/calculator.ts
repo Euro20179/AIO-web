@@ -18,7 +18,8 @@ const TT = {
     Le: "<=",
     Ge: ">=",
     DEq: "==",
-    Arrow: "->"
+    Arrow: "->",
+    TransformArrow: "=>",
 }
 
 const keywords = [
@@ -127,6 +128,7 @@ class BinOpNode extends NodePar {
         this.right = right;
     }
 }
+
 class PipeNode extends NodePar {
     constructor(children: NodePar[]) {
         super()
@@ -296,12 +298,15 @@ function lex(input: string): Token[] {
             if (input[pos] === '=') {
                 pos++
                 tokens.push(new Token("DEq", "=="))
+            } else if(input[pos] === ">") {
+                pos++
+                tokens.push(new Token("TransformArrow", "=>"))
             } else {
                 tokens.push(new Token("Eq", "="))
             }
         } else if (ch === '<') {
             pos++
-            if (input[pos] === "<=") {
+            if (input[pos] === "=") {
                 pos++
                 tokens.push(new Token("Le", "<="))
             } else {
@@ -309,7 +314,7 @@ function lex(input: string): Token[] {
             }
         } else if (ch === ">") {
             pos++
-            if (input[pos] === ">=") {
+            if (input[pos] === "=") {
                 pos++
                 tokens.push(new Token("Ge", ">="))
             } else {
@@ -324,6 +329,8 @@ function lex(input: string): Token[] {
             } else {
                 tokens.push(new Token("Sub", "-"))
             }
+        } else if(ch === "=") {
+            pos++
         }
         else {
             let foundTok = false
@@ -482,12 +489,25 @@ class Parser {
         return left
     }
 
+    mapPipe() {
+        let left = this.comparison()
+        let op = this.curTok()
+        while(op?.ty === "TransformArrow") {
+            this.next()
+            let right = this.mapPipe()
+            let f = new FuncDefNode(new Token("Word", ""), right)
+            left = new BinOpNode(left, op, f)
+            op = this.curTok()
+        }
+        return left
+    }
+
     pipe() {
-        let left = [this.comparison()]
+        let left = [this.mapPipe()]
         let tok = this.curTok()
         while (tok?.ty === "Arrow") {
             this.next()
-            let right = this.comparison()
+            let right = this.mapPipe()
             left.push(right)
             tok = this.curTok()
         }
@@ -972,6 +992,10 @@ class SymbolTable {
             return max
         }))
 
+        this.symbols.set("type", new Func(i => {
+            return new Str(i.constructor.name)
+        }))
+
         this.symbols.set("map", new Func((list, fn) => {
             if(!(list instanceof Arr)) {
                 return new Num(1)
@@ -1238,6 +1262,18 @@ class Interpreter {
                 return new Num(1)
             }
             return new Num(0)
+        } else if(node.operator.ty === "TransformArrow") {
+            //if the input is not an Arr, we are within a nested map (or the user is bad)
+            //if the former, the root caller (TransformArrow for loop) is waiting for THIS child's result to add to the list
+            if(!(left instanceof Arr)) {
+                return right.call([left])
+            }
+            let items = []
+            //TransformArrow for loop
+            for(let item of left.jsValue) {
+                items.push(right.call([item]))
+            }
+            return new Arr(items)
         } return right
     }
 
