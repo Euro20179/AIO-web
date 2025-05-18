@@ -21,6 +21,7 @@ const TT = {
     Arrow: "->",
     TransformArrow: "=>",
     FilterArrow: "?>",
+    Colon: ":",
 }
 
 const keywords = [
@@ -596,8 +597,8 @@ class Parser {
     ifStatement(): NodePar {
         let condition = this.ast_expr()
 
-        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") {
-            console.error("Expected 'do' after if")
+        if ((this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") && this.curTok()?.ty !== "Colon") {
+            console.error("Expected 'do' or ':' after if")
             return new NumNode(0)
         }
         this.next()
@@ -629,16 +630,16 @@ class Parser {
             return new NumNode(0)
         }
         this.next()
-        let start = this.atom()
+        let start = this.ast_expr()
         if (this.curTok().ty !== "Comma") {
             console.error("Expected comma")
             return new NumNode(0)
         }
         this.next() //skip comma
-        let end = this.atom()
+        let end = this.ast_expr()
 
-        if (this.curTok().ty !== "Word" || this.curTok().value !== "do") {
-            console.error("Expected 'do'")
+        if ((this.curTok().ty !== "Word" || this.curTok().value !== "do") && this.curTok()?.ty !== "Colon") {
+            console.error("Expected 'do' or ':'")
             return new NumNode(0)
         }
 
@@ -809,7 +810,8 @@ class Arr extends Type {
     }
 
     toNum(): Num {
-        return new Num(this.jsValue.length)
+        console.log(this.jsValue)
+        return this.jsValue.reduce((p: Type, c: Type) => p.toNum().add(c), new Num(0))
     }
 
     getattr(prop: Type): Type {
@@ -1113,6 +1115,10 @@ class SymbolTable {
             return new Num(BigInt(n.jsStr()))
         }))
 
+        this.symbols.set("num", new Func(n => {
+            return n.toNum()
+        }))
+
         this.symbols.set("set", new Func((obj, name, val) => {
             obj.setattr(name, val)
             return obj
@@ -1385,7 +1391,7 @@ class Interpreter {
     LUnOpNode(node: LUnOpNode) {
         let right = this.interpretNode(node.right)
         if (node.operator.ty === "Add") {
-            return right
+            return right.toNum()
         } else {
             return right.mul(new Num(-1))
         }
