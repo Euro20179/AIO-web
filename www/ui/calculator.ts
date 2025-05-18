@@ -1119,6 +1119,10 @@ class SymbolTable {
             return n.toNum()
         }))
 
+        this.symbols.set("pow", new Func((x, y) => {
+            return new Num(Math.pow(x.toNum().jsValue, y.toNum().jsValue))
+        }))
+
         this.symbols.set("set", new Func((obj, name, val) => {
             obj.setattr(name, val)
             return obj
