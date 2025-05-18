@@ -29,7 +29,9 @@ const TT = {
 const keywords = [
     "let", "var", "fun",
     "and", "or",
+    "while",
     "for",
+    "foreach",
     "rav",
     "rof",
     "do",
@@ -225,21 +227,53 @@ class VarDefNode extends NodePar {
     }
 }
 
+class WhileNode extends NodePar {
+    condition: NodePar
+    body: NodePar
+    returnType: "last" | "list"
+    constructor(condition: NodePar, body: NodePar, returnType: "last" | "list") {
+        super()
+        this.body = body
+        this.condition = condition
+        this.returnType = returnType
+    }
+}
+
 class ForNode extends NodePar {
     varName: Token
     start: NodePar
     end: NodePar
     body: NodePar
-    constructor(varName: Token, start: NodePar, end: NodePar, body: NodePar) {
+    returnType: "last" | "list"
+    constructor(varName: Token, start: NodePar, end: NodePar, body: NodePar, returnType: "last" | "list") {
         super()
         this.varName = varName
         this.start = start
         this.end = end
         this.body = body
+        this.returnType = returnType
     }
 
     serialize(): string {
-        return `for ${this.varName.value} = ${this.start.serialize()}, ${this.end.serialize()} do ${this.body.serialize()} rof`
+        return `for ${this.varName.value} = ${this.start.serialize()}, ${this.end.serialize()} ${this.returnType === "last" ? "do" : ":"} ${this.body.serialize()} rof`
+    }
+}
+
+class ForEachNode extends NodePar {
+    varName: Token
+    of: NodePar
+    body: NodePar
+    returnType: "last" | "list"
+    constructor(varName: Token, of: NodePar, body: NodePar, returnType: "last" | "list") {
+        super()
+        this.varName = varName
+        this.of = of
+        this.body = body
+        this.returnType = returnType
+    }
+
+    serialize(): string {
+        return `foreach ${this.varName.value} in ${this.of.serialize()} ${this.returnType === "last" ? "do" : ":"} ${this.body.serialize()} rof`
     }
 }
 
@@ -418,7 +452,7 @@ function lex(input: string): Token[] {
             if (input[pos] === "=") {
                 pos++
                 tokens.push(new Token("Le", "<="))
-            } else if(input[pos] == ">") {
+            } else if (input[pos] == ">") {
                 pos++
                 tokens.push(new Token("NEq", "<>"))
             } else {
@@ -536,6 +570,10 @@ class Parser {
                     case "fun":
                     case "let":
                         return this.varDef()
+                    case "while":
+                        return this.whileLoop()
+                    case "foreach":
+                        return this.forEachLoop()
                     case "for":
                         return this.forLoop()
                     case "if":
@@ -604,7 +642,6 @@ class Parser {
     comparison() {
         let left = this.term()
         let op = this.curTok()
-        console.log(op)
         while (op && ["<", ">", "<=", ">=", "==", "<>"].includes(op.value)) {
             this.next()
             let right = this.comparison()
@@ -708,10 +745,30 @@ class Parser {
         return new VarDefNode(name, this.ast_expr())
     }
 
-    ifStatement(): NodePar {
+    whileLoop(): NodePar {
         let condition = this.ast_expr()
 
         if ((this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do") && this.curTok()?.ty !== "Colon") {
+            console.error("Expected 'do' or ':' after while")
+            return new NumNode(0)
+        }
+
+        const rtType = this.curTok()?.value === "do" ? "last" : "list" as const
+
+        this.next()
+
+        let body = this.ast_expr()
+
+        if (this.curTok()?.ty === "Word" && ["fi", "elihw", "done"].includes(this.curTok()?.value)) {
+            this.next()
+        }
+        return new WhileNode(condition, body, rtType)
+    }
+
+    ifStatement(): NodePar {
+        let condition = this.ast_expr()
+
+        if ((this.curTok()?.ty !== "Word" || this.curTok()?.value !== "do")) {
             console.error("Expected 'do' or ':' after if")
             return new NumNode(0)
         }
@@ -730,6 +787,41 @@ class Parser {
         }
 
         return new IfNode(condition, body, elsePart)
+    }
+
+    forEachLoop(): NodePar {
+        if (this.curTok()?.ty !== "Word") {
+            return new ErrorNode("Expected variable name after 'foreach'")
+        }
+
+        let name = this.curTok()
+        this.next()
+
+        //be nice and dont require 'in' after var name
+        if (this.curTok()?.ty === "Word" && this.curTok()?.value === "in") {
+            this.next()
+        }
+
+        let of = this.ast_expr()
+
+        if ((this.curTok().ty !== "Word" || this.curTok().value !== "do") && this.curTok()?.ty !== "Colon") {
+            console.error("Expected 'do' or ':'")
+            return new NumNode(0)
+        }
+
+        const rtType = this.curTok()?.value === "do" ? "last" : "list" as const
+
+        this.next()
+
+        let body = this.ast_expr()
+
+        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "rof") {
+            return new ErrorNode("Expected 'rof' after 'foreach'")
+        }
+
+        this.next()
+
+        return new ForEachNode(name, of, body, rtType)
     }
 
     forLoop(): NodePar {
@@ -757,18 +849,20 @@ class Parser {
             return new NumNode(0)
         }
 
+        const rtType = this.curTok()?.value === "do" ? "last" : "list" as const
+
         this.next()
 
         let body = this.ast_expr()
 
-        if (this.curTok().ty !== "Word" || this.curTok().value !== "rof") {
+        if (this.curTok()?.ty !== "Word" || this.curTok()?.value !== "rof") {
             console.error("Expected 'rof'")
             return new NumNode(0)
         }
 
         this.next()
 
-        return new ForNode(name, start, end, body)
+        return new ForNode(name, start, end, body, rtType)
     }
 
     funcDef(name: Token) {
@@ -1331,7 +1425,7 @@ class SymbolTable {
                 e = end.toNum().jsValue
             }
 
-            for(let i = s; i < e; i++) {
+            for (let i = s; i < e; i++) {
                 newList.push(list.getattr(new Num(i)))
             }
             return new Arr(newList)
@@ -1594,7 +1688,7 @@ class SymbolTable {
         }))
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
-            if(!modeOutputIds.includes(name)) {
+            if (!modeOutputIds.includes(name)) {
                 return new Str("Invalid mode")
             }
             mode_setMode(name)
@@ -1781,9 +1875,11 @@ class SymbolTable {
 class Interpreter {
     tree: NodePar
     symbolTable: SymbolTable
+    stack: Type[]
     constructor(tree: NodePar, symbolTable: SymbolTable) {
         this.tree = tree
         this.symbolTable = symbolTable
+        this.stack = []
     }
 
     NumNode(node: NumNode) {
@@ -1867,11 +1963,11 @@ class Interpreter {
                     return new Num(left.truthy() && right.truthy() ? 1 : 0)
                 }
                 case "or":
-                    if (!left.truthy) {
+                    if (!left.truthy()) {
                         let right = this.interpretNode(node.right)
                         return new Num(right.truthy() ? 1 : 0)
                     }
-                    return new Num(0)
+                    return new Num(1)
                 case "xor": {
                     let right = this.interpretNode(node.right)
                     if ((left || right) && !(left && right)) {
@@ -1932,7 +2028,6 @@ class Interpreter {
                 val = this.interpretNode(child).call([val])
             }
         }
-        this.symbolTable.delete("_")
         return val
     }
 
@@ -1973,11 +2068,36 @@ class Interpreter {
         let end = this.interpretNode(node.end).toNum().jsValue
 
         let vals: Type[] = []
+        let out: Type = new Num(0)
         for (let i = start; i < end; i++) {
             this.symbolTable.set(name, new Num(i))
-            vals.push(this.interpretNode(node.body))
+            this.symbolTable.set("_", out)
+            out = this.interpretNode(node.body)
+            if (node.returnType === "list") {
+                vals.push(out)
+            }
         }
-        return new Arr(vals)
+        return node.returnType === "last" ? out : new Arr(vals)
+    }
+
+    ForEachNode(node: ForEachNode) {
+        let name = node.varName.value
+        let iterable = this.interpretNode(node.of)
+
+        let len = iterable.len().jsValue
+
+        let vals: Type[] = []
+        let lastVal: Type = new Num(0)
+        for (let i = 0; i < len; i++) {
+            let cur = iterable.getattr(new Num(i))
+            this.symbolTable.set(name, cur)
+            this.symbolTable.set("_", lastVal)
+            lastVal = this.interpretNode(node.body)
+            if (node.returnType === "list") {
+                vals.push(lastVal)
+            }
+        }
+        return node.returnType === "last" ? lastVal : new Arr(vals)
     }
 
     IfNode(node: IfNode) {
@@ -1988,6 +2108,20 @@ class Interpreter {
             return b
         }
         return this.interpretNode(node.elsePart)
+    }
+
+    WhileNode(node: WhileNode) {
+        let outList = []
+        let out: Type = new Num(0)
+        while (this.interpretNode(node.condition).truthy()) {
+            this.symbolTable.set("_", out)
+            let val = this.interpretNode(node.body)
+            out = val
+            if (node.returnType === "list") {
+                outList.push(val)
+            }
+        }
+        return node.returnType === "last" ? out : new Arr(outList)
     }
 
     FuncDefNode(node: FuncDefNode) {
