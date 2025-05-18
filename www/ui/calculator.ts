@@ -18,6 +18,7 @@ const TT = {
     Le: "<=",
     Ge: ">=",
     DEq: "==",
+    NEq: "<>",
     Arrow: "->",
     TransformArrow: "=>",
     FilterArrow: "?>",
@@ -417,6 +418,9 @@ function lex(input: string): Token[] {
             if (input[pos] === "=") {
                 pos++
                 tokens.push(new Token("Le", "<="))
+            } else if(input[pos] == ">") {
+                pos++
+                tokens.push(new Token("NEq", "<>"))
             } else {
                 tokens.push(new Token("Lt", "<"))
             }
@@ -600,7 +604,8 @@ class Parser {
     comparison() {
         let left = this.term()
         let op = this.curTok()
-        while (op && ["<", ">", "<=", ">=", "=="].includes(op.value)) {
+        console.log(op)
+        while (op && ["<", ">", "<=", ">=", "==", "<>"].includes(op.value)) {
             this.next()
             let right = this.comparison()
             left = new BinOpNode(left, op, right)
@@ -1062,6 +1067,10 @@ class Entry extends Type {
         return true
     }
 
+    toNum(): Num {
+        return new Num(this.jsValue["ItemId"])
+    }
+
     jsStr(): string {
         return (new Obj(this.jsValue)).jsStr()
     }
@@ -1462,7 +1471,7 @@ class SymbolTable {
 
         this.symbols.set("ask", new Func((p) => {
             const pText = p.jsStr()
-            return new Str(prompt(pText))
+            return new Str(prompt(pText) ?? "")
         }))
         this.symbols.set("prompt", this.symbols.get("ask") as Type)
 
@@ -1606,6 +1615,15 @@ class SymbolTable {
             api_username2UID(u).then(res => {
                 cb.call([new Num(res)])
             })
+            return new Num(0)
+        }))
+
+        this.symbols.set("setmode", new Func((modeName) => {
+            let name = modeName.jsStr()
+            if(!modeOutputIds.includes(name)) {
+                return new Str("Invalid mode")
+            }
+            mode_setMode(name)
             return new Num(0)
         }))
 
@@ -1794,13 +1812,19 @@ class Interpreter {
             return left.gt(right)
         } else if (node.operator.ty === "Ge") {
             let right = this.interpretNode(node.right)
-            if (left.gt(right) || left.eq(right)) {
+            if (left.gt(right).truthy() || left.eq(right).truthy()) {
                 return new Num(1)
             }
             return new Num(0)
         } else if (node.operator.ty === "Le") {
             let right = this.interpretNode(node.right)
-            if (left.lt(right) || left.eq(right)) {
+            if (left.lt(right).truthy() || left.eq(right).truthy()) {
+                return new Num(1)
+            }
+            return new Num(0)
+        } else if (node.operator.ty === "NEq") {
+            let right = this.interpretNode(node.right)
+            if (!left.eq(right).truthy()) {
                 return new Num(1)
             }
             return new Num(0)

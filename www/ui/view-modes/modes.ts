@@ -71,10 +71,14 @@ function addTagsToSelected() {
     }
 }
 
-document.getElementById("view-toggle")?.addEventListener("change", e => {
+function mode_setMode(name: string) {
     mode.subList(globalsNewUi.selectedEntries)
 
-    let name = (e.target as HTMLSelectElement).value
+    const viewToggle = document.getElementById("view-toggle")
+
+    if(viewToggle) {
+        (viewToggle as HTMLSelectElement).value = name
+    }
 
     let curModeIdx = modeOutputIds.indexOf(name)
 
@@ -82,6 +86,10 @@ document.getElementById("view-toggle")?.addEventListener("change", e => {
     location.hash = name
 
     mode.addList(globalsNewUi.selectedEntries)
+}
+
+document.getElementById("view-toggle")?.addEventListener("change", e => {
+    mode_setMode((e.target as HTMLSelectElement).value)
 })
 
 const viewAllElem = document.getElementById("view-all") as HTMLInputElement
