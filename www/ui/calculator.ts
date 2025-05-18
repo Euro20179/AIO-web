@@ -20,6 +20,7 @@ const TT = {
     DEq: "==",
     Arrow: "->",
     TransformArrow: "=>",
+    FilterArrow: "?>",
 }
 
 const keywords = [
@@ -298,7 +299,7 @@ function lex(input: string): Token[] {
             if (input[pos] === '=') {
                 pos++
                 tokens.push(new Token("DEq", "=="))
-            } else if(input[pos] === ">") {
+            } else if (input[pos] === ">") {
                 pos++
                 tokens.push(new Token("TransformArrow", "=>"))
             } else {
@@ -329,8 +330,14 @@ function lex(input: string): Token[] {
             } else {
                 tokens.push(new Token("Sub", "-"))
             }
-        } else if(ch === "=") {
+        } else if(ch === "?") {
             pos++
+            if(input[pos] === ">") {
+                pos++
+                tokens.push(new Token("FilterArrow", "?>"))
+            } else {
+                console.error(`Invalid token: ${ch}`)
+            }
         }
         else {
             let foundTok = false
@@ -489,12 +496,13 @@ class Parser {
         return left
     }
 
-    mapPipe() {
+    //filter (?>) and map (=>)
+    pipeOPS() {
         let left = this.comparison()
         let op = this.curTok()
-        while(op?.ty === "TransformArrow") {
+        while (["TransformArrow", "FilterArrow"].includes(op?.ty)) {
             this.next()
-            let right = this.mapPipe()
+            let right = this.pipeOPS()
             let f = new FuncDefNode(new Token("Word", ""), right)
             left = new BinOpNode(left, op, f)
             op = this.curTok()
@@ -503,11 +511,11 @@ class Parser {
     }
 
     pipe() {
-        let left = [this.mapPipe()]
+        let left = [this.pipeOPS()]
         let tok = this.curTok()
         while (tok?.ty === "Arrow") {
             this.next()
-            let right = this.mapPipe()
+            let right = this.pipeOPS()
             left.push(right)
             tok = this.curTok()
         }
@@ -947,17 +955,9 @@ class SymbolTable {
         this.setupDefaultFunctions()
     }
     setupDefaultFunctions() {
-        //@ts-ignore
-        this.symbols.set("abs", new Func(n => {
-            return new Num(Math.abs(n.toNum().jsValue))
-        }))
-
-        this.symbols.set("pow", new Func((x, y) => {
-            return new Num(x.toNum().jsValue ** y.toNum().jsValue)
-        }))
 
         this.symbols.set("len", new Func(n => {
-            if (!(n instanceof Str)) {
+            if (!(n instanceof Str) && !(n instanceof Arr)) {
                 return new Num(0)
             }
             return new Num(n.jsValue.length)
@@ -965,6 +965,33 @@ class SymbolTable {
 
         this.symbols.set("str", new Func(n => {
             return n.toStr()
+        }))
+
+        this.symbols.set("join", new Func((arr, by) => {
+            console.log(arr, by)
+            if (!(arr instanceof Arr)) {
+                return new Num(0)
+            }
+
+            const byStr = by.jsStr()
+            let str = ""
+            for (let i = 0; i < arr.jsValue.length; i++) {
+                if (i !== arr.jsValue.length - 1) {
+                    str += arr.jsValue[i].jsStr() + byStr
+                } else {
+                    str += arr.jsValue[i].jsStr()
+                }
+            }
+            return new Str(str)
+        }))
+
+        //@ts-ignore
+        this.symbols.set("abs", new Func(n => {
+            return new Num(Math.abs(n.toNum().jsValue))
+        }))
+
+        this.symbols.set("pow", new Func((x, y) => {
+            return new Num(x.toNum().jsValue ** y.toNum().jsValue)
         }))
 
         this.symbols.set("round", new Func(n => {
@@ -997,24 +1024,24 @@ class SymbolTable {
         }))
 
         this.symbols.set("map", new Func((list, fn) => {
-            if(!(list instanceof Arr)) {
+            if (!(list instanceof Arr)) {
                 return new Num(1)
             }
 
             let newList = []
-            for(let item of list.jsValue) {
+            for (let item of list.jsValue) {
                 newList.push(fn.call([item]))
             }
             return new Arr(newList)
         }))
 
         this.symbols.set("filter", new Func((list, fn) => {
-            if(!(list instanceof Arr)) {
+            if (!(list instanceof Arr)) {
                 return new Num(1)
             }
             let newList = []
-            for(let item of list.jsValue) {
-                if(fn.call([item]).truthy()) {
+            for (let item of list.jsValue) {
+                if (fn.call([item]).truthy()) {
                     newList.push(item)
                 }
             }
@@ -1262,26 +1289,41 @@ class Interpreter {
                 return new Num(1)
             }
             return new Num(0)
-        } else if(node.operator.ty === "TransformArrow") {
+        } else if (node.operator.ty === "TransformArrow") {
             //if the input is not an Arr, we are within a nested map (or the user is bad)
             //if the former, the root caller (TransformArrow for loop) is waiting for THIS child's result to add to the list
-            if(!(left instanceof Arr)) {
+            if (!(left instanceof Arr)) {
                 return right.call([left])
             }
             let items = []
             //TransformArrow for loop
-            for(let item of left.jsValue) {
+            for (let item of left.jsValue) {
                 items.push(right.call([item]))
             }
             return new Arr(items)
-        } return right
+        } else if (node.operator.ty === "FilterArrow") {
+            //if the input is not an Arr, we are within a nested filter (or the user is bad)
+            //if the former, the root caller (FilterArrow for loop) is waiting for THIS child's result to add to the list
+            if (!(left instanceof Arr)) {
+                return right.call([left])
+            }
+            let items = []
+            //FilterArrow for loop
+            for (let item of left.jsValue) {
+                if(right.call([item]).truthy()) {
+                    items.push(item)
+                }
+            }
+            return new Arr(items)
+        }
+        return right
     }
 
     PipeNode(node: PipeNode) {
         let val = this.interpretNode(node.children[0])
-        for(let child of node.children.slice(1)) {
+        for (let child of node.children.slice(1)) {
             this.symbolTable.set("_", val)
-            if(child instanceof CallNode) {
+            if (child instanceof CallNode) {
                 val = this.interpretNode(child, val)
             } else {
                 val = this.interpretNode(child).call([val])
@@ -1303,7 +1345,7 @@ class Interpreter {
 
     CallNode(node: CallNode, pipeValue?: Type): Type {
         let inner = node.inner.map(this.interpretNode.bind(this))
-        if(pipeValue) {
+        if (pipeValue) {
             inner = [pipeValue, ...inner]
         }
         let callable = this.interpretNode(node.callable)
