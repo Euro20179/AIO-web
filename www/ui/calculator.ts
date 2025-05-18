@@ -24,7 +24,7 @@ const TT = {
 }
 
 const keywords = [
-    "var",
+    "let", "var", "fun",
     "for",
     "rav",
     "rof",
@@ -420,6 +420,8 @@ class Parser {
             if (tok.ty === "Word") {
                 switch (tok.value) {
                     case "var":
+                    case "fun":
+                    case "let":
                         return this.varDef()
                     case "for":
                         return this.forLoop()
@@ -657,11 +659,11 @@ class Parser {
         }
         this.next() //skip ")"
 
-        if (this.curTok()?.ty !== "Eq") {
-            console.error("Expected '='")
-            return new NumNode(0)
+        //= is optional
+        if (this.curTok()?.ty === "Eq") {
+            this.next()
         }
-        this.next()
+
         let program = this.program()
         if (this.curTok().ty !== "Word" || this.curTok().value !== "rav") {
             console.error("Expected 'rav'")
@@ -1152,9 +1154,20 @@ class SymbolTable {
             return new Obj(entry)
         }
 
+        this.symbols.set("confirm", new Func((p) => {
+            let pText = p.jsStr()
+            return new Num(confirm(pText) ? 1 : 0)
+        }))
+
+        this.symbols.set("ask", new Func((p) => {
+            const pText = p.jsStr()
+            return new Str(prompt(pText))
+        }))
+        this.symbols.set("prompt", this.symbols.get("ask") as Type)
+
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
-            if (v === "entry") {
+            if (v === "entry" || v === "info") {
                 return new Arr(Object.values(globalsNewUi.entries).map(v => new Obj(v)))
             } else if (v === "user") {
                 return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Obj(v)))
