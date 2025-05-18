@@ -22,6 +22,7 @@ const TT = {
     TransformArrow: "=>",
     FilterArrow: "?>",
     Colon: ":",
+    Bs: "\\"
 }
 
 const keywords = [
@@ -59,6 +60,10 @@ class NodePar {
     addChild(child: NodePar) {
         this.children.push(child)
     }
+
+    serialize(): string {
+        return ""
+    }
 }
 
 class NumNode extends NodePar {
@@ -66,6 +71,9 @@ class NumNode extends NodePar {
     constructor(value: number) {
         super()
         this.value = value;
+    }
+    serialize(): string {
+        return `${this.value}`
     }
 }
 
@@ -75,6 +83,9 @@ class ArrNode extends NodePar {
         super(nodes[0])
         this.nodes = nodes
     }
+    serialize(): string {
+        return `[ ${this.nodes.map(v => v.serialize()).join(", ")} ]`
+    }
 }
 
 class WordNode extends NodePar {
@@ -82,6 +93,10 @@ class WordNode extends NodePar {
     constructor(value: string) {
         super()
         this.value = value
+    }
+
+    serialize(): string {
+        return this.value
     }
 }
 
@@ -91,6 +106,22 @@ class StringNode extends NodePar {
         super()
         this.value = value
     }
+
+    serialize(): string {
+        return `"${this.value}"`
+    }
+}
+
+class EscapedNode extends NodePar {
+    value: NodePar
+    constructor(value: NodePar) {
+        super(value)
+        this.value = value
+    }
+
+    serialize(): string {
+        return `(${this.value.serialize()})`
+    }
 }
 
 class ErrorNode extends NodePar {
@@ -98,6 +129,9 @@ class ErrorNode extends NodePar {
     constructor(value: string) {
         super()
         this.value = value
+    }
+    serialize(): string {
+        return `ERROR(${this.value})`
     }
 }
 
@@ -109,6 +143,10 @@ class RUnOpNode extends NodePar {
         this.left = left
         this.operator = operator
     }
+
+    serialize(): string {
+        return `${this.left.serialize()}${this.operator.value}`
+    }
 }
 class LUnOpNode extends NodePar {
     right: NodePar
@@ -117,6 +155,10 @@ class LUnOpNode extends NodePar {
         super()
         this.right = right
         this.operator = operator
+    }
+
+    serialize(): string {
+        return `${this.operator.value}${this.right.serialize()}`
     }
 }
 
@@ -130,6 +172,10 @@ class BinOpNode extends NodePar {
         this.operator = operator;
         this.right = right;
     }
+
+    serialize(): string {
+        return `${this.left.serialize()} ${this.operator.value} ${this.right.serialize()}`
+    }
 }
 
 class PipeFunNode extends NodePar {
@@ -140,12 +186,27 @@ class PipeFunNode extends NodePar {
         this.input = input
         this.funs = funs
     }
+
+    serialize(): string {
+        return `${this.input.serialize()} ${this.funs.map(v => {
+            switch(v.name.ty) {
+                case "FilterArrow":
+                    return `?> ${v.program.serialize()} `
+                case "TransformArrow":
+                    return `=> ${v.program.serialize()} `
+            }
+        })}`
+    }
 }
 
 class PipeNode extends NodePar {
     constructor(children: NodePar[]) {
         super()
         this.children = children
+    }
+
+    serialize(): string {
+        return `${this.children.map(v => v.serialize()).join(" -> ")}`
     }
 }
 
@@ -156,6 +217,10 @@ class VarDefNode extends NodePar {
         super()
         this.name = name
         this.expr = expr
+    }
+
+    serialize(): string {
+        return `var ${this.name.value} = ${this.expr.serialize()}`
     }
 }
 
@@ -171,6 +236,10 @@ class ForNode extends NodePar {
         this.end = end
         this.body = body
     }
+
+    serialize(): string {
+        return `for ${this.varName.value} = ${this.start.serialize()}, ${this.end.serialize()} do ${this.body.serialize()} rof`
+    }
 }
 
 class IfNode extends NodePar {
@@ -182,6 +251,10 @@ class IfNode extends NodePar {
         this.body = body
         this.condition = condition
         this.elsePart = elsePart
+    }
+
+    serialize(): string {
+        return `if ${this.condition.serialize()} do ${this.body.serialize} eles ${this.elsePart.serialize()} fi`
     }
 }
 
@@ -197,6 +270,10 @@ class FuncDefNode extends NodePar {
         this.closure = new SymbolTable()
         this.paramNames = paramNames
     }
+
+    serialize(): string {
+        return `fun ${this.name.value}(${this.paramNames.map(v => v.value).join(" ")}) ${this.program.serialize()}`
+    }
 }
 
 
@@ -208,6 +285,10 @@ class CallNode extends NodePar {
         this.callable = callable
         this.inner = inner
     }
+
+    serialize(): string {
+        return `${this.callable.serialize()}(${this.inner.map(v => v.serialize()).join(", ")})`
+    }
 }
 
 class PropertyAccessNode extends NodePar {
@@ -218,6 +299,10 @@ class PropertyAccessNode extends NodePar {
         this.value = value
         this.of = of
     }
+
+    serialize(): string {
+        return `${this.of.serialize()}[${this.value.serialize()}]`
+    }
 }
 
 class ExprNode extends NodePar {
@@ -226,9 +311,17 @@ class ExprNode extends NodePar {
         super()
         this.value = value
     }
+
+    serialize(): string {
+        return this.value.serialize()
+    }
 }
 
-class ProgramNode extends NodePar { }
+class ProgramNode extends NodePar {
+    serialize(): string {
+        return this.children.map(v => v.serialize()).join(";\n")
+    }
+}
 
 function parseExpression(input: string, symbols: SymbolTable) {
     const tokens = lex(input);
@@ -404,6 +497,10 @@ class Parser {
         if (tok.ty === "Num") {
             return new NumNode(Number(tok.value))
         }
+        else if(tok.ty == "Bs") {
+            let v = this.atom()
+            return new EscapedNode(v)
+        }
         else if (tok.ty == "Lbracket") {
             let nodes: NodePar[] = []
             tok = this.curTok()
@@ -512,19 +609,31 @@ class Parser {
         return left
     }
 
+    logicalComp() {
+        let left = this.comparison()
+        let logic = this.curTok()
+        while (logic?.ty === "Word" && ["and", "or", "xor", "nand"].includes(logic.value)) {
+            this.next()
+            let right = this.logicalComp()
+            left = new BinOpNode(left, logic, right)
+            logic = this.curTok()
+        }
+        return left
+    }
+
     //filter (?>) and map (=>)
     pipeOPS() {
-        let left = this.comparison()
+        let left = this.logicalComp()
         let op = this.curTok()
         let funs = []
         while (["TransformArrow", "FilterArrow"].includes(op?.ty)) {
             this.next()
-            let right = this.comparison()
+            let right = this.logicalComp()
             let f = new FuncDefNode(new Token("Word", ""), right, [op])
             funs.push(f)
             op = this.curTok()
         }
-        if(funs.length) {
+        if (funs.length) {
             return new PipeFunNode(left, funs)
         }
         return left
@@ -783,6 +892,51 @@ class Type {
     }
 }
 
+class Code extends Type {
+    code: ProgramNode
+    constructor(code: ProgramNode) {
+        super(code)
+        this.code = code
+    }
+
+    truthy(): boolean {
+        let int = new Interpreter(this.code, new SymbolTable)
+        return int.interpret().truthy()
+    }
+
+    call(params: Type[]): Type {
+        let tbl = new SymbolTable()
+        for(let i = 0; i < params.length; i++) {
+            tbl.set(`arg${i}`, params[i])
+        }
+        let int = new Interpreter(this.code, tbl)
+        return int.interpret()
+    }
+
+    jsStr(): string {
+        return this.code.serialize()
+    }
+
+    toStr(): Str {
+        return new Str(this.jsStr())
+    }
+
+    add(right: Type): Type {
+        if(!(right instanceof Code)) {
+            return super.add(right)
+        }
+
+        let cpy = new ProgramNode
+        cpy.children = [...this.code.children, ...right.code.children]
+        console.log(cpy.children)
+        return new Code(cpy)
+    }
+
+    getattr(prop: Type): Type {
+        return new Code(new ProgramNode(this.code.children[prop.toNum().jsValue]))
+    }
+}
+
 class Arr extends Type {
     constructor(values: Type[]) {
         super(values)
@@ -810,7 +964,6 @@ class Arr extends Type {
     }
 
     toNum(): Num {
-        console.log(this.jsValue)
         return this.jsValue.reduce((p: Type, c: Type) => p.toNum().add(c), new Num(0))
     }
 
@@ -1001,6 +1154,14 @@ class SymbolTable {
     }
     setupDefaultFunctions() {
 
+        this.symbols.set("eval", new Func(code => {
+            if(!(code instanceof Code)) {
+                return new Num(0)
+            }
+            let int = new Interpreter(code.code, this)
+            return int.interpret()
+        }))
+
         this.symbols.set("len", new Func(n => {
             if (!(n instanceof Str) && !(n instanceof Arr)) {
                 return new Num(0)
@@ -1013,7 +1174,6 @@ class SymbolTable {
         }))
 
         this.symbols.set("join", new Func((arr, by) => {
-            console.log(arr, by)
             if (!(arr instanceof Arr)) {
                 return new Num(0)
             }
@@ -1385,6 +1545,10 @@ class Interpreter {
         return new Str(node.value)
     }
 
+    EscapedNode(node: EscapedNode) {
+        return new Code(new ProgramNode(node.value))
+    }
+
     WordNode(node: WordNode) {
         if (this.symbolTable.get(node.value)) {
             return this.symbolTable.get(node.value)
@@ -1403,34 +1567,69 @@ class Interpreter {
 
     BinOpNode(node: BinOpNode) {
         let left = this.interpretNode(node.left)
-        let right = this.interpretNode(node.right)
 
         if (node.operator.ty === "Add") {
+            let right = this.interpretNode(node.right)
             return left.add(right)
         } else if (node.operator.ty === "Sub") {
+            let right = this.interpretNode(node.right)
             return left.sub(right)
         } else if (node.operator.ty === "Mul") {
+            let right = this.interpretNode(node.right)
             return left.mul(right)
         } else if (node.operator.ty === "Div") {
+            let right = this.interpretNode(node.right)
             return left.div(right)
         } else if (node.operator.ty === "DEq") {
+            let right = this.interpretNode(node.right)
             return left.eq(right)
         } else if (node.operator.ty === "Lt") {
+            let right = this.interpretNode(node.right)
             return left.lt(right)
         } else if (node.operator.ty === "Gt") {
+            let right = this.interpretNode(node.right)
             return left.gt(right)
         } else if (node.operator.ty === "Ge") {
+            let right = this.interpretNode(node.right)
             if (left.gt(right) || left.eq(right)) {
                 return new Num(1)
             }
             return new Num(0)
         } else if (node.operator.ty === "Le") {
+            let right = this.interpretNode(node.right)
             if (left.lt(right) || left.eq(right)) {
                 return new Num(1)
             }
             return new Num(0)
+        } else if (node.operator.ty === "Word") {
+            switch (node.operator.value) {
+                case "and": {
+                    let right = this.interpretNode(node.right)
+                    return new Num(left.truthy() && right.truthy() ? 1 : 0)
+                }
+                case "or":
+                    if (!left.truthy) {
+                        let right = this.interpretNode(node.right)
+                        return new Num(right.truthy() ? 1 : 0)
+                    }
+                    return new Num(0)
+                case "xor": {
+                    let right = this.interpretNode(node.right)
+                    if((left || right) && !(left && right)) {
+                        return new Num(1)
+                    }
+                    return new Num(0)
+                }
+                case "nand": {
+                    let right = this.interpretNode(node.right)
+                    if(!(left && right)) {
+                        return new Num(1)
+                    }
+                    return new Num(0)
+                }
+            }
         }
-        return right
+        return this.interpretNode(node.right)
     }
 
     PipeFunNode(node: PipeFunNode) {
@@ -1440,18 +1639,18 @@ class Interpreter {
         }
 
         let compiledFuncs: [Type, keyof typeof TT][] = []
-        for(let f of node.funs) {
+        for (let f of node.funs) {
             compiledFuncs.push([this.interpretNode(f), f.paramNames[0].ty])
         }
 
         let newItems = []
-        for(let item of input.jsValue) {
+        for (let item of input.jsValue) {
             let finalItem = item
             let shouldAdd = true
-            for(let [f, ty] of compiledFuncs) {
+            for (let [f, ty] of compiledFuncs) {
                 let res = f.call([finalItem])
-                if(ty === "FilterArrow") {
-                    if(!res.truthy()) {
+                if (ty === "FilterArrow") {
+                    if (!res.truthy()) {
                         shouldAdd = false
                         break
                     }
@@ -1459,7 +1658,7 @@ class Interpreter {
                     finalItem = res
                 }
             }
-            if(shouldAdd)
+            if (shouldAdd)
                 newItems.push(finalItem)
         }
         return new Arr(newItems)

@@ -38,7 +38,9 @@ const modeScripting: DisplayMode = {
 run.onclick = function() {
     const script = scriptBox.value
 
-    console.log(script)
-    const value = parseExpression(script, new SymbolTable)
+    let tbl = new SymbolTable()
+    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Obj(v))))
+
+    const value = parseExpression(script, tbl)
     scriptOutput.append(value.jsStr())
 }
