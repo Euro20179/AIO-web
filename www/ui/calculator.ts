@@ -2032,8 +2032,9 @@ class Interpreter {
     }
 
     interpretNode(node: NodePar, pipeValue?: Type): Type {
-        //@ts-ignore
-        return this[node.constructor.name](node, pipeValue)
+        let val = this[node.constructor.name](node, pipeValue)
+        this.symbolTable.set("_1", val)
+        return val
     }
 
     ErrorNode(node: ErrorNode) {
