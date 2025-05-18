@@ -4,7 +4,6 @@ const scriptOutput = document.getElementById("script-execute-output") as HTMLDiv
 
 const modeScripting: DisplayMode = {
     add(entry) {
-        console.log(mode, mode === modeScripting, entry)
         if (mode !== modeScripting) return
         const e = renderDisplayItem(entry.ItemId, scriptOutput)
         e.style.display = "block"

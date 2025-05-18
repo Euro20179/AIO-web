@@ -25,6 +25,7 @@ const TT = {
 
 const keywords = [
     "let", "var", "fun",
+    "and", "or",
     "for",
     "rav",
     "rof",
@@ -127,6 +128,16 @@ class BinOpNode extends NodePar {
         this.left = left;
         this.operator = operator;
         this.right = right;
+    }
+}
+
+class PipeFunNode extends NodePar {
+    input: NodePar
+    funs: FuncDefNode[]
+    constructor(input: NodePar, funs: FuncDefNode[]) {
+        super()
+        this.input = input
+        this.funs = funs
     }
 }
 
@@ -504,12 +515,16 @@ class Parser {
     pipeOPS() {
         let left = this.comparison()
         let op = this.curTok()
+        let funs = []
         while (["TransformArrow", "FilterArrow"].includes(op?.ty)) {
             this.next()
-            let right = this.pipeOPS()
-            let f = new FuncDefNode(new Token("Word", ""), right, [])
-            left = new BinOpNode(left, op, f)
+            let right = this.comparison()
+            let f = new FuncDefNode(new Token("Word", ""), right, [op])
+            funs.push(f)
             op = this.curTok()
+        }
+        if(funs.length) {
+            return new PipeFunNode(left, funs)
         }
         return left
     }
@@ -905,6 +920,9 @@ class Num extends Type {
         if (params.length > 1) {
             console.error("Multiple values to multiply number by")
             return new Num(this.jsValue)
+        }
+        if (params.length < 1) {
+            return this
         }
         return new Num(this.jsValue * params[0].toNum().jsValue)
     }
@@ -1401,34 +1419,40 @@ class Interpreter {
                 return new Num(1)
             }
             return new Num(0)
-        } else if (node.operator.ty === "TransformArrow") {
-            //if the input is not an Arr, we are within a nested map (or the user is bad)
-            //if the former, the root caller (TransformArrow for loop) is waiting for THIS child's result to add to the list
-            if (!(left instanceof Arr)) {
-                return right.call([left])
-            }
-            let items = []
-            //TransformArrow for loop
-            for (let item of left.jsValue) {
-                items.push(right.call([item]))
-            }
-            return new Arr(items)
-        } else if (node.operator.ty === "FilterArrow") {
-            //if the input is not an Arr, we are within a nested filter (or the user is bad)
-            //if the former, the root caller (FilterArrow for loop) is waiting for THIS child's result to add to the list
-            if (!(left instanceof Arr)) {
-                return right.call([left])
-            }
-            let items = []
-            //FilterArrow for loop
-            for (let item of left.jsValue) {
-                if (right.call([item]).truthy()) {
-                    items.push(item)
-                }
-            }
-            return new Arr(items)
         }
         return right
+    }
+
+    PipeFunNode(node: PipeFunNode) {
+        let input = this.interpretNode(node.input)
+        if (!(input instanceof Arr)) {
+            return new Num(0)
+        }
+
+        let compiledFuncs: [Type, keyof typeof TT][] = []
+        for(let f of node.funs) {
+            compiledFuncs.push([this.interpretNode(f), f.paramNames[0].ty])
+        }
+
+        let newItems = []
+        for(let item of input.jsValue) {
+            let finalItem = item
+            let shouldAdd = true
+            for(let [f, ty] of compiledFuncs) {
+                let res = f.call([finalItem])
+                if(ty === "FilterArrow") {
+                    if(!res.truthy()) {
+                        shouldAdd = false
+                        break
+                    }
+                } else if (ty === "TransformArrow") {
+                    finalItem = res
+                }
+            }
+            if(shouldAdd)
+                newItems.push(finalItem)
+        }
+        return new Arr(newItems)
     }
 
     PipeNode(node: PipeNode) {
