@@ -30,8 +30,12 @@ const modeScripting: DisplayMode = {
         scriptOutput.innerHTML = ""
     },
 
-    put(html: string) {
-        scriptOutput.innerHTML += html
+    put(html: string | HTMLElement | ShadowRoot) {
+        if(typeof html === 'string') {
+            scriptOutput.innerHTML += html
+        } else {
+            scriptOutput.append(html)
+        }
     }
 }
 

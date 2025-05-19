@@ -1695,8 +1695,12 @@ class SymbolTable {
 
         this.symbols.set("put", new Func((...values) => {
             if ("put" in mode) {
-                for (let str of values.map(v => v.jsStr())) {
-                    mode.put(str)
+                for (let item of values) {
+                    if(item instanceof Elem) {
+                        mode.put(item.el)
+                    } else {
+                        mode.put(item.jsStr())
+                    }
                 }
                 return new Str("")
             }
@@ -1738,6 +1742,21 @@ class SymbolTable {
             }
             renderSidebarItem(entry)
             return new Num(0)
+        }))
+
+        this.symbols.set("ui_sidebarrender", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+            let frag = document.createDocumentFragment()
+            let el = renderSidebarItem(entry, frag, { renderImg: true })
+            return new Elem(el)
         }))
 
         this.symbols.set("ui_select", new Func((id) => {

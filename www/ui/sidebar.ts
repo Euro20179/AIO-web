@@ -35,7 +35,7 @@ function refreshSidebarItem(item: InfoEntry) {
     }
 
     let meta = findMetadataById(item.ItemId)
-    if(meta)
+    if (meta)
         updateSidebarThumbnail(item.ItemId, meta?.Thumbnail)
 }
 
@@ -91,7 +91,7 @@ function sidebarEntryOpenOne(item: InfoEntry) {
 
 function updateSidebarThumbnail(id: bigint, src: string) {
     const elem = sidebarItems.querySelector(`[data-entry-id="${id}"]`)
-    if(!elem) return
+    if (!elem) return
     let img = elem.shadowRoot?.querySelector("img") as HTMLImageElement
     img.src = fixThumbnailURL(src)
 }
@@ -99,17 +99,18 @@ function updateSidebarThumbnail(id: bigint, src: string) {
 /**
   * @description below is an itemid that the item gets rendered below
 */
-function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems, below?: string) {
+function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems, options?: {
+    below?: string,
+    renderImg?: boolean
+}) {
     let elem = document.createElement("sidebar-entry")
-
-    sidebarObserver.observe(elem)
 
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
     if (!user || !meta) return elem
 
-    if(below) {
-        const renderBelow = sidebarParent.querySelector(`[data-entry-id="${below}"]`) as HTMLElement
+    if (options?.below) {
+        const renderBelow = sidebarParent.querySelector(`[data-entry-id="${options.below}"]`) as HTMLElement
         renderBelow?.insertAdjacentElement("afterend", elem)
     } else {
         sidebarParent.append(elem)
@@ -125,12 +126,18 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
                 sidebarEntryOpenMultiple(item, mode)
             }
         })
+
+        if (options?.renderImg) {
+            img.src = meta.Thumbnail
+        } else {
+            sidebarObserver.observe(elem)
+        }
     }
 
     let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
-    if(title) {
+    if (title) {
         title.onchange = function() {
-            if(title.value)
+            if (title.value)
                 api_updateInfoTitle(item.ItemId, title.value)
         }
     }
@@ -156,7 +163,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 }
 
 function renderSidebar(entries: InfoEntry[]) {
-    if(!entries.length) return
+    if (!entries.length) return
 
     if (viewAllElem.checked) {
         selectItemList(entries, mode)
@@ -165,7 +172,7 @@ function renderSidebar(entries: InfoEntry[]) {
     }
     clearSidebar()
     for (let i = 0; i < entries.length; i++) {
-            renderSidebarItem(entries[i], sidebarItems)
+        renderSidebarItem(entries[i], sidebarItems)
     }
 }
 

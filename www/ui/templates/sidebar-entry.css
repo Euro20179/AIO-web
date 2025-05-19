@@ -14,11 +14,6 @@
 :host(sidebar-entry) {
     height: 100%;
 
-    @media (width >=800px) {
-        border-top: 1px solid white;
-        border-bottom: 1px solid white;
-    }
-
     @media (width < 800px) {
         border-left: 1px solid white;
         border-right: 1px solid white;
@@ -31,7 +26,7 @@
     [part="root"] {
         container-type: inline-size;
 
-        height: 20cqb;
+        height: minmax(fit-content, 20cqb);
         align-content: center;
 
         overflow: hidden;

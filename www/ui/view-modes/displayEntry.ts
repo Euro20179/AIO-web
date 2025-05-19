@@ -1442,7 +1442,7 @@ function copyThis(item: InfoEntry) {
                     globalsNewUi.events.push(eventCopy)
                 }
                 mode.add(itemCopy, true)
-                renderSidebarItem(itemCopy, sidebarItems, String(item.ItemId))
+                renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
             })
             .catch(console.error)
     })
