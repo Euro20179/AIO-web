@@ -2,9 +2,9 @@ const calcItems = document.getElementById("calc-items") as HTMLDivElement
 const expressionInput = document.getElementById("calc-expression") as HTMLTextAreaElement
 
 const modeCalc: DisplayMode = {
-    add(entry, updateStats = true) {
+    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
         updateStats && changeResultStatsWithItem(entry)
-        renderCalcItem(entry)
+        return renderCalcItem(entry, parent)
     },
 
     sub(entry, updateStats = true) {
@@ -96,11 +96,11 @@ function removecCalcItem(item: InfoEntry) {
 }
 
 
-function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems) {
+function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems): HTMLElement {
     let el = document.createElement("calc-entry")
 
     let root = el.shadowRoot
-    if (!root) return
+    if (!root) return el
 
     el.setAttribute("data-item-id", String(item.ItemId))
 
@@ -118,6 +118,8 @@ function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment 
     parent.append(el)
     el.setAttribute("data-expression-output", String(val.jsStr()))
     el.setAttribute("data-item-id", String(item.ItemId))
+
+    return el
 }
 
 function sortCalcDisplay() {

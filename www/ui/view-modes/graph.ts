@@ -443,6 +443,7 @@ const modeGraphView: DisplayMode = {
     add(entry, updateStats = true) {
         updateStats && changeResultStatsWithItem(entry)
         makeGraphs(globalsNewUi.selectedEntries)
+        return document.getElementById("graph-output") as HTMLElement
     },
 
     sub(entry, updateStats = true) {

@@ -128,7 +128,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
         })
 
         if (options?.renderImg) {
-            img.src = meta.Thumbnail
+            img.src = fixThumbnailURL(meta.Thumbnail)
         } else {
             sidebarObserver.observe(elem)
         }

@@ -1,6 +1,6 @@
 const galleryItems = document.getElementById("gallery-items") as HTMLDivElement
 
-function renderGalleryItem(item: InfoEntry, parent = galleryItems){
+function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = galleryItems){
     let el = new Image()
     let meta = findMetadataById(item.ItemId)
     if(meta?.Thumbnail) {
@@ -10,6 +10,7 @@ function renderGalleryItem(item: InfoEntry, parent = galleryItems){
     el.setAttribute("data-item-id", String(item.ItemId))
 
     parent.appendChild(el)
+    return el
 }
 
 function removeGalleryItem(entry: InfoEntry) {
@@ -18,9 +19,9 @@ function removeGalleryItem(entry: InfoEntry) {
 }
 
 const modeGallery: DisplayMode = {
-    add(entry, updateStats = true) {
+    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
         updateStats && changeResultStatsWithItem(entry)
-        renderGalleryItem(entry)
+        return renderGalleryItem(entry, parent)
     },
 
     sub(entry, updateStats = true) {

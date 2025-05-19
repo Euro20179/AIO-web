@@ -452,6 +452,7 @@
 
         #script-execute-output {
             grid-area: output;
+            widtH: 100%;
         }
 
         #script {

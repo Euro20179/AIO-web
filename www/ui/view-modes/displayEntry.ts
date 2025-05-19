@@ -287,9 +287,9 @@ const observer = new IntersectionObserver(onIntersection, {
 })
 
 const modeDisplayEntry: DisplayMode = {
-    add(entry, updateStats = true) {
+    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
         updateStats && changeResultStatsWithItem(entry)
-        renderDisplayItem(entry.ItemId)
+        return renderDisplayItem(entry.ItemId, parent)
     },
 
     sub(entry, updateStats = true) {
@@ -353,6 +353,13 @@ const modeDisplayEntry: DisplayMode = {
             api_addEntryTags(item.ItemId, tagsList)
         }
         //FIXME: tags do not update immediately
+    },
+
+    put(html: string | HTMLElement | ShadowRoot) {
+        if(typeof html === 'string') {
+            return
+        }
+        displayItems.append(html)
     }
 }
 
@@ -756,7 +763,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         if (!script) continue
 
         let symbols = new SymbolTable()
-        symbols.set("root", new Elem(root))
+        symbols.set("root", new Elem(root as unknown as HTMLElement))
         symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
         let res = parseExpression(script, symbols).jsStr()
 
@@ -1048,7 +1055,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
-
 
     let user = findUserEntryById(itemId) as UserEntry
 

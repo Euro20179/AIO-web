@@ -997,8 +997,8 @@ class Type {
 }
 
 class Elem extends Type {
-    el: HTMLElement | ShadowRoot
-    constructor(element: HTMLElement | ShadowRoot) {
+    el: HTMLElement
+    constructor(element: HTMLElement) {
         super(element)
         this.el = element
     }
@@ -1018,6 +1018,15 @@ class Elem extends Type {
 
     toStr(): Str {
         return new Str(this.jsStr())
+    }
+
+    setattr(name: Type, value: Type): Type {
+        this.el.setAttribute(name.jsStr(), value.jsStr())
+        return this
+    }
+
+    getattr(prop: Type): Type {
+        return new Str(this.el.getAttribute(prop.jsStr()))
     }
 }
 
@@ -1694,7 +1703,7 @@ class SymbolTable {
         }))
 
         this.symbols.set("put", new Func((...values) => {
-            if ("put" in mode) {
+            if (mode.put) {
                 for (let item of values) {
                     if(item instanceof Elem) {
                         mode.put(item.el)
@@ -1774,8 +1783,27 @@ class SymbolTable {
                 return new Str(`${id} not found`)
             }
 
-            selectItem(entry, mode)
-            return new Str("")
+            let el = selectItem(entry, mode)
+            return new Elem(el)
+        }))
+
+        this.symbols.set("ui_render", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            let frag = document.createDocumentFragment()
+
+            let el = selectItem(entry, mode, true, frag)
+
+            return new Elem(el)
         }))
 
         this.symbols.set("ui_deselect", new Func((id) => {
@@ -1838,6 +1866,33 @@ class SymbolTable {
                 return new Num(0)
             }
             return new Elem(el)
+        }))
+
+        this.symbols.set("elem_getshadow", new Func(root => {
+            if(!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+
+            let div = document.createElement("div")
+            let shadow = root.el.shadowRoot
+            if(!shadow) {
+                return new Num(0)
+            }
+            div.innerHTML = shadow.innerHTML
+            return new Elem(div)
+        }))
+
+        this.symbols.set("elem_setshadow", new Func((root, tobeShadow) => {
+            if(!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+            if(!(tobeShadow instanceof Elem)) {
+                return new Str("shadow must be an element")
+            }
+
+            let shadow = root.el.shadowRoot ?? root.el.attachShadow({ mode: "open" })
+            shadow.replaceChildren(tobeShadow.el)
+            return root
         }))
 
         this.symbols.set("elem_sethtml", new Func((root, html) => {

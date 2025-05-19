@@ -1,12 +1,13 @@
 
 type DisplayMode = {
-    add: (entry: InfoEntry, updateStats?: boolean) => any
+    add: (entry: InfoEntry, updateStats?: boolean, parent?: HTMLElement | DocumentFragment) => HTMLElement
     sub: (entry: InfoEntry, updateStats?: boolean) => any
     addList: (entry: InfoEntry[], updateStats?: boolean) => any
     subList: (entry: InfoEntry[], updateStats?: boolean) => any
     refresh?: (id: bigint) => any
     putSelectedInCollection?: () => any
     addTagsToSelected?: () => any
+    put?: (html: string | HTMLElement | ShadowRoot) => any
     [key: string]: any
 }
 
@@ -26,9 +27,9 @@ let idx = modeOutputIds.indexOf(location.hash.slice(1))
 
 let mode = modes[idx]
 
-function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true) {
+function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true, parent?: HTMLElement | DocumentFragment): HTMLElement {
     globalsNewUi.selectedEntries.push(item)
-    mode.add(item, updateStats)
+    return mode.add(item, updateStats, parent)
 }
 
 function deselectItem(item: InfoEntry, updateStats: boolean = true) {
