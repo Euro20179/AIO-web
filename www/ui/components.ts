@@ -4,7 +4,7 @@ function fillElement(root: HTMLElement | ShadowRoot , selector: string, text: st
         return
     }
     if (fillmode === "append") {
-        elem.innerText = text
+        elem.textContent = text
     } else if (fillmode.match(/attribute=.+/)) {
         let attribute = fillmode.split("=")[1]
         elem.setAttribute(attribute, text)
@@ -49,10 +49,11 @@ customElements.define("display-entry", class extends HTMLElement {
 })
 
 customElements.define("sidebar-entry", class extends HTMLElement {
+    root: ShadowRoot
     constructor() {
         super()
-        let template = /**@type {HTMLTemplateElement}*/(document.getElementById("sidebar-entry"))
-        let content = /**@type {HTMLElement}*/(template.content.cloneNode(true))
+        let template = (document.getElementById("sidebar-entry")) as HTMLTemplateElement
+        let content = template.content.cloneNode(true) as HTMLElement
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
         this.root = root
@@ -63,12 +64,7 @@ customElements.define("sidebar-entry", class extends HTMLElement {
 customElements.define("entries-statistic", class extends HTMLElement {
     static observedAttributes = ["data-value"]
 
-    /**
-    * @param {string} name
-    * @param {string} ov
-    * @param {string} nv
-    */
-    attributeChangedCallback(name, ov, nv) {
+    attributeChangedCallback(name: string, ov: string, nv: string) {
         if (name != "data-value") return
         this.innerText = String(Math.round(Number(nv) * 100) / 100)
     }
@@ -76,23 +72,19 @@ customElements.define("entries-statistic", class extends HTMLElement {
 
 customElements.define("calc-entry", class extends HTMLElement {
     static observedAttributes = ["data-expression-output"]
+    root: ShadowRoot
 
     constructor() {
         super()
-        let template = /**@type {HTMLTemplateElement}*/(document.getElementById("calc-entry"))
-        let content = /**@type {HTMLElement}*/(template.content.cloneNode(true))
+        let template = document.getElementById("calc-entry") as HTMLTemplateElement
+        let content = template.content.cloneNode(true)
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
         this.root = root
 
     }
 
-    /**
-     * @param {string} name
-     * @param {string} ov
-     * @param {string} nv
-     */
-    attributeChangedCallback(name, ov, nv) {
+    attributeChangedCallback(name: string, ov: string, nv: string) {
         if (name !== "data-expression-output") return
 
         let el = this.root.getElementById("expression-output")

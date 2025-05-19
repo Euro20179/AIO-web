@@ -50,7 +50,7 @@ const modeCalc: DisplayMode = {
         }
         Promise.all(waiting).then(res => {
             for (let r of res) {
-                console.log(r.status)
+                console.log(r?.status)
             }
         })
     },

@@ -1444,7 +1444,7 @@ class SymbolTable {
                 return new Num(1)
             }
 
-            return new Arr(list.jsValue.sort((a, b) => fn.call([a, b]).toNum().jsValue))
+            return new Arr(list.jsValue.sort((a: Type, b: Type) => fn.call([a, b]).toNum().jsValue))
         }))
 
         this.symbols.set("slice", new Func((list, start, end) => {
@@ -1842,8 +1842,8 @@ class SymbolTable {
                 return new Str("ui_setresults expects array")
             }
             let results = newResults.jsValue
-                            .filter(v => v instanceof Entry && probablyInfoEntry(v.jsValue))
-                            .map(v => v.jsValue)
+                            .filter((v: Type) => v instanceof Entry && probablyInfoEntry(v.jsValue))
+                            .map((v: Type) => v.jsValue)
             globalsNewUi.results = results
             clearSidebar()
             renderSidebar(results)
@@ -1958,9 +1958,11 @@ class SymbolTable {
 
             api_setItem("", entry.jsValue).then(res => {
                 if (res?.status !== 200) {
-                    mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
-                } else {
-                    mode.put(`Updated: ${entry.jsValue.En_Title}`)
+                    if(mode.put)
+                        mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
+                } else{
+                    if(mode.put)
+                        mode.put(`Updated: ${entry.jsValue.En_Title}`)
                     updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: entry.jsValue
@@ -1979,9 +1981,11 @@ class SymbolTable {
             api_setItem("metadata/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
                 if (res?.status !== 200) {
-                    mode.put(`Failed to update: ${info.En_Title}'s metadata`)
+                    if(mode.put)
+                        mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 } else {
-                    mode.put(`Updated: ${info.En_Title}`)
+                    if(mode.put)
+                        mode.put(`Updated: ${info.En_Title}`)
                     updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: info
@@ -2003,9 +2007,11 @@ class SymbolTable {
             api_setItem("engagement/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
                 if (res?.status !== 200) {
-                    mode.put(`Failed to update: ${info.En_Title}'s user entry`)
+                    if(mode.put)
+                        mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 } else {
-                    mode.put(`Updated: ${info.En_Title}`)
+                    if(mode.put)
+                        mode.put(`Updated: ${info.En_Title}`)
                     updateInfo({
                         entries: {
                             [String(entry.jsValue.ItemId)]: info
