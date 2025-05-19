@@ -1004,11 +1004,12 @@ class Elem extends Type {
     }
 
     add(right: Type): Type {
-        if(right instanceof Elem) {
-            this.el.appendChild(right.jsValue)
-            return this
+        if(!(right instanceof Elem)) {
+            return new Num(0)
         }
-        return new Num(0)
+
+        this.el.appendChild(right.el)
+        return this
     }
 
     jsStr(): string {
@@ -1799,6 +1800,48 @@ class SymbolTable {
             globalsNewUi.results = results
             clearSidebar()
             renderSidebar(results)
+            return new Num(0)
+        }))
+
+        this.symbols.set("ui_selected", new Func(() => {
+            return new Arr(globalsNewUi.selectedEntries.map(v => new Entry(v)))
+        }))
+
+        this.symbols.set("elem_byid", new Func((root, id) => {
+            if(!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+
+            let selectorId = id.jsStr()
+
+            let el = root.el.querySelector(`[id="${selectorId}"]`)
+            if(!el || !(el instanceof HTMLElement)) {
+                return new Num(0)
+            }
+            return new Elem(el)
+        }))
+
+        this.symbols.set("elem_sethtml", new Func((root, html) => {
+            if(!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+            let newHTML = html.jsStr()
+            root.el.innerHTML = newHTML
+            return new Str(newHTML)
+        }))
+
+        this.symbols.set("elem_create", new Func(tagName => {
+            let name = tagName.jsStr()
+            return new Elem(document.createElement(name))
+        }))
+
+        this.symbols.set("elem_append", new Func((parent, child) => {
+            if(!(parent instanceof Elem) || !(child instanceof Elem)) {
+                return new Str("parent, and child must be Elem")
+            }
+
+            parent.el.append(child.el)
+            return parent
         }))
 
         this.symbols.set("uname2uid", new Func((name, cb) => {
