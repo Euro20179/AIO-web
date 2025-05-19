@@ -1682,10 +1682,11 @@ class SymbolTable {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
             loadSearch().then(() => {
-                cb?.call([])
+                cb?.call([new Arr(globalsNewUi.results.map(v => new Entry(v)))])
             }).catch(console.error)
             return new Num(0)
         }))
+
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
             if (!modeOutputIds.includes(name)) {
@@ -1694,17 +1695,13 @@ class SymbolTable {
             mode_setMode(name)
             return new Num(0)
         }))
-        this.symbols.set("ui_clearitems", new Func(() => {
-            clearItems()
-            return new Num(0)
-        }))
 
-        this.symbols.set("ui_clearsidebar", new Func(() => {
+        this.symbols.set("ui_sidebarclear", new Func(() => {
             clearSidebar()
             return new Num(0)
         }))
 
-        this.symbols.set("ui_opensidebarbyid", new Func((id) => {
+        this.symbols.set("ui_sidebarselect", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
@@ -1718,7 +1715,7 @@ class SymbolTable {
             return new Num(0)
         }))
 
-        this.symbols.set("ui_openbyid", new Func((id) => {
+        this.symbols.set("ui_select", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
@@ -1737,11 +1734,47 @@ class SymbolTable {
             return new Str("")
         }))
 
+        this.symbols.set("ui_deselect", new Func((id) => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
 
-        this.symbols.set("setuidstate", new Func((newUid) => {
+            if (!mode_isSelected(jsId)) {
+                return new Str(`${id} is not selected`)
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            deselectItem(entry)
+            return new Str("")
+        }))
+
+        this.symbols.set("ui_clear", new Func(() => {
+            clearItems()
+            return new Num(0)
+        }))
+
+
+        this.symbols.set("ui_setuid", new Func((newUid) => {
             const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
             uidSelector.value = newUid.toNum().jsStr()
             return new Str(uidSelector.value)
+        }))
+
+        this.symbols.set("ui_setresults", new Func(newResults => {
+            if(!(newResults instanceof Arr)) {
+                return new Str("ui_setresults expects array")
+            }
+            let results = newResults.jsValue
+                            .filter(v => v instanceof Entry && probablyInfoEntry(v.jsValue))
+                            .map(v => v.jsValue)
+            globalsNewUi.results = results
+            clearSidebar()
+            renderSidebar(results)
         }))
 
         this.symbols.set("uname2uid", new Func((name, cb) => {
