@@ -996,6 +996,30 @@ class Type {
     }
 }
 
+class Elem extends Type {
+    el: HTMLElement | ShadowRoot
+    constructor(element: HTMLElement | ShadowRoot) {
+        super(element)
+        this.el = element
+    }
+
+    add(right: Type): Type {
+        if(right instanceof Elem) {
+            this.el.appendChild(right.jsValue)
+            return this
+        }
+        return new Num(0)
+    }
+
+    jsStr(): string {
+        return this.el.innerHTML
+    }
+
+    toStr(): Str {
+        return new Str(this.jsStr())
+    }
+}
+
 class Code extends Type {
     code: ProgramNode
     constructor(code: ProgramNode) {

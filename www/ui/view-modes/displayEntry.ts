@@ -750,6 +750,25 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
         }
     }
+
+    for (let elem of root.querySelectorAll("script[type=\"application/x-aiol\"]")) {
+        let script = elem.textContent
+        if (!script) continue
+
+        let symbols = new SymbolTable()
+        symbols.set("root", new Elem(root))
+        symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
+        let res = parseExpression(script, symbols).jsStr()
+
+        let outputId = elem.getAttribute("data-output")
+        if (outputId) {
+            let outputEl = root.querySelector(`[id="${outputId}"]`)
+            if (outputEl) {
+                outputEl.innerHTML = res
+            }
+        }
+        console.log(res)
+    }
 }
 
 /**
