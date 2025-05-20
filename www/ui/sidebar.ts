@@ -23,20 +23,20 @@ function clearSidebar() {
     }
 }
 
-function refreshSidebarItem(item: InfoEntry) {
-    let el = document.querySelector(`sidebar-entry[data-entry-id="${item.ItemId}"]`) as HTMLElement
+function refreshSidebarItem(itemId: bigint) {
+    let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
+    let item = findInfoEntryById(itemId)
     if (el) {
-        let user = findUserEntryById(item.ItemId)
-        let meta = findMetadataById(item.ItemId)
-        if (!user || !meta) return
+        let user = findUserEntryById(itemId)
+        let meta = findMetadataById(itemId)
         changeSidebarItemData(item, user, meta, el)
     } else {
         renderSidebarItem(item)
     }
 
-    let meta = findMetadataById(item.ItemId)
+    let meta = findMetadataById(itemId)
     if (meta)
-        updateSidebarThumbnail(item.ItemId, meta?.Thumbnail)
+        updateSidebarThumbnail(itemId, meta?.Thumbnail)
 }
 
 

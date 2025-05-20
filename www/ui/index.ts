@@ -286,7 +286,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
             globalsNewUi.entries[id].info = info
         }
 
-        refreshSidebarItem(findInfoEntryById(BigInt(id)))
+        refreshSidebarItem(BigInt(id))
         if(mode.refresh) {
             mode.refresh(BigInt(id))
         }
