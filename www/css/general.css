@@ -10,6 +10,8 @@
     body {
         background: var(--main);
         color: var(--text-color);
+
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     input,
