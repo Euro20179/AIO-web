@@ -1,3 +1,5 @@
+const displayItems = document.getElementById("entry-output") as HTMLElement
+
 let displayQueue: InfoEntry[] = []
 
 async function itemIdentification(form: HTMLFormElement) {

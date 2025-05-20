@@ -105,8 +105,9 @@
     <div id="main" class="flex column">
         <div id="main-ui" class="overflow">
             <div id="search-area">
-                <div class="flex row">
-                </div>
+
+                <button popovertarget="new-entry" type="button" id="new-entry-button">➕︎</button>
+
                 <form action="javascript:loadSearch()" id="sidebar-form">
                     <a href="/usage#searching" id="help-link">?</a>
                     <input type="text" name="search-query" placeholder="search query">
@@ -129,19 +130,18 @@
                     </select>
                     <button type="submit">sort'n'search</button>
                 </form>
-                <button popovertarget="new-entry" type="button" id="new-entry-button">➕︎</button>
                 <div class="result-stats" id="result-stats">
                     <entries-statistic data-stat-name="results" class="stat"></entries-statistic>
                     <entries-statistic data-stat-name="totalCost" class="stat"></entries-statistic>
                     <entries-statistic data-stat-name="count" data-value="" class="stat"></entries-statistic>
-                    <select name="view-toggle" id="view-toggle" class="view-toggle">
-                        <option value="entry-output">Normal mode</option>
-                        <option value="graph-output">Graph mode</option>
-                        <option value="calc-output">Calc mode</option>
-                        <option value="gallery-output">Gallery mode</option>
-                        <option value="script-output">Script mode</option>
-                    </select>
                 </div>
+                <select name="view-toggle" id="view-toggle" class="view-toggle">
+                    <option value="entry-output">Normal mode</option>
+                    <option value="graph-output">Graph mode</option>
+                    <option value="calc-output">Calc mode</option>
+                    <option value="gallery-output">Gallery mode</option>
+                    <option value="script-output">Script mode</option>
+                </select>
             </div>
             <nav class="sidebar overflow" id="sidebar">
                 <div class="sidebar--navigation" id="sidebar-navigation">
@@ -168,7 +168,8 @@
                     <div id="script-root">
                         <div style="grid-area: run-button;">
                             <button id="script-execute">▶</button>
-                            <label for="script-execute-output-clear">clear on run <input type="checkbox" id="script-execute-output-clear" style="vertical-align: middle;" checked></label>
+                            <label for="script-execute-output-clear">clear on run <input type="checkbox"
+                                    id="script-execute-output-clear" style="vertical-align: middle;" checked></label>
                         </div>
                         <textarea id="script"></textarea>
                         <output id="script-execute-output" style="font-family: monospace"></output>

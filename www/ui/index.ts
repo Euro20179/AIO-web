@@ -4,8 +4,6 @@ type ClientSearchFilters = {
     sortBy: string
 }
 
-const displayItems = document.getElementById("entry-output") as HTMLElement
-
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
@@ -57,7 +55,12 @@ let resultStatsProxy = new Proxy({
         if (!Reflect.set(...arguments)) {
             return false
         }
-        let el = statsOutput.querySelector(`[data-stat-name="${String(prop)}"]`) as HTMLElement
+        let el = statsOutput.querySelector(`[data-stat-name="${String(prop)}"]`)
+        if(!el) {
+            el = document.createElement("entries-statistic")
+            el.setAttribute("data-stat-name", String(prop))
+            statsOutput.append(el)
+        }
         el.setAttribute("data-value", String(value))
         return true
     }

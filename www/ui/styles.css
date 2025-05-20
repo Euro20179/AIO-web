@@ -17,8 +17,6 @@
         display: flex;
 
         flex-wrap: wrap;
-
-        grid-area: searching;
     }
 }
 
@@ -160,8 +158,6 @@
             justify-self: end;
         }
 
-        grid-area: new;
-
         width: 50px;
         aspect-ratio: 1 / 1;
     }
@@ -172,9 +168,7 @@
         text-wrap: nowrap;
         overflow-x: auto;
         display: grid;
-        grid-template-areas:
-            "new searching stats";
-        grid-template-columns: min-content 2fr 1fr;
+        grid-template-columns: min-content 1fr 30cqb min-content;
         width: 100%;
 
         border-bottom: 2px solid var(--secondary);
@@ -182,7 +176,7 @@
         @container (width < 115ch) {
             grid-template-areas:
                 "new searching searching"
-                "stats stats stats";
+                "stats stats view-toggle";
         }
 
 
@@ -218,8 +212,6 @@
         display: flex;
         gap: 10px;
         justify-content: end;
-
-        grid-area: stats;
 
         *:not(:last-child) {
             padding-right: 10px;
