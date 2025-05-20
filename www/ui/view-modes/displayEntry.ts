@@ -744,6 +744,18 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         }
     }
 
+    function renderVal(val: Type, output: HTMLElement) {
+        if(val instanceof Elem) {
+            output.append(val.el)
+        } else if (val instanceof Arr) {
+            for(let item of val.jsValue) {
+                renderVal(item, output)
+            }
+        } else {
+            output.innerHTML += val.jsStr()
+        }
+    }
+
     for (let elem of root.querySelectorAll("script[type=\"application/x-aiol\"]")) {
         let script = elem.textContent
         if (!script) continue
@@ -756,13 +768,9 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
         let outputId = elem.getAttribute("data-output")
         if (outputId) {
-            let outputEl = root.querySelector(`[id="${outputId}"]`)
+            let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
             if (outputEl) {
-                if(res instanceof Elem) {
-                    outputEl.replaceChildren(res.el)
-                } else {
-                    outputEl.innerHTML = res.jsStr()
-                }
+                renderVal(res, outputEl)
             }
         }
     }
