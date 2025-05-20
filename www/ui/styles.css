@@ -186,7 +186,6 @@
 
 
         [name="search-query"] {
-            max-width: 500px;
             flex-grow: 1;
         }
 
