@@ -1222,7 +1222,12 @@ class Entry extends Type {
     }
 
     getattr(prop: Type): Type {
-        let v = this.jsValue[prop.jsStr()]
+        let name = prop.jsStr()
+        let v = this.jsValue[name]
+        if(name === "Thumbnail" && probablyMetaEntry(this.jsValue)) {
+            //be nice and dont make the user fix the thumbnail
+            return new Str(fixThumbnailURL(v))
+        }
         switch (typeof v) {
             case 'string':
                 return new Str(v)
@@ -1942,6 +1947,20 @@ class CalcVarTable {
             let newHTML = html.jsStr()
             root.el.innerHTML = newHTML
             return new Str(newHTML)
+        }))
+
+        this.symbols.set("elem_getohtml", new Func(root => {
+            if (!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+            return new Str(root.el.outerHTML)
+        }))
+
+        this.symbols.set("elem_gethtml", new Func(root => {
+            if (!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+            return new Str(root.el.innerHTML)
         }))
 
         this.symbols.set("elem_create", new Func(tagName => {
