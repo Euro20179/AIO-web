@@ -130,10 +130,12 @@
                     </select>
                     <button type="submit">sort'n'search</button>
                 </form>
-                <div class="result-stats" id="result-stats">
-                    <entries-statistic data-stat-name="results" class="stat"></entries-statistic>
-                    <entries-statistic data-stat-name="totalCost" class="stat"></entries-statistic>
-                    <entries-statistic data-stat-name="count" data-value="" class="stat"></entries-statistic>
+                <div style="display: flex; overflow: auto;">
+                    <div class="result-stats" id="result-stats">
+                        <entries-statistic data-stat-name="results" class="stat"></entries-statistic>
+                        <entries-statistic data-stat-name="totalCost" class="stat"></entries-statistic>
+                        <entries-statistic data-stat-name="count" data-value="" class="stat"></entries-statistic>
+                    </div>
                 </div>
                 <select name="view-toggle" id="view-toggle" class="view-toggle">
                     <option value="entry-output">Normal mode</option>

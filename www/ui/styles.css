@@ -211,7 +211,6 @@
 
         display: flex;
         gap: 10px;
-        justify-content: end;
 
         *:not(:last-child) {
             padding-right: 10px;
