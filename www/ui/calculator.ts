@@ -1807,6 +1807,26 @@ class CalcVarTable {
             return new Elem(el)
         }))
 
+        this.symbols.set("ui_toggle", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+            const entry = findInfoEntryById(jsId)
+
+            if (!entry) {
+                return new Str(`${id} not found`)
+            }
+
+            if (mode_isSelected(jsId)) {
+                deselectItem(entry)
+                return new Num(0)
+            } else {
+                selectItem(entry, mode)
+                return new Num(1)
+            }
+        }))
+
         this.symbols.set("ui_select", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
