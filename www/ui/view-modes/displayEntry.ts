@@ -359,6 +359,12 @@ const modeDisplayEntry: DisplayMode = {
             return
         }
         displayItems.append(html)
+    },
+
+    clear() {
+        for(let child of displayItems.querySelectorAll(":not(display-entry)")) {
+            child.remove()
+        }
     }
 }
 
