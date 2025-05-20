@@ -13,7 +13,7 @@ const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") a
 
 const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
 userSelector.onchange = function() {
-    refreshInfo().then(() => loadSearch())
+    refreshInfo(getUidUI()).then(() => loadSearch())
 }
 
 function getUserExtra(user: UserEntry, prop: string) {
@@ -297,12 +297,14 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
     }
 }
 
-async function refreshInfo() {
-    const uid = getUidUI()
-    return Promise.all([
+async function refreshInfo(uid: number) {
+    await Promise.all([
         loadLibraries(),
         loadInfoEntries(),
-        loadUserEvents(uid)
+    ])
+    return Promise.all([
+        loadUserEvents(uid),
+        items_refreshMetadata(uid)
     ])
 }
 
