@@ -907,17 +907,17 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
     //Meta table raw
     let data = meta
+    let mediaDependant
+    try {
+        mediaDependant = JSON.parse(data["MediaDependant"] || "{}")
+    } catch (err) {
+        console.error("Could not parse media dependant meta info json")
+        return
+    }
 
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && viewCount) {
-        let mediaDependant
-        try {
-            mediaDependant = JSON.parse(data["MediaDependant"])
-        } catch (err) {
-            console.error("Could not parse media dependant meta info json")
-            return
-        }
         viewCountEl.setAttribute("data-time-spent", String(Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60 || "unknown"))
         viewCountEl.innerText = String(viewCount)
     }
@@ -925,20 +925,12 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
     //Media dependant
     let type = String(item.Type)
-    let mediaDeptData
-    try {
-        mediaDeptData = JSON.parse(meta.MediaDependant)
-    }
-    catch (err) {
-        console.error("Could not parse json", meta.MediaDependant)
-        return
-    }
 
     if (mediaInfoTbl) {
         //remove the <Media>- part from the key looks ugly
         let modifiedKeys: { [k: string]: string } = {}
-        for (let key in mediaDeptData) {
-            const val = mediaDeptData[key]
+        for (let key in mediaDependant) {
+            const val = mediaDependant[key]
             key = key.split("-").slice(1).join(" ")
             modifiedKeys[key] = val
         }
@@ -949,15 +941,15 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     let userPos = parseInt(user.CurrentPosition)
 
     el.host.setAttribute("data-user-status", user.Status)
-    if (progressEl && "max" in progressEl && "value" in progressEl && mediaDeptData[`${type}-episodes`] && user.Status === "Viewing") {
-        progressEl.max = mediaDeptData[`${type}-episodes`]
+    if (progressEl && "max" in progressEl && "value" in progressEl && mediaDependant[`${type}-episodes`] && user.Status === "Viewing") {
+        progressEl.max = mediaDependant[`${type}-episodes`]
 
         progressEl.value = userPos
 
     }
     if (captionEl) {
-        captionEl.innerText = `${user.CurrentPosition}/${mediaDeptData[`${type}-episodes`]}`
-        captionEl.title = `${Math.round(userPos / parseInt(mediaDeptData[`${type}-episodes`]) * 1000) / 10}%`
+        captionEl.innerText = `${user.CurrentPosition}/${mediaDependant[`${type}-episodes`]}`
+        captionEl.title = `${Math.round(userPos / parseInt(mediaDependant[`${type}-episodes`]) * 1000) / 10}%`
     }
 
     //Current position
