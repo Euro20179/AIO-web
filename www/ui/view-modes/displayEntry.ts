@@ -237,7 +237,7 @@ function onIntersection(entries: IntersectionObserverEntry[]) {
     }
 }
 
-function newEvent(form: HTMLFormElement) {
+function displayEntryNewEvent(form: HTMLFormElement) {
     const data = new FormData(form)
     const name = data.get("name")
     if (name == null) {
