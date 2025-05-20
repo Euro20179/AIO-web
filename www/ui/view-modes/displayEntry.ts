@@ -972,14 +972,6 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         captionEl.title = `${Math.round(userPos / parseInt(mediaDependant[`${type}-episodes`]) * 1000) / 10}%`
     }
 
-    //Current position
-    if (progressEl) {
-        progressEl.title = user.CurrentPosition
-        if ("max" in progressEl && progressEl.max) {
-            progressEl.title = `${user.CurrentPosition}/${progressEl.max}`
-        }
-    }
-
     //relation elements
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
         let relationshipEl = el.getElementById(relationship[0])
