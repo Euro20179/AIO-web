@@ -277,6 +277,14 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 if (!aUInfo || !bUInfo) return 0
                 return bUInfo?.UserRating - aUInfo?.UserRating
             })
+        } else if(sortBy == "added") {
+            entries = entries.sort((a, b) => {
+                let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
+                let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
+                let aAdded = ae?.Timestamp || ae?.After || 0
+                let bAdded = be?.Timestamp || be?.After || 0
+                return bAdded - aAdded
+            })
         } else if (sortBy == "cost") {
             entries = entries.sort((a, b) => {
                 return b.PurchasePrice - a.PurchasePrice
