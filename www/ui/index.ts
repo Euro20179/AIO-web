@@ -16,6 +16,15 @@ userSelector.onchange = function() {
     refreshInfo(getUidUI()).then(() => loadSearch())
 }
 
+const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+sortBySelector.onchange = function() {
+    let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), sortBySelector.value || "user-title")
+    items_setResults(newEntries.map(v => v.ItemId))
+    clearItems()
+    clearSidebar()
+    renderSidebar(newEntries)
+}
+
 function getUserExtra(user: UserEntry, prop: string) {
     return JSON.parse(user.Extra).AIOWeb?.[prop] || null
 }
