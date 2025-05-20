@@ -43,7 +43,7 @@ const modeScripting: DisplayMode = {
 run.onclick = function() {
     const script = scriptBox.value
 
-    let tbl = new SymbolTable()
+    let tbl = new CalculatorSymbolTable()
     tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
 
     //@ts-ignore
