@@ -73,7 +73,8 @@
 
     #sidebar-thumbnail {
         cursor: pointer;
-        height: 70cqi;
+        max-height: 70cqi;
+        max-width: 100cqi;
 
         @media (width < 800px) {
             justify-self: center;
