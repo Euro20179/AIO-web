@@ -43,16 +43,6 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
     user.Extra = JSON.stringify(extra)
 }
 
-function resetResultStats() {
-    for (let node of statsOutput.querySelectorAll(".stat") || []) {
-        node.setAttribute("data-value", "0")
-    }
-    return {
-        totalCost: 0,
-        count: 0
-    }
-}
-
 let resultStatsProxy = new Proxy({
     count: 0,
     totalCost: 0,
@@ -118,8 +108,6 @@ async function loadLibraries() {
 
 async function loadInfoEntries() {
     await items_loadEntries(getUidUI(), false)
-
-    setResultStat("results", Object.keys(globalsNewUi.entries).length)
 
     return globalsNewUi.entries
 }
