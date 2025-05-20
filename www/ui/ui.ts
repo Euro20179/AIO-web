@@ -8,6 +8,12 @@ function getUidUI() {
     return Number(uidSelector.value)
 }
 
+function getSearchDataUI() {
+    let form = document.getElementById("sidebar-form") as HTMLFormElement
+    let data = new FormData(form)
+    return data
+}
+
 function deleteEntryUI(item: InfoEntry) {
     if (!confirm("Are you sure you want to delete this item")) {
         return

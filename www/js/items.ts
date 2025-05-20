@@ -310,6 +310,32 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 let bm = findMetadataById(b.ItemId)
                 return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
             })
+        } else if(sortBy === "user-title") {
+            entries = entries.sort((a, b) => {
+                return a.En_Title < b.En_Title ? 0 : 1
+            })
+        } else if(sortBy === "auto-title") {
+            entries = entries.sort((a, b) => {
+                let am = findMetadataById(a.ItemId)
+                let bm = findMetadataById(b.ItemId)
+                let at = am.Title || am.Native_Title || a.En_Title || a.Native_Title
+                let bt = bm.Title || bm.Native_Title || b.En_Title || b.Native_Title
+                return at < bt ? 0 : 1
+            })
+        } else if(sortBy === "native-title") {
+            entries = entries.sort((a, b) => {
+                let am = findMetadataById(a.ItemId)
+                let bm = findMetadataById(b.ItemId)
+                let at = am.Native_Title || a.Native_Title
+                let bt = bm.Native_Title || b.Native_Title
+                if(at === "") {
+                    return bt ? 1 : 0
+                }
+                if(bt === "") {
+                    return at ? 0 : 1
+                }
+                return at < bt ? 0 : 1
+            })
         }
     }
     return entries

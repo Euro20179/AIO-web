@@ -225,6 +225,7 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
     // return entries.slice(filters.start, filters.end)
 }
 
+//FIXME: onload, sorts that require metadata dont work because the metadata hasn't loaded
 async function loadSearch() {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
 
@@ -364,6 +365,10 @@ async function main() {
         //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
         clearSidebar()
 
+
+        const data = getSearchDataUI()
+        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() || "user-title")
+        items_setResults(newEntries.map(v => v.ItemId))
         for (let item of globalsNewUi.results) {
             mode?.refresh?.(item.ItemId)
             renderSidebarItem(item.info)
@@ -394,9 +399,8 @@ async function main() {
     }
 
     if (initialSearch) {
-        let formData = new FormData()
+        let formData = getSearchDataUI()
         formData.set("search-query", initialSearch)
-        formData.set("sort-by", "rating")
 
         let filters = parseClientsideSearchFiltering(formData)
         let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
@@ -412,15 +416,8 @@ async function main() {
         }
         renderSidebar(entries)
     } else {
-        let tree = Object.values(globalsNewUi.entries).sort((a, b) => {
-            let aUInfo = findUserEntryById(a.ItemId)
-            let bUInfo = findUserEntryById(b.ItemId)
-            if (!aUInfo || !bUInfo) return 0
-            return bUInfo?.UserRating - aUInfo?.UserRating
-        })
-
-        globalsNewUi.results = tree
-        renderSidebar(tree.map(v => v.info))
+        await loadSearch()
+        renderSidebar(globalsNewUi.results.map(v => v.info))
     }
 
     if (display_item_only) {

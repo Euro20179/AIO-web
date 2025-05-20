@@ -172,4 +172,3 @@ function renderSidebar(entries: InfoEntry[]) {
         renderSidebarItem(entries[i], sidebarItems)
     }
 }
-
