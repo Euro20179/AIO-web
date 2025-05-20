@@ -770,6 +770,8 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         if (outputId) {
             let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
             if (outputEl) {
+                //clear html
+                outputEl.innerHTML = ""
                 renderVal(res, outputEl)
             }
         }
