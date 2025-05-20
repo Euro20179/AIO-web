@@ -350,8 +350,12 @@ async function main() {
         searchInput.value = decodeURIComponent(initialSearch)
     }
 
+    mode_setMode(curModeName)
+
     const uid = getUidUI()
     await Promise.all([loadLibraries(), loadInfoEntries()])
+
+    //must happen synchronously to make item render properly
     await loadUserEvents(uid)
 
     //do this second because metadata can get really large, and having to wait for it could take a while

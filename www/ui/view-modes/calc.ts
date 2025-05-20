@@ -25,6 +25,12 @@ const modeCalc: DisplayMode = {
             removecCalcItem(item)
         }
     },
+    
+    refresh(id) {
+        const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
+        if(!el) return
+        refreshCalcItem(findInfoEntryById(id), el)
+    },
 
     *_getValidEntries() {
         const selected = Object.groupBy(globalsNewUi.selectedEntries, item => String(item.ItemId))
@@ -95,10 +101,7 @@ function removecCalcItem(item: InfoEntry) {
     el?.remove()
 }
 
-
-function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems): HTMLElement {
-    let el = document.createElement("calc-entry")
-
+function refreshCalcItem(item: InfoEntry, el: HTMLElement) {
     let root = el.shadowRoot
     if (!root) return el
 
@@ -115,10 +118,16 @@ function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment 
     if (meta?.Thumbnail) {
         img.src = fixThumbnailURL(meta?.Thumbnail)
     }
-    parent.append(el)
     el.setAttribute("data-expression-output", String(val.jsStr()))
     el.setAttribute("data-item-id", String(item.ItemId))
 
+    return el
+}
+
+function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems): HTMLElement {
+    let el = document.createElement("calc-entry")
+    refreshCalcItem(item, el)
+    parent.append(el)
     return el
 }
 

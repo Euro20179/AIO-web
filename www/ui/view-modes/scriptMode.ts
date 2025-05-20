@@ -37,7 +37,7 @@ const modeScripting: DisplayMode = {
         } else {
             scriptOutput.append(html)
         }
-    }
+    },
 }
 
 run.onclick = function() {

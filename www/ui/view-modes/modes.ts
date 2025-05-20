@@ -24,6 +24,7 @@ const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScrip
 const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output"]
 
 let idx = modeOutputIds.indexOf(location.hash.slice(1))
+let curModeName = modeOutputIds[idx]
 
 let mode = modes[idx]
 
@@ -87,6 +88,10 @@ function mode_setMode(name: string) {
     location.hash = name
 
     mode.addList(globalsNewUi.selectedEntries)
+
+    curModeName = name
+    let toggle = document.getElementById("view-toggle") as HTMLSelectElement
+    toggle.value = name
 }
 
 document.getElementById("view-toggle")?.addEventListener("change", e => {
