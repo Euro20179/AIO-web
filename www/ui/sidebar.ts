@@ -27,9 +27,7 @@ function refreshSidebarItem(itemId: bigint) {
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     let item = findInfoEntryById(itemId)
     if (el) {
-        let user = findUserEntryById(itemId)
-        let meta = findMetadataById(itemId)
-        changeSidebarItemData(item, user, meta, el)
+        changeSidebarItemData(itemId, el)
     } else {
         renderSidebarItem(item)
     }
@@ -68,16 +66,16 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         titleEl.setAttribute("data-release-year", "unknown")
 }
 
-function changeSidebarItemData(item: InfoEntry, user: UserEntry, meta: MetadataEntry, el: HTMLElement) {
+function changeSidebarItemData(id: bigint, el: HTMLElement) {
     const e = new CustomEvent("data-changed", {
         detail: {
-            item,
-            user,
-            meta,
+            item: findInfoEntryById(id),
+            user: findUserEntryById(id),
+            meta: findMetadataById(id),
         }
     })
     el.dispatchEvent(e)
-    el.setAttribute("data-entry-id", String(item.ItemId))
+    el.setAttribute("data-entry-id", String(id))
 }
 
 function sidebarEntryOpenMultiple(item: InfoEntry, mode: DisplayMode) {
@@ -153,11 +151,10 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
         const item = event.detail.item as InfoEntry
         const user = event.detail.user as UserEntry
         const meta = event.detail.meta as MetadataEntry
-        const events = event.detail.events as UserEvent[]
         updateSidebarEntryContents(item, user, meta, elem.shadowRoot as ShadowRoot)
     })
 
-    changeSidebarItemData(item, user, meta, elem)
+    changeSidebarItemData(item.ItemId, elem)
 
     return elem
 }
