@@ -1157,8 +1157,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             api_setParent(childId, item.ItemId).then(() => {
                 updateInfo2({
                     [String(item.ItemId)]: { info: item },
-                })
-                updateInfo2({
                     [String(newChildByIdInput.value)]: { info }
                 })
             })
@@ -1198,6 +1196,27 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                     })
                     .catch(() => alert("Failed to save notes"))
             }, 1000)
+        }
+    }
+
+    const cost = root.getElementById("cost")
+    if(cost) {
+        cost.onclick = function() {
+            const newPrice = promptNumber("New cost", "not a number", parseFloat)
+            if(newPrice === null) return
+            let item = findInfoEntryById(itemId)
+            item.PurchasePrice = newPrice as number
+            api_setItem("", item).then(res => {
+                if(res === null || res.status !== 200) {
+                    alert("Failed to set price")
+                    return
+                }
+                updateInfo2({ 
+                    [String(itemId)]: {
+                        info: item
+                    }
+                })
+            })
         }
     }
 
@@ -1527,8 +1546,6 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
             info.ParentId = item.ItemId
             updateInfo2({
                 [String(item.ItemId)]: { info: item },
-            })
-            updateInfo2({
                 [String(id)]: { info }
             })
         })

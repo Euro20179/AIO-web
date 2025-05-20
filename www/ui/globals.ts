@@ -17,7 +17,7 @@ function alert(text: string) {
     setTimeout(el.remove.bind(el), 15000)
 }
 
-function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number) {
+function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): number | bigint | null{
     let n = prompt(text)
     while (n !== null && n !== "" && isNaN(Number(numberConverter(n)))) {
         n = prompt(textFail)
