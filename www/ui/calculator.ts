@@ -1897,7 +1897,7 @@ class CalcVarTable {
             if (!shadow) {
                 return new Num(0)
             }
-            div.innerHTML = shadow.innerHTML
+            div.replaceChildren(...shadow.children)
             return new Elem(div)
         }))
 
