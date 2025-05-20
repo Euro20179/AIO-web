@@ -13,7 +13,7 @@ const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") a
 
 const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
 userSelector.onchange = function() {
-    refreshInfo(getUidUI()).then(() => loadSearch())
+    refreshInfo(getUidUI()).then(() => loadSearchUI())
 }
 
 const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
@@ -222,30 +222,6 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
     // return entries.slice(filters.start, filters.end)
 }
 
-//FIXME: onload, sorts that require metadata dont work because the metadata hasn't loaded
-async function loadSearch() {
-    let form = document.getElementById("sidebar-form") as HTMLFormElement
-
-    let formData = new FormData(form)
-
-    let filters = parseClientsideSearchFiltering(formData)
-
-    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
-
-    entries = applyClientsideSearchFiltering(entries, filters)
-
-    setResultStat("results", entries.length)
-
-    items_setResults(entries.map(v => v.ItemId))
-
-    clearItems()
-    if (entries.length === 0) {
-        setError("No results")
-        clearSidebar()
-        return
-    }
-    renderSidebar(entries)
-}
 
 function normalizeRating(rating: number, maxRating: number) {
     return rating / maxRating * 100
@@ -392,7 +368,7 @@ async function main() {
         let val = librarySelector.value
         globalsNewUi.viewingLibrary = BigInt(val)
 
-        loadSearch()
+        loadSearchUI()
     }
 
     if (initialSearch) {
@@ -413,7 +389,7 @@ async function main() {
         }
         renderSidebar(entries)
     } else {
-        await loadSearch()
+        await loadSearchUI()
     }
 
     if (display_item_only) {

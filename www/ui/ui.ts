@@ -24,6 +24,30 @@ function mkSearchUI(params: Record<string, string>) {
     form.submit()
 }
 
+async function loadSearchUI() {
+    let form = document.getElementById("sidebar-form") as HTMLFormElement
+
+    let formData = new FormData(form)
+
+    let filters = parseClientsideSearchFiltering(formData)
+
+    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
+
+    entries = applyClientsideSearchFiltering(entries, filters)
+
+    setResultStat("results", entries.length)
+
+    items_setResults(entries.map(v => v.ItemId))
+
+    clearItems()
+    if (entries.length === 0) {
+        setError("No results")
+        clearSidebar()
+        return
+    }
+    renderSidebar(entries)
+}
+
 function deleteEntryUI(item: InfoEntry) {
     if (!confirm("Are you sure you want to delete this item")) {
         return

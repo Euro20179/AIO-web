@@ -1769,7 +1769,7 @@ class CalcVarTable {
         this.symbols.set("ui_search", new Func((query, cb) => {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
-            loadSearch().then(() => {
+            loadSearchUI().then(() => {
                 cb?.call([new Arr(globalsNewUi.results.map(v => new Entry(v.info)))])
             }).catch(console.error)
             return new Num(0)
