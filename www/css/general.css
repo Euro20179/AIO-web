@@ -154,6 +154,10 @@
         color: var(--accent-color);
     }
 
+    .relative {
+        position: relative
+    }
+
     .flex-column {
         display: inline-flex;
         flex-direction: column;

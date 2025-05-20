@@ -110,8 +110,10 @@
         <div class="grid column">
             <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
             <button popovertarget="display-info-object-editor-popup">T✏</button>
-            <button class="edit-styles" onclick="displayEntryEditStyles(this)" title="edit item's stylesheet">🖌</button>
-            <button class="edit-template" onclick="displayEntryEditTemplate(this)" title="edit item's html template">&lt;&gt;</button>
+            <button class="edit-styles" onclick="displayEntryEditStyles(this)"
+                title="edit item's stylesheet">🖌</button>
+            <button class="edit-template" onclick="displayEntryEditTemplate(this)"
+                title="edit item's html template">&lt;&gt;</button>
         </div>
         <details>
             <summary>Raw Info</summary>
@@ -180,9 +182,11 @@
                 <div class="viewing">
                     <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"
                         put-data="ViewCount"></span>
-                    <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress" min="0"
-                        value="0"></progress>
-                    <figcaption id="entry-progressbar-position-label"></figcaption>
+                    <div class="relative">
+                        <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress"
+                            min="0" value="0"></progress>
+                        <figcaption id="entry-progressbar-position-label"></figcaption>
+                    </div>
                 </div>
             </figure>
         </div>

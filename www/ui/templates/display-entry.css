@@ -73,7 +73,8 @@
 
     }
 
-    #style-editor, #template-editor {
+    #style-editor,
+    #template-editor {
         widtH: 50cqi;
         height: 10cap;
     }
@@ -95,11 +96,12 @@
 
     #misc-info {
         display: grid;
+
         @container viewing-area (width > 650px) {
             grid-template-columns: 2fr 1fr;
         }
 
-        @container viewing-area (width <= 650px) {
+        @container viewing-area (width <=650px) {
             grid-template-rows: 2fr 1fr;
         }
     }
@@ -285,7 +287,8 @@
         }
     }
 
-    #descriptors>section, #relationship-display>section {
+    #descriptors>section,
+    #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: 15px;
     }
@@ -356,15 +359,18 @@
         justify-self: center;
         width: 25cqw;
         margin: 0;
+    }
 
-        #entry-progressbar-position-label {
-            line-height: 0;
-            margin-top: -1cap;
-            text-align: right;
-            margin-right: calc(1ch);
+    #entry-progressbar-position-label {
+        position: absolute;
+        right: 0;
 
-            color: var(--secondary);
-        }
+        line-height: 0;
+        margin-top: -1cap;
+        text-align: right;
+        margin-right: calc(1ch);
+
+        color: var(--main);
     }
 
     #entry-progressbar:where(:not([max]), [value="0"]) {
