@@ -752,16 +752,19 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         symbols.set("root", new Elem(root as unknown as HTMLElement))
         symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
         symbols.set("this", new Entry(item))
-        let res = parseExpression(script, symbols).jsStr()
+        let res = parseExpression(script, symbols)
 
         let outputId = elem.getAttribute("data-output")
         if (outputId) {
             let outputEl = root.querySelector(`[id="${outputId}"]`)
             if (outputEl) {
-                outputEl.innerHTML = res
+                if(res instanceof Elem) {
+                    outputEl.replaceChildren(res.el)
+                } else {
+                    outputEl.innerHTML = res.jsStr()
+                }
             }
         }
-        console.log(res)
     }
 }
 

@@ -1899,6 +1899,24 @@ class CalcVarTable {
             return Type.from(eval(t))
         }))
 
+        this.symbols.set("elem_on", new Func((root, event, cb) => {
+            if (!(root instanceof Elem)) {
+                return new Str("root must be an element")
+            }
+
+            if(!(cb instanceof Func)) {
+                return new Str("callback must be a func")
+            }
+
+            let evName = event.jsStr()
+
+            root.el.addEventListener(evName, e => {
+                cb.call([new Obj(e)])
+            })
+
+            return new Num(0)
+        }))
+
         this.symbols.set("elem_byid", new Func((root, id) => {
             if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
