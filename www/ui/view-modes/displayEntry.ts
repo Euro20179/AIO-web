@@ -1048,7 +1048,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     let user = findUserEntryById(itemId) as UserEntry
 
-    console.log(user)
     let template;
     if (user && (template = getUserExtra(user, "template")?.trim())) {
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
@@ -1305,7 +1304,6 @@ function _fetchLocationBackup(itemId: bigint) {
         if (!res) return
 
         if (res.status !== 200) {
-            console.log(await res.text())
             alert("Failed to find entries")
             return
         }
@@ -1347,7 +1345,6 @@ function _fetchLocation(itemId: bigint) {
             }
 
             let newLocation = await res.text()
-            console.log(newLocation)
 
             if (res.status !== 200) {
                 alert("Failed to get location, loading possible options")

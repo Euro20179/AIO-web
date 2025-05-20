@@ -296,13 +296,11 @@ class IfNode extends NodePar {
 class FuncDefNode extends NodePar {
     name: Token
     program: ProgramNode
-    closure: CalcVarTable
     paramNames: Token[]
     constructor(name: Token, program: ProgramNode, paramNames: Token[]) {
         super()
         this.name = name
         this.program = program
-        this.closure = new CalcVarTable()
         this.paramNames = paramNames
     }
 
@@ -727,7 +725,7 @@ class Parser {
     varDef(): NodePar {
         //lambda
         if (this.curTok().ty === "Lparen") {
-            return this.funcDef(new Token("Word", ""))
+            return this.funcDef(new Token("Word", `lambda_${String(Math.random()).replace("0.", "")}`))
         }
 
         let name = this.curTok()
@@ -958,6 +956,7 @@ class Type {
         }
     }
 
+    
     len(): Num {
         console.error(`Unable to get the len of ${this.constructor.name}`)
         return new Num(0)
@@ -1209,7 +1208,6 @@ class Entry extends Type {
     }
 
     toNum(): Num {
-        console.log(this.jsValue)
         return new Num(this.jsValue["ItemId"])
     }
 
@@ -2377,16 +2375,17 @@ class Interpreter {
     }
 
     FuncDefNode(node: FuncDefNode) {
-        node.closure = this.symbolTable.copy()
+        const closure = this.symbolTable.copy()
+        console.log("CLOSING: ", closure.get("i"))
 
         let fun = new Func((...items) => {
             for (let i = 0; i < items.length; i++) {
-                node.closure.set(`arg${i}`, items[i])
+                closure.set(`arg${i}`, items[i])
             }
             for (let i = 0; i < node.paramNames.length; i++) {
-                node.closure.set(node.paramNames[i].value, items[i])
+                closure.set(node.paramNames[i].value, items[i])
             }
-            let interpreter = new Interpreter(node.program, node.closure)
+            let interpreter = new Interpreter(node.program, closure)
             return interpreter.interpretNode(node.program)
         })
 
