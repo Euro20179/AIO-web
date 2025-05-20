@@ -1755,6 +1755,17 @@ class CalcVarTable {
             return new Num(1)
         }))
 
+        this.symbols.set("ua_download", new Func((data, name, ft) => {
+            let jsName = name?.jsStr() || "file.dat"
+            let fileType = ft?.jsStr() || "text/plain"
+            let e = document.createElement("a")
+            e.download = jsName
+            let b = new Blob([data.jsStr()], { type: fileType})
+            e.href = URL.createObjectURL(b)
+            e.click()
+            return new Num(0)
+        }))
+
         this.symbols.set("ui_search", new Func((query, cb) => {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()

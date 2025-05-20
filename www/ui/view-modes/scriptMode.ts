@@ -32,7 +32,7 @@ const modeScripting: DisplayMode = {
     },
 
     put(html: string | HTMLElement | ShadowRoot) {
-        if(typeof html === 'string') {
+        if (typeof html === 'string') {
             scriptOutput.innerHTML += html
         } else {
             scriptOutput.append(html)
@@ -47,10 +47,14 @@ run.onclick = function() {
     tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
 
     //@ts-ignore
-    if(document.getElementById("script-execute-output-clear")?.checked) {
+    if (document.getElementById("script-execute-output-clear")?.checked) {
         modeScripting.clear()
     }
 
     const value = parseExpression(script, tbl)
-    scriptOutput.append(value.jsStr())
+    if (value instanceof Elem) {
+        scriptOutput.append(value.el)
+    } else {
+        scriptOutput.append(value.jsStr())
+    }
 }
