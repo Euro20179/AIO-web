@@ -112,7 +112,7 @@ class Item {
 
 function items_setResults(items: bigint[]) {
     globalsNewUi.results = []
-    for(let id of items) {
+    for (let id of items) {
         globalsNewUi.results.push(globalsNewUi.entries[String(id)])
     }
 }
@@ -187,7 +187,7 @@ function genericUserEntry(itemId: bigint): UserEntry {
 
 function items_getAllMeta() {
     let meta: Record<string, MetadataEntry> = {}
-    for(let key in globalsNewUi.entries) {
+    for (let key in globalsNewUi.entries) {
         meta[key] = globalsNewUi.entries[key].meta
     }
     return meta
@@ -200,21 +200,24 @@ async function items_refreshUserEntries(uid: number) {
     }
 }
 
-async function items_loadEntries(uid: number) {
-    const res = await Promise.all([
+async function items_loadEntries(uid: number, loadMeta: boolean = true) {
+    let loading: (Promise<InfoEntry[]> | Promise<UserEntry[]> | Promise<MetadataEntry[]>)[] = [
         api_loadList<InfoEntry>("list-entries", uid),
         api_loadList<UserEntry>("engagement/list-entries", uid),
-        api_loadList<MetadataEntry>("metadata/list-entries", uid)
-    ])
+    ]
+    if (loadMeta) {
+        loading.push(api_loadList<MetadataEntry>("metadata/list-entries", uid))
+    }
+    const res = await Promise.all(loading)
 
     let obj: Record<string, Item> = {}
     for (let tbls of res) {
-        for(let tbl of tbls) {
+        for (let tbl of tbls) {
             let item = obj[String(tbl.ItemId)] || new Item(tbl.ItemId)
-            if(probablyMetaEntry(tbl)) {
+            if (probablyMetaEntry(tbl)) {
                 item.meta = tbl
             }
-            else if(probablyInfoEntry(tbl)) {
+            else if (probablyInfoEntry(tbl)) {
                 item.info = tbl
             } else {
                 item.user = tbl
@@ -256,9 +259,9 @@ function* findCopies(itemId: bigint) {
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
-    for(let evId in grouped) {
+    for (let evId in grouped) {
         const events = grouped[evId]
-        if(globalsNewUi.entries[evId]) {
+        if (globalsNewUi.entries[evId]) {
             //@ts-ignore
             globalsNewUi.entries[evId].events = events
         }

@@ -108,7 +108,7 @@ async function loadLibraries() {
 }
 
 async function loadInfoEntries() {
-    await items_loadEntries(getUidUI())
+    await items_loadEntries(getUidUI(), false)
 
     setResultStat("results", Object.keys(globalsNewUi.entries).length)
 
@@ -353,14 +353,16 @@ async function main() {
     await loadUserEvents(uid)
 
     //do this second because metadata can get really large, and having to wait for it could take a while
-    // items_refreshMetadata(uid).then(() => {
-    //     clearSidebar()
-    //
-    //     for (let item of globalsNewUi.results) {
-    //         mode?.refresh?.(item.ItemId)
-    //         renderSidebarItem(item.info)
-    //     }
-    // })
+    items_refreshMetadata(uid).then(() => {
+        //clear and rerender sidebar to make thumbnail load when it appears on screen
+        //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
+        clearSidebar()
+
+        for (let item of globalsNewUi.results) {
+            mode?.refresh?.(item.ItemId)
+            renderSidebarItem(item.info)
+        }
+    })
 
     api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
