@@ -44,7 +44,7 @@ run.onclick = function() {
     const script = scriptBox.value
 
     let tbl = new SymbolTable()
-    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
+    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
 
     //@ts-ignore
     if(document.getElementById("script-execute-output-clear")?.checked) {

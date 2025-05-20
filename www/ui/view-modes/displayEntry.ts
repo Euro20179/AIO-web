@@ -47,19 +47,14 @@ async function itemIdentification(form: HTMLFormElement) {
 
             const newMeta = [...api_deserializeJsonl(json)][0]
 
-            let newItem = globalsNewUi.entries[itemId]
-
             //if the provider also has a location provider might as well get the location for it
             if (["steam", "sonarr"].includes(provider)) {
                 fetchLocationUI(BigInt(itemId), provider)
             }
 
-            updateInfo({
-                entries: {
-                    [String(itemId)]: newItem
-                },
-                metadataEntries: {
-                    [String(itemId)]: newMeta
+            updateInfo2({
+                [String(itemId)]: {
+                    meta: newMeta
                 }
             })
         })
@@ -187,10 +182,12 @@ function saveItemChanges(root: ShadowRoot, itemId: bigint) {
         .catch(console.error)
 
 
-    updateInfo({
-        entries: { [String(itemId)]: info },
-        userEntries: { [String(itemId)]: userEntry },
-        metadataEntries: { [String(itemId)]: meta }
+    updateInfo2({
+        [String(itemId)]: {
+            info,
+            meta,
+            user: userEntry
+        }
     })
 }
 
@@ -263,16 +260,18 @@ function newEvent(form: HTMLFormElement) {
     api_registerEvent(itemId, name.toString(), ts, afterts)
         .then(res => res?.text())
         .then(() => {
-            updateInfo({
-                events: [
-                    {
-                        Timestamp: ts,
-                        After: afterts,
-                        Event: name.toString(),
-                        ItemId: itemId,
-                        TimeZone: ""
-                    }
-                ]
+            updateInfo2({
+                [String(itemId)]: {
+                    events: [
+                        {
+                            Timestamp: ts,
+                            After: afterts,
+                            Event: name.toString(),
+                            ItemId: itemId,
+                            TimeZone: ""
+                        }
+                    ]
+                }
             })
             form.parentElement?.hidePopover()
         })
@@ -356,7 +355,7 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     put(html: string | HTMLElement | ShadowRoot) {
-        if(typeof html === 'string') {
+        if (typeof html === 'string') {
             return
         }
         displayItems.append(html)
@@ -408,15 +407,10 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 .then(text => {
                     alert(text)
 
-                    const info = findInfoEntryById(item.ItemId) as InfoEntry
-
-                    Promise.all([loadUserEvents(getUidUI()), items_loadUserEntries(getUidUI())]).then(() =>
-                        updateInfo({
-                            entries: {
-                                [String(item.ItemId)]: info
-                            },
-                            userEntries: {
-                                [String(item.ItemId)]: findUserEntryById(item.ItemId) as UserEntry
+                    Promise.all([loadUserEvents(getUidUI()), items_refreshUserEntries(getUidUI())]).then(() =>
+                        updateInfo2({
+                            [String(item.ItemId)]: {
+                                user: findUserEntryById(item.ItemId)
                             }
                         })
                     )
@@ -458,13 +452,11 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 })
                 .then(text => {
                     alert(text)
-                    Promise.all([loadUserEvents(getUidUI()), items_loadUserEntries(getUidUI())]).then(() =>
-                        updateInfo({
-                            entries: {
-                                [String(item.ItemId)]: item
-                            },
-                            userEntries: {
-                                [String(item.ItemId)]: findUserEntryById(item.ItemId) as UserEntry
+                    Promise.all([loadUserEvents(getUidUI()), items_refreshUserEntries(getUidUI())]).then(() =>
+                        updateInfo2({
+                            [String(item.ItemId)]: {
+                                user: findUserEntryById(item.ItemId),
+                                events: findUserEventsById(item.ItemId),
                             }
                         })
                     )
@@ -490,22 +482,12 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 api_setThumbnail(item.ItemId, result)
                     .then(() => {
                         let meta = findMetadataById(item.ItemId)
-                        if (!meta) {
-                            refreshInfo().then(() => {
-                                refreshDisplayItem(itemId)
-                                refreshSidebarItem(item)
-                            })
-                        } else {
-                            meta.Thumbnail = result
-                            updateInfo({
-                                entries: {
-                                    [String(item.ItemId)]: item
-                                },
-                                metadataEntries: {
-                                    [String(item.ItemId)]: meta
-                                }
-                            })
-                        }
+                        meta.Thumbnail = result
+                        updateInfo2({
+                            [String(item.ItemId)]: {
+                                meta
+                            }
+                        })
                     })
             }
         }
@@ -539,43 +521,43 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
         costTotal += info.PurchasePrice
     }
     if (includeChildren) {
-        let children = Object.values(globalsNewUi.entries).filter(v => v.ParentId === itemId)
+        let children = Object.values(globalsNewUi.entries).filter(v => v.info.ParentId === itemId)
         for (let child of children) {
-            costTotal += child.PurchasePrice
+            costTotal += child.info.PurchasePrice
         }
     }
     if (includeCopies) {
-        let copies = Object.values(globalsNewUi.entries).filter(v => v.CopyOf === itemId)
+        let copies = Object.values(globalsNewUi.entries).filter(v => v.info.CopyOf === itemId)
         for (let copy of copies) {
-            costTotal += copy.PurchasePrice
+            costTotal += copy.info.PurchasePrice
         }
     }
     costEl.innerText = String(costTotal)
 }
 
-function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<InfoEntry>, relationType: "descendants" | "copies") {
+function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<Item>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
-    let titles = relationships.map(i => i.En_Title)
+    let titles = relationships.map(i => i.info.En_Title)
     relationships = relationships.sort((a, b) => {
-        return (sequenceNumberGrabber(a.En_Title, titles) || 0) - (sequenceNumberGrabber(b.En_Title, titles) || 0)
+        return (sequenceNumberGrabber(a.info.En_Title, titles) || 0) - (sequenceNumberGrabber(b.info.En_Title, titles) || 0)
     })
     for (let child of relationships) {
         let meta = findMetadataById(child.ItemId)
         let el: HTMLElement
         if (meta?.Thumbnail) {
             el = document.createElement("img")
-            formatToName(child.Format).then(name => {
-                el.title = `${child.En_Title} (${typeToSymbol(child.Type)} on ${name})`
+            formatToName(child.info.Format).then(name => {
+                el.title = `${child.info.En_Title} (${typeToSymbol(child.info.Type)} on ${name})`
             })
             //@ts-ignore
             el.src = fixThumbnailURL(meta.Thumbnail)
         } else {
             el = document.createElement("button")
-            el.innerText = child.En_Title
+            el.innerText = child.info.En_Title
         }
         elementParent.append(el)
         el.addEventListener("click", (e) => {
-            toggleItem(child)
+            toggleItem(child.info)
         })
         el.addEventListener("contextmenu", e => {
             e.preventDefault()
@@ -587,23 +569,21 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                 let thisId: bigint
                 switch (relationType) {
                     case "copies":
-                        thisId = child.CopyOf
-                        child.CopyOf = 0n
+                        thisId = child.info.CopyOf
+                        child.info.CopyOf = 0n
                         break
                     case "descendants":
-                        thisId = child.ParentId
-                        child.ParentId = 0n
+                        thisId = child.info.ParentId
+                        child.info.ParentId = 0n
                         break
                 }
-                api_setItem("", child).then((res) => {
+                api_setItem("", child.info).then((res) => {
                     if (!res || res.status !== 200) {
                         alert("Failed to update item")
                         return
                     }
-                    updateInfo({
-                        entries: {
-                            [String(child.ItemId)]: child
-                        }
+                    updateInfo2({
+                        [String(child.ItemId)]: { info: child.info }
                     })
                     refreshDisplayItem(thisId)
                 })
@@ -764,7 +744,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
         let symbols = new SymbolTable()
         symbols.set("root", new Elem(root as unknown as HTMLElement))
-        symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v))))
+        symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
         let res = parseExpression(script, symbols).jsStr()
 
         let outputId = elem.getAttribute("data-output")
@@ -1058,6 +1038,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     let user = findUserEntryById(itemId) as UserEntry
 
+    console.log(user)
     let template;
     if (user && (template = getUserExtra(user, "template")?.trim())) {
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
@@ -1122,13 +1103,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                     return
                 }
                 res.text().then(() => alert(`Updated status to ${user.Status}`))
-                updateInfo({
-                    entries: {
-                        [String(info.ItemId)]: info,
-                    },
-                    userEntries: {
-                        [String(user.ItemId)]: user
-                    }
+                updateInfo2({
+                    [String(info.ItemId)]: { user },
                 })
             })
             .catch(console.error)
@@ -1166,14 +1142,13 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         newChildByIdInput.onchange = function() {
             let childId = BigInt(String(newChildByIdInput.value))
             let info = findInfoEntryById(childId)
-            if (!info) return
             info.ParentId = item.ItemId
             api_setParent(childId, item.ItemId).then(() => {
-                updateInfo({
-                    entries: {
-                        [String(item.ItemId)]: item,
-                        [String(newChildByIdInput.value)]: info
-                    }
+                updateInfo2({
+                    [String(item.ItemId)]: { info: item },
+                })
+                updateInfo2({
+                    [String(newChildByIdInput.value)]: { info }
                 })
             })
         }
@@ -1190,13 +1165,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
             const userStringified = api_serializeEntry(user)
 
-            updateInfo({
-                entries: {
-                    [String(item.ItemId)]: item
-                },
-                userEntries: {
-                    [String(item.ItemId)]: user
-                }
+            updateInfo2({
+                [String(item.ItemId)]: { user }
             })
 
             if (editTO) {
@@ -1315,7 +1285,9 @@ function _fetchLocationBackup(itemId: bigint) {
         const newLocation = await res.text()
         alert(`Location set to: ${newLocation}`)
         item.Location = newLocation
-        updateInfo({ entries: { [String(item.ItemId)]: item } })
+        updateInfo2({
+            [String(item.ItemId)]: { info: item }
+        })
         popover.hidePopover()
     }
 
@@ -1378,10 +1350,8 @@ function _fetchLocation(itemId: bigint) {
             const info = findInfoEntryById(itemId) as InfoEntry
             info.Location = newLocation
 
-            updateInfo({
-                entries: {
-                    [String(itemId)]: info
-                }
+            updateInfo2({
+                [String(itemId)]: { info }
             })
             alert(`Location set to: ${newLocation}`)
         })
@@ -1417,7 +1387,7 @@ function copyThis(item: InfoEntry) {
         }
 
         const text = await res.text()
-        const itemCopy = api_deserializeJsonl(text.trim()).next().value
+        const itemCopy = api_deserializeJsonl(text.trim()).next().value as InfoEntry
         const userCopy = { ...user }
         userCopy.ItemId = itemCopy.ItemId
         const metaCopy = { ...meta }
@@ -1439,13 +1409,13 @@ function copyThis(item: InfoEntry) {
                     }
                 }
                 alert(`Coppied: ${item.En_Title}`)
-                globalsNewUi.entries[String(itemCopy.ItemId)] = itemCopy
-                globalsNewUi.userEntries[String(itemCopy.ItemId)] = userCopy
-                globalsNewUi.metadataEntries[String(itemCopy.ItemId)] = metaCopy
+                globalsNewUi.entries[String(itemCopy.ItemId)].info = itemCopy
+                globalsNewUi.entries[String(itemCopy.ItemId)].user = userCopy
+                globalsNewUi.entries[String(itemCopy.ItemId)].meta = metaCopy
                 for (let event of events) {
                     let eventCopy = { ...event }
                     eventCopy.ItemId = itemCopy.ItemId
-                    globalsNewUi.events.push(eventCopy)
+                    globalsNewUi.entries[String(itemCopy.ItemId)].events.push(eventCopy)
                 }
                 mode.add(itemCopy, true)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
@@ -1506,26 +1476,16 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
             .then(res => res?.text())
             .then(console.log)
             .catch(console.error)
-        updateInfo({
-            entries: {
-                [strId]: item
-            },
-            userEntries: {
-                [strId]: into as UserEntry
-            }
+        updateInfo2({
+            [strId]: { user: into as UserEntry }
         })
     } else {
         api_setItem("metadata/", into as MetadataEntry)
             .then(res => res?.text())
             .then(console.log)
             .catch(console.error)
-        updateInfo({
-            entries: {
-                [strId]: item
-            },
-            metadataEntries: {
-                [strId]: into as MetadataEntry
-            }
+        updateInfo2({
+            [strId]: { meta: into as MetadataEntry }
         })
     }
 })
@@ -1556,11 +1516,11 @@ const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
                 return
             }
             info.ParentId = item.ItemId
-            updateInfo({
-                entries: {
-                    [String(item.ItemId)]: item,
-                    [String(id)]: info
-                }
+            updateInfo2({
+                [String(item.ItemId)]: { info: item },
+            })
+            updateInfo2({
+                [String(id)]: { info }
             })
         })
     })
@@ -1603,13 +1563,8 @@ const displayEntryViewCount = displayEntryAction(item => {
                 })
             } else {
                 user.ViewCount = Number(count)
-                updateInfo({
-                    entries: {
-                        [String(item.ItemId)]: item
-                    },
-                    userEntries: {
-                        [String(item.ItemId)]: user
-                    }
+                updateInfo2({
+                    [String(item.ItemId)]: { user }
                 })
             }
         })
@@ -1623,13 +1578,8 @@ const displayEntryProgress = displayEntryAction(async (item, root) => {
     await api_setPos(item.ItemId, String(newEp))
     const user = findUserEntryById(item.ItemId) as UserEntry
     user.CurrentPosition = String(newEp)
-    updateInfo({
-        entries: {
-            [String(item.ItemId)]: item,
-        },
-        userEntries: {
-            [String(item.ItemId)]: user
-        }
+    updateInfo2({
+        [String(item.ItemId)]: { user }
     })
 })
 
@@ -1651,13 +1601,8 @@ const displayEntryRating = displayEntryAction(item => {
                 return refreshInfo()
             }
             user.UserRating = Number(newRating)
-            updateInfo({
-                entries: {
-                    [String(item.ItemId)]: item
-                },
-                userEntries: {
-                    [String(item.ItemId)]: user
-                }
+            updateInfo2({
+                [String(item.ItemId)]: { user }
             })
         })
         .catch(console.error)
@@ -1673,8 +1618,8 @@ function deleteEvent(el: HTMLElement, ts: number, after: number) {
         .then(res => res?.text())
         .then(() =>
             loadUserEvents(getUidUI())
-                .then(() => updateInfo({
-                    entries: { [String(itemId)]: globalsNewUi.entries[String(itemId)] }
+                .then(() => updateInfo2({
+                    [String(itemId)]: globalsNewUi.entries[String(itemId)]
                 }))
         )
         .catch(alert)

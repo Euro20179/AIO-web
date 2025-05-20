@@ -1,14 +1,4 @@
-type UserEntry = {
-    ItemId: bigint
-    Status: UserStatus
-    ViewCount: number
-    UserRating: number
-    Notes: string
-    CurrentPosition: string
-    Extra: string
-}
-
-function probablyUserItem(item: object) {
+function probablyUserItem(item: object): item is UserEntry {
     for (let key of [
         "ItemId",
         "Status",
@@ -25,53 +15,7 @@ function probablyUserItem(item: object) {
     return true
 }
 
-type UserStatus = "" |
-    "Viewing" |
-    "Finished" |
-    "Dropped" |
-    "Planned" |
-    "ReViewing" |
-    "Paused" |
-    "Waiting"
-
-type EntryType = "Show" |
-    "Movie" |
-    "MovieShort" |
-    "Game" |
-    "BoardGame" |
-    "Song" |
-    "Book" |
-    "Manga" |
-    "Collection" |
-    "Picture" |
-    "Meme" |
-    "Library"
-
-type UserEvent = {
-    ItemId: bigint
-    Event: string
-    Timestamp: number
-    After: number
-    TimeZone: string
-}
-
-type InfoEntry = {
-    ItemId: bigint
-    Collection: string
-    Format: number
-    ArtStyle: number
-    Location: string
-    Native_Title: string
-    ParentId: bigint
-    PurchasePrice: number
-    Type: EntryType
-    En_Title: string
-    CopyOf: bigint
-    Library: bigint
-
-    Tags: string[]
-}
-function probablyInfoEntry(item: object) {
+function probablyInfoEntry(item: object): item is InfoEntry {
     for (let key of [
         "ItemId",
         "Collection",
@@ -93,22 +37,7 @@ function probablyInfoEntry(item: object) {
     return true
 }
 
-type MetadataEntry = {
-    ItemId: bigint
-    Rating: number
-    RatingMax: number
-    Description: string
-    ReleaseYear: number
-    Thumbnail: string
-    MediaDependant: string
-    Datapoints: string
-    Title: string
-    Native_Title: string
-    Provider: string
-    ProviderID: string
-}
-
-function probablyMetaEntry(item: object) {
+function probablyMetaEntry(item: object): item is MetadataEntry {
     for (let key of [
         "ItemId",
         "Rating",

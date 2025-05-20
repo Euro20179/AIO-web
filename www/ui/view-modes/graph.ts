@@ -198,9 +198,9 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
     let groupBy = groupBySelect.value
 
     const groupings: Record<string, (i: InfoEntry) => any> = {
-        "Year": i => globalsNewUi.metadataEntries[String(i.ItemId)].ReleaseYear,
+        "Year": i => globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear,
         "Decade": i => {
-            const year = String(globalsNewUi.metadataEntries[String(i.ItemId)].ReleaseYear)
+            const year = String(globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear)
             if (year == "0") {
                 return "0"
             }
@@ -209,7 +209,7 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
             return `${century}${decade}0s`
         },
         "Century": i => {
-            const year = String(globalsNewUi.metadataEntries[String(i.ItemId)].ReleaseYear)
+            const year = String(globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear)
             if (year == "0") {
                 return "0"
             }
@@ -218,8 +218,8 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
         },
         "Type": i => i.Type,
         "Format": i => api_formatsCache()[i.Format] || "N/A",
-        "Status": i => globalsNewUi.userEntries[String(i.ItemId)].Status,
-        "View-count": i => globalsNewUi.userEntries[String(i.ItemId)].ViewCount,
+        "Status": i => globalsNewUi.entries[String(i.ItemId)].user.Status,
+        "View-count": i => globalsNewUi.entries[String(i.ItemId)].user.ViewCount,
         "Is-anime": i => (i.ArtStyle & 1) == 1,
         "Item-name": i => i.En_Title
     }
@@ -316,8 +316,8 @@ const watchTimeByYear = ChartManager(async (entries) => {
     let watchTimes = data
         .map(v => {
             return v.map(i => {
-                let watchCount = globalsNewUi.userEntries[String(i.ItemId)].ViewCount
-                let thisMeta = globalsNewUi.metadataEntries[String(i.ItemId)]
+                let watchCount = globalsNewUi.entries[String(i.ItemId)].user.ViewCount
+                let thisMeta = globalsNewUi.entries[String(i.ItemId)].meta
                 let watchTime = getWatchTime(watchCount, thisMeta)
                 return watchTime / 60
             }).reduce((p, c) => p + c, 0)
@@ -334,14 +334,14 @@ const adjRatingByYear = ChartManager(async (entries) => {
     let totalRating = 0
     for (let item of items) {
         totalItems += item.length
-        totalRating += item.reduce((p, c) => p + globalsNewUi.userEntries[String(c.ItemId)].UserRating, 0)
+        totalRating += item.reduce((p, c) => p + globalsNewUi.entries[String(c.ItemId)].user.UserRating, 0)
     }
     let avgItems = totalItems / items.length
     let generalAvgRating = totalRating / totalItems
     const ratings = data
         .map(v => {
             let ratings = v.map(i => {
-                let thisUser = globalsNewUi.userEntries[String(i.ItemId)]
+                let thisUser = globalsNewUi.entries[String(i.ItemId)].user
                 return thisUser.UserRating
             })
             let totalRating = ratings
@@ -371,7 +371,7 @@ const ratingByYear = ChartManager(async (entries) => {
     const ratings = data
         .map(v => v
             .map(i => {
-                let thisUser = globalsNewUi.userEntries[String(i.ItemId)]
+                let thisUser = globalsNewUi.entries[String(i.ItemId)].user
                 return thisUser.UserRating
             })
             .reduce((p, c, i) => (p * i + c) / (i + 1), 0)

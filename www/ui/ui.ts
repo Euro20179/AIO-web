@@ -20,15 +20,17 @@ function deleteEntryUI(item: InfoEntry) {
             return
         }
         alert(`Deleted: ${item.En_Title} (${item.Native_Title} : ${item.ItemId})`)
-        updateInfo({ entries: { [String(item.ItemId)]: item } }, true)
+        updateInfo2({
+            [String(item.ItemId)]: { info: item }
+        }, true)
         deselectItem(item)
         removeSidebarItem(item)
     })
 }
 
 async function fetchLocationUI(id: bigint, provider?: string) {
-    let res = await api_fetchLocation(id, provider)
-    if (res.status !== 200) {
+    let res = await api_fetchLocation(id, getUidUI(), provider)
+    if (res?.status !== 200) {
         alert("Failed to get location")
         return
     }
@@ -39,10 +41,8 @@ async function fetchLocationUI(id: bigint, provider?: string) {
 
     item.Location = newLocation
 
-    updateInfo({
-        entries: {
-            [String(item.ItemId)]: item
-        }
+    updateInfo2({
+        [String(item.ItemId)]: { info: item }
     })
     alert(`Location set to: ${newLocation}`)
 }
@@ -53,7 +53,7 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     }
 
     api_overwriteMetadataEntry(item.ItemId).then(res => {
-        if (res.status !== 200) {
+        if (res?.status !== 200) {
             console.error(res)
             alert("Failed to get metadata")
             return
@@ -63,14 +63,7 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
 
         res.json().then((newMeta: MetadataEntry) => {
             let sId = String(item.ItemId)
-            updateInfo({
-                entries: {
-                    [sId]: item
-                },
-                metadataEntries: {
-                    [sId]: newMeta
-                }
-            })
+            updateInfo2({ [sId]: { meta: newMeta } })
 
             if (newMeta.Provider === "steam") {
                 fetchLocationUI(item.ItemId, "steam")
@@ -109,8 +102,8 @@ async function newEntryUI(form: HTMLFormElement) {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
     let res = await authorizedRequest(`${apiPath}/add-entry${queryString}&timezone=${encodeURIComponent(tz)}`)
-    let text = await res.text()
-    if (res.status !== 200) {
+    let text = await res?.text()
+    if (res?.status !== 200 || !text) {
         alert(text)
         return
     }
@@ -124,9 +117,10 @@ async function newEntryUI(form: HTMLFormElement) {
 
         const data = api_deserializeJsonl(await res.text()).next().value
 
-        updateInfo({
-            entries: { [json.ItemId]: json },
-            metadataEntries: { [data.ItemId]: data }
+        updateInfo2({
+            [json.ItemId]: {
+                meta: data
+            }
         })
 
         clearItems()
@@ -190,7 +184,7 @@ function fillItemListing(entries: Record<string, MetadataEntry>) {
 async function selectExistingItem(): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDivElement
 
-    const container = fillItemListing(globalsNewUi.metadataEntries)
+    const container = fillItemListing(items_getAllMeta())
 
     popover.showPopover()
 

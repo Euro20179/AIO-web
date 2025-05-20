@@ -1,29 +1,160 @@
+type GlobalsNewUi = {
+    entries: Record<string, Item>
+    results: Item[]
+    selectedEntries: InfoEntry[]
+    libraries: Record<string, InfoEntry>
+    viewingLibrary: bigint
+}
+
 let globalsNewUi: GlobalsNewUi = {
-    userEntries: {},
-    metadataEntries: {},
     entries: {},
     results: [],
-    events: [],
     selectedEntries: [],
     libraries: {},
     viewingLibrary: 0n,
 }
 
-function findMetadataById(id: bigint): MetadataEntry | null {
-    return globalsNewUi.metadataEntries[String(id)] || defaultMetadata(id)
+type UserStatus = "" |
+    "Viewing" |
+    "Finished" |
+    "Dropped" |
+    "Planned" |
+    "ReViewing" |
+    "Paused" |
+    "Waiting"
+
+type EntryType = "Show" |
+    "Movie" |
+    "MovieShort" |
+    "Game" |
+    "BoardGame" |
+    "Song" |
+    "Book" |
+    "Manga" |
+    "Collection" |
+    "Picture" |
+    "Meme" |
+    "Library"
+
+type UserEvent = {
+    ItemId: bigint
+    Event: string
+    Timestamp: number
+    After: number
+    TimeZone: string
 }
 
-function findUserEntryById(id: bigint): UserEntry | null {
-    return globalsNewUi.userEntries[String(id)]
+type InfoEntry = {
+    ItemId: bigint
+    Collection: string
+    Format: number
+    ArtStyle: number
+    Location: string
+    Native_Title: string
+    ParentId: bigint
+    PurchasePrice: number
+    Type: EntryType
+    En_Title: string
+    CopyOf: bigint
+    Library: bigint
+
+    Tags: string[]
+}
+
+type UserEntry = {
+    ItemId: bigint
+    Status: UserStatus
+    ViewCount: number
+    UserRating: number
+    Notes: string
+    CurrentPosition: string
+    Extra: string
+}
+
+type MetadataEntry = {
+    ItemId: bigint
+    Rating: number
+    RatingMax: number
+    Description: string
+    ReleaseYear: number
+    Thumbnail: string
+    MediaDependant: string
+    Datapoints: string
+    Title: string
+    Native_Title: string
+    Provider: string
+    ProviderID: string
+}
+
+
+class Item {
+    user: UserEntry
+    meta: MetadataEntry
+    info: InfoEntry
+
+    events: UserEvent[]
+
+    constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
+        this.info = typeof info === 'bigint' ? genericInfo(info) : info
+        this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId)
+        this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId)
+        this.events = events || []
+    }
+
+    get fixedThumbnail() {
+        return fixThumbnailURL(this.meta.Thumbnail)
+    }
+
+    get ItemId() {
+        return this.info.ItemId
+    }
+}
+
+function items_setResults(items: bigint[]) {
+    globalsNewUi.results = []
+    for(let id of items) {
+        globalsNewUi.results.push(globalsNewUi.entries[String(id)])
+    }
+}
+
+function findMetadataById(id: bigint): MetadataEntry {
+    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    return globalsNewUi.entries[String(id)].meta
+}
+
+function findUserEntryById(id: bigint): UserEntry {
+    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    return globalsNewUi.entries[String(id)].user
 }
 
 function findUserEventsById(id: bigint): UserEvent[] {
-    return globalsNewUi.events.filter(v => v.ItemId === id)
+    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    return globalsNewUi.entries[String(id)].events
 }
 
-function findInfoEntryById(id: bigint): InfoEntry | null {
-    return globalsNewUi.entries[String(id)]
+function findInfoEntryById(id: bigint): InfoEntry {
+    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    return globalsNewUi.entries[String(id)].info
 }
+function genericInfo(itemId: bigint): InfoEntry {
+    return {
+        ItemId: itemId,
+        Collection: "",
+        Format: 0,
+        ArtStyle: 0,
+        Location: "",
+        Native_Title: "",
+        ParentId: 0n,
+        PurchasePrice: 0,
+        Type: "Show",
+        En_Title: "",
+        CopyOf: 0n,
+        Library: 0n,
+
+        Tags: []
+    }
+}
+
 
 function genericMetadata(itemId: bigint): MetadataEntry {
     return {
@@ -54,22 +185,42 @@ function genericUserEntry(itemId: bigint): UserEntry {
     }
 }
 
-
-async function items_loadUserEntries(uid: number): Promise<Record<string, UserEntry>> {
-    let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
-    let obj: Record<string, UserEntry> = {}
-    for (let item of items) {
-        obj[String(item.ItemId)] = item
+function items_getAllMeta() {
+    let meta: Record<string, MetadataEntry> = {}
+    for(let key in globalsNewUi.entries) {
+        meta[key] = globalsNewUi.entries[key].meta
     }
-    return globalsNewUi.userEntries = obj
+    return meta
 }
 
-async function items_loadInfoEntries(uid: number) {
-    const items = await api_loadList<InfoEntry>("list-entries", uid)
-
-    let obj: Record<string, InfoEntry> = {}
+async function items_refreshUserEntries(uid: number) {
+    let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
     for (let item of items) {
-        obj[String(item.ItemId)] = item
+        globalsNewUi.entries[String(item.ItemId)].user = item
+    }
+}
+
+async function items_loadEntries(uid: number) {
+    const res = await Promise.all([
+        api_loadList<InfoEntry>("list-entries", uid),
+        api_loadList<UserEntry>("engagement/list-entries", uid),
+        api_loadList<MetadataEntry>("metadata/list-entries", uid)
+    ])
+
+    let obj: Record<string, Item> = {}
+    for (let tbls of res) {
+        for(let tbl of tbls) {
+            let item = obj[String(tbl.ItemId)] || new Item(tbl.ItemId)
+            if(probablyMetaEntry(tbl)) {
+                item.meta = tbl
+            }
+            else if(probablyInfoEntry(tbl)) {
+                item.info = tbl
+            } else {
+                item.user = tbl
+            }
+            obj[String(tbl.ItemId)] = item
+        }
     }
 
     return globalsNewUi.entries = obj
@@ -83,29 +234,35 @@ async function items_loadLibraries(uid: number) {
     }
 }
 
-async function items_loadMetadata(uid: number): Promise<Record<string, MetadataEntry>> {
+async function items_refreshMetadata(uid: number) {
     let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)
-    let obj: Record<string, MetadataEntry> = {}
     for (let item of items) {
-        obj[String(item.ItemId)] = item
+        globalsNewUi.entries[String(item.ItemId)].meta = item
     }
-    return globalsNewUi.metadataEntries = obj
 }
 
 function* findDescendants(itemId: bigint) {
     let entries = Object.values(globalsNewUi.entries)
     yield* entries.values()
-        .filter(v => v.ParentId === itemId)
+        .filter(v => v.info.ParentId === itemId)
 }
 
 function* findCopies(itemId: bigint) {
     let entries = Object.values(globalsNewUi.entries)
     yield* entries.values()
-        .filter(v => v.CopyOf === itemId)
+        .filter(v => v.info.CopyOf === itemId)
 }
 
 async function loadUserEvents(uid: number) {
-    return globalsNewUi.events = await api_loadList("engagement/list-events", uid)
+    let events = await api_loadList<UserEvent>("engagement/list-events", uid)
+    const grouped = Object.groupBy(events, k => String(k.ItemId))
+    for(let evId in grouped) {
+        const events = grouped[evId]
+        if(globalsNewUi.entries[evId]) {
+            //@ts-ignore
+            globalsNewUi.entries[evId].events = events
+        }
+    }
 }
 
 function sortEntries(entries: InfoEntry[], sortBy: string) {

@@ -927,6 +927,37 @@ class Type {
         this.jsValue = jsValue
     }
 
+    static from(value: any): Type {
+        if (value instanceof HTMLElement) {
+            return new Elem(value)
+        } else if (value instanceof Type) {
+            return value
+        }
+
+        switch (typeof value) {
+            case 'string':
+                return new Str(value)
+            case 'number':
+            case 'bigint':
+                return new Num(value)
+            case 'boolean':
+                return new Num(Number(value))
+            case 'symbol':
+                return new Str(String(value))
+            case 'undefined':
+                return new Str("undefined")
+            case 'object':
+                if (value instanceof Type) {
+                    return value
+                }
+                return new Str(JSON.stringify(value, (_, v) => typeof v === "bigint" ? String(v) : v))
+            case 'function':
+                return new Func(function() {
+                    return Type.from(value(...arguments))
+                })
+        }
+    }
+
     len(): Num {
         console.error(`Unable to get the len of ${this.constructor.name}`)
         return new Num(0)
@@ -1004,7 +1035,7 @@ class Elem extends Type {
     }
 
     add(right: Type): Type {
-        if(!(right instanceof Elem)) {
+        if (!(right instanceof Elem)) {
             return new Num(0)
         }
 
@@ -1154,26 +1185,8 @@ class Obj extends Type {
         for (let param of params) {
             curObj = curObj[param.jsStr()]
         }
-        switch (typeof curObj) {
-            case 'string':
-                return new Str(curObj)
-            case 'number':
-            case 'bigint':
-                return new Num(curObj)
-            case 'boolean':
-                return new Num(Number(curObj))
-            case 'symbol':
-                return new Str(String(curObj))
-            case 'undefined':
-                return new Str("undefined")
-            case 'object':
-                if (curObj instanceof Type) {
-                    return curObj
-                }
-                return new Str(JSON.stringify(curObj, (_, v) => typeof v === "bigint" ? String(v) : v))
-            case 'function':
-                return new Str(String(curObj))
-        }
+
+        return Type.from(curObj)
     }
 
     getattr(prop: Type): Type {
@@ -1196,6 +1209,7 @@ class Entry extends Type {
     }
 
     toNum(): Num {
+        console.log(this.jsValue)
         return new Num(this.jsValue["ItemId"])
     }
 
@@ -1591,11 +1605,11 @@ class SymbolTable {
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
             if (v === "entry" || v === "info") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.info)))
             } else if (v === "user") {
-                return new Arr(Object.values(globalsNewUi.userEntries).map(v => new Entry(v)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.user)))
             } else if (v === "meta") {
-                return new Arr(Object.values(globalsNewUi.metadataEntries).map(v => new Entry(v)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.meta)))
             }
             return new Arr([])
         }))
@@ -1604,10 +1618,10 @@ class SymbolTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Entry(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
+                        return new Entry(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Entry(v[Math.floor(Math.random() * v.length)])
+                        return new Entry(v[Math.floor(Math.random() * v.length)].info)
                     default:
                         return new Entry(findInfoEntryById(i) as InfoEntry)
                 }
@@ -1618,10 +1632,10 @@ class SymbolTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Entry(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as MetadataEntry)
+                        return new Entry(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info.ItemId) as MetadataEntry)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Entry(findMetadataById(v[Math.floor(Math.random() * v.length)].ItemId) as MetadataEntry)
+                        return new Entry(findMetadataById(v[Math.floor(Math.random() * v.length)].info.ItemId) as MetadataEntry)
                     default:
                         return new Entry(findMetadataById(i) as MetadataEntry)
                 }
@@ -1705,7 +1719,7 @@ class SymbolTable {
         this.symbols.set("put", new Func((...values) => {
             if (mode.put) {
                 for (let item of values) {
-                    if(item instanceof Elem) {
+                    if (item instanceof Elem) {
                         mode.put(item.el)
                     } else {
                         mode.put(item.jsStr())
@@ -1720,7 +1734,7 @@ class SymbolTable {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
             loadSearch().then(() => {
-                cb?.call([new Arr(globalsNewUi.results.map(v => new Entry(v)))])
+                cb?.call([new Arr(globalsNewUi.results.map(v => new Entry(v.info)))])
             }).catch(console.error)
             return new Num(0)
         }))
@@ -1838,12 +1852,12 @@ class SymbolTable {
         }))
 
         this.symbols.set("ui_setresults", new Func(newResults => {
-            if(!(newResults instanceof Arr)) {
+            if (!(newResults instanceof Arr)) {
                 return new Str("ui_setresults expects array")
             }
             let results = newResults.jsValue
-                            .filter((v: Type) => v instanceof Entry && probablyInfoEntry(v.jsValue))
-                            .map((v: Type) => v.jsValue)
+                .filter((v: Type) => v instanceof Entry && probablyInfoEntry(v.jsValue))
+                .map((v: Type) => v.jsValue)
             globalsNewUi.results = results
             clearSidebar()
             renderSidebar(results)
@@ -1854,28 +1868,33 @@ class SymbolTable {
             return new Arr(globalsNewUi.selectedEntries.map(v => new Entry(v)))
         }))
 
+        this.symbols.set("js_eval", new Func(text => {
+            let t = text.jsStr()
+            return Type.from(eval(t))
+        }))
+
         this.symbols.set("elem_byid", new Func((root, id) => {
-            if(!(root instanceof Elem)) {
+            if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
 
             let selectorId = id.jsStr()
 
             let el = root.el.querySelector(`[id="${selectorId}"]`)
-            if(!el || !(el instanceof HTMLElement)) {
+            if (!el || !(el instanceof HTMLElement)) {
                 return new Num(0)
             }
             return new Elem(el)
         }))
 
         this.symbols.set("elem_getshadow", new Func(root => {
-            if(!(root instanceof Elem)) {
+            if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
 
             let div = document.createElement("div")
             let shadow = root.el.shadowRoot
-            if(!shadow) {
+            if (!shadow) {
                 return new Num(0)
             }
             div.innerHTML = shadow.innerHTML
@@ -1883,10 +1902,10 @@ class SymbolTable {
         }))
 
         this.symbols.set("elem_setshadow", new Func((root, tobeShadow) => {
-            if(!(root instanceof Elem)) {
+            if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
-            if(!(tobeShadow instanceof Elem)) {
+            if (!(tobeShadow instanceof Elem)) {
                 return new Str("shadow must be an element")
             }
 
@@ -1896,7 +1915,7 @@ class SymbolTable {
         }))
 
         this.symbols.set("elem_sethtml", new Func((root, html) => {
-            if(!(root instanceof Elem)) {
+            if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
             let newHTML = html.jsStr()
@@ -1910,7 +1929,7 @@ class SymbolTable {
         }))
 
         this.symbols.set("elem_append", new Func((parent, child) => {
-            if(!(parent instanceof Elem) || !(child instanceof Elem)) {
+            if (!(parent instanceof Elem) || !(child instanceof Elem)) {
                 return new Str("parent, and child must be Elem")
             }
 
@@ -1958,15 +1977,13 @@ class SymbolTable {
 
             api_setItem("", entry.jsValue).then(res => {
                 if (res?.status !== 200) {
-                    if(mode.put)
+                    if (mode.put)
                         mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
-                } else{
-                    if(mode.put)
+                } else {
+                    if (mode.put)
                         mode.put(`Updated: ${entry.jsValue.En_Title}`)
-                    updateInfo({
-                        entries: {
-                            [String(entry.jsValue.ItemId)]: entry.jsValue
-                        }
+                    updateInfo2({
+                        [String(entry.jsValue.ItemId)]: { info: entry.jsValue }
                     })
                 }
             })
@@ -1981,17 +1998,14 @@ class SymbolTable {
             api_setItem("metadata/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
                 if (res?.status !== 200) {
-                    if(mode.put)
+                    if (mode.put)
                         mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 } else {
-                    if(mode.put)
+                    if (mode.put)
                         mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo({
-                        entries: {
-                            [String(entry.jsValue.ItemId)]: info
-                        },
-                        metadataEntries: {
-                            [String(entry.jsValue.ItemId)]: entry.jsValue
+                    updateInfo2({
+                        [String(entry.jsValue.ItemId)]: {
+                            meta: entry.jsValue
                         }
                     })
                 }
@@ -2007,17 +2021,14 @@ class SymbolTable {
             api_setItem("engagement/", entry.jsValue).then(res => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
                 if (res?.status !== 200) {
-                    if(mode.put)
+                    if (mode.put)
                         mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 } else {
-                    if(mode.put)
+                    if (mode.put)
                         mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo({
-                        entries: {
-                            [String(entry.jsValue.ItemId)]: info
-                        },
-                        userEntries: {
-                            [String(entry.jsValue.ItemId)]: entry.jsValue
+                    updateInfo2({
+                        [String(entry.jsValue.ItemId)]: {
+                            user: entry.jsValue
                         }
                     })
                 }
@@ -2212,6 +2223,7 @@ class Interpreter {
     }
 
     interpretNode(node: NodePar, pipeValue?: Type): Type {
+        //@ts-ignore
         let val = this[node.constructor.name](node, pipeValue)
         this.symbolTable.set("_1", val)
         return val
@@ -2223,6 +2235,7 @@ class Interpreter {
     }
 
     CallNode(node: CallNode, pipeValue?: Type): Type {
+        //@ts-ignore
         let inner = node.inner.map(this.interpretNode.bind(this))
         if (pipeValue) {
             inner = [pipeValue, ...inner]
@@ -2346,31 +2359,12 @@ class Interpreter {
     }
 }
 
-function jsVal2CalcVal(value: any): Type {
-    switch (typeof value) {
-        case 'string':
-            return new Str(value)
-        case 'number':
-            return new Num(value)
-        case 'boolean':
-            return new Num(Number(value))
-        case 'bigint':
-            return new Num(BigInt(value))
-        case 'function':
-            return new Func(function() {
-                return jsVal2CalcVal(value(...arguments))
-            })
-        default:
-            return new Num(NaN)
-    }
-}
-
 function makeSymbolsTableFromObj(obj: object): SymbolTable {
     let symbols = new SymbolTable()
     for (let name in obj) {
         //@ts-ignore
         let val = obj[name]
-        let t = jsVal2CalcVal(val)
+        let t = Type.from(val)
         if (symbols.get(name)) {
             name = `${name}2`
         }

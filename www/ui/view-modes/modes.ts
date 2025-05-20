@@ -97,7 +97,7 @@ const viewAllElem = document.getElementById("view-all") as HTMLInputElement
 viewAllElem.addEventListener("change", e => {
     clearItems()
     if ((e.target as HTMLInputElement)?.checked) {
-        selectItemList(globalsNewUi.results, mode)
+        selectItemList(globalsNewUi.results.map(v => v.info), mode)
     } else {
         resultStatsProxy.reset()
     }

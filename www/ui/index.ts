@@ -4,17 +4,6 @@ type ClientSearchFilters = {
     sortBy: string
 }
 
-type GlobalsNewUi = {
-    userEntries: Record<string, UserEntry>
-    metadataEntries: Record<string, MetadataEntry>
-    entries: Record<string, InfoEntry>
-    events: UserEvent[]
-    results: InfoEntry[]
-    selectedEntries: InfoEntry[]
-    libraries: Record<string, InfoEntry>
-    viewingLibrary: bigint
-}
-
 const displayItems = document.getElementById("entry-output") as HTMLElement
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
@@ -36,7 +25,7 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
     let AIOWeb = extra.AIOWeb || {}
 
     //the user can modify this field, but it MUST be an object
-    if(typeof AIOWeb !== "object") {
+    if (typeof AIOWeb !== "object") {
         AIOWeb = {}
     }
 
@@ -90,7 +79,7 @@ function changeResultStats(key: keyof ResultStats, value: number) {
 }
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
-    if(!item) return
+    if (!item) return
     changeResultStats("totalCost", item.PurchasePrice * multiplier)
     changeResultStats("count", 1 * multiplier)
 }
@@ -119,7 +108,7 @@ async function loadLibraries() {
 }
 
 async function loadInfoEntries() {
-    await items_loadInfoEntries(getUidUI())
+    await items_loadEntries(getUidUI())
 
     setResultStat("results", Object.keys(globalsNewUi.entries).length)
 
@@ -249,7 +238,7 @@ async function loadSearch() {
 
     setResultStat("results", entries.length)
 
-    globalsNewUi.results = entries
+    items_setResults(entries.map(v => v.ItemId))
 
     clearItems()
     if (entries.length === 0) {
@@ -264,53 +253,46 @@ function normalizeRating(rating: number, maxRating: number) {
     return rating / maxRating * 100
 }
 
-/**
- * @description Updates information in the global information table, also refreshes the mode's dispaly info, and the sidebar info
- */
-function updateInfo({
-    entries, metadataEntries, events, userEntries
-}: Partial<GlobalsNewUi>, del = false) {
-
-    if (del && events) {
-        let specific = events.map(v => `${v.ItemId}:${v.Timestamp || v.After}:${v.Event}`)
-        globalsNewUi.events = globalsNewUi.events.filter(v => !specific.includes(`${v.ItemId}:${v.Timestamp || v.After}:${v.Event}`))
-    } else if (events) {
-        globalsNewUi.events = globalsNewUi.events.concat(events)
-    }
-
+function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry }>>, del: boolean = false) {
     let updatedLibraries = false
+    for (let id in toUpdate) {
+        if (del) {
+            delete globalsNewUi.entries[id]
+            continue
+        }
 
-    for (let entry in entries) {
-        let e = entries[entry]
-        if (e.Type === "Library") {
-            if (!del) {
-                globalsNewUi.libraries[entry] = e
-            } else {
-                delete globalsNewUi.libraries[entry]
-            }
+        const { user, events, meta, info } = toUpdate[id]
+
+        if (info?.Type === "Library") {
+            if (del)
+                delete globalsNewUi.libraries[id]
+            else
+                globalsNewUi.libraries[id] = info
+
             updatedLibraries = true
         }
 
 
-        if (!del) {
-            let metadata = metadataEntries?.[entry] || findMetadataById(e.ItemId) || genericMetadata(e.ItemId)
-            let user = userEntries?.[entry] || findUserEntryById(e.ItemId) || genericUserEntry(e.ItemId)
+        if (user) {
+            globalsNewUi.entries[id].user = user
+        }
+        if (events) {
+            globalsNewUi.entries[id].events = events
+        }
+        if (meta) {
+            globalsNewUi.entries[id].meta = meta
+        }
+        if (info) {
+            globalsNewUi.entries[id].info = info
+        }
 
-            globalsNewUi.entries[entry] = e
-            globalsNewUi.metadataEntries[entry] = metadata
-            globalsNewUi.userEntries[entry] = user
-
-            refreshSidebarItem(e)
-            if (mode.refresh)
-                mode.refresh(e.ItemId)
-        } else {
-            delete globalsNewUi.entries[entry]
-            delete globalsNewUi.metadataEntries[entry]
-            delete globalsNewUi.userEntries[entry]
+        refreshSidebarItem(findInfoEntryById(BigInt(id)))
+        if(mode.refresh) {
+            mode.refresh(BigInt(id))
         }
     }
 
-    if (updatedLibraries) {
+    if(updatedLibraries) {
         updateLibraryDropdown()
     }
 }
@@ -320,8 +302,6 @@ async function refreshInfo() {
     return Promise.all([
         loadLibraries(),
         loadInfoEntries(),
-        items_loadMetadata(uid),
-        items_loadUserEntries(uid),
         loadUserEvents(uid)
     ])
 }
@@ -330,13 +310,13 @@ async function main() {
     const urlParams = new URLSearchParams(document.location.search)
 
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
-    if(!uidSelector) {
+    if (!uidSelector) {
         alert("Failed to 💧H Y D R A T E💧 the user selection list, aborting")
         return
     }
 
     api_listAccounts().then(accounts => {
-        for(let acc of accounts) {
+        for (let acc of accounts) {
             const opt = document.createElement("option")
             const [id, name] = acc.split(":")
 
@@ -348,15 +328,15 @@ async function main() {
         }
     })
 
-    if(urlParams.has("uname")) {
+    if (urlParams.has("uname")) {
         let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
 
-        if(!uid) {
+        if (!uid) {
             setError(`username: ${urlParams.get("uname")} does not exist`)
             return
         }
         uidSelector.value = String(uid)
-    } else if(urlParams.has("uid")) {
+    } else if (urlParams.has("uid")) {
         uidSelector.value = urlParams.get("uid") as string
     }
 
@@ -369,17 +349,18 @@ async function main() {
     }
 
     const uid = getUidUI()
-    await Promise.all([loadLibraries(), loadInfoEntries(), items_loadUserEntries(uid), loadUserEvents(uid)])
+    await Promise.all([loadLibraries(), loadInfoEntries()])
+    await loadUserEvents(uid)
 
     //do this second because metadata can get really large, and having to wait for it could take a while
-    items_loadMetadata(uid).then(() => {
-        clearSidebar()
-
-        for(let item of globalsNewUi.results) {
-            mode?.refresh?.(item.ItemId)
-            renderSidebarItem(item)
-        }
-    })
+    // items_refreshMetadata(uid).then(() => {
+    //     clearSidebar()
+    //
+    //     for (let item of globalsNewUi.results) {
+    //         mode?.refresh?.(item.ItemId)
+    //         renderSidebarItem(item.info)
+    //     }
+    // })
 
     api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
@@ -415,7 +396,7 @@ async function main() {
 
         setResultStat("results", entries.length)
 
-        globalsNewUi.results = entries
+        items_setResults(entries.map(v => v.ItemId))
 
         if (entries.length === 0) {
             setError("No results")
@@ -431,10 +412,10 @@ async function main() {
         })
 
         globalsNewUi.results = tree
-        renderSidebar(tree)
+        renderSidebar(tree.map(v => v.info))
     }
 
-    if(display_item_only) {
+    if (display_item_only) {
         let mainUI = document.getElementById("main-ui")
         mainUI?.classList.add("display-mode")
     }
@@ -447,12 +428,12 @@ async function remote2LocalThumbService() {
     if (servicing) return
 
     servicing = true
-    for (let item in globalsNewUi.metadataEntries) {
-        let metadata = globalsNewUi.metadataEntries[item]
+    for (let item in globalsNewUi.results) {
+        let metadata = globalsNewUi.results[item].meta
         let thumbnail = metadata.Thumbnail
 
-        let userTitle = globalsNewUi.entries[item].En_Title
-        let userNativeTitle = globalsNewUi.entries[item].Native_Title
+        let userTitle = globalsNewUi.entries[item].info.En_Title
+        let userNativeTitle = globalsNewUi.entries[item].info.Native_Title
 
         if (!thumbnail) continue
         if (thumbnail.startsWith(`${apiPath}/resource/thumbnail`) || thumbnail.startsWith(`${apiPath}/resource/get-thumbnail`)) continue
