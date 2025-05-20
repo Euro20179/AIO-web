@@ -14,6 +14,16 @@ function getSearchDataUI() {
     return data
 }
 
+function mkSearchUI(params: Record<string, string>) {
+    let form = document.getElementById("sidebar-form") as HTMLFormElement
+    for(let param in params) {
+        let inp = form.querySelector(`[name="${param}"]`) as HTMLInputElement | null
+        if(!inp || inp.tagName !== "INPUT") continue
+        inp.value = params[param]
+    }
+    form.submit()
+}
+
 function deleteEntryUI(item: InfoEntry) {
     if (!confirm("Are you sure you want to delete this item")) {
         return

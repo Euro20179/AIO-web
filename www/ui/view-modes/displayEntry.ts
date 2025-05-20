@@ -849,9 +849,9 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
             btn.onclick = function(e) {
                 let btn = e.target as HTMLButtonElement
                 let tag = btn.innerText
-                const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
-                searchInput.value = `#tag:${tag}`
-                searchInput.form?.submit()
+                mkSearchUI({
+                    ["search-query"]: `#tag:${tag}`
+                })
             }
 
             tagsRoot?.append(outer)
