@@ -1614,6 +1614,28 @@ class CalcVarTable {
             return new Arr([])
         }))
 
+        this.symbols.set("children", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            let children = [...findDescendants(jsId)]
+
+            return new Arr(children.map(v => new Entry(v.info)))
+        }))
+
+        this.symbols.set("copies", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            let children = [...findCopies(jsId)]
+
+            return new Arr(children.map(v => new Entry(v.info)))
+        }))
+
         this.symbols.set("entry", new Func((id) => {
             return findByid(id, i => {
                 switch (i) {
@@ -1843,7 +1865,6 @@ class CalcVarTable {
             clearItems()
             return new Num(0)
         }))
-
 
         this.symbols.set("ui_setuid", new Func((newUid) => {
             const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement

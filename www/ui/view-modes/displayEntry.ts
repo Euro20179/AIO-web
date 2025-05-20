@@ -751,6 +751,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         let symbols = new CalcVarTable()
         symbols.set("root", new Elem(root as unknown as HTMLElement))
         symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
+        symbols.set("this", new Entry(item))
         let res = parseExpression(script, symbols).jsStr()
 
         let outputId = elem.getAttribute("data-output")
