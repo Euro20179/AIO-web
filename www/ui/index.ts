@@ -417,7 +417,6 @@ async function main() {
         renderSidebar(entries)
     } else {
         await loadSearch()
-        renderSidebar(globalsNewUi.results.map(v => v.info))
     }
 
     if (display_item_only) {
