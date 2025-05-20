@@ -742,7 +742,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         let script = elem.textContent
         if (!script) continue
 
-        let symbols = new CalculatorSymbolTable()
+        let symbols = new CalcVarTable()
         symbols.set("root", new Elem(root as unknown as HTMLElement))
         symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
         let res = parseExpression(script, symbols).jsStr()

@@ -296,13 +296,13 @@ class IfNode extends NodePar {
 class FuncDefNode extends NodePar {
     name: Token
     program: ProgramNode
-    closure: CalculatorSymbolTable
+    closure: CalcVarTable
     paramNames: Token[]
     constructor(name: Token, program: ProgramNode, paramNames: Token[]) {
         super()
         this.name = name
         this.program = program
-        this.closure = new CalculatorSymbolTable()
+        this.closure = new CalcVarTable()
         this.paramNames = paramNames
     }
 
@@ -358,7 +358,7 @@ class ProgramNode extends NodePar {
     }
 }
 
-function parseExpression(input: string, symbols: CalculatorSymbolTable) {
+function parseExpression(input: string, symbols: CalcVarTable) {
     const tokens = lex(input);
     let parser = new Parser(tokens)
     const tree = parser.ast()
@@ -1073,12 +1073,12 @@ class Code extends Type {
     }
 
     truthy(): boolean {
-        let int = new Interpreter(this.code, new CalculatorSymbolTable)
+        let int = new Interpreter(this.code, new CalcVarTable)
         return int.interpret().truthy()
     }
 
     call(params: Type[]): Type {
-        let tbl = new CalculatorSymbolTable()
+        let tbl = new CalcVarTable()
         for (let i = 0; i < params.length; i++) {
             tbl.set(`arg${i}`, params[i])
         }
@@ -1357,7 +1357,7 @@ class Str extends Type {
     }
 }
 
-class CalculatorSymbolTable {
+class CalcVarTable {
     symbols: Map<string, Type>
     constructor() {
         this.symbols = new Map()
@@ -2055,7 +2055,7 @@ class CalculatorSymbolTable {
     }
 
     copy() {
-        let copy = new CalculatorSymbolTable()
+        let copy = new CalcVarTable()
         for (let item of this.symbols.entries()) {
             copy.set(item[0], item[1])
         }
@@ -2065,9 +2065,9 @@ class CalculatorSymbolTable {
 
 class Interpreter {
     tree: NodePar
-    symbolTable: CalculatorSymbolTable
+    symbolTable: CalcVarTable
     stack: Type[]
-    constructor(tree: NodePar, symbolTable: CalculatorSymbolTable) {
+    constructor(tree: NodePar, symbolTable: CalcVarTable) {
         this.tree = tree
         this.symbolTable = symbolTable
         this.stack = []
@@ -2359,8 +2359,8 @@ class Interpreter {
     }
 }
 
-function makeSymbolsTableFromObj(obj: object): CalculatorSymbolTable {
-    let symbols = new CalculatorSymbolTable()
+function makeSymbolsTableFromObj(obj: object): CalcVarTable {
+    let symbols = new CalcVarTable()
     for (let name in obj) {
         //@ts-ignore
         let val = obj[name]
