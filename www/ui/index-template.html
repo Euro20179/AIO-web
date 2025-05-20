@@ -104,8 +104,7 @@
 
     <div id="main" class="flex column">
         <div id="main-ui" class="overflow">
-            <div id="search-area">
-
+            <nav id="search-area" aria-label="search and information">
                 <button popovertarget="new-entry" type="button" id="new-entry-button">➕︎</button>
 
                 <form action="javascript:loadSearch()" id="sidebar-form">
@@ -144,8 +143,8 @@
                     <option value="gallery-output">Gallery mode</option>
                     <option value="script-output">Script mode</option>
                 </select>
-            </div>
-            <nav class="sidebar overflow" id="sidebar">
+            </nav>
+            <nav class="sidebar overflow" id="sidebar" aria-label="item selection">
                 <div class="sidebar--navigation" id="sidebar-navigation">
                     <label class="center block" style="width: 100%; align-content: center;"><input type="checkbox"
                             name="view-all" id="view-all">View all</label>
