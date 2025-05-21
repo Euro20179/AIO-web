@@ -105,7 +105,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
-    if (!user || !meta) return elem
+    if (!user || !meta || !elem.shadowRoot) return elem
 
     if (options?.below) {
         const renderBelow = sidebarParent.querySelector(`[data-entry-id="${options.below}"]`) as HTMLElement
@@ -114,7 +114,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
         sidebarParent.append(elem)
     }
 
-    let img = elem.shadowRoot?.querySelector("img") as HTMLImageElement
+    let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
         img.addEventListener("click", e => {
             if (e.ctrlKey) {
@@ -125,7 +125,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
             }
         })
 
-        if (options?.renderImg) {
+        if (options?.renderImg && meta.Thumbnail) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         } else {
             sidebarObserver.observe(elem)

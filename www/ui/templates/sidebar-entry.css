@@ -80,4 +80,8 @@
             justify-self: center;
         }
     }
+
+    #sidebar-thumbnail:not([src]) {
+        height: 70cqb;
+    }
 }
