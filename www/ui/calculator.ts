@@ -1766,6 +1766,13 @@ class CalcVarTable {
             return new Num(0)
         }))
 
+        this.symbols.set("ui_setstat", new Func((name, val) => {
+            let n = name.jsStr()
+            let v = val.toNum()
+            setResultStat(n, v.jsValue)
+            return v
+        }))
+
         this.symbols.set("ui_search", new Func((query, cb) => {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()

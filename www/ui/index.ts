@@ -72,12 +72,12 @@ type ResultStats = {
     results: number
 }
 
-function setResultStat(key: keyof ResultStats, value: number) {
-    resultStatsProxy[key] = value
+function setResultStat(key: string, value: number) {
+    resultStatsProxy[key as keyof ResultStats] = value
 }
 
-function changeResultStats(key: keyof ResultStats, value: number) {
-    resultStatsProxy[key] += value
+function changeResultStats(key: string, value: number) {
+    resultStatsProxy[key as keyof ResultStats] += value
 }
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
