@@ -1042,6 +1042,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
 
+    observer.observe(el)
+
     let user = findUserEntryById(itemId) as UserEntry
 
     let template;
