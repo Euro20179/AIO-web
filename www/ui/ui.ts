@@ -18,7 +18,7 @@ let resultStatsProxy = new Proxy({
             return false
         }
         let el = statsOutput.querySelector(`[data-stat-name="${String(prop)}"]`)
-        if(!el) {
+        if (!el) {
             el = document.createElement("entries-statistic")
             el.setAttribute("data-stat-name", String(prop))
             statsOutput.append(el)
@@ -50,7 +50,7 @@ function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
 
 function deleteResultStat(key: string) {
     let el = statsOutput.querySelector(`[data-stat-name="${key}"]`)
-    if(el) {
+    if (el) {
         el.remove()
         return true
     }
@@ -76,9 +76,9 @@ function getSearchDataUI() {
 
 function mkSearchUI(params: Record<string, string>) {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
-    for(let param in params) {
+    for (let param in params) {
         let inp = form.querySelector(`[name="${param}"]`) as HTMLInputElement | null
-        if(!inp || inp.tagName !== "INPUT") continue
+        if (!inp || inp.tagName !== "INPUT") continue
         inp.value = params[param]
     }
     form.submit()
@@ -238,7 +238,7 @@ newItemForm.onsubmit = function() {
     newEntryUI(newItemForm)
 }
 
-function fillItemListing(entries: Record<string, MetadataEntry>) {
+function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
     const popover = document.getElementById("items-listing") as HTMLDivElement
     popover.innerHTML = ""
 
@@ -255,8 +255,12 @@ function fillItemListing(entries: Record<string, MetadataEntry>) {
 
         const entry = entries[id]
 
-
-        const title = entry.Title || entry.Native_Title || "unknown"
+        let title
+        if (probablyMetaEntry(entry)) {
+            title = (entry.Title || entry.Native_Title) || "unknown"
+        } else {
+            title = entry.info.En_Title || entry.info.Native_Title || entry.meta.Title || entry.meta.Native_Title
+        }
 
         const fig = document.createElement("figure")
 
@@ -264,8 +268,10 @@ function fillItemListing(entries: Record<string, MetadataEntry>) {
 
         fig.setAttribute("data-item-id", String(id))
 
+        let thumbnail = probablyMetaEntry(entry) ? fixThumbnailURL(entry.Thumbnail) : entry.fixedThumbnail
+
         const img = document.createElement("img")
-        img.src = fixThumbnailURL(entry.Thumbnail)
+        img.src = fixThumbnailURL(thumbnail)
         img.width = 100
         img.loading = "lazy"
         const caption = document.createElement("figcaption")
@@ -284,7 +290,7 @@ function fillItemListing(entries: Record<string, MetadataEntry>) {
 async function selectExistingItem(): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDivElement
 
-    const container = fillItemListing(items_getAllMeta())
+    const container = fillItemListing(globalsNewUi.entries)
 
     popover.showPopover()
 

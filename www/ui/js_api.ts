@@ -171,6 +171,10 @@ function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
     return ""
 }
 
+async function ui_askitem() {
+    return await selectExistingItem()
+}
+
 async function aio_search(query: string): Promise<InfoEntry[]> {
     return await api_queryV3(query, getUidUI())
 }

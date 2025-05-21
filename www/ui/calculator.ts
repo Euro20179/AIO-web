@@ -1758,6 +1758,19 @@ class CalcVarTable {
             return Type.from(ua_download(d, jsName, fileType))
         }))
 
+        this.symbols.set("ui_askitem", new Func(cb => {
+            ui_askitem().then(id => {
+                let result
+                if(typeof id === 'bigint') {
+                    result = new EntryTy(findInfoEntryById(id))
+                } else {
+                    result = new Num(0)
+                }
+                cb.call([result])
+            })
+            return new Num(0)
+        }))
+
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
