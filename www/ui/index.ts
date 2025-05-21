@@ -41,57 +41,6 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
     user.Extra = JSON.stringify(extra)
 }
 
-let resultStatsProxy = new Proxy({
-    count: 0,
-    totalCost: 0,
-    results: 0,
-    reset() {
-        this.count = 0
-        this.totalCost = 0
-    }
-}, {
-    set(_obj, prop, value) {
-        //@ts-ignore
-        if (!Reflect.set(...arguments)) {
-            return false
-        }
-        let el = statsOutput.querySelector(`[data-stat-name="${String(prop)}"]`)
-        if(!el) {
-            el = document.createElement("entries-statistic")
-            el.setAttribute("data-stat-name", String(prop))
-            statsOutput.append(el)
-        }
-        el.setAttribute("data-value", String(value))
-        return true
-    }
-})
-
-type ResultStats = {
-    totalCost: number
-    count: number
-    results: number
-}
-
-function setResultStat(key: string, value: number) {
-    resultStatsProxy[key as keyof ResultStats] = value
-}
-
-function changeResultStats(key: string, value: number) {
-    resultStatsProxy[key as keyof ResultStats] += value
-}
-
-function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
-    if (!item) return
-    changeResultStats("totalCost", item.PurchasePrice * multiplier)
-    changeResultStats("count", 1 * multiplier)
-}
-
-function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 1) {
-    for (let item of items) {
-        changeResultStatsWithItem(item, multiplier)
-    }
-}
-
 function updateLibraryDropdown() {
     librarySelector.innerHTML = '<option value="0">Library</option>'
     for (let i in globalsNewUi.libraries) {
