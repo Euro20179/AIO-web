@@ -128,6 +128,14 @@ function ui_clear(): number {
     return 0
 }
 
+function ui_modeclear(): number {
+    if("clear" in mode) {
+        mode.clear()
+        return 0
+    }
+    return 1
+}
+
 function ui_setuid(newId: string): string {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
     return uidSelector.value = newId

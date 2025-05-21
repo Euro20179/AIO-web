@@ -930,6 +930,16 @@ class Type {
             return new Elem(value)
         } else if (value instanceof Type) {
             return value
+        } else if (probablyUserItem(value) || probablyInfoEntry(value) || probablyMetaEntry(value)) {
+            return new EntryTy(value)
+        }
+
+        else if(Array.isArray(value)) {
+            let arr = []
+            for(let item of value) {
+                arr.push(Type.from(item))
+            }
+            return new Arr(arr)
         }
 
         switch (typeof value) {
@@ -1734,38 +1744,33 @@ class CalcVarTable {
         }))
 
         this.symbols.set("clear", new Func(() => {
-            if ("clear" in mode) {
-                mode.clear()
-                return new Num(0)
-            }
-            return new Num(1)
+            return Type.from(ui_modeclear())
         }))
 
         this.symbols.set("put", new Func((...values) => {
-            let res = ui_put(...values.map(v => v instanceof Elem ? v.el : v.jsStr()))
-            return res === "" ? new Str(res) : new Num(res)
+            return Type.from(ui_put(...values.map(v => v instanceof Elem ? v.el : v.jsStr())))
         }))
 
         this.symbols.set("ua_download", new Func((data, name, ft) => {
             let jsName = name?.jsStr() || "file.dat"
             let fileType = ft?.jsStr() || "text/plain"
             let d = data.jsStr()
-            return new Num(ua_download(d, jsName, fileType))
+            return Type.from(ua_download(d, jsName, fileType))
         }))
 
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
-            return new Num(ui_setstat(n, v.jsValue))
+            return Type.from(ui_setstat(n, v.jsValue))
         }))
 
         this.symbols.set("ui_delstat", new Func((name) => {
             let n = name.jsStr()
-            return new Num(Number(ui_delstat(n)))
+            return Type.from(Number(ui_delstat(n)))
         }))
 
         this.symbols.set("ui_search", new Func((query, cb) => {
-            return new Num(ui_search(query.jsStr(), results => {
+            return Type.from(ui_search(query.jsStr(), results => {
                 cb?.call([new Arr(results.map(v => new EntryTy(v.info)))])
             }))
         }))
@@ -1776,11 +1781,11 @@ class CalcVarTable {
             if (res == 1) {
                 return new Str("Invalid mode")
             }
-            return new Num(res)
+            return Type.from(res)
         }))
 
         this.symbols.set("ui_sidebarclear", new Func(() => {
-            return new Num(ui_sidebarclear())
+            return Type.from(ui_sidebarclear())
         }))
 
         this.symbols.set("ui_sidebarselect", new Func((id) => {
@@ -1793,7 +1798,7 @@ class CalcVarTable {
             if (res === 1) {
                 return new Str(`${id} not found`)
             }
-            return new Num(res)
+            return Type.from(res)
         }))
 
         this.symbols.set("ui_sidebarrender", new Func(id => {
@@ -1804,7 +1809,7 @@ class CalcVarTable {
             let res = ui_sidebarrender(jsId)
             if (res === 1)
                 return new Str(`${id} not found`)
-            return new Elem(res)
+            return Type.from(res)
         }))
 
         this.symbols.set("ui_toggle", new Func(id => {
@@ -1817,7 +1822,7 @@ class CalcVarTable {
             if (res == 2) {
                 return new Str(`${id} not found`)
             }
-            return new Num(res)
+            return Type.from(res)
         }))
 
         this.symbols.set("ui_select", new Func((id) => {
@@ -1832,7 +1837,7 @@ class CalcVarTable {
             } else if (res === 1) {
                 return new Str(`${id} not found`)
             } else {
-                return new Elem(res)
+                return Type.from(res)
             }
         }))
 
@@ -1846,7 +1851,7 @@ class CalcVarTable {
             if (res === 1) {
                 return new Str(`${id} not found`)
             } else {
-                return new Elem(res)
+                return Type.from(res)
             }
         }))
 
@@ -1862,20 +1867,20 @@ class CalcVarTable {
             } else if (res === 1) {
                 return new Str(`${id} not found`)
             } else {
-                return new Str("")
+                return Type.from("")
             }
         }))
 
         this.symbols.set("ui_clear", new Func(() => {
-            return new Num(clearItems())
+            return Type.from(clearItems())
         }))
 
         this.symbols.set("ui_setuid", new Func((newUid) => {
-            return new Str(ui_setuid(newUid.toNum().jsStr()))
+            return Type.from(ui_setuid(newUid.toNum().jsStr()))
         }))
 
         this.symbols.set("ui_getuid", new Func(() => {
-            return new Str(ui_getuid())
+            return Type.from(ui_getuid())
         }))
 
         this.symbols.set("ui_setresults", new Func(newResults => {
@@ -1885,20 +1890,19 @@ class CalcVarTable {
             let results = newResults.jsValue
                 .filter((v: Type) => v instanceof EntryTy && probablyInfoEntry(v.jsValue))
                 .map((v: Type) => v.jsValue)
-            return new Num(ui_setresults(results))
+            return Type.from(ui_setresults(results))
         }))
 
         this.symbols.set("ui_getresults", new Func(() => {
-            return new Arr(ui_getresults().map(v => new EntryTy(v)))
+            return Type.from(ui_getresults())
         }))
 
         this.symbols.set("ui_selected", new Func(() => {
-            return new Arr(ui_selected().map(v => new EntryTy(v)))
+            return Type.from(ui_selected())
         }))
 
         this.symbols.set("js_eval", new Func(text => {
-            let t = text.jsStr()
-            return Type.from(eval(t))
+            return Type.from(eval(text.jsStr()))
         }))
 
         this.symbols.set("elem_on", new Func((root, event, cb) => {
