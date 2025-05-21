@@ -167,10 +167,15 @@
 
                 <div id="script-output">
                     <div id="script-root">
-                        <div style="grid-area: run-button;">
+                        <div class="flex" style="grid-area: run-button;">
                             <button id="script-execute">▶</button>
-                            <label for="script-execute-output-clear">clear on run <input type="checkbox"
-                                    id="script-execute-output-clear" style="vertical-align: middle;" checked></label>
+                            <div class="flex column">
+                                <label for="script-execute-output-clear">clear on run <input type="checkbox"
+                                        id="script-execute-output-clear" style="vertical-align: middle;"
+                                        checked></label>
+                                <label for="script-js-mode">js mode <input type="checkbox" id="script-js-mode"
+                                        style="vertical-align: middle;"></label>
+                            </div>
                         </div>
                         <textarea id="script"></textarea>
                         <output id="script-execute-output" style="font-family: monospace"></output>
@@ -258,6 +263,7 @@
     <script src="/js/items.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/notes-parser.js"></script>
+    <script src="/ui/js_api.js"></script>
     <script src="/ui/calculator.js"></script>
     <script src="/ui/components.js"></script>
     <script src="/ui/globals.js"></script>

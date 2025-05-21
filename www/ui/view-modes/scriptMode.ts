@@ -41,7 +41,7 @@ const modeScripting: DisplayMode = {
 }
 
 run.onclick = function() {
-    const script = scriptBox.value
+    let script = scriptBox.value
 
     let tbl = new CalcVarTable()
     tbl.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
@@ -49,6 +49,18 @@ run.onclick = function() {
     //@ts-ignore
     if (document.getElementById("script-execute-output-clear")?.checked) {
         modeScripting.clear()
+    }
+
+    //@ts-ignore
+    if (document.getElementById("script-js-mode")?.checked) {
+        //put the script within a scope so the user can redeclare vars
+        script = `{${script}}`
+        let b = new Blob([script], { type: "application/javascript" })
+        let scriptEl = document.createElement("script")
+        scriptEl.src = URL.createObjectURL(b)
+        document.body.append(scriptEl)
+        scriptEl.remove()
+        return
     }
 
     const value = parseExpression(script, tbl)

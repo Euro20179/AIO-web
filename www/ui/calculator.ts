@@ -956,7 +956,7 @@ class Type {
         }
     }
 
-    
+
     len(): Num {
         console.error(`Unable to get the len of ${this.constructor.name}`)
         return new Num(0)
@@ -1222,7 +1222,7 @@ class EntryTy extends Type {
     getattr(prop: Type): Type {
         let name = prop.jsStr()
         let v = this.jsValue[name]
-        if(name === "Thumbnail" && probablyMetaEntry(this.jsValue)) {
+        if (name === "Thumbnail" && probablyMetaEntry(this.jsValue)) {
             //be nice and dont make the user fix the thumbnail
             return new Str(fixThumbnailURL(v))
         }
@@ -1742,62 +1742,45 @@ class CalcVarTable {
         }))
 
         this.symbols.set("put", new Func((...values) => {
-            if (mode.put) {
-                for (let item of values) {
-                    if (item instanceof Elem) {
-                        mode.put(item.el)
-                    } else {
-                        mode.put(item.jsStr())
-                    }
-                }
-                return new Str("")
-            }
-            return new Num(1)
+            let res = ui_put(...values.map(v => v instanceof Elem ? v.el : v.jsStr()))
+            return res === "" ? new Str(res) : new Num(res)
         }))
 
         this.symbols.set("ua_download", new Func((data, name, ft) => {
             let jsName = name?.jsStr() || "file.dat"
             let fileType = ft?.jsStr() || "text/plain"
-            let e = document.createElement("a")
-            e.download = jsName
-            let b = new Blob([data.jsStr()], { type: fileType})
-            e.href = URL.createObjectURL(b)
-            e.click()
-            return new Num(0)
+            let d = data.jsStr()
+            return new Num(ua_download(d, jsName, fileType))
         }))
 
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
-            setResultStat(n, v.jsValue)
-            return v
+            return new Num(ui_setstat(n, v.jsValue))
         }))
+
         this.symbols.set("ui_delstat", new Func((name) => {
             let n = name.jsStr()
-            return new Num(Number(deleteResultStat(n)))
+            return new Num(Number(ui_delstat(n)))
         }))
 
         this.symbols.set("ui_search", new Func((query, cb) => {
-            let form = document.getElementById("sidebar-form") as HTMLFormElement
-            (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
-            loadSearchUI().then(() => {
-                cb?.call([new Arr(globalsNewUi.results.map(v => new EntryTy(v.info)))])
-            }).catch(console.error)
-            return new Num(0)
+            return new Num(ui_search(query.jsStr(), results => {
+                cb?.call([new Arr(results.map(v => new EntryTy(v.info)))])
+            }))
         }))
 
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
-            if (!modeOutputIds.includes(name)) {
+            let res = ui_setmode(name)
+            if (res == 1) {
                 return new Str("Invalid mode")
             }
-            mode_setMode(name)
-            return new Num(0)
+            return new Num(res)
         }))
 
         this.symbols.set("ui_sidebarclear", new Func(() => {
-            clearSidebar()
-            return new Num(0)
+            return new Num(ui_sidebarclear())
         }))
 
         this.symbols.set("ui_sidebarselect", new Func((id) => {
@@ -1805,13 +1788,12 @@ class CalcVarTable {
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
             }
-            const entry = findInfoEntryById(jsId)
 
-            if (!entry) {
+            let res = ui_sidebarselect(jsId)
+            if (res === 1) {
                 return new Str(`${id} not found`)
             }
-            renderSidebarItem(entry)
-            return new Num(0)
+            return new Num(res)
         }))
 
         this.symbols.set("ui_sidebarrender", new Func(id => {
@@ -1819,14 +1801,10 @@ class CalcVarTable {
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
             }
-            const entry = findInfoEntryById(jsId)
-
-            if (!entry) {
+            let res = ui_sidebarrender(jsId)
+            if (res === 1)
                 return new Str(`${id} not found`)
-            }
-            let frag = document.createDocumentFragment()
-            let el = renderSidebarItem(entry, frag, { renderImg: true })
-            return new Elem(el)
+            return new Elem(res)
         }))
 
         this.symbols.set("ui_toggle", new Func(id => {
@@ -1834,19 +1812,12 @@ class CalcVarTable {
             if (typeof jsId !== 'bigint') {
                 return new Str("id is not a bigint")
             }
-            const entry = findInfoEntryById(jsId)
 
-            if (!entry) {
+            let res = ui_toggle(jsId)
+            if (res == 2) {
                 return new Str(`${id} not found`)
             }
-
-            if (mode_isSelected(jsId)) {
-                deselectItem(entry)
-                return new Num(0)
-            } else {
-                selectItem(entry, mode)
-                return new Num(1)
-            }
+            return new Num(res)
         }))
 
         this.symbols.set("ui_select", new Func((id) => {
@@ -1855,17 +1826,14 @@ class CalcVarTable {
                 return new Str("id is not a bigint")
             }
 
-            if (mode_isSelected(jsId)) {
+            let res = ui_select(jsId)
+            if (res === 2) {
                 return new Str(`${id} already selected`)
-            }
-            const entry = findInfoEntryById(jsId)
-
-            if (!entry) {
+            } else if (res === 1) {
                 return new Str(`${id} not found`)
+            } else {
+                return new Elem(res)
             }
-
-            let el = selectItem(entry, mode)
-            return new Elem(el)
         }))
 
         this.symbols.set("ui_render", new Func(id => {
@@ -1874,17 +1842,12 @@ class CalcVarTable {
                 return new Str("id is not a bigint")
             }
 
-            const entry = findInfoEntryById(jsId)
-
-            if (!entry) {
+            let res = ui_render(jsId)
+            if (res === 1) {
                 return new Str(`${id} not found`)
+            } else {
+                return new Elem(res)
             }
-
-            let frag = document.createDocumentFragment()
-
-            let el = selectItem(entry, mode, true, frag)
-
-            return new Elem(el)
         }))
 
         this.symbols.set("ui_deselect", new Func((id) => {
@@ -1893,28 +1856,26 @@ class CalcVarTable {
                 return new Str("id is not a bigint")
             }
 
-            if (!mode_isSelected(jsId)) {
+            let res = ui_deselect(jsId)
+            if (res === 2) {
                 return new Str(`${id} is not selected`)
-            }
-            const entry = findInfoEntryById(jsId)
-
-            if (!entry) {
+            } else if (res === 1) {
                 return new Str(`${id} not found`)
+            } else {
+                return new Str("")
             }
-
-            deselectItem(entry)
-            return new Str("")
         }))
 
         this.symbols.set("ui_clear", new Func(() => {
-            clearItems()
-            return new Num(0)
+            return new Num(clearItems())
         }))
 
         this.symbols.set("ui_setuid", new Func((newUid) => {
-            const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
-            uidSelector.value = newUid.toNum().jsStr()
-            return new Str(uidSelector.value)
+            return new Str(ui_setuid(newUid.toNum().jsStr()))
+        }))
+
+        this.symbols.set("ui_getuid", new Func(() => {
+            return new Str(ui_getuid())
         }))
 
         this.symbols.set("ui_setresults", new Func(newResults => {
@@ -1924,18 +1885,15 @@ class CalcVarTable {
             let results = newResults.jsValue
                 .filter((v: Type) => v instanceof EntryTy && probablyInfoEntry(v.jsValue))
                 .map((v: Type) => v.jsValue)
-            globalsNewUi.results = results
-            clearSidebar()
-            renderSidebar(results)
-            return new Num(0)
+            return new Num(ui_setresults(results))
         }))
 
         this.symbols.set("ui_getresults", new Func(() => {
-            return new Arr(globalsNewUi.results.map(v => new EntryTy(v.info)))
+            return new Arr(ui_getresults().map(v => new EntryTy(v)))
         }))
 
         this.symbols.set("ui_selected", new Func(() => {
-            return new Arr(globalsNewUi.selectedEntries.map(v => new EntryTy(v)))
+            return new Arr(ui_selected().map(v => new EntryTy(v)))
         }))
 
         this.symbols.set("js_eval", new Func(text => {
@@ -1948,7 +1906,7 @@ class CalcVarTable {
                 return new Str("root must be an element")
             }
 
-            if(!(cb instanceof Func)) {
+            if (!(cb instanceof Func)) {
                 return new Str("callback must be a func")
             }
 
@@ -2055,7 +2013,6 @@ class CalcVarTable {
             return new Num(0)
         }))
 
-
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
             api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async (res) => {
@@ -2076,17 +2033,9 @@ class CalcVarTable {
             if (!(entry instanceof EntryTy) || !probablyInfoEntry(entry.jsValue)) {
                 return new Str("NOT AN ENTRY")
             }
-
-            api_setItem("", entry.jsValue).then(res => {
-                if (res?.status !== 200) {
-                    if (mode.put)
-                        mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
-                } else {
-                    if (mode.put)
-                        mode.put(`Updated: ${entry.jsValue.En_Title}`)
-                    updateInfo2({
-                        [String(entry.jsValue.ItemId)]: { info: entry.jsValue }
-                    })
+            aio_setentry(entry.jsValue).then(success => {
+                if (!success && mode.put) {
+                    mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
                 }
             })
             return new Str("")
@@ -2097,21 +2046,13 @@ class CalcVarTable {
                 return new Str("NOT AN ENTRY")
             }
 
-            api_setItem("metadata/", entry.jsValue).then(res => {
+            aio_setmeta(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if (res?.status !== 200) {
-                    if (mode.put)
-                        mode.put(`Failed to update: ${info.En_Title}'s metadata`)
-                } else {
-                    if (mode.put)
-                        mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo2({
-                        [String(entry.jsValue.ItemId)]: {
-                            meta: entry.jsValue
-                        }
-                    })
+                if (!success && mode.put) {
+                    mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 }
             })
+
             return new Str("")
         }))
 
@@ -2119,22 +2060,13 @@ class CalcVarTable {
             if (!(entry instanceof EntryTy) || !probablyUserItem(entry.jsValue)) {
                 return new Str("NOT AN ENTRY")
             }
-
-            api_setItem("engagement/", entry.jsValue).then(res => {
+            aio_setuser(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if (res?.status !== 200) {
-                    if (mode.put)
-                        mode.put(`Failed to update: ${info.En_Title}'s user entry`)
-                } else {
-                    if (mode.put)
-                        mode.put(`Updated: ${info.En_Title}`)
-                    updateInfo2({
-                        [String(entry.jsValue.ItemId)]: {
-                            user: entry.jsValue
-                        }
-                    })
+                if (!success && mode.put) {
+                    mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 }
             })
+
             return new Str("")
         }))
 
