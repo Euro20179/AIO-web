@@ -96,7 +96,7 @@ async function loadSearchUI() {
         clearSidebar()
         return
     }
-    renderSidebar(entries)
+    renderSidebar(globalsNewUi.results.map(v => v.info))
 }
 
 function deleteEntryUI(item: InfoEntry) {

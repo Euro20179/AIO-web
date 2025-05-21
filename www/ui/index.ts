@@ -292,7 +292,7 @@ async function main() {
 
 
         const data = getSearchDataUI()
-        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() || "user-title")
+        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() ?? "user-title")
         items_setResults(newEntries.map(v => v.ItemId))
         for (let item of globalsNewUi.results) {
             mode?.refresh?.(item.ItemId)
