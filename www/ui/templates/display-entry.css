@@ -22,6 +22,7 @@
     button,
     select {
         border-color: var(--input-border-color);
+        font-family: inherit;
     }
 
     hr {

@@ -18,6 +18,10 @@
 
         flex-wrap: wrap;
     }
+
+    button, input, select {
+        font-family: inherit;
+    }
 }
 
 @layer utility {
