@@ -48,6 +48,15 @@ function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
     changeResultStats("count", 1 * multiplier)
 }
 
+function deleteResultStat(key: string) {
+    let el = statsOutput.querySelector(`[data-stat-name="${key}"]`)
+    if(el) {
+        el.remove()
+        return true
+    }
+    return false
+}
+
 function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 1) {
     for (let item of items) {
         changeResultStatsWithItem(item, multiplier)

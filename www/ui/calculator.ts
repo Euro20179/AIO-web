@@ -1772,6 +1772,10 @@ class CalcVarTable {
             setResultStat(n, v.jsValue)
             return v
         }))
+        this.symbols.set("ui_delstat", new Func((name) => {
+            let n = name.jsStr()
+            return new Num(Number(deleteResultStat(n)))
+        }))
 
         this.symbols.set("ui_search", new Func((query, cb) => {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
@@ -1924,6 +1928,10 @@ class CalcVarTable {
             clearSidebar()
             renderSidebar(results)
             return new Num(0)
+        }))
+
+        this.symbols.set("ui_getresults", new Func(() => {
+            return new Arr(globalsNewUi.results.map(v => new EntryTy(v.info)))
         }))
 
         this.symbols.set("ui_selected", new Func(() => {
