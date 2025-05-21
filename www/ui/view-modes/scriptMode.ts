@@ -44,7 +44,7 @@ run.onclick = function() {
     const script = scriptBox.value
 
     let tbl = new CalcVarTable()
-    tbl.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
+    tbl.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
 
     //@ts-ignore
     if (document.getElementById("script-execute-output-clear")?.checked) {

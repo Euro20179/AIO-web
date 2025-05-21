@@ -934,21 +934,21 @@ class Type {
 
         switch (typeof value) {
             case 'string':
-                return new Str(value)
+                return new ElemTy(value)
             case 'number':
             case 'bigint':
                 return new Num(value)
             case 'boolean':
                 return new Num(Number(value))
             case 'symbol':
-                return new Str(String(value))
+                return new ElemTy(String(value))
             case 'undefined':
-                return new Str("undefined")
+                return new ElemTy("undefined")
             case 'object':
                 if (value instanceof Type) {
                     return value
                 }
-                return new Str(JSON.stringify(value, (_, v) => typeof v === "bigint" ? String(v) : v))
+                return new ElemTy(JSON.stringify(value, (_, v) => typeof v === "bigint" ? String(v) : v))
             case 'function':
                 return new Func(function() {
                     return Type.from(value(...arguments))
@@ -971,7 +971,7 @@ class Type {
     }
 
     toStr() {
-        return new Str(this.jsStr())
+        return new ElemTy(this.jsStr())
     }
 
     toNum() {
@@ -1046,8 +1046,8 @@ class Elem extends Type {
         return this.el.innerHTML
     }
 
-    toStr(): Str {
-        return new Str(this.jsStr())
+    toStr(): ElemTy {
+        return new ElemTy(this.jsStr())
     }
 
     setattr(name: Type, value: Type): Type {
@@ -1056,7 +1056,7 @@ class Elem extends Type {
     }
 
     getattr(prop: Type): Type {
-        return new Str(this.el.getAttribute(prop.jsStr()))
+        return new ElemTy(this.el.getAttribute(prop.jsStr()))
     }
 }
 
@@ -1089,8 +1089,8 @@ class Code extends Type {
         return this.code.serialize()
     }
 
-    toStr(): Str {
-        return new Str(this.jsStr())
+    toStr(): ElemTy {
+        return new ElemTy(this.jsStr())
     }
 
     add(right: Type): Type {
@@ -1126,12 +1126,12 @@ class Arr extends Type {
         return this.jsValue[idx]
     }
 
-    toStr(): Str {
+    toStr(): ElemTy {
         let str = ""
         for (let item of this.jsValue) {
             str += item.jsStr()
         }
-        return new Str(str)
+        return new ElemTy(str)
     }
 
     jsStr(): string {
@@ -1175,8 +1175,8 @@ class Obj extends Type {
         })
     }
 
-    toStr(): Str {
-        return new Str(this.jsStr())
+    toStr(): ElemTy {
+        return new ElemTy(this.jsStr())
     }
 
     call(params: Type[]) {
@@ -1197,7 +1197,7 @@ class Obj extends Type {
     }
 }
 
-class Entry extends Type {
+class EntryTy extends Type {
     constructor(entry: InfoEntry | MetadataEntry | UserEntry) {
         //create a copy, dont let the user accidentally fuck shit up
         super({ ...entry })
@@ -1215,8 +1215,8 @@ class Entry extends Type {
         return (new Obj(this.jsValue)).jsStr()
     }
 
-    toStr(): Str {
-        return new Str(this.jsStr())
+    toStr(): ElemTy {
+        return new ElemTy(this.jsStr())
     }
 
     getattr(prop: Type): Type {
@@ -1224,24 +1224,24 @@ class Entry extends Type {
         let v = this.jsValue[name]
         if(name === "Thumbnail" && probablyMetaEntry(this.jsValue)) {
             //be nice and dont make the user fix the thumbnail
-            return new Str(fixThumbnailURL(v))
+            return new ElemTy(fixThumbnailURL(v))
         }
         switch (typeof v) {
             case 'string':
-                return new Str(v)
+                return new ElemTy(v)
             case 'number':
             case 'bigint':
                 return new Num(v)
             case 'boolean':
                 return new Num(Number(v))
             case 'symbol':
-                return new Str(String(v))
+                return new ElemTy(String(v))
             case 'undefined':
-                return new Str("undefined")
+                return new ElemTy("undefined")
             case 'object':
-                return new Str(JSON.stringify(v, (_, v) => typeof v === "bigint" ? String(v) : v))
+                return new ElemTy(JSON.stringify(v, (_, v) => typeof v === "bigint" ? String(v) : v))
             case 'function':
-                return new Str(String(v))
+                return new ElemTy(String(v))
         }
     }
 
@@ -1268,8 +1268,8 @@ class Func extends Type {
         return "[Function]"
     }
 
-    toStr(): Str {
-        return new Str(this.jsStr())
+    toStr(): ElemTy {
+        return new ElemTy(this.jsStr())
     }
 
     call(params: Type[]) {
@@ -1329,7 +1329,7 @@ class Num extends Type {
     }
 }
 
-class Str extends Type {
+class ElemTy extends Type {
     add(right: Type) {
         this.jsValue += right.jsStr()
         return this
@@ -1356,7 +1356,7 @@ class Str extends Type {
     }
 
     getattr(prop: Type): Type {
-        return new Str(this.jsValue[prop.toNum().jsValue])
+        return new ElemTy(this.jsValue[prop.toNum().jsValue])
     }
 }
 
@@ -1379,7 +1379,7 @@ class CalcVarTable {
 
         this.symbols.set("true", new Num(1))
         this.symbols.set("false", new Num(0))
-        this.symbols.set("end", new Str(""))
+        this.symbols.set("end", new ElemTy(""))
 
         this.symbols.set("len", new Func(n => {
             return n.len()
@@ -1403,7 +1403,7 @@ class CalcVarTable {
                     str += arr.jsValue[i].jsStr()
                 }
             }
-            return new Str(str)
+            return new ElemTy(str)
         }))
 
         //@ts-ignore
@@ -1441,7 +1441,7 @@ class CalcVarTable {
         }))
 
         this.symbols.set("type", new Func(i => {
-            return new Str(i.constructor.name)
+            return new ElemTy(i.constructor.name)
         }))
 
         this.symbols.set("map", new Func((list, fn) => {
@@ -1582,13 +1582,13 @@ class CalcVarTable {
 
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             const entry = finder(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
 
             return entry
@@ -1601,18 +1601,18 @@ class CalcVarTable {
 
         this.symbols.set("ask", new Func((p) => {
             const pText = p.jsStr()
-            return new Str(prompt(pText) ?? "")
+            return new ElemTy(prompt(pText) ?? "")
         }))
         this.symbols.set("prompt", this.symbols.get("ask") as Type)
 
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
             if (v === "entry" || v === "info") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.info)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.info)))
             } else if (v === "user") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.user)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.user)))
             } else if (v === "meta") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new Entry(v.meta)))
+                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.meta)))
             }
             return new Arr([])
         }))
@@ -1620,35 +1620,35 @@ class CalcVarTable {
         this.symbols.set("children", new Func(id => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             let children = [...findDescendants(jsId)]
 
-            return new Arr(children.map(v => new Entry(v.info)))
+            return new Arr(children.map(v => new EntryTy(v.info)))
         }))
 
         this.symbols.set("copies", new Func(id => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             let children = [...findCopies(jsId)]
 
-            return new Arr(children.map(v => new Entry(v.info)))
+            return new Arr(children.map(v => new EntryTy(v.info)))
         }))
 
         this.symbols.set("entry", new Func((id) => {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Entry(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info)
+                        return new EntryTy(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Entry(v[Math.floor(Math.random() * v.length)].info)
+                        return new EntryTy(v[Math.floor(Math.random() * v.length)].info)
                     default:
-                        return new Entry(findInfoEntryById(i) as InfoEntry)
+                        return new EntryTy(findInfoEntryById(i) as InfoEntry)
                 }
             })
         }))
@@ -1657,12 +1657,12 @@ class CalcVarTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Entry(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info.ItemId) as MetadataEntry)
+                        return new EntryTy(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info.ItemId) as MetadataEntry)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Entry(findMetadataById(v[Math.floor(Math.random() * v.length)].info.ItemId) as MetadataEntry)
+                        return new EntryTy(findMetadataById(v[Math.floor(Math.random() * v.length)].info.ItemId) as MetadataEntry)
                     default:
-                        return new Entry(findMetadataById(i) as MetadataEntry)
+                        return new EntryTy(findMetadataById(i) as MetadataEntry)
                 }
             })
         }))
@@ -1671,12 +1671,12 @@ class CalcVarTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new Entry(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
+                        return new EntryTy(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
                     case "a-rand":
                         const v = Object.values(globalsNewUi.entries)
-                        return new Entry(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
+                        return new EntryTy(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
                     default:
-                        return new Entry(findUserEntryById(i) as UserEntry)
+                        return new EntryTy(findUserEntryById(i) as UserEntry)
                 }
             })
         }))
@@ -1712,7 +1712,7 @@ class CalcVarTable {
                     braceC--
 
                     if (braceC === 0) {
-                        let params = curFmtName.split(".").map(v => new Str(v))
+                        let params = curFmtName.split(".").map(v => new ElemTy(v))
                         final += obj.call(params).jsStr()
                         curFmtName = ""
                         continue
@@ -1726,11 +1726,11 @@ class CalcVarTable {
                 }
             }
 
-            return new Str(final)
+            return new ElemTy(final)
         }))
 
         this.symbols.set("serialize", new Func((obj) => {
-            return new Str(JSON.stringify(obj.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
+            return new ElemTy(JSON.stringify(obj.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
         }))
 
         this.symbols.set("clear", new Func(() => {
@@ -1750,7 +1750,7 @@ class CalcVarTable {
                         mode.put(item.jsStr())
                     }
                 }
-                return new Str("")
+                return new ElemTy("")
             }
             return new Num(1)
         }))
@@ -1770,7 +1770,7 @@ class CalcVarTable {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query.jsStr()
             loadSearchUI().then(() => {
-                cb?.call([new Arr(globalsNewUi.results.map(v => new Entry(v.info)))])
+                cb?.call([new Arr(globalsNewUi.results.map(v => new EntryTy(v.info)))])
             }).catch(console.error)
             return new Num(0)
         }))
@@ -1778,7 +1778,7 @@ class CalcVarTable {
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
             if (!modeOutputIds.includes(name)) {
-                return new Str("Invalid mode")
+                return new ElemTy("Invalid mode")
             }
             mode_setMode(name)
             return new Num(0)
@@ -1792,12 +1792,12 @@ class CalcVarTable {
         this.symbols.set("ui_sidebarselect", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
             renderSidebarItem(entry)
             return new Num(0)
@@ -1806,12 +1806,12 @@ class CalcVarTable {
         this.symbols.set("ui_sidebarrender", new Func(id => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
             let frag = document.createDocumentFragment()
             let el = renderSidebarItem(entry, frag, { renderImg: true })
@@ -1821,12 +1821,12 @@ class CalcVarTable {
         this.symbols.set("ui_toggle", new Func(id => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
 
             if (mode_isSelected(jsId)) {
@@ -1841,16 +1841,16 @@ class CalcVarTable {
         this.symbols.set("ui_select", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             if (mode_isSelected(jsId)) {
-                return new Str(`${id} already selected`)
+                return new ElemTy(`${id} already selected`)
             }
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
 
             let el = selectItem(entry, mode)
@@ -1860,13 +1860,13 @@ class CalcVarTable {
         this.symbols.set("ui_render", new Func(id => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
 
             let frag = document.createDocumentFragment()
@@ -1879,20 +1879,20 @@ class CalcVarTable {
         this.symbols.set("ui_deselect", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
+                return new ElemTy("id is not a bigint")
             }
 
             if (!mode_isSelected(jsId)) {
-                return new Str(`${id} is not selected`)
+                return new ElemTy(`${id} is not selected`)
             }
             const entry = findInfoEntryById(jsId)
 
             if (!entry) {
-                return new Str(`${id} not found`)
+                return new ElemTy(`${id} not found`)
             }
 
             deselectItem(entry)
-            return new Str("")
+            return new ElemTy("")
         }))
 
         this.symbols.set("ui_clear", new Func(() => {
@@ -1903,15 +1903,15 @@ class CalcVarTable {
         this.symbols.set("ui_setuid", new Func((newUid) => {
             const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
             uidSelector.value = newUid.toNum().jsStr()
-            return new Str(uidSelector.value)
+            return new ElemTy(uidSelector.value)
         }))
 
         this.symbols.set("ui_setresults", new Func(newResults => {
             if (!(newResults instanceof Arr)) {
-                return new Str("ui_setresults expects array")
+                return new ElemTy("ui_setresults expects array")
             }
             let results = newResults.jsValue
-                .filter((v: Type) => v instanceof Entry && probablyInfoEntry(v.jsValue))
+                .filter((v: Type) => v instanceof EntryTy && probablyInfoEntry(v.jsValue))
                 .map((v: Type) => v.jsValue)
             globalsNewUi.results = results
             clearSidebar()
@@ -1920,7 +1920,7 @@ class CalcVarTable {
         }))
 
         this.symbols.set("ui_selected", new Func(() => {
-            return new Arr(globalsNewUi.selectedEntries.map(v => new Entry(v)))
+            return new Arr(globalsNewUi.selectedEntries.map(v => new EntryTy(v)))
         }))
 
         this.symbols.set("js_eval", new Func(text => {
@@ -1930,11 +1930,11 @@ class CalcVarTable {
 
         this.symbols.set("elem_on", new Func((root, event, cb) => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
 
             if(!(cb instanceof Func)) {
-                return new Str("callback must be a func")
+                return new ElemTy("callback must be a func")
             }
 
             let evName = event.jsStr()
@@ -1948,7 +1948,7 @@ class CalcVarTable {
 
         this.symbols.set("elem_byid", new Func((root, id) => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
 
             let selectorId = id.jsStr()
@@ -1962,7 +1962,7 @@ class CalcVarTable {
 
         this.symbols.set("elem_getshadow", new Func(root => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
 
             let div = document.createElement("div")
@@ -1976,10 +1976,10 @@ class CalcVarTable {
 
         this.symbols.set("elem_setshadow", new Func((root, tobeShadow) => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
             if (!(tobeShadow instanceof Elem)) {
-                return new Str("shadow must be an element")
+                return new ElemTy("shadow must be an element")
             }
 
             let shadow = root.el.shadowRoot ?? root.el.attachShadow({ mode: "open" })
@@ -1989,25 +1989,25 @@ class CalcVarTable {
 
         this.symbols.set("elem_sethtml", new Func((root, html) => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
             let newHTML = html.jsStr()
             root.el.innerHTML = newHTML
-            return new Str(newHTML)
+            return new ElemTy(newHTML)
         }))
 
         this.symbols.set("elem_getohtml", new Func(root => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
-            return new Str(root.el.outerHTML)
+            return new ElemTy(root.el.outerHTML)
         }))
 
         this.symbols.set("elem_gethtml", new Func(root => {
             if (!(root instanceof Elem)) {
-                return new Str("root must be an element")
+                return new ElemTy("root must be an element")
             }
-            return new Str(root.el.innerHTML)
+            return new ElemTy(root.el.innerHTML)
         }))
 
         this.symbols.set("elem_create", new Func(tagName => {
@@ -2017,7 +2017,7 @@ class CalcVarTable {
 
         this.symbols.set("elem_append", new Func((parent, child) => {
             if (!(parent instanceof Elem) || !(child instanceof Elem)) {
-                return new Str("parent, and child must be Elem")
+                return new ElemTy("parent, and child must be Elem")
             }
 
             parent.el.append(child.el)
@@ -2034,7 +2034,7 @@ class CalcVarTable {
 
         this.symbols.set("search", new Func((query, cb) => {
             api_queryV3(query.jsStr(), getUidUI()).then(entries => {
-                let es = new Arr(entries.map(v => new Entry(v)))
+                let es = new Arr(entries.map(v => new EntryTy(v)))
                 cb?.call([es])
             }).catch(console.error)
             return new Num(0)
@@ -2046,20 +2046,20 @@ class CalcVarTable {
             api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async (res) => {
                 if (!res) {
                     if (done) {
-                        done.call([new Str("FAIL"), new Num(0)])
+                        done.call([new ElemTy("FAIL"), new Num(0)])
                     }
                     return
                 }
                 if (done) {
-                    done.call([new Str(await res.text()), new Num(res.status)])
+                    done.call([new ElemTy(await res.text()), new Num(res.status)])
                 }
             })
             return new Num(0)
         }))
 
         this.symbols.set("setentry", new Func((entry) => {
-            if (!(entry instanceof Entry) || !probablyInfoEntry(entry.jsValue)) {
-                return new Str("NOT AN ENTRY")
+            if (!(entry instanceof EntryTy) || !probablyInfoEntry(entry.jsValue)) {
+                return new ElemTy("NOT AN ENTRY")
             }
 
             api_setItem("", entry.jsValue).then(res => {
@@ -2074,12 +2074,12 @@ class CalcVarTable {
                     })
                 }
             })
-            return new Str("")
+            return new ElemTy("")
         }))
 
         this.symbols.set("setmeta", new Func((entry) => {
-            if (!(entry instanceof Entry) || !probablyMetaEntry(entry.jsValue)) {
-                return new Str("NOT AN ENTRY")
+            if (!(entry instanceof EntryTy) || !probablyMetaEntry(entry.jsValue)) {
+                return new ElemTy("NOT AN ENTRY")
             }
 
             api_setItem("metadata/", entry.jsValue).then(res => {
@@ -2097,12 +2097,12 @@ class CalcVarTable {
                     })
                 }
             })
-            return new Str("")
+            return new ElemTy("")
         }))
 
         this.symbols.set("setuser", new Func((entry) => {
-            if (!(entry instanceof Entry) || !probablyUserItem(entry.jsValue)) {
-                return new Str("NOT AN ENTRY")
+            if (!(entry instanceof EntryTy) || !probablyUserItem(entry.jsValue)) {
+                return new ElemTy("NOT AN ENTRY")
             }
 
             api_setItem("engagement/", entry.jsValue).then(res => {
@@ -2120,7 +2120,7 @@ class CalcVarTable {
                     })
                 }
             })
-            return new Str("")
+            return new ElemTy("")
         }))
 
         this.symbols.set("env", new Func(() => {
@@ -2128,7 +2128,7 @@ class CalcVarTable {
             for (let key of this.symbols.keys()) {
                 res += key + "\n"
             }
-            return new Str(res.trim())
+            return new ElemTy(res.trim())
         }))
     }
     delete(name: string) {
@@ -2169,7 +2169,7 @@ class Interpreter {
     }
 
     StringNode(node: WordNode) {
-        return new Str(node.value)
+        return new ElemTy(node.value)
     }
 
     EscapedNode(node: EscapedNode) {
@@ -2180,7 +2180,7 @@ class Interpreter {
         if (this.symbolTable.get(node.value)) {
             return this.symbolTable.get(node.value)
         }
-        return new Str(node.value)
+        return new ElemTy(node.value)
     }
 
     LUnOpNode(node: LUnOpNode) {
@@ -2318,7 +2318,7 @@ class Interpreter {
 
     ErrorNode(node: ErrorNode) {
         console.error(node.value)
-        return new Str(node.value)
+        return new ElemTy(node.value)
     }
 
     CallNode(node: CallNode, pipeValue?: Type): Type {

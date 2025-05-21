@@ -543,7 +543,7 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     costEl.innerText = String(costTotal)
 }
 
-function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<Item>, relationType: "descendants" | "copies") {
+function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
     relationships = relationships.sort((a, b) => {
@@ -764,8 +764,8 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
         let symbols = new CalcVarTable()
         symbols.set("root", new Elem(root as unknown as HTMLElement))
-        symbols.set("results", new Arr(globalsNewUi.results.map(v => new Entry(v.info))))
-        symbols.set("this", new Entry(item))
+        symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
+        symbols.set("this", new EntryTy(item))
         let res = parseExpression(script, symbols)
 
         let outputId = elem.getAttribute("data-output")

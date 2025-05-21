@@ -1,6 +1,6 @@
 type GlobalsNewUi = {
-    entries: Record<string, Item>
-    results: Item[]
+    entries: Record<string, items_Entry>
+    results: items_Entry[]
     selectedEntries: InfoEntry[]
     libraries: Record<string, InfoEntry>
     viewingLibrary: bigint
@@ -87,7 +87,7 @@ type MetadataEntry = {
 }
 
 
-class Item {
+class items_Entry {
     user: UserEntry
     meta: MetadataEntry
     info: InfoEntry
@@ -210,10 +210,10 @@ async function items_loadEntries(uid: number, loadMeta: boolean = true) {
     }
     const res = await Promise.all(loading)
 
-    let obj: Record<string, Item> = {}
+    let obj: Record<string, items_Entry> = {}
     for (let tbls of res) {
         for (let tbl of tbls) {
-            let item = obj[String(tbl.ItemId)] || new Item(tbl.ItemId)
+            let item = obj[String(tbl.ItemId)] || new items_Entry(tbl.ItemId)
             if (probablyMetaEntry(tbl)) {
                 item.meta = tbl
             }
