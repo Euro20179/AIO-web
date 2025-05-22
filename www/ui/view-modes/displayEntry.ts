@@ -754,33 +754,51 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         }
     }
 
-    function renderVal(val: Type, output: HTMLElement) {
+    function renderVal(val: Type | string, output: HTMLElement) {
         if (val instanceof Elem) {
             output.append(val.el)
         } else if (val instanceof Arr) {
             for (let item of val.jsValue) {
                 renderVal(item, output)
             }
-        } else {
+        } else if (val instanceof Type) {
             output.innerHTML += val.jsStr()
+        } else {
+            output.innerHTML += val
         }
     }
 
-    for (let elem of root.querySelectorAll("script[type=\"application/x-aiol\"]")) {
+    for (let elem of root.querySelectorAll("script")) {
         let script = elem.textContent
         if (!script) continue
 
-        let symbols = new CalcVarTable()
-        symbols.set("root", new Elem(root as unknown as HTMLElement))
-        symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
-        symbols.set("this", new EntryTy(item))
-        let res = parseExpression(script, symbols)
+        let res: string | Type
 
+        if (elem.getAttribute("type") === "application/x-aiol") {
+            let symbols = new CalcVarTable()
+            symbols.set("root", new Elem(root as unknown as HTMLElement))
+            symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
+            symbols.set("this", new EntryTy(item))
+            res = parseExpression(script, symbols)
+        } else {
+            let old = XMLHttpRequest
+            //@ts-ignore
+            window.XMLHttpRequest = null
+            let oldFetch = fetch
+            window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
+                if(!confirm(`A request is about to be made to ${path}, is this ok?`)) {
+                    return await oldFetch("/")
+                }
+                return await oldFetch(path, opts)
+            }
+            res = new Function("root", "results", script).bind(item)(root, globalsNewUi.results.map(v => v.info), item)
+            window.XMLHttpRequest = old
+            window.fetch = oldFetch
+        }
         let outputId = elem.getAttribute("data-output")
         if (outputId) {
             let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
             if (outputEl) {
-                //clear html
                 outputEl.innerHTML = ""
                 renderVal(res, outputEl)
             }
@@ -1522,11 +1540,11 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
         if (key == "") continue
 
         let valueType = valueEl.getAttribute("data-type")
-        if(valueType === 'bigint') {
+        if (valueType === 'bigint') {
             newObj[key] = BigInt(value)
-        } else if(valueType === 'number') {
+        } else if (valueType === 'number') {
             newObj[key] = Number(value)
-        }else {
+        } else {
             newObj[key] = value
         }
     }
