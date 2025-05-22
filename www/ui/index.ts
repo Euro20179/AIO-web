@@ -21,7 +21,6 @@ sortBySelector.onchange = function() {
     items_setResults(ids)
     clearItems()
     reorderSidebar(ids)
-    selectItem(newEntries[0], mode)
 }
 
 function getUserExtra(user: UserEntry, prop: string) {

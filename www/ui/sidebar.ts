@@ -66,6 +66,14 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         titleEl.setAttribute("data-release-year", "unknown")
 }
 
+function selectSidebarItems(entries: InfoEntry[]) {
+    if (viewAllElem.checked) {
+        selectItemList(entries, mode)
+    } else {
+        selectItem(entries[0], mode)
+    }
+}
+
 function reorderSidebar(itemOrder: bigint[]) {
     let elems = []
     for(let item of itemOrder) {
@@ -74,6 +82,7 @@ function reorderSidebar(itemOrder: bigint[]) {
         elems.push(elem)
     }
     sidebarItems.replaceChildren(...elems)
+    selectSidebarItems(itemOrder.map(v => findInfoEntryById(v)))
 }
 
 function changeSidebarItemData(id: bigint, el: HTMLElement) {
@@ -171,11 +180,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 function renderSidebar(entries: InfoEntry[]) {
     if (!entries.length) return
 
-    if (viewAllElem.checked) {
-        selectItemList(entries, mode)
-    } else {
-        selectItem(entries[0], mode)
-    }
+    selectSidebarItems(entries)
     clearSidebar()
     for (let i = 0; i < entries.length; i++) {
         renderSidebarItem(entries[i], sidebarItems)
