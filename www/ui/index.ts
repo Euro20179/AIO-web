@@ -214,12 +214,12 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
         }
 
         refreshSidebarItem(BigInt(id))
-        if(mode.refresh) {
+        if (mode.refresh) {
             mode.refresh(BigInt(id))
         }
     }
 
-    if(updatedLibraries) {
+    if (updatedLibraries) {
         updateLibraryDropdown()
     }
 }
@@ -257,19 +257,19 @@ async function main() {
             opt.innerText = name
             uidSelector.append(opt)
         }
-    })
 
-    if (urlParams.has("uname")) {
-        let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
+        if (urlParams.has("uname")) {
+            let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
 
-        if (!uid) {
-            setError(`username: ${urlParams.get("uname")} does not exist`)
-            return
+            if (!uid) {
+                setError(`username: ${urlParams.get("uname")} does not exist`)
+                return
+            }
+            uidSelector.value = String(uid)
+        } else if (urlParams.has("uid")) {
+            uidSelector.value = urlParams.get("uid") as string
         }
-        uidSelector.value = String(uid)
-    } else if (urlParams.has("uid")) {
-        uidSelector.value = urlParams.get("uid") as string
-    }
+    })
 
     const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
     const display_item_only = urlParams.has("display")
