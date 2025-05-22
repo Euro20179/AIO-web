@@ -119,8 +119,6 @@
         width: 80vmin;
         aspect-ratio: 1 / 1;
         position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
 
         container: dialog / size;
     }
