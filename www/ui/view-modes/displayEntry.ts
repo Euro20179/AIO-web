@@ -939,7 +939,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
     //View count
     let viewCount = user.ViewCount
-    if (viewCountEl && viewCount) {
+    if (viewCountEl && (viewCount || user.Minutes)) {
         let minutes = String(user.Minutes / 60
                         || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60
                         || "unknown")
