@@ -100,12 +100,12 @@ async function loadSearchUI() {
     items_setResults(entries.map(v => v.ItemId))
 
     clearItems()
+    clearSidebar()
     if (entries.length === 0) {
         setError("No results")
-        clearSidebar()
         return
     }
-    renderSidebar(globalsNewUi.results.map(v => v.info))
+    renderSidebar(globalsNewUi.results.map(v => v.info), false)
 }
 
 function deleteEntryUI(item: InfoEntry) {
@@ -352,7 +352,7 @@ async function fillFormatSelectionUI() {
     let opts = []
     for (let fNo in formats) {
         let name = formats[fNo]
-        if(name === "MOD_DIGITAL") continue
+        if (name === "MOD_DIGITAL") continue
 
         let opt = document.createElement("option")
         opt.value = fNo

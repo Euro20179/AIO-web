@@ -66,7 +66,10 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         titleEl.setAttribute("data-release-year", "unknown")
 }
 
-function selectSidebarItems(entries: InfoEntry[]) {
+function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
+    if (clearSelected) {
+        clearItems()
+    }
     if (viewAllElem.checked) {
         selectItemList(entries, mode)
     } else {
@@ -74,15 +77,18 @@ function selectSidebarItems(entries: InfoEntry[]) {
     }
 }
 
-function reorderSidebar(itemOrder: bigint[]) {
+function reorderSidebar(itemOrder: bigint[], select = true) {
     let elems = []
-    for(let item of itemOrder) {
+    for (let item of itemOrder) {
         let elem = sidebarItems.querySelector(`[data-entry-id="${item}"]`) as HTMLElement
-        if(!elem) continue
+        if (!elem) continue
         elems.push(elem)
     }
     sidebarItems.replaceChildren(...elems)
-    selectSidebarItems(itemOrder.map(v => findInfoEntryById(v)))
+
+    if (select) {
+        selectSidebarItems(itemOrder.map(v => findInfoEntryById(v)))
+    }
 }
 
 function changeSidebarItemData(id: bigint, el: HTMLElement) {
@@ -177,12 +183,13 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     return elem
 }
 
-function renderSidebar(entries: InfoEntry[]) {
+function renderSidebar(entries: InfoEntry[], clearRendered = true) {
     if (!entries.length) return
-
-    selectSidebarItems(entries)
-    clearSidebar()
+    if (clearRendered) {
+        clearSidebar()
+    }
     for (let i = 0; i < entries.length; i++) {
         renderSidebarItem(entries[i], sidebarItems)
     }
+    selectSidebarItems(entries, clearRendered)
 }
