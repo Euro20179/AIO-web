@@ -239,7 +239,7 @@ function onIntersection(entries: IntersectionObserverEntry[]) {
     }
 }
 
-function displayEntryNewEvent(form: HTMLFormElement) {
+function de_newevent(form: HTMLFormElement) {
     const data = new FormData(form)
     const name = data.get("name")
     if (name == null) {
@@ -672,7 +672,6 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
         default:
             return "{}"
     }
-
 }
 
 /**
@@ -720,6 +719,15 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
             break
         }
+    }
+
+    for (let actionEl of root.querySelectorAll("[entry-action]")) {
+        let event = actionEl.getAttribute("entry-action-trigger") || "click"
+        actionEl.addEventListener(event, e => {
+            let actionFn = de_actions[actionEl.getAttribute("entry-action") as keyof typeof de_actions];
+            if (actionFn)
+                actionFn(e.target as HTMLElement)
+        })
     }
 
     //put-tbl, for raw objects such as user.Extra
@@ -786,7 +794,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
             window.XMLHttpRequest = null
             let oldFetch = fetch
             window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
-                if(!confirm(`A request is about to be made to ${path}, is this ok?`)) {
+                if (!confirm(`A request is about to be made to ${path}, is this ok?`)) {
                     return await oldFetch("/")
                 }
                 return await oldFetch(path, opts)
@@ -1088,7 +1096,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     if (!item || !user || !meta || !events) return el
 
     parent.append(el)
-
 
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
@@ -1489,207 +1496,200 @@ function copyThis(item: InfoEntry) {
     })
 }
 
-const displayEntryDelete = displayEntryAction(item => deleteEntryUI(item))
-const displayEntryRefresh = displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item))
-const displayEntryFetchLocation = displayEntryAction((item) => _fetchLocation(item.ItemId))
-const displayEntrySave = displayEntryAction((item, root) => saveItemChanges(root, item.ItemId))
-const displayEntryClose = displayEntryAction(item => deselectItem(item))
-const displayEntryCopyThis = displayEntryAction(item => copyThis(item))
+const de_actions = {
+    delete: displayEntryAction(item => deleteEntryUI(item)),
+    refresh: displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
+    fetchlocation: displayEntryAction((item) => _fetchLocation(item.ItemId)),
+    save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
+    close: displayEntryAction(item => deselectItem(item)),
+    copythis: displayEntryAction(item => copyThis(item)),
+    saveobject: displayEntryAction((item, root) => {
+        const tbl = root.getElementById("display-info-object-tbl")
 
-const displayEntrySaveObject = displayEntryAction((item, root) => {
-    const tbl = root.getElementById("display-info-object-tbl")
+        const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
 
-    const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
+        let into: Record<string, any> = {}
+        let keyName
+        let endpoint: Parameters<typeof api_setItem>["0"] = ""
+        switch (editedObject) {
+            case "meta":
+                endpoint = "metadata/"
+                break
+            case "entry":
+                endpoint = ""
+                break
+            case "user":
+                endpoint = "engagement/"
+                break
+            case "user-extra":
+                into = findUserEntryById(item.ItemId) as UserEntry
+                keyName = "Extra"
+                break
+            case "meta-datapoints":
+                into = findMetadataById(item.ItemId) as MetadataEntry
+                keyName = "Datapoints"
+                break
+            case "meta-media-dependant":
+                into = findMetadataById(item.ItemId) as MetadataEntry
+                keyName = "MediaDependant"
+                break
+            default:
+                alert(`${editedObject} saving is not implemented yet`)
+                return
+        }
 
-    let into: Record<string, any> = {}
-    let keyName
-    let endpoint: Parameters<typeof api_setItem>["0"] = ""
-    switch (editedObject) {
-        case "meta":
-            endpoint = "metadata/"
-            break
-        case "entry":
-            endpoint = ""
-            break
-        case "user":
-            endpoint = "engagement/"
-            break
-        case "user-extra":
-            into = findUserEntryById(item.ItemId) as UserEntry
-            keyName = "Extra"
-            break
-        case "meta-datapoints":
-            into = findMetadataById(item.ItemId) as MetadataEntry
-            keyName = "Datapoints"
-            break
-        case "meta-media-dependant":
-            into = findMetadataById(item.ItemId) as MetadataEntry
-            keyName = "MediaDependant"
-            break
-        default:
-            alert(`${editedObject} saving is not implemented yet`)
-            return
-    }
+        let newObj: Record<string, any> = {}
+        for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
+            let key = row.firstElementChild?.textContent || ""
+            let valueEl = row.firstElementChild?.nextElementSibling
+            if (!valueEl) continue
+            let value = valueEl?.textContent || ""
+            if (key == "") continue
 
-    let newObj: Record<string, any> = {}
-    for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
-        let key = row.firstElementChild?.textContent || ""
-        let valueEl = row.firstElementChild?.nextElementSibling
-        if (!valueEl) continue
-        let value = valueEl?.textContent || ""
-        if (key == "") continue
+            let valueType = valueEl.getAttribute("data-type")
+            if (valueType === 'bigint') {
+                newObj[key] = BigInt(value)
+            } else if (valueType === 'number') {
+                newObj[key] = Number(value)
+            } else {
+                newObj[key] = value
+            }
+        }
 
-        let valueType = valueEl.getAttribute("data-type")
-        if (valueType === 'bigint') {
-            newObj[key] = BigInt(value)
-        } else if (valueType === 'number') {
-            newObj[key] = Number(value)
+        if (keyName)
+            into[keyName] = JSON.stringify(newObj)
+        else into = newObj
+
+        const strId = String(item.ItemId)
+        api_setItem(endpoint, into as UserEntry)
+            .then(res => res?.text())
+            .then(console.log)
+            .catch(console.error)
+        if (editedObject === "user-extra" || editedObject === "user") {
+            updateInfo2({
+                [strId]: { user: into as UserEntry }
+            })
+        } else if (editedObject === "entry") {
+            updateInfo2({
+                [strId]: { info: into as InfoEntry }
+            })
         } else {
-            newObj[key] = value
+            updateInfo2({
+                [strId]: { meta: into as MetadataEntry }
+            })
         }
-    }
+    }),
+    newobjectfield: displayEntryAction((item, root) => {
+        const name = prompt("Field name")
+        if (!name) return
 
-    if (keyName)
-        into[keyName] = JSON.stringify(newObj)
-    else into = newObj
+        const strObj = getCurrentObjectInObjEditor(item.ItemId, root) as string
+        const obj = JSON.parse(strObj)
+        if (name in obj) return
 
-    const strId = String(item.ItemId)
-    api_setItem(endpoint, into as UserEntry)
-        .then(res => res?.text())
-        .then(console.log)
-        .catch(console.error)
-    if (editedObject === "user-extra" || editedObject === "user") {
-        updateInfo2({
-            [strId]: { user: into as UserEntry }
-        })
-    } else if (editedObject === "entry") {
-        updateInfo2({
-            [strId]: { info: into as InfoEntry }
-        })
-    } else {
-        updateInfo2({
-            [strId]: { meta: into as MetadataEntry }
-        })
-    }
-})
+        obj[name] = ""
 
-const displayEntryNewObjectField = displayEntryAction((item, root) => {
-    const name = prompt("Field name")
-    if (!name) return
-
-    const strObj = getCurrentObjectInObjEditor(item.ItemId, root) as string
-    const obj = JSON.parse(strObj)
-    if (name in obj) return
-
-    obj[name] = ""
-
-    const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
-    updateObjectTbl(obj, objectTbl, false)
-})
-
-const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
-    selectExistingItem().then(id => {
-        if (!id) {
-            alert("Could not set child")
-            return
-        }
-        api_setParent(id, item.ItemId).then(() => {
-            let info = findInfoEntryById(id)
-            if (!info) {
-                alert("could not find child id")
+        const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+        updateObjectTbl(obj, objectTbl, false)
+    }),
+    de_selectnewchild: displayEntryAction(item => {
+        selectExistingItem().then(id => {
+            if (!id) {
+                alert("Could not set child")
                 return
             }
-            info.ParentId = item.ItemId
-            updateInfo2({
-                [String(item.ItemId)]: { info: item },
-                [String(id)]: { info }
+            api_setParent(id, item.ItemId).then(() => {
+                let info = findInfoEntryById(id)
+                if (!info) {
+                    alert("could not find child id")
+                    return
+                }
+                info.ParentId = item.ItemId
+                updateInfo2({
+                    [String(item.ItemId)]: { info: item },
+                    [String(id)]: { info }
+                })
             })
         })
-    })
-})
+    }),
+    editstyles: displayEntryAction((item, root) => {
+        const styleEditor = root.getElementById("style-editor")
+        if (!styleEditor) return
+        styleEditor.hidden = !styleEditor.hidden
+    }),
+    edittemplate: displayEntryAction((item, root) => {
+        const templEditor = root.getElementById("template-editor")
+        if (!templEditor) return
+        templEditor.hidden = !templEditor.hidden
+    }),
+    copyto: displayEntryAction(item => {
+        let id = promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
+        if (id === null) return
+        let idInt = BigInt(id)
 
-const displayEntryEditStyles = displayEntryAction((item, root) => {
-    const styleEditor = root.getElementById("style-editor")
-    if (!styleEditor) return
-    styleEditor.hidden = !styleEditor.hidden
-})
+        api_copyUserInfo(item.ItemId, idInt)
+            .then(res => res?.text())
+            .then(console.log)
+    }),
+    setviewcount: displayEntryAction(item => {
+        let count = promptNumber("New view count", 'Not a number, view count')
+        if (count === null) return
 
-const displayEntryEditTemplate = displayEntryAction((item, root) => {
-    const templEditor = root.getElementById("template-editor")
-    if (!templEditor) return
-    templEditor.hidden = !templEditor.hidden
-})
+        authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
+            .then(res => res?.text())
+            .then(alert)
+            .then(() => {
+                let user = findUserEntryById(item.ItemId)
+                if (!user) {
+                    refreshInfo(getUidUI()).then(() => {
+                        refreshDisplayItem(item.ItemId)
+                    })
+                } else {
+                    user.ViewCount = Number(count)
+                    updateInfo2({
+                        [String(item.ItemId)]: { user }
+                    })
+                }
+            })
+            .catch(console.error)
+    }),
+    setprogress: displayEntryAction(async (item, root) => {
+        let newEp = prompt("Current position:")
+        if (!newEp) return
 
-const displayEntryCopyTo = displayEntryAction(item => {
-    let id = promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
-    if (id === null) return
-    let idInt = BigInt(id)
+        await api_setPos(item.ItemId, String(newEp))
+        const user = findUserEntryById(item.ItemId) as UserEntry
+        user.CurrentPosition = String(newEp)
+        updateInfo2({
+            [String(item.ItemId)]: { user }
+        })
+    }),
+    setrating: displayEntryAction(item => {
+        let user = findUserEntryById(item.ItemId)
+        if (!user) {
+            alert("Failed to get current rating")
+            return
+        }
+        let newRating = prompt("New rating")
+        if (!newRating || isNaN(Number(newRating))) {
+            return
+        }
 
-    api_copyUserInfo(item.ItemId, idInt)
-        .then(res => res?.text())
-        .then(console.log)
-})
-
-const displayEntryViewCount = displayEntryAction(item => {
-    let count = promptNumber("New view count", 'Not a number, view count')
-    if (count === null) return
-
-    authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
-        .then(res => res?.text())
-        .then(alert)
-        .then(() => {
-            let user = findUserEntryById(item.ItemId)
-            if (!user) {
-                refreshInfo(getUidUI()).then(() => {
-                    refreshDisplayItem(item.ItemId)
-                })
-            } else {
-                user.ViewCount = Number(count)
+        api_setRating(item.ItemId, newRating)
+            .then(() => {
+                let user = findUserEntryById(item.ItemId)
+                if (!user) {
+                    return refreshInfo(getUidUI())
+                }
+                user.UserRating = Number(newRating)
                 updateInfo2({
                     [String(item.ItemId)]: { user }
                 })
-            }
-        })
-        .catch(console.error)
-})
-
-const displayEntryProgress = displayEntryAction(async (item, root) => {
-    let newEp = prompt("Current position:")
-    if (!newEp) return
-
-    await api_setPos(item.ItemId, String(newEp))
-    const user = findUserEntryById(item.ItemId) as UserEntry
-    user.CurrentPosition = String(newEp)
-    updateInfo2({
-        [String(item.ItemId)]: { user }
-    })
-})
-
-const displayEntryRating = displayEntryAction(item => {
-    let user = findUserEntryById(item.ItemId)
-    if (!user) {
-        alert("Failed to get current rating")
-        return
-    }
-    let newRating = prompt("New rating")
-    if (!newRating || isNaN(Number(newRating))) {
-        return
-    }
-
-    api_setRating(item.ItemId, newRating)
-        .then(() => {
-            let user = findUserEntryById(item.ItemId)
-            if (!user) {
-                return refreshInfo(getUidUI())
-            }
-            user.UserRating = Number(newRating)
-            updateInfo2({
-                [String(item.ItemId)]: { user }
             })
-        })
-        .catch(console.error)
-    api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
-})
+            .catch(console.error)
+        api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
+    }),
+} as const
 
 function deleteEvent(el: HTMLElement, ts: number, after: number) {
     if (!confirm("Are you sure you would like to delete this event")) {

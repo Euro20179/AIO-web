@@ -7,7 +7,7 @@
 
 
 <dialog id="new-event-form" popover>
-    <form action="javascript:void(0)" onsubmit="displayEntryNewEvent(this)">
+    <form action="javascript:void(0)" onsubmit="de_newevent(this)">
         <label for="name">Name: <input id="name" name="name" required></label>
         <p>
             Please only fill out one of the time slots.<br>
@@ -71,7 +71,7 @@
 <dialog id="display-info-object-editor-popup" popover>
     <div class="flex j-center" style="gap: var(--small-gap);">
         <button id="save-object-editor" style="align-self: center; height: fit-content;"
-            onclick="displayEntrySaveObject(this)">💾︎</button>
+            entry-action="saveobject">💾︎</button>
         <h3 class="center">Object Editor</h3>
     </div>
     <div class="center">
@@ -86,34 +86,32 @@
     </div>
     <table id="display-info-object-tbl" style="width: 100%;">
         <tr>
-            <th style="position: relative;"><button onclick="displayEntryNewObjectField(this)"
-                    style="position: absolute; left: 0" id="new-user-extra-field">+</button> Name</th>
+            <th style="position: relative;"><button entry-action="newobjectfield" style="position: absolute; left: 0"
+                    id="new-user-extra-field">+</button> Name</th>
             <th>value</th>
         </tr>
     </table>
 </dialog>
 <div class="root" id="root">
     <div class="item-interactions" id="item-interactions">
-        <button class="close" onclick="displayEntryClose(this)" title="remove item from inspection area">X</button>
-        <button class="copy-to" onclick="displayEntryCopyTo(this)" title="copy user info to another item">➡</button>
-        <button class="delete" onclick="displayEntryDelete(this)" title="permanently delete item">🗑</button>
+        <button class="close" entry-action="close" title="remove item from inspection area">X</button>
+        <button class="copy-to" entry-action="copyto" title="copy user info to another item">➡</button>
+        <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
-            <button id="fetch-location" onclick="displayEntryFetchLocation(this)"
-                title="find location of this item">📍</button>
+            <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
             <button class="identify" title="identify item" popovertarget="item-identification-form">ℹ</button>
-            <button class="refresh" onclick="displayEntryRefresh(this)" title="refresh metadata">🗘</button>
+            <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
         </div>
         <input type="file" hidden id="thumbnail-file-upload">
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
         <div class="grid column">
-            <button class="save" onclick="displayEntrySave(this)" title="save any manual changes">💾︎</button>
+            <button class="save" entry-action="save" title="save any manual changes">💾︎</button>
             <button popovertarget="display-info-object-editor-popup">T✏</button>
-            <button class="edit-styles" onclick="displayEntryEditStyles(this)"
-                title="edit item's stylesheet">🖌</button>
-            <button class="edit-template" onclick="displayEntryEditTemplate(this)"
+            <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
+            <button class="edit-template" entry-action="edittemplate"
                 title="edit item's html template">&lt;&gt;</button>
         </div>
     </figure>
@@ -164,16 +162,15 @@
             </div>
             <span class="cost" id="cost"></span>
             <div style="justify-content: center; gap: 1ch; font-size: 1.1em;" class="flex">
-                <span class="rating" id="user-rating" onclick="displayEntryRating(this)" title="your rating">??</span>
+                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
                 <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
             </div>
             <figure class="entry-progress">
                 <div class="viewing">
-                    <span id="view-count" class="view-count" onclick="displayEntryViewCount(this)"
-                        put-data="ViewCount"></span>
+                    <span id="view-count" class="view-count" entry-action="setviewcount" put-data="ViewCount"></span>
                     <div class="relative">
-                        <progress onclick="displayEntryProgress(this)" id="entry-progressbar" class="entry-progress"
-                            min="0" value="0"></progress>
+                        <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
+                            value="0"></progress>
                         <figcaption id="entry-progressbar-position-label"></figcaption>
                     </div>
                 </div>
@@ -213,8 +210,7 @@
                 </div>
                 <div class="flex" style="gap: 1ch">
                     <button id="new-child" title="Create new item as a child of this">New</button>
-                    <button id="new-child-by-id" onclick="displayEntryAddExistingItemAsChild(this)">Add
-                        Existing</button>
+                    <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
                 </div>
             </div>
         </section>
@@ -225,7 +221,7 @@
                 </div>
                 <div class="flex" style="gap: 1ch">
                     <button id="copy-from-this" title="Create a new item that is an exact copy of this"
-                        onclick="displayEntryCopyThis(this)">Copy this</button>
+                        entry-action="copythis">Copy this</button>
                 </div>
             </div>
         </section>
