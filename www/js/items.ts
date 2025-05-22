@@ -119,22 +119,22 @@ function items_setResults(items: bigint[]) {
 }
 
 function findMetadataById(id: bigint): MetadataEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].meta
 }
 
 function findUserEntryById(id: bigint): UserEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].user
 }
 
 function findUserEventsById(id: bigint): UserEvent[] {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    console.assert(globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].events
 }
 
 function findInfoEntryById(id: bigint): InfoEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined)
+    console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].info
 }
 function genericInfo(itemId: bigint): InfoEntry {

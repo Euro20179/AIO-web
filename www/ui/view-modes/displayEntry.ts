@@ -608,8 +608,7 @@ function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
     // statusText.innerText = newStatus
 }
 
-function updateObjectTbl(obj: object, el: ShadowRoot, clear = true) {
-    const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
+function updateObjectTbl(obj: object, objectTbl: HTMLTableElement, clear = true) {
 
     if (clear) {
         const firstTr = objectTbl.firstElementChild
@@ -634,7 +633,10 @@ function updateObjectTbl(obj: object, el: ShadowRoot, clear = true) {
         nameTd.innerText = key
 
         valTd.setAttribute("data-type", typeof val)
-        if (typeof val !== 'string' && typeof val !== 'number') {
+        if (typeof val === 'bigint') {
+            val = String(val)
+        }
+        else if (typeof val !== 'string' && typeof val !== 'number') {
             val = JSON.stringify(val)
         }
         valTd.innerText = val
@@ -656,11 +658,17 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
 
     switch (editedObject) {
         case "user-extra":
-            return user.Extra || "{}"
+            return JSON.parse(user.Extra) || {}
         case "meta-datapoints":
-            return meta.Datapoints || "{}"
+            return JSON.parse(meta.Datapoints) || {}
         case "meta-media-dependant":
-            return meta.MediaDependant || "{}"
+            return JSON.parse(meta.MediaDependant) || {}
+        case "user":
+            return user || {}
+        case "meta":
+            return meta || {}
+        case "entry":
+            return findInfoEntryById(itemId) || {}
         default:
             return "{}"
     }
@@ -802,7 +810,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     const notesEditBox = el.getElementById("notes-edit-box")
 
     //object editor table
-    updateObjectTbl(JSON.parse(getCurrentObjectInObjEditor(item.ItemId, el)), el)
+    const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
+    updateObjectTbl(getCurrentObjectInObjEditor(item.ItemId, el), objectTbl)
 
     //status
     updateStatusDisplay(user.Status, el)
@@ -941,8 +950,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     let viewCount = user.ViewCount
     if (viewCountEl && (viewCount || user.Minutes)) {
         let minutes = String(user.Minutes / 60
-                        || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60
-                        || "unknown")
+            || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60
+            || "unknown")
         viewCountEl.setAttribute("data-time-spent", minutes)
         viewCountEl.innerText = String(viewCount)
     }
@@ -1066,16 +1075,27 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
         currentEditedObj.onchange = function() {
+            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
             switch (currentEditedObj.value) {
                 case "user-extra":
-                    updateObjectTbl(JSON.parse(user.Extra), root)
+                    updateObjectTbl(JSON.parse(user.Extra), objectTbl)
                     break
                 case "meta-datapoints":
-                    updateObjectTbl(JSON.parse(meta.Datapoints), root)
+                    updateObjectTbl(JSON.parse(meta.Datapoints), objectTbl)
                     break
                 case "meta-media-dependant":
-                    updateObjectTbl(JSON.parse(meta.MediaDependant), root)
+                    updateObjectTbl(JSON.parse(meta.MediaDependant), objectTbl)
                     break
+                case "user":
+                    updateObjectTbl(user, objectTbl)
+                    break
+                case "meta":
+                    updateObjectTbl(meta, objectTbl)
+                    break
+                case "entry":
+                    updateObjectTbl(item, objectTbl)
+                    break
+
             }
         }
     }
@@ -1463,20 +1483,34 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
 
     const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
 
-    let into: Record<string, any>
+    let into: Record<string, any> = {}
     let keyName
-    if (editedObject === "user-extra") {
-        into = findUserEntryById(item.ItemId) as UserEntry
-        keyName = "Extra"
-    } else if (editedObject === "meta-datapoints") {
-        into = findMetadataById(item.ItemId) as MetadataEntry
-        keyName = "Datapoints"
-    } else if (editedObject === "meta-media-dependant") {
-        into = findMetadataById(item.ItemId) as MetadataEntry
-        keyName = "MediaDependant"
-    } else {
-        alert(`${editedObject} saving is not implemented yet`)
-        return
+    let endpoint: Parameters<typeof api_setItem>["0"] = ""
+    switch (editedObject) {
+        case "meta":
+            endpoint = "metadata/"
+            break
+        case "entry":
+            endpoint = ""
+            break
+        case "user":
+            endpoint = "engagement/"
+            break
+        case "user-extra":
+            into = findUserEntryById(item.ItemId) as UserEntry
+            keyName = "Extra"
+            break
+        case "meta-datapoints":
+            into = findMetadataById(item.ItemId) as MetadataEntry
+            keyName = "Datapoints"
+            break
+        case "meta-media-dependant":
+            into = findMetadataById(item.ItemId) as MetadataEntry
+            keyName = "MediaDependant"
+            break
+        default:
+            alert(`${editedObject} saving is not implemented yet`)
+            return
     }
 
     let newObj: Record<string, any> = {}
@@ -1488,29 +1522,33 @@ const displayEntrySaveObject = displayEntryAction((item, root) => {
         if (key == "") continue
 
         let valueType = valueEl.getAttribute("data-type")
-        if (valueType !== "string") {
-            newObj[key] = JSON.parse(value)
-        } else {
+        if(valueType === 'bigint') {
+            newObj[key] = BigInt(value)
+        } else if(valueType === 'number') {
+            newObj[key] = Number(value)
+        }else {
             newObj[key] = value
         }
     }
 
-    into[keyName] = JSON.stringify(newObj)
+    if (keyName)
+        into[keyName] = JSON.stringify(newObj)
+    else into = newObj
 
     const strId = String(item.ItemId)
-    if (editedObject === "user-extra") {
-        api_setItem("engagement/", into as UserEntry)
-            .then(res => res?.text())
-            .then(console.log)
-            .catch(console.error)
+    api_setItem(endpoint, into as UserEntry)
+        .then(res => res?.text())
+        .then(console.log)
+        .catch(console.error)
+    if (editedObject === "user-extra" || editedObject === "user") {
         updateInfo2({
             [strId]: { user: into as UserEntry }
         })
+    } else if (editedObject === "entry") {
+        updateInfo2({
+            [strId]: { info: into as InfoEntry }
+        })
     } else {
-        api_setItem("metadata/", into as MetadataEntry)
-            .then(res => res?.text())
-            .then(console.log)
-            .catch(console.error)
         updateInfo2({
             [strId]: { meta: into as MetadataEntry }
         })
@@ -1527,7 +1565,8 @@ const displayEntryNewObjectField = displayEntryAction((item, root) => {
 
     obj[name] = ""
 
-    updateObjectTbl(obj, root, false)
+    const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+    updateObjectTbl(obj, objectTbl, false)
 })
 
 const displayEntryAddExistingItemAsChild = displayEntryAction(item => {
@@ -1583,7 +1622,7 @@ const displayEntryViewCount = displayEntryAction(item => {
         .then(() => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
-                refreshInfo().then(() => {
+                refreshInfo(getUidUI()).then(() => {
                     refreshDisplayItem(item.ItemId)
                 })
             } else {
@@ -1623,7 +1662,7 @@ const displayEntryRating = displayEntryAction(item => {
         .then(() => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
-                return refreshInfo()
+                return refreshInfo(getUidUI())
             }
             user.UserRating = Number(newRating)
             updateInfo2({

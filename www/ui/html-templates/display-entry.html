@@ -76,6 +76,9 @@
     </div>
     <div class="center">
         <select id="current-edited-object">
+            <option value="meta">meta info</option>
+            <option value="entry">entry info</option>
+            <option value="user">user info</option>
             <option value="user-extra">User Extra</option>
             <option value="meta-datapoints">Metadata Datapoints</option>
             <option value="meta-media-dependant">Metadata Media Dependant</option>
@@ -90,8 +93,6 @@
     </table>
 </dialog>
 <div class="root" id="root">
-
-
     <div class="item-interactions" id="item-interactions">
         <button class="close" onclick="displayEntryClose(this)" title="remove item from inspection area">X</button>
         <button class="copy-to" onclick="displayEntryCopyTo(this)" title="copy user info to another item">➡</button>
