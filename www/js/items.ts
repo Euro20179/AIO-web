@@ -69,6 +69,7 @@ type UserEntry = {
     Notes: string
     CurrentPosition: string
     Extra: string
+    Minutes: number
 }
 
 type MetadataEntry = {

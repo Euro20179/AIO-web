@@ -364,7 +364,7 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     clear() {
-        for(let child of displayItems.querySelectorAll(":not(display-entry)")) {
+        for (let child of displayItems.querySelectorAll(":not(display-entry)")) {
             child.remove()
         }
     }
@@ -747,10 +747,10 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
     }
 
     function renderVal(val: Type, output: HTMLElement) {
-        if(val instanceof Elem) {
+        if (val instanceof Elem) {
             output.append(val.el)
         } else if (val instanceof Arr) {
-            for(let item of val.jsValue) {
+            for (let item of val.jsValue) {
                 renderVal(item, output)
             }
         } else {
@@ -940,7 +940,10 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && viewCount) {
-        viewCountEl.setAttribute("data-time-spent", String(Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60 || "unknown"))
+        let minutes = String(user.Minutes / 60
+                        || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60
+                        || "unknown")
+        viewCountEl.setAttribute("data-time-spent", minutes)
         viewCountEl.innerText = String(viewCount)
     }
 
@@ -1196,18 +1199,18 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     }
 
     const cost = root.getElementById("cost")
-    if(cost) {
+    if (cost) {
         cost.onclick = function() {
             const newPrice = promptNumber("New cost", "not a number", parseFloat)
-            if(newPrice === null) return
+            if (newPrice === null) return
             let item = findInfoEntryById(itemId)
             item.PurchasePrice = newPrice as number
             api_setItem("", item).then(res => {
-                if(res === null || res.status !== 200) {
+                if (res === null || res.status !== 200) {
                     alert("Failed to set price")
                     return
                 }
-                updateInfo2({ 
+                updateInfo2({
                     [String(itemId)]: {
                         info: item
                     }
