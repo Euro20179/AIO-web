@@ -210,16 +210,14 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl(text).next().value
     api_getEntryMetadata(json.ItemId, getUidUI()).then(async (res) => {
-        if (res.status !== 200) {
+        if (res === null) {
             alert("Failed to load new item metadata, please reload")
             return
         }
 
-        const data = api_deserializeJsonl(await res.text()).next().value
-
         updateInfo2({
             [json.ItemId]: {
-                meta: data
+                meta: res
             }
         })
 

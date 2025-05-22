@@ -98,7 +98,7 @@ function _api_parseJsonL(jsonl: string) {
     }
 }
 
-function* api_deserializeJsonl(jsonl: string | string[]) {
+function* api_deserializeJsonl<T>(jsonl: string | string[]): Generator<T> {
     if (typeof jsonl === 'string') {
         jsonl = jsonl.split("\n")
     }
@@ -328,7 +328,11 @@ async function api_updateInfoTitle(itemId: bigint, newTitle: string) {
 }
 
 async function api_getEntryMetadata(itemId: bigint, uid: number) {
-    return await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
+    let res = await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
+    if(res.status !== 200) {
+        return null
+    }
+    return api_deserializeJsonl(await res.text()).next().value as MetadataEntry
 }
 
 async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
