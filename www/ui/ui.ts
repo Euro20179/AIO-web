@@ -209,6 +209,14 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let json = api_deserializeJsonl(text).next().value
+
+    items_addItem({
+        meta: genericMetadata(json.ItemId),
+        user: genericUserEntry(json.ItemId),
+        events: [],
+        info: json
+    })
+
     api_getEntryMetadata(json.ItemId, getUidUI()).then(async (res) => {
         if (res === null) {
             alert("Failed to load new item metadata, please reload")
@@ -227,7 +235,8 @@ async function newEntryUI(form: HTMLFormElement) {
 
         clearSidebar()
         renderSidebarItem(json)
-    }).catch(() => {
+    }).catch((err) => {
+        console.error(err)
         alert("Failed to load new item metadata, please reload")
     })
 }

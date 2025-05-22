@@ -118,6 +118,10 @@ function items_setResults(items: bigint[]) {
     }
 }
 
+function items_addItem(item: {meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry}) {
+    globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
+}
+
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].meta
