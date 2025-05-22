@@ -1801,6 +1801,11 @@ class CalcVarTable {
             return Type.from(ui_sidebarclear())
         }))
 
+        this.symbols.set("ui_sidebarreorder", new Func((...items) => {
+            let ids = items.map(v => v.toNum().jsValue) as bigint[]
+            return Type.from(ui_sidebarreorder(...ids))
+        }))
+
         this.symbols.set("ui_sidebarselect", new Func((id) => {
             const jsId = id.toNum().jsValue
             if (typeof jsId !== 'bigint') {

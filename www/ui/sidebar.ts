@@ -66,6 +66,16 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         titleEl.setAttribute("data-release-year", "unknown")
 }
 
+function reorderSidebar(itemOrder: bigint[]) {
+    let elems = []
+    for(let item of itemOrder) {
+        let elem = sidebarItems.querySelector(`[data-entry-id="${item}"]`) as HTMLElement
+        if(!elem) continue
+        elems.push(elem)
+    }
+    sidebarItems.replaceChildren(...elems)
+}
+
 function changeSidebarItemData(id: bigint, el: HTMLElement) {
     const e = new CustomEvent("data-changed", {
         detail: {

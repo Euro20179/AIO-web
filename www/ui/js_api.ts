@@ -148,7 +148,6 @@ function ui_getuid(): number {
 
 function ui_setresults(results: InfoEntry[]): number {
     globalsNewUi.results = results.map(v => globalsNewUi.entries[String(v.ItemId)])
-    clearSidebar()
     renderSidebar(results)
     return 0
 }
@@ -169,6 +168,12 @@ function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
         mode.put(h)
     }
     return ""
+}
+
+function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEntry)[]): number {
+    ids = ids.map(v => typeof v === 'bigint' ? v : v.ItemId)
+    reorderSidebar(ids as bigint[])
+    return 0
 }
 
 async function ui_askitem() {
