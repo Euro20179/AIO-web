@@ -243,6 +243,8 @@ async function main() {
         return
     }
 
+    fillFormatSelectionUI()
+
     api_listAccounts().then(accounts => {
         for (let acc of accounts) {
             const opt = document.createElement("option")

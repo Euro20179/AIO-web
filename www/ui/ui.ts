@@ -344,3 +344,21 @@ async function signinUI(reason: string): Promise<string> {
         }, 60000)
     })
 }
+
+async function fillFormatSelectionUI() {
+    const formatSelector = document.querySelector('[name="format"]') as HTMLSelectElement
+
+    const formats = await api_listFormats()
+    let opts = []
+    for (let fNo in formats) {
+        let name = formats[fNo]
+        if(name === "MOD_DIGITAL") continue
+
+        let opt = document.createElement("option")
+        opt.value = fNo
+        opt.innerText = formats[fNo]
+        opts.push(opt)
+    }
+
+    formatSelector.replaceChildren(...opts)
+}
