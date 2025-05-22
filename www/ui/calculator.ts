@@ -930,13 +930,11 @@ class Type {
             return new Elem(value)
         } else if (value instanceof Type) {
             return value
-        } else if (probablyUserItem(value) || probablyInfoEntry(value) || probablyMetaEntry(value)) {
-            return new EntryTy(value)
         }
 
-        else if(Array.isArray(value)) {
+        else if (Array.isArray(value)) {
             let arr = []
-            for(let item of value) {
+            for (let item of value) {
                 arr.push(Type.from(item))
             }
             return new Arr(arr)
@@ -957,8 +955,14 @@ class Type {
             case 'object':
                 if (value instanceof Type) {
                     return value
+                } else if (probablyUserItem(value) || probablyInfoEntry(value) || probablyMetaEntry(value)) {
+                    return new EntryTy(value)
                 }
-                return new Str(JSON.stringify(value, (_, v) => typeof v === "bigint" ? String(v) : v))
+                let o: Record<string, Type> = {}
+                for (let key in value) {
+                    o[key] = Type.from(value[key])
+                }
+                return new Obj(o)
             case 'function':
                 return new Func(function() {
                     return Type.from(value(...arguments))
@@ -1743,6 +1747,11 @@ class CalcVarTable {
             return new Str(JSON.stringify(obj.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
         }))
 
+        this.symbols.set("deserialize", new Func(text => {
+            console.log(text.jsStr())
+            return new Obj(api_deserializeJsonl(text.jsStr()).next().value)
+        }))
+
         this.symbols.set("clear", new Func(() => {
             return Type.from(ui_modeclear())
         }))
@@ -1761,7 +1770,7 @@ class CalcVarTable {
         this.symbols.set("ui_askitem", new Func(cb => {
             ui_askitem().then(id => {
                 let result
-                if(typeof id === 'bigint') {
+                if (typeof id === 'bigint') {
                     result = new EntryTy(findInfoEntryById(id))
                 } else {
                     result = new Num(0)
