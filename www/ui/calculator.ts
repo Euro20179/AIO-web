@@ -1791,6 +1791,10 @@ class CalcVarTable {
             return Type.from(Number(ui_delstat(n)))
         }))
 
+        this.symbols.set("ui_sort", new Func(by => {
+            return Type.from(ui_sort(by.jsStr()))
+        }))
+
         this.symbols.set("ui_search", new Func((query, cb) => {
             return Type.from(ui_search(query.jsStr(), results => {
                 cb?.call([new Arr(results.map(v => new EntryTy(v.info)))])

@@ -16,6 +16,13 @@ function ui_delstat(name: string): boolean {
     return deleteResultStat(name)
 }
 
+function ui_sort(by: string): number {
+    const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+    sortBySelector.value = by
+    sortEntriesUI()
+    return 0
+}
+
 function ui_search(query: string, cb?: (results: items_Entry[]) => any): number {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
     (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query

@@ -187,6 +187,7 @@ function genericUserEntry(itemId: bigint): UserEntry {
         Notes: "",
         CurrentPosition: "",
         Extra: "{}",
+        Minutes: 0
     }
 }
 

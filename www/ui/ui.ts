@@ -63,6 +63,14 @@ function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 
     }
 }
 
+function sortEntriesUI() {
+    let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), sortBySelector.value)
+    let ids = newEntries.map(v => v.ItemId)
+    items_setResults(ids)
+    clearItems()
+    reorderSidebar(ids)
+}
+
 function getUidUI() {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
     return Number(uidSelector.value)
