@@ -40,13 +40,6 @@ document.addEventListener("keydown", e => {
             (form.querySelector('[name="search-query"]') as HTMLInputElement).focus()
             break
         }
-        case "a": {
-            let focused = document.activeElement
-            if (focused?.tagName === "INPUT" || focused?.tagName === "TEXTAREA") return
-            e.preventDefault()
-            openModalUI("new-entry")
-            break
-        }
     }
 })
 
