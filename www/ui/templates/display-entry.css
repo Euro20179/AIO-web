@@ -57,6 +57,7 @@
 
 @layer components {
     :host(display-entry) {
+        height: 100%;
 
         flex-grow: 1;
         /*-10px just incase*/

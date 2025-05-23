@@ -96,6 +96,8 @@
             set height on #sidebar-items to 100cqb
         */
         overflow: clip;
+
+        display: flow-root;
     }
 
     #notifications {
@@ -123,6 +125,7 @@
     }
 
     #main-ui {
+        height: 100%;
         flex-grow: 1;
 
         display: grid;
@@ -265,7 +268,6 @@
     }
 
     #viewing-area {
-        height: 100cqb;
         container-name: viewing-area;
         container-type: size;
 
