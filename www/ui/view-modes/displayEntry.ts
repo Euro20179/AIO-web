@@ -1545,6 +1545,9 @@ const de_actions = {
         let newObj: Record<string, any> = {}
         for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
             let key = row.firstElementChild?.textContent || ""
+            //invalid key
+            if(editedObject === "entry" && key === "Tags") continue
+
             let valueEl = row.firstElementChild?.nextElementSibling
             if (!valueEl) continue
             let value = valueEl?.textContent || ""
@@ -1563,6 +1566,10 @@ const de_actions = {
         if (keyName)
             into[keyName] = JSON.stringify(newObj)
         else into = newObj
+
+        if(editedObject === "entry") {
+            into["Tags"] = findInfoEntryById(into["ItemId"]).Tags
+        }
 
         const strId = String(item.ItemId)
         api_setItem(endpoint, into as UserEntry)
