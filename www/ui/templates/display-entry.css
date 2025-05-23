@@ -62,8 +62,6 @@
 
 @layer components {
     :host(display-entry) {
-        height: 100%;
-
         flex-grow: 1;
         /*-10px just incase*/
         min-width: calc(50cqw - var(--gap-size) - 10px);
@@ -102,7 +100,7 @@
 
     #root {
         width: 100%;
-        height: 100%;
+        height: fit-content;
         container: entry / inline-size;
         border-right: 1px solid hsl(from var(--secondary) h s 30%);
 

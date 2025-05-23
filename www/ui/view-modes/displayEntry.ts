@@ -1696,6 +1696,12 @@ const de_actions = {
     }),
 } as const
 
+//backwards compat {{{
+const displayEntryEditTemplate = de_actions["edittemplate"]
+const displayEntryEditStyles = de_actions["editstyles"]
+const displayEntrySave = de_actions["save"]
+// }}}
+
 function deleteEvent(el: HTMLElement, ts: number, after: number) {
     if (!confirm("Are you sure you would like to delete this event")) {
         return
