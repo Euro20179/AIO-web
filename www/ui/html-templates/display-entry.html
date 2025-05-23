@@ -114,11 +114,39 @@
             <button class="edit-template" entry-action="edittemplate"
                 title="edit item's html template">&lt;&gt;</button>
         </div>
+        <div class="header-subtitle" id="header-subtitle">
+            <div>
+                <span>Include in cost</span>
+                <div id="cost-calculation-modifiers" class="flex row j-center">
+                    <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
+                        Self</label>
+                    <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
+                        Children</label>
+                    <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
+                        Copies</label>
+                </div>
+            </div>
+            <span class="cost" id="cost"></span>
+            <figure class="entry-progress">
+                <div class="viewing">
+                    <span id="view-count" class="view-count" entry-action="setviewcount" put-data="ViewCount"></span>
+                    <div class="relative">
+                        <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
+                            value="0"></progress>
+                        <figcaption id="entry-progressbar-position-label"></figcaption>
+                    </div>
+                </div>
+            </figure>
+        </div>
     </figure>
     <hgroup>
         <h2 class="title center" id="main-title"></h2>
         <div class="flex column wrap j-center" style="gap: 2ch">
             <h3 class="center official-native-title" id="official-native-title"></h3>
+        </div>
+        <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
+            <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
+            <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
         </div>
     </hgroup>
     <div id="misc-info">
@@ -147,34 +175,6 @@
                 <table class="user-actions" id="user-actions"></table>
                 <button id="new-event-button" popovertarget="new-event-form">New Event</button>
             </div>
-        </div>
-        <div class="header-subtitle" id="header-subtitle">
-            <div>
-                <span>Include in cost</span>
-                <div id="cost-calculation-modifiers" class="flex row j-center">
-                    <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
-                        Self</label>
-                    <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
-                        Children</label>
-                    <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
-                        Copies</label>
-                </div>
-            </div>
-            <span class="cost" id="cost"></span>
-            <div style="justify-content: center; gap: 1ch; font-size: 1.1em;" class="flex">
-                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
-                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
-            </div>
-            <figure class="entry-progress">
-                <div class="viewing">
-                    <span id="view-count" class="view-count" entry-action="setviewcount" put-data="ViewCount"></span>
-                    <div class="relative">
-                        <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
-                            value="0"></progress>
-                        <figcaption id="entry-progressbar-position-label"></figcaption>
-                    </div>
-                </div>
-            </figure>
         </div>
     </div>
 

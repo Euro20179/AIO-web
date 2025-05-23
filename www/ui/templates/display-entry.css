@@ -94,18 +94,6 @@
         }
     }
 
-    #misc-info {
-        display: grid;
-
-        @container viewing-area (width > 650px) {
-            grid-template-columns: 2fr 1fr;
-        }
-
-        @container viewing-area (width <=650px) {
-            grid-template-rows: 2fr 1fr;
-        }
-    }
-
     #root {
         width: 100%;
         height: 100%;
@@ -127,7 +115,7 @@
         border: 1px solid var(--blue);
         align-self: center;
 
-        width: 20cqw;
+        width: min(20cqw, 300px);
 
         cursor: pointer;
     }
@@ -145,11 +133,7 @@
         max-width: 40cqw;
         overflow: auto auto;
 
-        width: min-content;
-
-        table {
-            min-width: 20cqw;
-        }
+        width: min-width;
 
         hr {
             width: 100%;
@@ -343,6 +327,10 @@
         }
     }
 
+    #official-native-title:empty {
+        margin: 0;
+    }
+
     :host(display-entry:not([data-user-status="Viewing"])) #entry-progressbar-position-label {
         display: none;
     }
@@ -357,8 +345,11 @@
 
     #entry-progressbar {
         justify-self: center;
-        width: 25cqw;
         margin: 0;
+
+        background: var(--blue);
+        width: 100%;
+        appearance: none;
     }
 
     #entry-progressbar-position-label {
@@ -380,11 +371,6 @@
         &~figcaption {
             display: none;
         }
-    }
-
-    #entry-progressbar {
-        background: var(--blue);
-        width: 100%;
     }
 
     #entry-progressbar[max]::-moz-progress-bar,
