@@ -273,7 +273,7 @@
         container-name: viewing-area;
         container-type: size;
 
-        &:not(:has(display-entry)) {
+        &:not(:has(:where(display-entry, #calc-output:target, #gallery-output:target, #graph-output:target))) {
             #error-output {
                 display: unset;
             }
@@ -350,7 +350,7 @@
     }
 
 
-    #entry-output {
+    #entry-output:target {
         --grid-size: 50%;
 
         --gap-size: 10px;
