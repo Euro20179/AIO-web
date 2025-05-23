@@ -47,7 +47,7 @@ async function itemIdentification(form: HTMLFormElement) {
                 return
             }
 
-            const newMeta = [...api_deserializeJsonl(json)][0]
+            const newMeta = [...api_deserializeJsonl<MetadataEntry>(json)][0]
 
             //if the provider also has a location provider might as well get the location for it
             if (["steam", "sonarr"].includes(provider)) {
@@ -1379,18 +1379,17 @@ function _fetchLocationBackup(itemId: bigint) {
         }
 
         const [_, metaText] = (await res.text()).split("\x02")
-        const metaInfo = [...api_deserializeJsonl(metaText.trim().split("\n"))]
+        const metaInfo = [...api_deserializeJsonl<MetadataEntry>(metaText.trim().split("\n"))]
 
         //TODO: if the length is 0, ask the user for a search query
 
         if (metaInfo.length === 1) {
-            api_fetchLocation(item.ItemId, getUidUI(), provider, metaInfo[0].ItemId).then(onfetchLocation)
+            api_fetchLocation(item.ItemId, getUidUI(), provider, String(metaInfo[0].ItemId)).then(onfetchLocation)
             return
         }
 
         const metaRecord = Object.fromEntries(metaInfo.map(v => [v.ItemId, v]))
 
-        console.table(metaRecord)
         const container = fillItemListing(metaRecord)
 
         const figs = container.querySelectorAll("figure")
@@ -1597,7 +1596,7 @@ const de_actions = {
         const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
         updateObjectTbl(obj, objectTbl, false)
     }),
-    de_selectnewchild: displayEntryAction(item => {
+    selectnewchild: displayEntryAction(item => {
         selectExistingItem().then(id => {
             if (!id) {
                 alert("Could not set child")
