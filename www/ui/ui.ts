@@ -34,6 +34,45 @@ type ResultStats = {
     results: number
 }
 
+document.addEventListener("keydown", e => {
+    if (!e.ctrlKey) return
+    switch (e.key) {
+        case "/": {
+            let form = document.getElementById("sidebar-form") as HTMLFormElement
+            (form.querySelector('[name="search-query"]') as HTMLInputElement).focus()
+            break
+        }
+        case "a": {
+            e.preventDefault()
+            toggleModalUI("new-entry")
+            break
+        }
+    }
+})
+
+function openModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+    let dialog = root.getElementById(modalName)
+    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
+    dialog.showModal()
+}
+
+function closeModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+    let dialog = root.getElementById(modalName)
+    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
+    dialog.close()
+}
+
+function toggleModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+    let dialog = root.getElementById(modalName)
+    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
+    console.log(dialog.open)
+    if (dialog.open) {
+        dialog.close()
+    } else {
+        dialog.showModal()
+    }
+}
+
 function setResultStat(key: string, value: number) {
     resultStatsProxy[key as keyof ResultStats] = value
 }
