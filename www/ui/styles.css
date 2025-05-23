@@ -82,6 +82,17 @@
 
     #main {
         height: 100%;
+        /*DO NOT SET THIS TO FLEX
+            it causes a weird perf bug in chrome where every time anything happens
+            (including the user typing in the input box) it recalculates layout
+
+            the solution was to:
+            set this to clip,
+            remove it's flex status
+            set overflow on #sidebar-items
+            set height on #sidebar-items to 100cqb
+        */
+        overflow: clip;
     }
 
     #notifications {
@@ -406,6 +417,8 @@
         max-height: 83%;
 
         width: 100%;
+        height: 100cqb;
+        overflow: auto;
 
         float: left;
 
