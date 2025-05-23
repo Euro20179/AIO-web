@@ -24,6 +24,11 @@
     select {
         font-family: inherit;
     }
+
+    select {
+        /*safari...*/
+        -webkit-appearance: none;
+    }
 }
 
 @layer utility {
