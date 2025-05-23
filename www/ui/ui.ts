@@ -43,8 +43,10 @@ document.addEventListener("keydown", e => {
             break
         }
         case "a": {
+            let focused = document.activeElement
+            if (focused?.tagName === "INPUT" || focused?.tagName === "TEXTAREA") return
             e.preventDefault()
-            toggleModalUI("new-entry")
+            openModalUI("new-entry")
             break
         }
     }
@@ -273,8 +275,6 @@ async function newEntryUI(form: HTMLFormElement) {
             events = y
             meta = x
         }
-
-
 
         events = events.filter(v => v.ItemId === json.ItemId)
 
