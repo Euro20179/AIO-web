@@ -1507,6 +1507,7 @@ const de_actions = {
     save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
     close: displayEntryAction(item => deselectItem(item)),
     copythis: displayEntryAction(item => copyThis(item)),
+    //TODO: this function is a disaster, each edited object should probably get its own save function
     saveobject: displayEntryAction((item, root) => {
         const tbl = root.getElementById("display-info-object-tbl")
 
