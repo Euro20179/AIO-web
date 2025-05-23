@@ -953,6 +953,9 @@ class Type {
             case 'undefined':
                 return new Str("undefined")
             case 'object':
+                if(value === null) {
+                    return new Num(0)
+                }
                 if (value instanceof Type) {
                     return value
                 } else if (probablyUserItem(value) || probablyInfoEntry(value) || probablyMetaEntry(value)) {

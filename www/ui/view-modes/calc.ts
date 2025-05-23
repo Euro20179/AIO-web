@@ -89,7 +89,7 @@ function updateExpressionOutput(item: InfoEntry) {
     let all = { ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 }
     let symbols = makeSymbolsTableFromObj(all)
 
-    let val = new ElemTy(`${meta?.Description || ""}<br>${meta?.Rating || 0}`)
+    let val = new Str(`${meta?.Description || ""}<br>${meta?.Rating || 0}`)
     if (expr) {
         val = parseExpression(expr, symbols)
     }
