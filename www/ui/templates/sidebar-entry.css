@@ -73,6 +73,8 @@
 
     #sidebar-thumbnail {
         cursor: pointer;
+        /*set a range instead of specific sizes, so that the image can resize to a good size, and so that the image fits within the size of the sidebar*/
+        min-height: 50cqi;
         max-height: 70cqi;
         max-width: 100cqi;
 
