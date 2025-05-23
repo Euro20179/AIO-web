@@ -355,12 +355,12 @@ async function remote2LocalThumbService() {
     if (servicing) return
 
     servicing = true
-    for (let item in globalsNewUi.results) {
-        let metadata = globalsNewUi.results[item].meta
+    for (let item of globalsNewUi.results) {
+        let metadata = item.meta
         let thumbnail = metadata.Thumbnail
 
-        let userTitle = globalsNewUi.entries[item].info.En_Title
-        let userNativeTitle = globalsNewUi.entries[item].info.Native_Title
+        let userTitle = item.info.En_Title
+        let userNativeTitle = item.info.Native_Title
 
         if (!thumbnail) continue
         if (thumbnail.startsWith(`${apiPath}/resource/thumbnail`) || thumbnail.startsWith(`${apiPath}/resource/get-thumbnail`)) continue
