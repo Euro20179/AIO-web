@@ -262,17 +262,19 @@ function de_newevent(form: HTMLFormElement) {
     api_registerEvent(itemId, name.toString(), ts, afterts)
         .then(res => res?.text())
         .then(() => {
+            let ev = findUserEventsById(itemId)
+            ev.push(
+                {
+                    Timestamp: ts,
+                    After: afterts,
+                    Event: name.toString(),
+                    ItemId: itemId,
+                    TimeZone: ""
+                }
+            )
             updateInfo2({
                 [String(itemId)]: {
-                    events: [
-                        {
-                            Timestamp: ts,
-                            After: afterts,
-                            Event: name.toString(),
-                            ItemId: itemId,
-                            TimeZone: ""
-                        }
-                    ]
+                    events: ev
                 }
             })
             form.parentElement?.hidePopover()
