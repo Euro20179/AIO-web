@@ -16,11 +16,7 @@ userSelector.onchange = function() {
 
 const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
 sortBySelector.onchange = function() {
-    let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), sortBySelector.value || "user-title")
-    let ids = newEntries.map(v => v.ItemId)
-    items_setResults(ids)
-    clearItems()
-    reorderSidebar(ids)
+    sortEntriesUI()
 }
 
 function getUserExtra(user: UserEntry, prop: string) {
