@@ -3,7 +3,7 @@
  * with client-side inputs
 */
 
-let resultStatsProxy = new Proxy({
+let resultStatsProxy: ResultStats | { reset(): void } = new Proxy({
     count: 0,
     totalCost: 0,
     results: 0,
@@ -29,9 +29,7 @@ let resultStatsProxy = new Proxy({
 })
 
 type ResultStats = {
-    totalCost: number
-    count: number
-    results: number
+    [key: string]: number
 }
 
 document.addEventListener("keydown", e => {
@@ -75,11 +73,13 @@ function toggleModalUI(modalName: string, root: { getElementById(elementId: stri
 }
 
 function setResultStat(key: string, value: number) {
-    resultStatsProxy[key as keyof ResultStats] = value
+    //@ts-ignore
+    resultStatsProxy[key] = value
 }
 
 function changeResultStats(key: string, value: number) {
-    resultStatsProxy[key as keyof ResultStats] += value
+    //@ts-ignore
+    resultStatsProxy[key] += value
 }
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
@@ -380,7 +380,7 @@ async function signinUI(reason: string): Promise<string> {
     (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
 
     //if the popover is already open, something already called this function for the user to sign in
-    if (loginPopover.matches(":popover-open")) {
+    if (loginPopover.open) {
         return await new Promise((res, rej) => {
             //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
             setInterval(() => {
@@ -392,19 +392,19 @@ async function signinUI(reason: string): Promise<string> {
         })
     }
 
-    loginPopover.showPopover()
+    loginPopover.showModal()
     return await new Promise((res, rej) => {
         const form = loginPopover.querySelector("form") as HTMLFormElement
         form.onsubmit = function() {
             let data = new FormData(form)
             let username = data.get("username")
             let password = data.get("password")
-            loginPopover.hidePopover()
+            loginPopover.close()
             res(btoa(`${username}:${password}`))
         }
 
         setTimeout(() => {
-            loginPopover.hidePopover()
+            loginPopover.close()
             rej(null)
         }, 60000)
     })
