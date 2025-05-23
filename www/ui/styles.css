@@ -96,8 +96,6 @@
             set height on #sidebar-items to 100cqb
         */
         overflow: clip;
-
-        display: flow-root;
     }
 
     #notifications {
@@ -122,6 +120,10 @@
 
     #main-ui.display-mode> :not(#viewing-area) {
         display: none;
+    }
+
+    .display-mode #viewing-area {
+        height: 100%;
     }
 
     #main-ui {
@@ -426,7 +428,6 @@
         max-height: 83%;
 
         width: 100%;
-        overflow: auto;
 
         float: left;
 
