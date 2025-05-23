@@ -167,7 +167,7 @@ function deleteEntryUI(item: InfoEntry) {
             alert("Failed to delete item")
             return
         }
-        alert(`Deleted: ${item.En_Title} (${item.Native_Title} : ${item.ItemId})`)
+        alert(`Deleted: ${item.En_Title} (${item.Native_Title ? item.Native_Title + " : " : ""}${item.ItemId})`)
         updateInfo2({
             [String(item.ItemId)]: { info: item }
         }, true)
