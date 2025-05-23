@@ -266,7 +266,7 @@
             grid-template-columns: 1fr 1fr;
         }
 
-        @container (width <=800px) {
+        @container (width <= 800px) {
             grid-template-rows: 1fr 1fr;
         }
     }
@@ -284,6 +284,15 @@
     :is(#description, #notes) {
         max-height: 50cqb;
         overflow: auto auto;
+
+        /*since basically anything can be in these, create a new formatting context
+         * so that overflow doesn't cross into the thumbnail-fig*/
+        display: flow-root;
+
+        /*if the image does not have a max width, it will cause overflow*/
+        img {
+            max-width: 100%;
+        }
     }
 
     #notes {
