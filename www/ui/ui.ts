@@ -218,18 +218,18 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl(text).next().value
 
-    items_addItem({
-        meta: genericMetadata(json.ItemId),
-        user: genericUserEntry(json.ItemId),
-        events: [],
-        info: json
-    })
-
     api_getEntryMetadata(json.ItemId, getUidUI()).then(async (res) => {
         if (res === null) {
             alert("Failed to load new item metadata, please reload")
             return
         }
+
+        items_addItem({
+            meta: genericMetadata(json.ItemId),
+            user: genericUserEntry(json.ItemId),
+            events: [],
+            info: json
+        })
 
         updateInfo2({
             [json.ItemId]: {
@@ -246,6 +246,14 @@ async function newEntryUI(form: HTMLFormElement) {
     }).catch((err) => {
         console.error(err)
         alert("Failed to load new item metadata, please reload")
+    })
+
+    //FIXME: should only load new item's events
+    let events = await api_loadList<UserEvent>("engagement/list-events", getUidUI())
+    updateInfo2({
+        [json.ItemId]: {
+            events: events.filter(v => v.ItemId === json.ItemId)
+        }
     })
 }
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
