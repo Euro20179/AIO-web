@@ -430,8 +430,6 @@
 
         padding: 0;
 
-        counter-reset: item-list;
-
         @container body (width < 800px) {
             grid-column: 1 / -1;
             flex-direction: row;

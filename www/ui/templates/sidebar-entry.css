@@ -12,8 +12,6 @@
 }
 
 :host(sidebar-entry) {
-    height: 100%;
-
     @media (width < 800px) {
         border-left: 1px solid white;
         border-right: 1px solid white;
