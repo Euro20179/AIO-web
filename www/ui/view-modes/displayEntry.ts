@@ -723,11 +723,13 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
     for (let actionEl of root.querySelectorAll("[entry-action]")) {
         let event = actionEl.getAttribute("entry-action-trigger") || "click"
-        actionEl.addEventListener(event, e => {
+        //@ts-ignore
+        //use on_ instead of addEventListener because if the entry is refreshed, it will add multiple event listeners
+        actionEl[`on${event}`] = e => {
             let actionFn = de_actions[actionEl.getAttribute("entry-action") as keyof typeof de_actions];
             if (actionFn)
                 actionFn(e.target as HTMLElement)
-        })
+        }
     }
 
     //put-tbl, for raw objects such as user.Extra
