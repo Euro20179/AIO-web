@@ -58,10 +58,10 @@
 
     /*we NEED 0 specificity here*/
     :where(#entry-output,
-    #graph-output,
-    #calc-output,
-    #gallery-output,
-    #script-output) {
+        #graph-output,
+        #calc-output,
+        #gallery-output,
+        #script-output) {
         &:target {
             display: inherit;
         }
@@ -376,10 +376,12 @@
         @container viewing-area (max-width: 800px) {
             display: grid;
             grid-auto-flow: column;
+
             /*if there are at least 2 children, column size should be 80%*/
             &:has(:nth-child(2)) {
                 grid-auto-columns: 80%;
             }
+
             /*otherwise, the 1 item should get all the width*/
             &:not(:has(:nth-child(2))) {
                 grid-auto-columns: 100%;

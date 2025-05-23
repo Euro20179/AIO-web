@@ -25,6 +25,10 @@
         font-family: inherit;
     }
 
+    select {
+        -webkit-appearance: none;
+    }
+
     hr {
         border-style: dashed;
         border-color: var(--text-color);
