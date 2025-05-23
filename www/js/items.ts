@@ -424,3 +424,31 @@ async function nameToFormat(name: string): Promise<number> {
     val |= formats[name as keyof typeof formats]
     return val
 }
+
+function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean) {
+    const item = findInfoEntryById(itemId)
+    let total = includeSelf ? item.PurchasePrice : 0
+    if(includeChildren) {
+        let children = Object.values(globalsNewUi.entries).filter(v => v.info.ParentId === itemId)
+        for (let child of children) {
+            if(recursive) {
+                //includeChildren in this case will always be true
+                total += items_calculateCost(child.ItemId, includeSelf, true, includeCopies, true)
+            } else {
+                total += child.info.PurchasePrice
+            }
+        }
+    }
+    if(includeCopies) {
+        let copies = Object.values(globalsNewUi.entries).filter(v => v.info.CopyOf === itemId)
+        for (let copy of copies) {
+            if(recursive) {
+                //includeChildren in this case will always be true
+                total += items_calculateCost(copy.ItemId, includeSelf, true, includeCopies, true)
+            } else {
+                total += copy.info.PurchasePrice
+            }
+        }
+    }
+    return total
+}

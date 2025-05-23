@@ -513,6 +513,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
     }
 }
 
+
 function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if (!costEl) return
@@ -520,30 +521,12 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const info = findInfoEntryById(itemId)
     if (!info) return
 
-    //@ts-ignore
-    const includeSelf = (el.getElementById("include-self-in-cost"))?.checked
-    //@ts-ignore
-    const includeChildren = (el.getElementById("include-children-in-cost"))?.checked
-    //@ts-ignore
-    const includeCopies = (el.getElementById("include-copies-in-cost"))?.checked
+    const includeSelf = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
+    const includeChildren = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
+    const includeCopies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
+    const includeRecursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
 
-    let costTotal = 0
-    if (includeSelf) {
-        costTotal += info.PurchasePrice
-    }
-    if (includeChildren) {
-        let children = Object.values(globalsNewUi.entries).filter(v => v.info.ParentId === itemId)
-        for (let child of children) {
-            costTotal += child.info.PurchasePrice
-        }
-    }
-    if (includeCopies) {
-        let copies = Object.values(globalsNewUi.entries).filter(v => v.info.CopyOf === itemId)
-        for (let copy of copies) {
-            costTotal += copy.info.PurchasePrice
-        }
-    }
-    costEl.innerText = String(costTotal)
+    costEl.innerText = String(items_calculateCost(itemId, includeSelf, includeChildren, includeCopies, includeRecursive))
 }
 
 function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
@@ -1133,9 +1116,10 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     const includeSelf = root.getElementById("include-self-in-cost")
     const includeChildren = root.getElementById("include-children-in-cost")
     const includeCopies = root.getElementById("include-copies-in-cost")
+    const includeRecursive = root.getElementById("include-recusively-in-cost")
     const statusSelector = root.getElementById("status-selector")
 
-    for (let input of [includeSelf, includeCopies, includeChildren]) {
+    for (let input of [includeSelf, includeCopies, includeChildren, includeRecursive]) {
         if (!input) continue
         input.onchange = function() {
             updateCostDisplay(root, item.ItemId)
@@ -1547,7 +1531,7 @@ const de_actions = {
         for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
             let key = row.firstElementChild?.textContent || ""
             //invalid key
-            if(editedObject === "entry" && key === "Tags") continue
+            if (editedObject === "entry" && key === "Tags") continue
 
             let valueEl = row.firstElementChild?.nextElementSibling
             if (!valueEl) continue
@@ -1568,7 +1552,7 @@ const de_actions = {
             into[keyName] = JSON.stringify(newObj)
         else into = newObj
 
-        if(editedObject === "entry") {
+        if (editedObject === "entry") {
             into["Tags"] = findInfoEntryById(into["ItemId"]).Tags
         }
 
