@@ -274,6 +274,14 @@ async function loadUserEvents(uid: number) {
     }
 }
 
+function sortEvents(events: UserEvent[]) {
+    return events.sort((a, b) => {
+        let at = a.Timestamp || a.After
+        let bt = b.Timestamp || b.After
+        return at - bt
+    })
+}
+
 function sortEntries(entries: InfoEntry[], sortBy: string) {
     if (sortBy != "") {
         if (sortBy == "rating") {

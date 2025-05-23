@@ -272,6 +272,7 @@ function de_newevent(form: HTMLFormElement) {
                     TimeZone: ""
                 }
             )
+            ev = sortEvents(ev)
             updateInfo2({
                 [String(itemId)]: {
                     events: ev
