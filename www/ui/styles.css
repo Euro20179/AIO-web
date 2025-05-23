@@ -28,6 +28,7 @@
     select {
         /*safari...*/
         -webkit-appearance: none;
+        -moz-appearance: revert;
     }
 }
 

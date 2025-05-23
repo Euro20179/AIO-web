@@ -65,7 +65,6 @@ function closeModalUI(modalName: string, root: { getElementById(elementId: strin
 function toggleModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
-    console.log(dialog.open)
     if (dialog.open) {
         dialog.close()
     } else {

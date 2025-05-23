@@ -25,16 +25,17 @@
         <button>Add</button>
     </form>
     <br>
-    <button popovertarget="new-event-form">Close</button>
+    <button onclick="closeModalUI('new-event-form', this.getRootNode())">Close</button>
 </dialog>
 
 <dialog id="notes-edit-dialog" popover>
-    <button popovertarget="notes-edit-dialog" style="position: absolute; top: 1ch; right: 1ch;">X</button>
+    <button onclick="closeModalUI('notes-edit-dialog', this.getRootNode())" style="position: absolute; top: 1ch; right: 1ch;">X</button>
     <p class="center">Notes save automatically after 3 seconds of no editing</p>
     <textarea id="notes-edit-box"></textarea>
 </dialog>
 
 <dialog id="item-identification-form" popover>
+    <button style="position: absolute; top: 0; right: 0" onclick="closeModalUI('item-identification-form', this.getRootNode())">X</button>
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
             <option value="anilist">Anilist</option>
@@ -101,7 +102,7 @@
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
             <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
-            <button class="identify" title="identify item" popovertarget="item-identification-form">ℹ</button>
+            <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())" title="identify item">ℹ</button>
             <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
         </div>
         <input type="file" hidden id="thumbnail-file-upload">
@@ -109,7 +110,7 @@
         <table class="media-info" id="media-info"></table>
         <div class="grid column">
             <button class="save" entry-action="save" title="save any manual changes">💾︎</button>
-            <button popovertarget="display-info-object-editor-popup">T✏</button>
+            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">T✏</button>
             <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
             <button class="edit-template" entry-action="edittemplate"
                 title="edit item's html template">&lt;&gt;</button>
@@ -173,7 +174,7 @@
             </div>
             <div class="tables flex column" id="event-table-area">
                 <table class="user-actions" id="user-actions"></table>
-                <button id="new-event-button" popovertarget="new-event-form">New Event</button>
+                <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New Event</button>
             </div>
         </div>
     </div>
@@ -190,7 +191,7 @@
             <div
                 style="justify-self: center; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid; margin-top: var(--small-gap); width: 100%;">
                 <!--this z-index is because i cant click the button because its under things for some reason-->
-                <button popovertarget="notes-edit-dialog"
+                <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())"
                     style="justify-self: start; width: 35px; aspect-ratio: 1 / 1; margin-left: var(--small-gap); z-index: 1;">✏</button>
                 <h4 class="center" style="margin: 0;">Notes</h4>
             </div>

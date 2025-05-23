@@ -80,14 +80,14 @@
                 <input type="text" placeholder="parent id" name="parentId">
                 <input type="text" placeholder="copy of id" name="copyOf">
             </div>
-            <input type="submit" value="CREATE!" popovertarget="new-entry">
+            <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode())">
         </form>
     </dialog>
 
     <div id="main">
         <div id="main-ui" class="overflow">
             <nav id="search-area" aria-label="search and information">
-                <button popovertarget="new-entry" type="button" id="new-entry-button">➕︎</button>
+                <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form">
                     <a href="/usage#searching" id="help-link">?</a>

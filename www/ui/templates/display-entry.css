@@ -27,6 +27,7 @@
 
     select {
         -webkit-appearance: none;
+        -moz-appearance: revert;
     }
 
     hr {
