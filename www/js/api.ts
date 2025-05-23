@@ -8,7 +8,7 @@ function probablyUserItem(item: object): item is UserEntry {
         "CurrentPosition",
         "Extra"
     ]) {
-        if(!(key in item)) {
+        if (!(key in item)) {
             return false
         }
     }
@@ -30,7 +30,7 @@ function probablyInfoEntry(item: object): item is InfoEntry {
         "CopyOf",
         "Library",
     ]) {
-        if(!(key in item)) {
+        if (!(key in item)) {
             return false
         }
     }
@@ -52,7 +52,7 @@ function probablyMetaEntry(item: object): item is MetadataEntry {
         "Provider",
         "ProviderID",
     ]) {
-        if(!(key in item)) {
+        if (!(key in item)) {
             return false
         }
     }
@@ -69,6 +69,23 @@ type Status = string
 let formats: { [key: number]: string } = {}
 
 let _api_types_cache: EntryType[] = []
+
+function quoteEscape(text: string, stringQuoteType: '"' | "'") {
+    let newText = ""
+    let escaped = false
+    for (let ch of text) {
+        if (ch === "\\") {
+            escaped = true
+        }
+        else if (!escaped && ch === stringQuoteType) {
+            newText += `\\`
+        } else {
+            escaped = false
+        }
+        newText += ch
+    }
+    return newText
+}
 
 function _api_mkStrItemId(jsonl: string) {
     return jsonl
@@ -329,7 +346,7 @@ async function api_updateInfoTitle(itemId: bigint, newTitle: string) {
 
 async function api_getEntryMetadata(itemId: bigint, uid: number) {
     let res = await fetch(`${apiPath}/metadata/retrieve?id=${itemId}&uid=${uid}`)
-    if(res.status !== 200) {
+    if (res.status !== 200) {
         return null
     }
     return api_deserializeJsonl(await res.text()).next().value as MetadataEntry

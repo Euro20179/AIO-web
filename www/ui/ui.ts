@@ -256,11 +256,27 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl(text).next().value
 
-    api_getEntryMetadata(json.ItemId, getUidUI()).then(async (res) => {
-        if (res === null) {
-            alert("Failed to load new item metadata, please reload")
-            return
+    //FIXME: should only load new item's events
+    Promise.all([
+        api_getEntryMetadata(json.ItemId, getUidUI()),
+        api_loadList<UserEvent>("engagement/list-events", getUidUI())
+    ]).then(res => {
+        let [x, y] = res
+        let meta, events
+        if (x === null || probablyMetaEntry(x)) {
+            if (x === null) {
+                alert("Failed to load new item metadata, please reload")
+            }
+            meta = x || genericMetadata(json.ItemId)
+            events = y
+        } else {
+            events = y
+            meta = x
         }
+
+
+
+        events = events.filter(v => v.ItemId === json.ItemId)
 
         items_addItem({
             meta: genericMetadata(json.ItemId),
@@ -271,27 +287,15 @@ async function newEntryUI(form: HTMLFormElement) {
 
         updateInfo2({
             [json.ItemId]: {
-                meta: res
+                meta,
+                events
             }
         })
 
-        clearItems()
-
-        selectItem(json, mode, true)
-
-        clearSidebar()
-        renderSidebarItem(json)
+        ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)
     }).catch((err) => {
         console.error(err)
         alert("Failed to load new item metadata, please reload")
-    })
-
-    //FIXME: should only load new item's events
-    let events = await api_loadList<UserEvent>("engagement/list-events", getUidUI())
-    updateInfo2({
-        [json.ItemId]: {
-            events: events.filter(v => v.ItemId === json.ItemId)
-        }
     })
 }
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
