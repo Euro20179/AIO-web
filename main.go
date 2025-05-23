@@ -29,6 +29,14 @@ func root(w http.ResponseWriter, req *http.Request) {
 	// }
 	fullPath := filepath.Join(rootPath, path)
 
+	if stat, err := os.Stat(fullPath); err == nil && stat.IsDir() {
+		if strings.HasSuffix(fullPath, "/") {
+			fullPath += "index.html"
+		} else {
+			fullPath += "/index.html"
+		}
+	}
+
 	if strings.HasSuffix(fullPath, ".html") {
 		tmpl, err := template.ParseFiles(fullPath)
 		if err != nil {

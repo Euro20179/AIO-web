@@ -1113,19 +1113,15 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         }
     }
 
-    const includeSelf = root.getElementById("include-self-in-cost")
-    const includeChildren = root.getElementById("include-children-in-cost")
-    const includeCopies = root.getElementById("include-copies-in-cost")
-    const includeRecursive = root.getElementById("include-recusively-in-cost")
-    const statusSelector = root.getElementById("status-selector")
-
-    for (let input of [includeSelf, includeCopies, includeChildren, includeRecursive]) {
-        if (!input) continue
-        input.onchange = function() {
+    for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-recusively-in-cost"]) {
+        const el = root.getElementById(input)
+        if (!el) continue
+        el.onchange = function() {
             updateCostDisplay(root, item.ItemId)
         }
     }
 
+    const statusSelector = root.getElementById("status-selector")
     statusSelector && (statusSelector.onchange = function(e) {
         const selector = e.target as HTMLSelectElement
         const info = findInfoEntryById(item.ItemId) as InfoEntry
