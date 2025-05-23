@@ -315,13 +315,9 @@
         grid-template-rows: min-content 1fr;
 
         #calc-items {
-            display: flex;
-            flex-wrap: wrap;
-
-            calc-entry {
-                flex-grow: 1;
-                width: 33cqi;
-            }
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(33cqi, 1fr));
+            grid-template-rows: repeat(auto-fill, minmax(50cqb, 1fr));
         }
     }
 
