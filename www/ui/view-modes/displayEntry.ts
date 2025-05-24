@@ -3,7 +3,7 @@ const displayItems = document.getElementById("entry-output") as HTMLElement
 let displayQueue: InfoEntry[] = []
 
 async function itemIdentification(form: HTMLFormElement) {
-    form.parentElement?.hidePopover()
+    closeModalUI("item-identification-form", form.getRootNode() as ShadowRoot)
     let data = new FormData(form)
 
     let provider = data.get("provider") as string
@@ -79,35 +79,10 @@ async function titleIdentification(provider: string, search: string, selectionEl
         return ""
     }
 
-    while (selectionElemOutput.children.length) {
-        selectionElemOutput.firstChild?.remove()
-    }
-
-    selectionElemOutput.showPopover()
-
-    return await new Promise(RETURN => {
-        for (let result of items) {
-            let fig = document.createElement("figure")
-
-            let img = document.createElement("img")
-            img.src = result.Thumbnail
-            img.style.cursor = "pointer"
-            img.width = 100
-
-            img.addEventListener("click", _e => {
-                selectionElemOutput.hidePopover()
-                RETURN(result.ItemId)
-            })
-
-            let title = document.createElement("h3")
-            title.innerText = result.Title || result.Native_Title
-            title.title = result.Native_Title || result.Title
-
-            fig.append(title)
-            fig.append(img)
-            selectionElemOutput.append(fig)
-        }
-    })
+    let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+    const container = fillItemListing(obj)
+    let item = await selectExistingItem(container)
+    return item ? String(item) : null
 }
 
 

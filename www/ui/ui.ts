@@ -310,7 +310,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
     ))
 }
 
-function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>): HTMLDivElement {
+function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
     const itemsFillDiv = document.getElementById("put-items-to-select") as HTMLDivElement
     itemsFillDiv.innerHTML = ""
 
@@ -318,6 +318,11 @@ function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>): 
     container.classList.add("grid")
     container.classList.add("center")
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
+
+    if (addCancel) {
+        entries["0"] = new items_Entry(genericInfo(0n))
+        entries["0"].info.En_Title = "CANCEL SELECTION"
+    }
 
     for (let id in entries) {
         //no need to re-render the element (thumbnail or title might be different, that's ok)
@@ -370,29 +375,28 @@ async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     input.value = popover.returnValue
 }
 
-async function selectExistingItem(): Promise<null | bigint> {
+async function selectExistingItem(container: HTMLDivElement | null = null): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
 
     let f = document.getElementById("items-listing-search") as HTMLFormElement
     let query = f.querySelector('[name="items-listing-search"]') as HTMLInputElement
 
-    let cancel = new items_Entry(genericInfo(0n))
-    let cpy = { ...globalsNewUi.entries }
-    cpy["0"] = cancel
-    cancel.info.En_Title = "CANCEL SELECTION"
-    const container = fillItemListing(cpy)
+    if (!container) {
+        let cpy = { ...globalsNewUi.entries }
+        container = fillItemListing(cpy, true)
+    }
 
     popover.showModal()
 
     return await new Promise((res, rej) => {
         function registerFigClickEvents(container: HTMLElement) {
-                for (let fig of container.querySelectorAll("figure")) {
-                    const id = fig.getAttribute("data-item-id")
-                    fig.onclick = () => {
-                        popover.close(String(id))
-                        res(BigInt(id as string))
-                    }
+            for (let fig of container.querySelectorAll("figure")) {
+                const id = fig.getAttribute("data-item-id")
+                fig.onclick = () => {
+                    popover.close(String(id))
+                    res(BigInt(id as string))
                 }
+            }
         }
         f.onsubmit = function() {
             fillItemListingWithSearch(query.value).then(registerFigClickEvents)
