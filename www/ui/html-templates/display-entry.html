@@ -121,7 +121,10 @@
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
         <menu role="menu" aria-label="metadata actions"
-            style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
+            style="margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));">
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"> </select>
+            <select id="format-selector" title="Format type" entry-action="setformat"
+                entry-action-trigger="change" class="center"></select>
             <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
                 title="identify item">ℹ</button>
             <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
@@ -155,8 +158,6 @@
     <hgroup>
         <div class="flex j-center" style="gap: var(--small-gap);">
             <h2 class="title center" id="main-title"></h2>
-            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center">
-            </select>
         </div>
         <div class="flex column wrap j-center" style="gap: 2ch">
             <h3 class="center official-native-title" id="official-native-title"></h3>

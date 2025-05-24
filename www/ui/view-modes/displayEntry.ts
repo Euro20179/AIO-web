@@ -807,6 +807,21 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         })
     }
 
+    //format selector
+    const formatSelector = el.getElementById("format-selector")
+    if (formatSelector && (formatSelector instanceof HTMLSelectElement)) {
+        api_listFormats().then(formats => {
+            formatSelector.innerHTML = ""
+            for (let fNo in formats) {
+                const option = document.createElement("option")
+                option.value = fNo
+                option.innerText = formats[fNo]
+                formatSelector.append(option)
+            }
+            formatSelector.value = String(item.Format)
+        })
+    }
+
     //tags
     const tagsRoot = el.getElementById("tags")
     if (tagsRoot) {
@@ -1494,6 +1509,21 @@ const de_actions = {
     save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
     close: displayEntryAction(item => deselectItem(item)),
     copythis: displayEntryAction(item => copyThis(item)),
+    setformat: displayEntryAction((item, _, target) => {
+        if (!("value" in target)) return
+        api_listFormats().then(formats => {
+            if (!Object.keys(formats).includes(String(target.value))) return
+            item.Format = Number(target.value)
+            api_setItem("", item)
+                .catch(console.error)
+                .then(alert.bind(window, `Switched format to: ${formats[Number(target.value)]}`))
+            updateInfo2({
+                [String(item.ItemId)]: {
+                    info: item
+                }
+            })
+        })
+    }),
     settype: displayEntryAction((item, _, target) => {
         if (!("value" in target)) return
         api_listTypes().then(types => {
