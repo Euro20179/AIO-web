@@ -163,7 +163,7 @@ function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
             `
 
     for (let key in data) {
-        html += `<tr><td>${key}</td><td contenteditable>${data[key]}</td></tr>`
+        html += `<tr><td>${key}</td><td>${data[key]}</td></tr>`
     }
     html += "</tbody>"
     root.innerHTML = html
