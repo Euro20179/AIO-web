@@ -324,9 +324,8 @@
     #main-title {
         margin: 0;
 
-        &[data-format-name="UNOWNED"]::after {
-            text-transform: lowercase;
-            content: " (unowned)";
+        &[data-owner]::after {
+            content: " (owner: " attr(data-owner) ")";
         }
 
         &::before {

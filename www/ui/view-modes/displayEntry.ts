@@ -869,6 +869,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
+    if(getUidUI() === 0)
+        displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid])
 
 
     //format
