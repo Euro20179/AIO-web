@@ -296,11 +296,25 @@ newItemForm.onsubmit = function() {
     newEntryUI(newItemForm)
 }
 
-function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
-    const popover = document.getElementById("items-listing") as HTMLDivElement
-    popover.innerHTML = ""
+async function fillItemListingWithSearch(search: string) {
+    let results = await api_queryV3(search, getUidUI())
+    fillItemListing(Object.fromEntries(
+        results.map(v => [
+            String(v.ItemId),
+            new items_Entry(
+                v,
+                findUserEntryById(v.ItemId),
+                findMetadataById(v.ItemId)
+            )
+        ])
+    ))
+}
 
-    const container = popover.querySelector("div") || document.createElement("div")
+function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
+    const itemsFillDiv = document.getElementById("put-items-to-select") as HTMLDivElement
+    itemsFillDiv.innerHTML = ""
+
+    const container = itemsFillDiv.querySelector("div") || document.createElement("div")
     container.classList.add("grid")
     container.classList.add("center")
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
@@ -341,14 +355,14 @@ function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
         container.append(fig)
     }
 
-    popover.append(container)
+    itemsFillDiv.append(container)
     return container
 }
 
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectExistingItem()
     console.log(item)
-    if(item === null) {
+    if (item === null) {
         input.value = "0"
         return
     }
@@ -359,7 +373,7 @@ async function selectExistingItem(): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
 
     let cancel = new items_Entry(genericInfo(0n))
-    let cpy = {...globalsNewUi.entries}
+    let cpy = { ...globalsNewUi.entries }
     cpy["0"] = cancel
     cancel.info.En_Title = "CANCEL SELECTION"
     const container = fillItemListing(cpy)

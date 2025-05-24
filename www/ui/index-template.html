@@ -14,6 +14,15 @@
         <center>
             <h3>Find Item</h3>
         </center>
+        <center>
+            <form action="javascript:void(0)"
+                    class="flex j-center"
+                    onsubmit="fillItemListingWithSearch(this.querySelector('[name=items-listing-search]').value)">
+                <input name="items-listing-search" placeholder="search">
+            </form>
+        </center>
+        <div id="put-items-to-select">
+        </div>
     </dialog>
 
     <dialog id="login" popover>
