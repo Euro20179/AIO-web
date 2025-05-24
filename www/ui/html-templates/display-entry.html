@@ -166,13 +166,13 @@
     </hgroup>
     <div id="misc-info" class="flex row wrap j-center">
         <div class="tables flex column" id="event-table-area"
-            style="flex-grow: 1; justify-content: center; display: flow-root;">
+            style="flex-grow: 1; justify-content: center; display: flow-root; align-self: center;">
             <table class="user-actions" id="user-actions"></table>
             <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
                 Event</button>
         </div>
         <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-            <p id="view-count" class="view-count center" entry-action="setviewcount" put-data="ViewCount"></p>
+            <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount" put-data="ViewCount"></p>
             <figure class="entry-progress">
                 <div class="viewing relative">
                     <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
