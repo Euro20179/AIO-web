@@ -189,7 +189,7 @@ function renderSidebar(entries: InfoEntry[], clearRendered = true) {
         clearSidebar()
     }
     for (let i = 0; i < entries.length; i++) {
-        renderSidebarItem(entries[i], sidebarItems)
+        renderSidebarItem(entries[i])
     }
     selectSidebarItems(entries, clearRendered)
 }

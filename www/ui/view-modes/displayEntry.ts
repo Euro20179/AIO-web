@@ -833,10 +833,26 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //Cost
     updateCostDisplay(el, item.ItemId)
 
+    //user styles
     let userExtra = getUserExtra(user, "styles")
     let styles = userExtra || ""
     if (customStyles) {
         customStyles.innerText = styles
+    }
+
+    //type selector
+    const typeSelector = el.getElementById("type-selector")
+    if (typeSelector && (typeSelector instanceof HTMLSelectElement)) {
+        api_listTypes().then(types => {
+            typeSelector.innerHTML = ""
+            for (let ty of types) {
+                const option = document.createElement("option")
+                option.value = ty
+                option.innerText = ty
+                typeSelector.append(option)
+            }
+            typeSelector.value = item.Type
+        })
     }
 
     //tags
@@ -1085,6 +1101,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     parent.append(el)
 
+
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
         currentEditedObj.onchange = function() {
@@ -1312,11 +1329,11 @@ function getIdFromDisplayElement(element: HTMLElement) {
     return BigInt(String(host.getAttribute("data-item-id")))
 }
 
-function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot) => any) {
+function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
     return function(elem: HTMLElement) {
         let id = getIdFromDisplayElement(elem)
         let item;
-        (item = findInfoEntryById(id)) && func(item, elem.getRootNode() as ShadowRoot)
+        (item = findInfoEntryById(id)) && func(item, elem.getRootNode() as ShadowRoot, elem)
     }
 }
 
@@ -1487,6 +1504,21 @@ const de_actions = {
     save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
     close: displayEntryAction(item => deselectItem(item)),
     copythis: displayEntryAction(item => copyThis(item)),
+    settype: displayEntryAction((item, _, target) => {
+        if (!("value" in target)) return
+        api_listTypes().then(types => {
+            if (!types.includes(target.value as EntryType)) return
+            item.Type = target.value as EntryType
+            api_setItem("", item)
+                .catch(console.error)
+                .then(alert.bind(window, `Switched type to: ${target.value}`))
+            updateInfo2({
+                [String(item.ItemId)]: {
+                    info: item
+                }
+            })
+        })
+    }),
     //TODO: this function is a disaster, each edited object should probably get its own save function
     saveobject: displayEntryAction((item, root) => {
         const tbl = root.getElementById("display-info-object-tbl")

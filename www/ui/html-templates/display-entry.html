@@ -101,6 +101,8 @@
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change">
+            </select>
             <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
             <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())" title="identify item">ℹ</button>
             <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
