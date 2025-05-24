@@ -126,6 +126,7 @@
             <li>Notes (string): any notes the user has on the entry</li>
             <li>CurrentPosition (string): a description of the position of the user within an entry</li>
             <li>Extra (string): a json object containing extra information about the entry</li>
+            <li>Minutes (int): the number of minutes the user has spent viewing the entry</li>
         </ul>
         <p>
             Metadata fields
@@ -226,10 +227,16 @@
             <li>
                 <code>uid</code>: the user's id to display<br>
                 This parameter or <code>uname</code> is required in order to know which user's items to display
+            </li>
+            <li>
                 <code>uname</code>: the username to display
-                <code>q</code>: an initial search query
+            </li>
+            <code>q</code>: an initial search query
+            <li>
                 <code>item-id</code>: the item id to show (same as <code>?q=ItemId%20=id</code>
-                <code>display</code>: get rid of the ui elements, and display the first result found by <code>q</code>,
+            </li>
+            <code>display</code>: get rid of the ui elements, and display the first result found by <code>q</code>,
+            <li>
                 or the item specified by <code>item-id</code>
             </li>
         </ul>
