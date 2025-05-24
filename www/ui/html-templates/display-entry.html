@@ -29,13 +29,15 @@
 </dialog>
 
 <dialog id="notes-edit-dialog" popover>
-    <button onclick="closeModalUI('notes-edit-dialog', this.getRootNode())" style="position: absolute; top: 1ch; right: 1ch;">X</button>
+    <button onclick="closeModalUI('notes-edit-dialog', this.getRootNode())"
+        style="position: absolute; top: 1ch; right: 1ch;">X</button>
     <p class="center">Notes save automatically after 3 seconds of no editing</p>
     <textarea id="notes-edit-box"></textarea>
 </dialog>
 
 <dialog id="item-identification-form" popover>
-    <button style="position: absolute; top: 0; right: 0" onclick="closeModalUI('item-identification-form', this.getRootNode())">X</button>
+    <button style="position: absolute; top: 0; right: 0"
+        onclick="closeModalUI('item-identification-form', this.getRootNode())">X</button>
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
             <option value="anilist">Anilist</option>
@@ -100,23 +102,27 @@
         <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));">
-            <select id="type-selector" entry-action="settype" entry-action-trigger="change">
-            </select>
-            <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
-            <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())" title="identify item">ℹ</button>
-            <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
-        </div>
+        <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
+        <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
-        <div class="grid column">
-            <button class="save" entry-action="save" title="save any manual changes">💾︎</button>
-            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">T✏</button>
-            <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
-            <button class="edit-template" entry-action="edittemplate"
-                title="edit item's html template">&lt;&gt;</button>
-        </div>
+        <menu style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
+            <div class="grid">
+                <select id="type-selector" entry-action="settype" entry-action-trigger="change">
+                </select>
+                <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
+                <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
+                    title="identify item">ℹ</button>
+                <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
+            </div>
+            <div class="grid">
+                <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
+                <button class="edit-template" entry-action="edittemplate"
+                    title="edit item's html template">&lt;&gt;</button>
+                <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())" style="height: fit-content;">✏</button>
+            </div>
+        </menu>
         <div class="header-subtitle" id="header-subtitle">
             <div>
                 <span>Include in cost</span>
@@ -178,7 +184,8 @@
             </div>
             <div class="tables flex column" id="event-table-area">
                 <table class="user-actions" id="user-actions"></table>
-                <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New Event</button>
+                <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
+                    Event</button>
             </div>
         </div>
     </div>

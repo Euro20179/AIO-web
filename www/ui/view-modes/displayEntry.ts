@@ -112,51 +112,8 @@ async function titleIdentification(provider: string, search: string, selectionEl
 
 
 function saveItemChanges(root: ShadowRoot, itemId: bigint) {
-    if (!confirm("Are you sure you want to save changes?")) {
-        return
-    }
-
     let userEntry = findUserEntryById(itemId)
     if (!userEntry) return
-
-    let infoTable = root.getElementById("info-raw")
-    let metaTable = root.getElementById("meta-info-raw")
-    let userTable = root.getElementById("user-info-raw")
-
-    const updateWithTable: (table: Element, item: InfoEntry | MetadataEntry | UserEntry) => void = (table, item) => {
-        for (let row of table?.querySelectorAll("tr") || []) {
-            let nameChild = row.firstElementChild as HTMLElement
-            let valueChild = row.firstElementChild?.nextElementSibling as HTMLElement
-            let name = nameChild.innerText.trim()
-            let value = valueChild.innerText.trim()
-            if (!(name in item)) {
-                console.log(`${name} NOT IN ITEM`)
-                continue
-            } else if (name === "ItemId") {
-                console.log("Skipping ItemId")
-                continue
-            }
-            let ty = item[name as keyof typeof item]?.constructor
-            if (!ty) continue
-            //@ts-ignore
-            item[name] = ty(value)
-        }
-    }
-
-    let info = findInfoEntryById(itemId)
-    if (!info) return
-    if (infoTable) {
-        updateWithTable(infoTable, info)
-    }
-
-    let meta = findMetadataById(itemId)
-    if (!meta) return
-
-    if (metaTable)
-        updateWithTable(metaTable, meta)
-
-    if (userTable)
-        updateWithTable(userTable, userEntry)
 
     const customStylesElem = root.getElementById("style-editor")
     const customTemplElem = root.getElementById("template-editor")
@@ -171,23 +128,11 @@ function saveItemChanges(root: ShadowRoot, itemId: bigint) {
 
     api_setItem("engagement/", userEntry)
         .then(res => res?.text())
-        .then(console.log)
+        .then(() => alert("saved user info"))
         .catch(console.error)
-    api_setItem("", info)
-        .then(res => res?.text())
-        .then(console.log)
-        .catch(console.error)
-
-    api_setItem("metadata/", meta)
-        .then(res => res?.text())
-        .then(console.log)
-        .catch(console.error)
-
 
     updateInfo2({
         [String(itemId)]: {
-            info,
-            meta,
             user: userEntry
         }
     })
@@ -1636,15 +1581,31 @@ const de_actions = {
             })
         })
     }),
-    editstyles: displayEntryAction((item, root) => {
+    editstyles: displayEntryAction((item, root, elem) => {
         const styleEditor = root.getElementById("style-editor")
         if (!styleEditor) return
         styleEditor.hidden = !styleEditor.hidden
+        let to: number | null = null
+        styleEditor.onchange = function() {
+            if (to) clearTimeout(to)
+            to = setTimeout(() => {
+                de_actions["save"](elem)
+                alert("saved styles")
+            }, 3000)
+        }
     }),
-    edittemplate: displayEntryAction((item, root) => {
+    edittemplate: displayEntryAction((item, root, elem) => {
         const templEditor = root.getElementById("template-editor")
         if (!templEditor) return
         templEditor.hidden = !templEditor.hidden
+        let to: number | null = null
+        templEditor.onchange = function() {
+            if (to) clearTimeout(to)
+            to = setTimeout(() => {
+                de_actions["save"](elem)
+                alert("saved template")
+            }, 3000)
+        }
     }),
     copyto: displayEntryAction(item => {
         let id = promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
