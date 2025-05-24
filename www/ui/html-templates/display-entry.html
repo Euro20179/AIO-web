@@ -7,29 +7,39 @@
 
 
 <dialog id="new-event-form" popover>
+    <button onclick="closeModalUI('new-event-form', this.getRootNode())"
+        style="position: absolute; top: 0; right: 0; margin: var(--small-gap);">X</button>
     <form action="javascript:void(0)" onsubmit="de_newevent(this)">
         <label for="name">Name: <input id="name" name="name" required></label>
         <p>
-            Please only fill out one of the time slots.<br>
-            If you know the exact day (exact time is unimportant, put 0:0 if unsure) fill out the first one,<br>
-            otherwise fill out the second one if you know the event happend after a certain time
+            Not all time slots are required. Exact times are also not required.
         </p>
-        <label for="timestamp">
-            Exact: <input id="timestamp" name="timestamp" type="datetime-local">
-        </label>
+        <div class="grid column">
+            <div class="flex column" style="align-items: center;">
+                <label for="after-timestamp">
+                    After:
+                </label>
+                <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
+            </div>
+            <div class="flex column" style="align-items: center;">
+                <label for="timestamp">
+                    On:
+                </label>
+                <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
+            </div>
+            <div class="flex column" style="align-items: center;">
+                <label for="before-timestamp">
+                    Before:
+                </label>
+                <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
+            </div>
+        </div>
         <br>
-        <label for="after-timestamp">
-            After: <input type="datetime-local" name="after" id="after-timestamp">
-        </label>
-        <br>
-        <label for="before-timestamp">
-            Before: <input type="datetime-local" name="before" id="before-timestamp">
-        </label>
-        <br>
-        <button>Add</button>
+        <div class="flex j-center">
+            <button>Add</button>
+        </div>
     </form>
     <br>
-    <button onclick="closeModalUI('new-event-form', this.getRootNode())">Close</button>
 </dialog>
 
 <dialog id="notes-edit-dialog" popover>
