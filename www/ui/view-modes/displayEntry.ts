@@ -1044,7 +1044,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
             html += `<tr>
                         <td>
                             <div class="grid column">
-                                <button class="delete" onclick="deleteEvent(this, ${ts}, ${afterts})">🗑</button>
+                                <button class="delete" onclick="deleteEvent(this, ${ts}, ${afterts}, ${beforets})">🗑</button>
                                 ${name}
                             </div>
                         </td>
@@ -1717,12 +1717,12 @@ const displayEntryEditStyles = de_actions["editstyles"]
 const displayEntrySave = de_actions["save"]
 // }}}
 
-function deleteEvent(el: HTMLElement, ts: number, after: number) {
+function deleteEvent(el: HTMLElement, ts: number, after: number, before: number) {
     if (!confirm("Are you sure you would like to delete this event")) {
         return
     }
     const itemId = getIdFromDisplayElement(el)
-    api_deleteEvent(itemId, ts, after)
+    api_deleteEvent(itemId, ts, after, before)
         .then(res => res?.text())
         .then(() =>
             loadUserEvents(getUidUI())

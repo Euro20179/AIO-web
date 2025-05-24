@@ -311,8 +311,8 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     return res
 }
 
-async function api_deleteEvent(itemId: bigint, ts: number, after: number) {
-    return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
+async function api_deleteEvent(itemId: bigint, ts: number, after: number, before: number) {
+    return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}&before=${before}`)
 }
 
 async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string, before: number = 0) {
