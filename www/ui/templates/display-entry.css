@@ -302,6 +302,10 @@
         }
     }
 
+    section:has(> #description:empty) {
+        display: none;
+    }
+
     #notes {
         white-space: pre-wrap;
 
