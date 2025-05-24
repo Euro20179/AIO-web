@@ -152,7 +152,7 @@
 
     #new-event-button {
         align-self: center;
-        width: 50cqi;
+        width: 100%;
     }
 
     /*if the table has events, we no longer need the new event button*/
