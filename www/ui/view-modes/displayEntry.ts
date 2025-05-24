@@ -948,14 +948,17 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && (viewCount || user.Minutes)) {
-        viewCountEl.title = String(user.Minutes
+        let mins = user.Minutes
             || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0)
-            || "unknown") + " minutes"
 
-        let minutes = String(Math.round(user.Minutes / 0.6) / 100
-            || Math.round(Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 0.6) / 100
-            || "unknown")
-        viewCountEl.setAttribute("data-time-spent", minutes)
+        viewCountEl.title = String(mins) + " minutes"
+
+        let minutesRounded = String(Math.round(mins / 0.6) / 100 || "unknown")
+        if(mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
+            user.Minutes = mins
+            api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
+        }
+        viewCountEl.setAttribute("data-time-spent", minutesRounded)
         viewCountEl.innerText = String(viewCount)
     }
 
