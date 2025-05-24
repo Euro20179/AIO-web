@@ -265,14 +265,6 @@
         gap: 2cqi;
 
         margin-top: var(--small-gap);
-
-        /* @container (width > 800px) { */
-        /*     grid-template-columns: 1fr 1fr; */
-        /* } */
-        /**/
-        /* @container (width <= 800px) { */
-        /*     grid-template-rows: 1fr 1fr; */
-        /* } */
     }
 
     #descriptors>section,

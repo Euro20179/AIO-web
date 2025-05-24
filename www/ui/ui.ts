@@ -345,25 +345,39 @@ function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
     return container
 }
 
+async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
+    let item = await selectExistingItem()
+    console.log(item)
+    if(item === null) {
+        input.value = "0"
+        return
+    }
+    input.value = String(item)
+}
+
 async function selectExistingItem(): Promise<null | bigint> {
-    const popover = document.getElementById("items-listing") as HTMLDivElement
+    const popover = document.getElementById("items-listing") as HTMLDialogElement
 
-    const container = fillItemListing(globalsNewUi.entries)
+    let cancel = new items_Entry(genericInfo(0n))
+    let cpy = {...globalsNewUi.entries}
+    cpy["0"] = cancel
+    cancel.info.En_Title = "CANCEL SELECTION"
+    const container = fillItemListing(cpy)
 
-    popover.showPopover()
+    popover.showModal()
 
     return await new Promise((res, rej) => {
         for (let fig of container.querySelectorAll("figure")) {
             const id = fig.getAttribute("data-item-id")
             fig.onclick = () => {
-                popover.hidePopover()
+                popover.close()
                 res(BigInt(id as string))
             }
         }
 
         setTimeout(() => {
             rej(null)
-            popover.hidePopover()
+            popover.close()
         }, 60000)
     })
 }
