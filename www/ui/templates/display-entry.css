@@ -193,6 +193,7 @@
     #event-table-area {
         gap: 10px;
         overflow: auto auto;
+        max-height: 30cqb;
     }
 
     #header-subtitle {
