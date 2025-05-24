@@ -193,6 +193,7 @@ function de_newevent(form: HTMLFormElement) {
     }
     const tsStr = data.get("timestamp")
     const aftertsStr = data.get("after")
+    const beforetsStr = data.get("before")
     //@ts-ignore
     let ts = new Date(tsStr).getTime()
     if (isNaN(ts)) {
@@ -203,8 +204,13 @@ function de_newevent(form: HTMLFormElement) {
     if (isNaN(afterts)) {
         afterts = 0
     }
+    //@ts-ignore
+    let beforets = new Date(beforetsStr).getTime()
+    if (isNaN(beforets)) {
+        beforets = 0
+    }
     const itemId = getIdFromDisplayElement(form)
-    api_registerEvent(itemId, name.toString(), ts, afterts)
+    api_registerEvent(itemId, name.toString(), ts, afterts, undefined, beforets)
         .then(res => res?.text())
         .then(() => {
             let ev = findUserEventsById(itemId)
@@ -214,7 +220,8 @@ function de_newevent(form: HTMLFormElement) {
                     After: afterts,
                     Event: name.toString(),
                     ItemId: itemId,
-                    TimeZone: ""
+                    TimeZone: "",
+                    Before: beforets
                 }
             )
             ev = sortEvents(ev)
@@ -993,23 +1000,47 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         for (let event of events) {
             const ts = event.Timestamp
             const afterts = event.After
+            const beforets = event.Before
             const timeZone = event.TimeZone || "UTC"
             const name = event.Event
 
-            let date = new Date(event.Timestamp)
-            let afterDate = new Date(event.After)
             let timeTd = ""
-            if (ts !== 0) {
+            let innerTD = ""
+
+            if (afterts) {
+                let date = new Date(afterts)
                 let time = date.toLocaleTimeString("en", { timeZone })
                 let dd = date.toLocaleDateString("en", { timeZone })
-                timeTd = `<td title="${time} (${timeZone})">${dd}</td>`
-            } else if (afterts !== 0) {
-                let time = afterDate.toLocaleTimeString("en", { timeZone })
-                let dd = afterDate.toLocaleDateString("en", { timeZone })
-                timeTd = `<td title="${time} (${timeZone})">after: ${dd}</td>`
-            } else {
-                timeTd = `<td title="unknown">unknown</td>`
+                innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
             }
+
+            if (ts) {
+                let date = new Date(ts)
+                let time = date.toLocaleTimeString("en", { timeZone })
+                let dd = date.toLocaleDateString("en", { timeZone })
+                if (innerTD) {
+                    innerTD += " &lt; "
+                }
+                innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
+            //if there is no exact timestamp, put a ? in the middle of afterts and beforets
+            } else {
+                if(innerTD) {
+                    innerTD += " &lt; "
+                }
+                innerTD += " ? "
+            }
+
+            if (beforets) {
+                let bdate = new Date(beforets)
+                let btime = bdate.toLocaleTimeString("en", { timeZone })
+                let bdd = bdate.toLocaleDateString("en", { timeZone })
+                if (innerTD) {
+                    innerTD += " &lt; "
+                }
+                innerTD += `<span title="${btime} (${timeZone})">${bdd}</span>`
+            }
+            timeTd = `<td>${innerTD}</td>`
+
             html += `<tr>
                         <td>
                             <div class="grid column">

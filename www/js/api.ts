@@ -315,9 +315,9 @@ async function api_deleteEvent(itemId: bigint, ts: number, after: number) {
     return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}`)
 }
 
-async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string) {
+async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string, before: number = 0) {
     tz ||= Intl.DateTimeFormat().resolvedOptions().timeZone
-    return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}`)
+    return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}&before=${before}`)
 }
 
 async function api_addEntryTags(itemId: bigint, tags: string[]) {

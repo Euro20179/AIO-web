@@ -42,6 +42,7 @@ type UserEvent = {
     Timestamp: number
     After: number
     TimeZone: string
+    Before: number
 }
 
 type InfoEntry = {
