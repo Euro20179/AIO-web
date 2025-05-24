@@ -135,8 +135,7 @@
             <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
             <button class="edit-template" entry-action="edittemplate"
                 title="edit item's html template">&lt;&gt;</button>
-            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())"
-                style="height: fit-content;">✏</button>
+            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
         </menu>
         <div class="header-subtitle" id="header-subtitle">
             <div>
@@ -166,7 +165,8 @@
         </div>
     </hgroup>
     <div id="misc-info" class="flex row wrap j-center">
-        <div class="tables flex column" id="event-table-area" style="flex-grow: 1; justify-content: center; display: flow-root;">
+        <div class="tables flex column" id="event-table-area"
+            style="flex-grow: 1; justify-content: center; display: flow-root;">
             <table class="user-actions" id="user-actions"></table>
             <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
                 Event</button>

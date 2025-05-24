@@ -127,10 +127,11 @@
     #thumbnail-fig {
         float: right;
         margin: 0;
+        margin-left: var(--small-gap);
 
         /*this way, everything in the middle of the page is cenetered nicely*/
         /*and the space to the right entirely belongs to the figure*/
-        height: 90cqb;
+        /* height: 90cqb; */
 
         font-size: min(1em, 3cqw);
 
@@ -259,24 +260,28 @@
     }
 
     #descriptors {
-        display: grid;
+        display: flex;
+        flex-wrap: wrap;
         gap: 2cqi;
 
         margin-top: var(--small-gap);
 
-        @container (width > 800px) {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        @container (width <= 800px) {
-            grid-template-rows: 1fr 1fr;
-        }
+        /* @container (width > 800px) { */
+        /*     grid-template-columns: 1fr 1fr; */
+        /* } */
+        /**/
+        /* @container (width <= 800px) { */
+        /*     grid-template-rows: 1fr 1fr; */
+        /* } */
     }
 
     #descriptors>section,
     #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: 15px;
+        width: 50cqb;
+        flex-grow: 1;
+        min-width: 100px;
     }
 
     #relationship-display {
