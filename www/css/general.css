@@ -102,7 +102,7 @@
         appearance: none;
         border-style: solid;
         vertical-align: bottom;
-
+        border-radius: 3px;
     }
 
     input[type="checkbox"]:checked {

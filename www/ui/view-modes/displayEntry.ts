@@ -1169,7 +1169,17 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
             const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
             parentIdInput.value = String(item.ItemId)
-            newEntryDialog.showPopover()
+            newEntryDialog.showModal()
+        })
+    }
+
+    let newCopyButton = root.getElementById("new-copy")
+    if (newCopyButton) {
+        newCopyButton.addEventListener("click", e => {
+            const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
+            const parentIdInput = newEntryDialog.querySelector(`[name="copyOf"]`) as HTMLInputElement
+            parentIdInput.value = String(item.ItemId)
+            newEntryDialog.showModal()
         })
     }
 

@@ -219,7 +219,7 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let artStyle = 0
 
-    const styles = ['is-anime', 'is-cartoon', 'is-handrawn', 'is-digital', 'is-cgi', 'is-live-action']
+    const styles = ['is-anime-art', 'is-cartoon', 'is-handrawn', 'is-digital-art', 'is-cgi', 'is-live-action']
     for (let i = 0; i < styles.length; i++) {
         let style = styles[i]
         if (data.get(style)) {
@@ -296,9 +296,9 @@ newItemForm.onsubmit = function() {
     newEntryUI(newItemForm)
 }
 
-async function fillItemListingWithSearch(search: string) {
+async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
     let results = await api_queryV3(search, getUidUI())
-    fillItemListing(Object.fromEntries(
+    return fillItemListing(Object.fromEntries(
         results.map(v => [
             String(v.ItemId),
             new items_Entry(
@@ -310,7 +310,7 @@ async function fillItemListingWithSearch(search: string) {
     ))
 }
 
-function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
+function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>): HTMLDivElement {
     const itemsFillDiv = document.getElementById("put-items-to-select") as HTMLDivElement
     itemsFillDiv.innerHTML = ""
 
@@ -361,16 +361,20 @@ function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>) {
 
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectExistingItem()
-    console.log(item)
+    const popover = document.getElementById("items-listing") as HTMLDialogElement
+    console.log(popover.returnValue)
     if (item === null) {
         input.value = "0"
         return
     }
-    input.value = String(item)
+    input.value = popover.returnValue
 }
 
 async function selectExistingItem(): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
+
+    let f = document.getElementById("items-listing-search") as HTMLFormElement
+    let query = f.querySelector('[name="items-listing-search"]') as HTMLInputElement
 
     let cancel = new items_Entry(genericInfo(0n))
     let cpy = { ...globalsNewUi.entries }
@@ -381,17 +385,23 @@ async function selectExistingItem(): Promise<null | bigint> {
     popover.showModal()
 
     return await new Promise((res, rej) => {
-        for (let fig of container.querySelectorAll("figure")) {
-            const id = fig.getAttribute("data-item-id")
-            fig.onclick = () => {
-                popover.close()
-                res(BigInt(id as string))
-            }
+        function registerFigClickEvents(container: HTMLElement) {
+                for (let fig of container.querySelectorAll("figure")) {
+                    const id = fig.getAttribute("data-item-id")
+                    fig.onclick = () => {
+                        popover.close(String(id))
+                        res(BigInt(id as string))
+                    }
+                }
         }
+        f.onsubmit = function() {
+            fillItemListingWithSearch(query.value).then(registerFigClickEvents)
+        }
+        registerFigClickEvents(container)
 
         setTimeout(() => {
             rej(null)
-            popover.close()
+            popover.close("0")
         }, 60000)
     })
 }
