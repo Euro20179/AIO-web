@@ -924,8 +924,12 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && (viewCount || user.Minutes)) {
-        let minutes = String(user.Minutes / 60
-            || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 60
+        viewCountEl.title = String(user.Minutes
+            || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0)
+            || "unknown") + " minutes"
+
+        let minutes = String(Math.round(user.Minutes / 0.6) / 100
+            || Math.round(Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0) / 0.6) / 100
             || "unknown")
         viewCountEl.setAttribute("data-time-spent", minutes)
         viewCountEl.innerText = String(viewCount)

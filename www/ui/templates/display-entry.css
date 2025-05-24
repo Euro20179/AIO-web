@@ -210,9 +210,6 @@
     #actions {
         justify-content: center;
 
-        /*not sure why the bottom margin has to be double*/
-        margin: 1cap 0 2cap 0;
-
         --gap-size: 20px;
 
         /*There are a couple of flexboxes within here to group thigns together*/

@@ -96,8 +96,9 @@
     </table>
 </dialog>
 <div class="root" id="root">
-    <div class="item-interactions" id="item-interactions">
+    <div class="item-interactions" id="item-interactions" style="margin-right: var(--small-gap);">
         <button class="close" entry-action="close" title="remove item from inspection area">X</button>
+        <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
         <button class="copy-to" entry-action="copyto" title="copy user info to another item">➡</button>
         <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </div>
@@ -105,23 +106,23 @@
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
+        <menu role="menu" aria-label="metadata actions"
+            style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
+            <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
+                title="identify item">ℹ</button>
+            <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
+        </menu>
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
-        <menu role="menu" aria-label="item modifications" style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
-            <div class="grid">
-                <select id="type-selector" entry-action="settype" entry-action-trigger="change">
-                </select>
-                <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍</button>
-                <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
-                    title="identify item">ℹ</button>
-                <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
-            </div>
-            <div class="grid">
-                <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
-                <button class="edit-template" entry-action="edittemplate"
-                    title="edit item's html template">&lt;&gt;</button>
-                <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())" style="height: fit-content;">✏</button>
-            </div>
+        <menu role="menu" aria-label="item modifications"
+            style="margin: 0; padding: 0; display: grid; grid-template-rows: repeat(2, 1fr); grid-template-columns: repeat(2, 1fr);">
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change">
+            </select>
+            <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
+            <button class="edit-template" entry-action="edittemplate"
+                title="edit item's html template">&lt;&gt;</button>
+            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())"
+                style="height: fit-content;">✏</button>
         </menu>
         <div class="header-subtitle" id="header-subtitle">
             <div>
@@ -140,7 +141,6 @@
             <span class="cost" id="cost"></span>
             <figure class="entry-progress">
                 <div class="viewing">
-                    <span id="view-count" class="view-count" entry-action="setviewcount" put-data="ViewCount"></span>
                     <div class="relative">
                         <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
                             value="0"></progress>
@@ -160,9 +160,15 @@
             <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
         </div>
     </hgroup>
-    <div id="misc-info">
-        <div>
-            <menu role="menu" aria-label="status actions" class="actions flex wrap" style="padding: 0;" id="actions">
+    <div id="misc-info" class="flex row wrap j-center">
+        <div class="tables flex column" id="event-table-area" style="flex-grow: 1;">
+            <table class="user-actions" id="user-actions"></table>
+            <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
+                Event</button>
+        </div>
+        <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
+            <div id="view-count" class="view-count center" entry-action="setviewcount" put-data="ViewCount"></div>
+            <menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
                 <div class="flex">
                     <button data-action="Plan" class="action" title="plan">🗓</button>
                     <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
@@ -182,11 +188,6 @@
                     </select>
                 </div>
             </menu>
-            <div class="tables flex column" id="event-table-area">
-                <table class="user-actions" id="user-actions"></table>
-                <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
-                    Event</button>
-            </div>
         </div>
     </div>
 
