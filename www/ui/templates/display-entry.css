@@ -424,7 +424,9 @@
         }
 
         img {
-            width: 10cqi;
+            max-width: 10cqi;
+            /*it's in a flex, the aspect-ratio gets messed up if other images of different heights are here*/
+            height: fit-content;
             cursor: pointer;
         }
 
