@@ -107,7 +107,7 @@
         <input type="file" hidden id="thumbnail-file-upload">
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
-        <menu style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
+        <menu role="menu" aria-label="item modifications" style="margin: 0; padding: 0; display: grid; grid-auto-flow: column;">
             <div class="grid">
                 <select id="type-selector" entry-action="settype" entry-action-trigger="change">
                 </select>
@@ -162,7 +162,7 @@
     </hgroup>
     <div id="misc-info">
         <div>
-            <div class="actions flex wrap" id="actions">
+            <menu role="menu" aria-label="status actions" class="actions flex wrap" style="padding: 0;" id="actions">
                 <div class="flex">
                     <button data-action="Plan" class="action" title="plan">🗓</button>
                     <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
@@ -181,7 +181,7 @@
                         <option value="Dropped">Dropped</option>
                     </select>
                 </div>
-            </div>
+            </menu>
             <div class="tables flex column" id="event-table-area">
                 <table class="user-actions" id="user-actions"></table>
                 <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
