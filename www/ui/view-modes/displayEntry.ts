@@ -989,7 +989,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
                     <!-- this nonsense is so that the title lines up with the events -->
                     <th>
                         <div class="grid column">
-                            <button popovertarget="new-event-form">➕︎</button><span style="text-align: center">Event</span>
+                            <button onclick="openModalUI('new-event-form', this.getRootNode())">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
                     <th>Time</th>
