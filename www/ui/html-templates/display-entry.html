@@ -153,15 +153,6 @@
                 </div>
             </div>
             <span class="cost" id="cost"></span>
-            <figure class="entry-progress">
-                <div class="viewing">
-                    <div class="relative">
-                        <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
-                            value="0"></progress>
-                        <figcaption id="entry-progressbar-position-label"></figcaption>
-                    </div>
-                </div>
-            </figure>
         </div>
     </figure>
     <hgroup>
@@ -182,6 +173,13 @@
         </div>
         <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
             <p id="view-count" class="view-count center" entry-action="setviewcount" put-data="ViewCount"></p>
+            <figure class="entry-progress">
+                <div class="viewing relative">
+                    <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
+                        value="0"></progress>
+                    <figcaption id="entry-progressbar-position-label"></figcaption>
+                </div>
+            </figure>
             <menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
                 <div class="flex">
                     <button data-action="Plan" class="action" title="plan">🗓</button>
