@@ -1022,9 +1022,9 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
                     innerTD += " &lt; "
                 }
                 innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
-            //if there is no exact timestamp, put a ? in the middle of afterts and beforets
+                //if there is no exact timestamp, put a ? in the middle of afterts and beforets
             } else {
-                if(innerTD) {
+                if (innerTD) {
                     innerTD += " &lt; "
                 }
                 innerTD += " ? "

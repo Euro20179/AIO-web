@@ -129,13 +129,11 @@
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
         <menu role="menu" aria-label="item modifications"
-            style="margin: 0; padding: 0; display: grid; grid-template-rows: repeat(2, 1fr); grid-template-columns: repeat(2, 1fr);">
-            <select id="type-selector" entry-action="settype" entry-action-trigger="change">
-            </select>
+            style="margin: 0; padding: 0; display: grid; grid-template-rows: repeat(1, 1fr); grid-template-columns: repeat(3, 1fr);">
+            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
             <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
             <button class="edit-template" entry-action="edittemplate"
                 title="edit item's html template">&lt;&gt;</button>
-            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
         </menu>
         <div class="header-subtitle" id="header-subtitle">
             <div>
@@ -155,7 +153,11 @@
         </div>
     </figure>
     <hgroup>
-        <h2 class="title center" id="main-title"></h2>
+        <div class="flex j-center" style="gap: var(--small-gap);">
+            <h2 class="title center" id="main-title"></h2>
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center">
+            </select>
+        </div>
         <div class="flex column wrap j-center" style="gap: 2ch">
             <h3 class="center official-native-title" id="official-native-title"></h3>
         </div>
@@ -172,7 +174,8 @@
                 Event</button>
         </div>
         <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-            <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount" put-data="ViewCount"></p>
+            <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount"
+                put-data="ViewCount"></p>
             <figure class="entry-progress">
                 <div class="viewing relative">
                     <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"

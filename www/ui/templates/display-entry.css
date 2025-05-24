@@ -324,11 +324,6 @@
     #main-title {
         margin: 0;
 
-        &:not([data-format-name="UNOWNED"])[data-format-name]::after {
-            text-transform: lowercase;
-            content: " (on " attr(data-format-name)")";
-        }
-
         &[data-format-name="UNOWNED"]::after {
             text-transform: lowercase;
             content: " (unowned)";
