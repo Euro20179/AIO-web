@@ -20,7 +20,13 @@ sortBySelector.onchange = function() {
 }
 
 function getUserExtra(user: UserEntry, prop: string) {
-    return JSON.parse(user.Extra).AIOWeb?.[prop] || null
+    try {
+        return JSON.parse(user.Extra).AIOWeb?.[prop] || null
+    }
+    catch(err) {
+        console.error(err)
+        return null
+    }
 }
 
 function setUserExtra(user: UserEntry, prop: string, value: string) {
@@ -264,7 +270,11 @@ async function main() {
         uidSelector.value = urlParams.get("uid") as string
     }
 
-    const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
+    const initialSearch = (
+        urlParams.has("item-id")
+            ? `metadata.ItemId = ${urlParams.get("item-id")}`
+            : urlParams.get("q")
+    )
     const display_item_only = urlParams.has("display")
 
     const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
@@ -277,24 +287,9 @@ async function main() {
     const uid = getUidUI()
     await Promise.all([loadLibraries(), loadInfoEntries()])
 
+
     //must happen synchronously to make item render properly
     await loadUserEvents(uid)
-
-    //do this second because metadata can get really large, and having to wait for it could take a while
-    items_refreshMetadata(uid).then(() => {
-        //clear and rerender sidebar to make thumbnail load when it appears on screen
-        //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
-        clearSidebar()
-
-
-        const data = getSearchDataUI()
-        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() ?? "user-title")
-        items_setResults(newEntries.map(v => v.ItemId))
-        for (let item of globalsNewUi.results) {
-            mode?.refresh?.(item.ItemId)
-            renderSidebarItem(item.info)
-        }
-    })
 
     api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
@@ -319,26 +314,30 @@ async function main() {
         loadSearchUI()
     }
 
-    if (initialSearch) {
-        let formData = getSearchDataUI()
-        formData.set("search-query", initialSearch)
-
-        let filters = parseClientsideSearchFiltering(formData)
-        let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
-        entries = applyClientsideSearchFiltering(entries, filters)
-
-        setResultStat("results", entries.length)
-
-        items_setResults(entries.map(v => v.ItemId))
-
-        if (entries.length === 0) {
-            setError("No results")
-            return
-        }
-        renderSidebar(entries)
+    if (initialSearch || searchInput.value) {
+        ui_search(initialSearch || searchInput.value)
     } else {
-        await loadSearchUI()
+        let entries = Object.values(globalsNewUi.entries).map(v => v.info)
+        sortEntries(entries, sortBySelector.value)
+        items_setResults(entries.map(v => v.ItemId))
+        renderSidebar(entries)
     }
+
+    //do this second because metadata can get really large, and having to wait for it could take a while
+    items_refreshMetadata(uid).then(() => {
+        //clear and rerender sidebar to make thumbnail load when it appears on screen
+        //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
+        clearSidebar()
+
+
+        const data = getSearchDataUI()
+        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() ?? "user-title")
+        items_setResults(newEntries.map(v => v.ItemId))
+        for (let item of globalsNewUi.results) {
+            mode?.refresh?.(item.ItemId)
+            renderSidebarItem(item.info)
+        }
+    })
 
     if (display_item_only) {
         let mainUI = document.getElementById("main-ui")
