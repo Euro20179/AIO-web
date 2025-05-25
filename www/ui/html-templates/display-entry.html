@@ -123,8 +123,8 @@
         <menu role="menu" aria-label="metadata actions"
             style="margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));">
             <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"> </select>
-            <select id="format-selector" title="Format type" entry-action="setformat"
-                entry-action-trigger="change" class="center"></select>
+            <select id="format-selector" title="Format type" entry-action="setformat" entry-action-trigger="change"
+                class="center"></select>
             <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
                 title="identify item">ℹ</button>
             <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
@@ -135,7 +135,7 @@
             style="margin: 0; padding: 0; display: grid; grid-template-rows: repeat(1, 1fr); grid-template-columns: repeat(3, 1fr);">
             <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
             <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
-            <button class="edit-template" entry-action="edittemplate"
+            <button class="edit-template" entry-action="toggle" elem-id="template-editor-container"
                 title="edit item's html template">&lt;&gt;</button>
         </menu>
         <div class="header-subtitle" id="header-subtitle">
@@ -208,7 +208,18 @@
     </div>
 
     <textarea id="style-editor" hidden></textarea>
-    <textarea id="template-editor" hidden></textarea>
+
+    <dialog id="template-editor-container" style="font-size: 1rem;">
+        <h2 style="font-size: revert;" class="center">Template editor</h2>
+        <div class="flex j-center">
+            <button entry-action="save">💾︎</button>
+            <button entry-action="previewtemplate" title="preview the template">👁</button>
+        </div>
+        <textarea id="template-editor" style="width: initial; height: initial;" rows="30" cols="80"></textarea>
+    </dialog>
+    <dialog id="template-preview" style="font-size: 1rem; width: 80vw;"></dialog>
+
+
 
     <div class="descriptors" id="descriptors">
         <section>

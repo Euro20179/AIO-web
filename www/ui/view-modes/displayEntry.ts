@@ -1068,7 +1068,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     }
 }
 
-function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems) {
+function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string) {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
@@ -1077,8 +1077,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     let user = findUserEntryById(itemId) as UserEntry
 
-    let template;
-    if (user && (template = getUserExtra(user, "template")?.trim())) {
+    if (template || (user && (template = getUserExtra(user, "template")?.trim()))) {
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }
 
@@ -1503,6 +1502,21 @@ const de_actions = {
     save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
     close: displayEntryAction(item => deselectItem(item)),
     copythis: displayEntryAction(item => copyThis(item)),
+    toggle: displayEntryAction((item, root, elem) => {
+        let id = elem.getAttribute("elem-id")
+        if (!id) return
+        let toShow = root.getElementById(id)
+        if (!toShow) return
+        if (toShow instanceof HTMLDialogElement) {
+            if (toShow.open) {
+                toShow.close()
+            } else {
+                toShow.showModal()
+            }
+        } else {
+            toShow.hidden = !toShow.hidden
+        }
+    }),
     setformat: displayEntryAction((item, _, target) => {
         if (!("value" in target)) return
         api_listFormats().then(formats => {
@@ -1666,17 +1680,32 @@ const de_actions = {
     edittemplate: displayEntryAction((item, root, elem) => {
         const templEditor = root.getElementById("template-editor")
         if (!templEditor) return
+
         templEditor.hidden = !templEditor.hidden
         let to: number | null = null
         templEditor.onchange = function() {
             if (to) clearTimeout(to)
             to = setTimeout(() => {
+                if (!confirm("Save template?")) return
+
                 de_actions["save"](elem)
                 alert("saved template")
-            }, 3000)
+            }, 10000)
         }
     }),
-    copyto: displayEntryAction(async(item) => {
+    previewtemplate: displayEntryAction((item, root) => {
+        const templEditor = root.getElementById("template-editor")
+        if (!templEditor || !(templEditor instanceof HTMLTextAreaElement)) return
+
+        const templatePreview = root.getElementById("template-preview")
+        if (!templatePreview || !(templatePreview instanceof HTMLElement)) return
+        templatePreview.innerHTML = ""
+        renderDisplayItem(item.ItemId, templatePreview, templEditor.value)
+        if (templatePreview instanceof HTMLDialogElement) {
+            templatePreview.showModal()
+        }
+    }),
+    copyto: displayEntryAction(async (item) => {
         let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
         if (id === null) return
         let idInt = BigInt(id)
@@ -1685,7 +1714,7 @@ const de_actions = {
             .then(res => res?.text())
             .then(console.log)
     }),
-    setviewcount: displayEntryAction(async(item) => {
+    setviewcount: displayEntryAction(async (item) => {
         let count = await promptNumber("New view count", 'Not a number, view count')
         if (count === null) return
 
