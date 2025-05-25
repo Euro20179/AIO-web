@@ -1681,16 +1681,6 @@ const de_actions = {
         if (!templEditor) return
 
         templEditor.hidden = !templEditor.hidden
-        let to: number | null = null
-        templEditor.onchange = function() {
-            if (to) clearTimeout(to)
-            to = setTimeout(() => {
-                if (!confirm("Save template?")) return
-
-                de_actions["save"](elem)
-                alert("saved template")
-            }, 10000)
-        }
     }),
     previewtemplate: displayEntryAction(function(item, root) {
         const templEditor = root.getElementById("template-editor")
