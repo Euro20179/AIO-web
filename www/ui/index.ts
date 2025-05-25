@@ -266,7 +266,11 @@ async function main() {
         }
     })
 
-    const initialSearch = urlParams.has("item-id") ? `metadata.ItemId = ${urlParams.get("item-id")}` : urlParams.get("q")
+    const initialSearch =
+        (urlParams.has("item-id")
+            ? `metadata.ItemId = ${urlParams.get("item-id")}`
+            : urlParams.get("q")
+        ) || "@planned"
     const display_item_only = urlParams.has("display")
 
     const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
@@ -321,26 +325,7 @@ async function main() {
         loadSearchUI()
     }
 
-    if (initialSearch) {
-        let formData = getSearchDataUI()
-        formData.set("search-query", initialSearch)
-
-        let filters = parseClientsideSearchFiltering(formData)
-        let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
-        entries = applyClientsideSearchFiltering(entries, filters)
-
-        setResultStat("results", entries.length)
-
-        items_setResults(entries.map(v => v.ItemId))
-
-        if (entries.length === 0) {
-            setError("No results")
-            return
-        }
-        renderSidebar(entries)
-    } else {
-        await loadSearchUI()
-    }
+    ui_search(initialSearch)
 
     if (display_item_only) {
         let mainUI = document.getElementById("main-ui")
