@@ -241,30 +241,28 @@ async function main() {
 
     fillFormatSelectionUI()
 
-    api_listAccounts().then(accounts => {
-        for (let acc of accounts) {
-            const opt = document.createElement("option")
-            const [id, name] = acc.split(":")
+    for (let acc of await api_listAccounts()) {
+        const opt = document.createElement("option")
+        const [id, name] = acc.split(":")
 
-            ACCOUNTS[Number(id)] = name
+        ACCOUNTS[Number(id)] = name
 
-            opt.value = id
-            opt.innerText = name
-            uidSelector.append(opt)
+        opt.value = id
+        opt.innerText = name
+        uidSelector.append(opt)
+    }
+
+    if (urlParams.has("uname")) {
+        let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
+
+        if (!uid) {
+            setError(`username: ${urlParams.get("uname")} does not exist`)
+            return
         }
-
-        if (urlParams.has("uname")) {
-            let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
-
-            if (!uid) {
-                setError(`username: ${urlParams.get("uname")} does not exist`)
-                return
-            }
-            uidSelector.value = String(uid)
-        } else if (urlParams.has("uid")) {
-            uidSelector.value = urlParams.get("uid") as string
-        }
-    })
+        uidSelector.value = String(uid)
+    } else if (urlParams.has("uid")) {
+        uidSelector.value = urlParams.get("uid") as string
+    }
 
     const initialSearch =
         (urlParams.has("item-id")
