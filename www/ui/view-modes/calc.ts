@@ -26,11 +26,16 @@ const modeCalc: DisplayMode = {
         }
     },
 
-    refresh(id) {
-        const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
-        if (!el) return
-        refreshCalcItem(findInfoEntryById(id), el)
-    },
+    //PROBLEM: if something within the user's code causes calc to get updated
+    //an infinite cycle will occure because
+    //run user's code -> updateInfo -> calc updates -> run user's code
+    //SOLUTION:
+    //remove refresh
+    // refresh(id) {
+    //     const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
+    //     if (!el) return
+    //     refreshCalcItem(findInfoEntryById(id), el)
+    // },
 
     *_getValidEntries() {
         const selected = Object.groupBy(globalsNewUi.selectedEntries, item => String(item.ItemId))
@@ -93,9 +98,6 @@ function updateExpressionOutput(item: InfoEntry) {
 
     let val = new Str(`${meta?.Description || ""}<br>${meta?.Rating || 0}`)
     if (expr) {
-        //FIXME: if something within the user's code causes calc to get updated
-        //an infinite cycle will occure because
-        //run user's code -> updateInfo -> calc updates -> run user's code
         val = parseExpression(expr, symbols)
     }
     return val
