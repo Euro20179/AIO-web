@@ -186,7 +186,7 @@ async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
     }
 
     const lines = text.split("\n").filter(Boolean)
-    return [...api_deserializeJsonl(lines)]
+    return [...api_deserializeJsonl<T>(lines)]
 }
 
 async function api_copyUserInfo(oldid: bigint, newid: bigint) {
@@ -232,7 +232,7 @@ async function api_queryV3(searchString: string, uid: number): Promise<InfoEntry
     }
 
     try {
-        return [...api_deserializeJsonl(itemsText.split("\n").filter(Boolean))]
+        return [...api_deserializeJsonl<InfoEntry>(itemsText.split("\n").filter(Boolean))]
     } catch (err) {
         console.error(err)
     }

@@ -98,7 +98,7 @@ class items_Entry {
     events: UserEvent[]
 
     constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
-        this.info = typeof info === 'bigint' ? genericInfo(info) : info
+        this.info = typeof info === 'bigint' ? genericInfo(info, getUidUI()) : info
         this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId)
         this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId)
         this.events = events || []
@@ -143,8 +143,9 @@ function findInfoEntryById(id: bigint): InfoEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].info
 }
-function genericInfo(itemId: bigint): InfoEntry {
+function genericInfo(itemId: bigint, uid: number): InfoEntry {
     return {
+        Uid: uid,
         ItemId: itemId,
         Collection: "",
         Format: 0,

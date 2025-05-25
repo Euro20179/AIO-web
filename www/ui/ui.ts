@@ -341,7 +341,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
 
     if (addCancel) {
-        entries["0"] = new items_Entry(genericInfo(0n))
+        entries["0"] = new items_Entry(genericInfo(0n, 0))
         entries["0"].info.En_Title = "CANCEL SELECTION"
     }
 

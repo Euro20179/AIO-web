@@ -318,7 +318,7 @@ async function main() {
         ui_search(initialSearch || searchInput.value)
     } else {
         let entries = Object.values(globalsNewUi.entries).map(v => v.info)
-        sortEntries(entries, sortBySelector.value)
+        entries = sortEntries(entries, sortBySelector.value || "user-title")
         items_setResults(entries.map(v => v.ItemId))
         renderSidebar(entries)
     }
