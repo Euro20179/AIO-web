@@ -53,7 +53,7 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
     pEl.showModal()
     return await new Promise((res, rej) => {
         pEl.onclose = () => {
-            res(pEl.returnValue ?? null)
+            res(pEl.returnValue ?? _default ?? null)
         }
         close.onclick = () => {
             pEl.close(undefined)
