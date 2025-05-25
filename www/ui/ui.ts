@@ -375,11 +375,21 @@ async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     input.value = popover.returnValue
 }
 
-async function selectExistingItem(container: HTMLDivElement | null = null): Promise<null | bigint> {
+type SelectItemOptions = Partial<{
+    container: HTMLDivElement | null,
+    onsearch: (query: string) => Promise<HTMLDivElement>
+}>
+async function selectExistingItem(options?: SelectItemOptions): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
 
     let f = document.getElementById("items-listing-search") as HTMLFormElement
     let query = f.querySelector('[name="items-listing-search"]') as HTMLInputElement
+
+    let { container, onsearch } = options || {}
+
+    if(!onsearch) {
+        onsearch = fillItemListingWithSearch
+    }
 
     if (!container) {
         let cpy = { ...globalsNewUi.entries }
@@ -399,7 +409,7 @@ async function selectExistingItem(container: HTMLDivElement | null = null): Prom
             }
         }
         f.onsubmit = function() {
-            fillItemListingWithSearch(query.value).then(registerFigClickEvents)
+            onsearch(query.value).then(registerFigClickEvents)
         }
         registerFigClickEvents(container)
 

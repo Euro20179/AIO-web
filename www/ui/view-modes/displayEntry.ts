@@ -81,7 +81,18 @@ async function titleIdentification(provider: string, search: string, selectionEl
 
     let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
     const container = fillItemListing(obj)
-    let item = await selectExistingItem(container)
+    let item = await selectExistingItem({
+        container,
+        async onsearch(query) {
+            let res = await api_identify(query, provider)
+            if (!res) return document.createElement("div")
+            let text = await res.text()
+            let [_, rest] = text.split("\x02")
+            let items = rest.split("\n").filter(Boolean).map(v => JSON.parse(v))
+            let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+            return fillItemListing(obj)
+        },
+    })
     return item ? String(item) : null
 }
 
@@ -844,7 +855,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
-    if(getUidUI() === 0)
+    if (getUidUI() === 0)
         displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid])
 
 
@@ -929,7 +940,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         viewCountEl.title = String(mins) + " minutes"
 
         let minutesRounded = String(Math.round(mins / 0.6) / 100 || "unknown")
-        if(mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
+        if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
             user.Minutes = mins
             api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
         }
