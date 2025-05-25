@@ -298,7 +298,7 @@ newItemForm.onsubmit = function() {
 
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
     let results = await api_queryV3(search, getUidUI())
-    return fillItemListing(Object.fromEntries(
+    return fillItemListingUI(Object.fromEntries(
         results.map(v => [
             String(v.ItemId),
             new items_Entry(
@@ -310,7 +310,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
     ))
 }
 
-function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
+function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
     const itemsFillDiv = document.getElementById("put-items-to-select") as HTMLDivElement
     itemsFillDiv.innerHTML = ""
 
@@ -365,7 +365,7 @@ function fillItemListing(entries: Record<string, MetadataEntry | items_Entry>, a
 }
 
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
-    let item = await selectExistingItem()
+    let item = await selectItemUI()
     const popover = document.getElementById("items-listing") as HTMLDialogElement
     console.log(popover.returnValue)
     if (item === null) {
@@ -379,7 +379,11 @@ type SelectItemOptions = Partial<{
     container: HTMLDivElement | null,
     onsearch: (query: string) => Promise<HTMLDivElement>
 }>
-async function selectExistingItem(options?: SelectItemOptions): Promise<null | bigint> {
+
+/**
+ * @description lets the user select an item, be sure to use fillItemListingUI first
+*/
+async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
 
     let f = document.getElementById("items-listing-search") as HTMLFormElement
@@ -393,7 +397,7 @@ async function selectExistingItem(options?: SelectItemOptions): Promise<null | b
 
     if (!container) {
         let cpy = { ...globalsNewUi.entries }
-        container = fillItemListing(cpy, true)
+        container = fillItemListingUI(cpy, true)
     }
 
     popover.showModal()

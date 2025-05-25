@@ -184,7 +184,7 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
 }
 
 async function ui_askitem() {
-    return await selectExistingItem()
+    return await selectItemUI()
 }
 
 async function aio_search(query: string): Promise<InfoEntry[]> {

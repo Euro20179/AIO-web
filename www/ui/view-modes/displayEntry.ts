@@ -80,8 +80,8 @@ async function titleIdentification(provider: string, search: string, selectionEl
     }
 
     let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
-    const container = fillItemListing(obj)
-    let item = await selectExistingItem({
+    const container = fillItemListingUI(obj)
+    let item = await selectItemUI({
         container,
         async onsearch(query) {
             let res = await api_identify(query, provider)
@@ -90,7 +90,7 @@ async function titleIdentification(provider: string, search: string, selectionEl
             let [_, rest] = text.split("\x02")
             let items = rest.split("\n").filter(Boolean).map(v => JSON.parse(v))
             let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
-            return fillItemListing(obj)
+            return fillItemListingUI(obj)
         },
     })
     return item ? String(item) : null
@@ -1383,7 +1383,7 @@ function _fetchLocationBackup(itemId: bigint) {
 
         const metaRecord = Object.fromEntries(metaInfo.map(v => [v.ItemId, v]))
 
-        const container = fillItemListing(metaRecord)
+        const container = fillItemListingUI(metaRecord)
 
         const figs = container.querySelectorAll("figure")
         for (const fig of figs) {
@@ -1628,7 +1628,7 @@ const de_actions = {
         updateObjectTbl(obj, objectTbl, false)
     }),
     selectnewchild: displayEntryAction(item => {
-        selectExistingItem().then(id => {
+        selectItemUI().then(id => {
             if (!id) {
                 alert("Could not set child")
                 return
