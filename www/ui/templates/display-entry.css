@@ -102,6 +102,8 @@
         height: fit-content;
         container: entry / inline-size;
 
+        background-color: var(--main);
+
         color: var(--text-color);
 
         overflow: auto auto;
