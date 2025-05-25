@@ -115,12 +115,12 @@
 
         background: var(--main);
         border: 1px solid white;
+        padding: 5cap 5ch;
 
-        width: 80vmin;
-        aspect-ratio: 1 / 1;
-        position: fixed;
-
-        container: dialog / size;
+        font-size: 1.2rem;
+        * {
+            font-size: inherit;
+        }
     }
 
     dialog::backdrop {
