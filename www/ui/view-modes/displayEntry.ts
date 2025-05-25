@@ -1692,16 +1692,22 @@ const de_actions = {
             }, 10000)
         }
     }),
-    previewtemplate: displayEntryAction((item, root) => {
+    previewtemplate: displayEntryAction(function(item, root) {
         const templEditor = root.getElementById("template-editor")
         if (!templEditor || !(templEditor instanceof HTMLTextAreaElement)) return
 
-        const templatePreview = root.getElementById("template-preview")
-        if (!templatePreview || !(templatePreview instanceof HTMLElement)) return
-        templatePreview.innerHTML = ""
-        renderDisplayItem(item.ItemId, templatePreview, templEditor.value)
-        if (templatePreview instanceof HTMLDialogElement) {
-            templatePreview.showModal()
+        const preview = document.open(location.toString(), "_blank", "popup=true")
+        if (!preview) return
+
+        preview.onload = () => {
+            preview.document.body.innerHTML = ""
+            preview.document.title = `${item.En_Title} PREVIEW`
+            renderDisplayItem(item.ItemId, preview.document.body, templEditor.value)
+        }
+
+        templEditor.onkeyup = function() {
+            preview.document.body.innerHTML = ""
+            renderDisplayItem(item.ItemId, preview.document.body, templEditor.value)
         }
     }),
     copyto: displayEntryAction(async (item) => {
