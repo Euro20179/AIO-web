@@ -1089,7 +1089,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     parent.append(el)
 
-
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
         currentEditedObj.onchange = function() {

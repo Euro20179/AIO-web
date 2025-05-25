@@ -82,12 +82,6 @@
         }
     }
 
-    #style-editor,
-    #template-editor {
-        widtH: 50cqi;
-        height: 10cap;
-    }
-
     #item-interactions {
         display: grid;
         grid-auto-flow: row;
@@ -107,12 +101,6 @@
         width: 100%;
         height: fit-content;
         container: entry / inline-size;
-        border-right: 1px solid hsl(from var(--secondary) h s 30%);
-
-        @container viewing-area (orientation: portrait) {
-            border-bottom: 1px solid hsl(from var(--secondary) h s 30%);
-            border-right: none;
-        }
 
         color: var(--text-color);
 
