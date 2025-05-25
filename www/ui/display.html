@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link href="/css/general.css" rel="stylesheet">
+</head>
+
+<body>
+    <dialog id="login" popover>
+        <h3 class="center">Login</h3>
+        <form action="javascript:void(0)" class="flex column" style="align-content: center">
+            <input type="text" placeholder="username" name="username">
+            <input type="password" placeholder="password" name="password">
+            <input type="submit" value="login">
+        </form>
+        <p>Please sign in to <span id="login-reason"></span></p>
+    </dialog>
+    <template id="display-entry">
+    </template>
+    <div id="notifications" style="position: absolute;"></div>
+</body>
+<script>
+    function getUserExtra() {
+        return ""
+    }
+    function setUserExtra() {
+    }
+</script>
+<script src="/config.js"></script>
+<script src="/js/items.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/notes-parser.js"></script>
+<script src="/ui/js_api.js"></script>
+<script src="/ui/calculator.js"></script>
+<script src="/ui/components.js"></script>
+<script src="/ui/globals.js"></script>
+<script src="/ui/sidebar.js"></script>
+<script src="/ui/view-modes/displayEntry.js"></script>
+<script src="/ui/ui.js"></script>
+<script>
+    function updateInfo2() {
+    }
+    const urlParams = new URLSearchParams(document.location.search)
+    let id = urlParams.get("item-id")
+    fetch(`${apiPath}/get-all-for-entry?id=${id}&uid=0`).then(async (res) => {
+        let dispRes = await fetch(`/ui/html-templates/display-entry.html`)
+        let templ = await dispRes.text()
+
+        const template = document.getElementById("display-entry")
+        template.innerHTML = templ
+
+        let info, meta, user
+        let events = []
+        let text = (await res.text()).trim()
+        for (let line of api_deserializeJsonl(text)) {
+            if (probablyMetaEntry(line)) {
+                meta = line
+            } else if (probablyUserItem(line)) {
+                user = line
+            } else if (probablyInfoEntry(line)) {
+                info = line
+            } else {
+                events.push(line)
+            }
+        }
+        items_addItem({meta, events, info, user})
+        items_setResults([BigInt(id)])
+        renderDisplayItem(meta.ItemId, document.body)
+        console.log(events)
+    })
+</script>
+
+</html>

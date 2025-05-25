@@ -127,6 +127,7 @@ function sortEntriesUI() {
 
 function getUidUI() {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
+    if(!uidSelector) return 0
     return Number(uidSelector.value)
 }
 
@@ -313,8 +314,10 @@ async function newEntryUI(form: HTMLFormElement) {
     })
 }
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
-newItemForm.onsubmit = function() {
-    newEntryUI(newItemForm)
+if (newItemForm) {
+    newItemForm.onsubmit = function() {
+        newEntryUI(newItemForm)
+    }
 }
 
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
