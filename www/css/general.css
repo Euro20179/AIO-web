@@ -130,6 +130,10 @@
         pointer-events: none;
     }
 
+    mark {
+        background-color: var(--yellow);
+    }
+
     :is(input, select):required:invalid {
         border-color: var(--red);
     }
