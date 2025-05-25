@@ -329,14 +329,12 @@ async function main() {
         //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
         clearSidebar()
 
+        clearItems()
 
         const data = getSearchDataUI()
         let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() ?? "user-title")
         items_setResults(newEntries.map(v => v.ItemId))
-        for (let item of globalsNewUi.results) {
-            mode?.refresh?.(item.ItemId)
-            renderSidebarItem(item.info)
-        }
+        renderSidebar(newEntries)
     })
 
     if (display_item_only) {
