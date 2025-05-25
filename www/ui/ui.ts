@@ -43,6 +43,27 @@ document.addEventListener("keydown", e => {
     }
 })
 
+async function promptUI(html?: string, _default?: string): Promise<string | null> {
+    const pEl = document.getElementById("prompt") as HTMLDialogElement
+    const close = pEl.querySelector("button:first-child") as HTMLButtonElement
+    const root = pEl.querySelector("[root]") as HTMLDivElement
+    const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
+    submission.value = ""
+    root.innerHTML = html || "<p>prompt</p>"
+    pEl.showModal()
+    return await new Promise((res, rej) => {
+        pEl.onclose = () => {
+            res(pEl.returnValue ?? null)
+        }
+        close.onclick = () => {
+            pEl.close(undefined)
+        };
+        (submission.form as HTMLFormElement).onsubmit = () => {
+            pEl.close(submission.value)
+        }
+    })
+}
+
 function openModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
@@ -391,7 +412,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 
     let { container, onsearch } = options || {}
 
-    if(!onsearch) {
+    if (!onsearch) {
         onsearch = fillItemListingWithSearch
     }
 

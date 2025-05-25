@@ -272,29 +272,31 @@ const modeDisplayEntry: DisplayMode = {
 
     putSelectedInCollection() {
         const selected = globalsNewUi.selectedEntries
-        const collectionName = prompt("Id of collection")
-        if (!collectionName) return
+        promptUI("Id of collection").then(collectionName => {
+            if (!collectionName) return
 
-        let waiting = []
-        for (let item of selected) {
-            waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
-        }
-        Promise.all(waiting).then(res => {
-            for (let r of res) {
-                console.log(r?.status)
+            let waiting = []
+            for (let item of selected) {
+                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
             }
+            Promise.all(waiting).then(res => {
+                for (let r of res) {
+                    console.log(r?.status)
+                }
+            })
         })
     },
 
     addTagsToSelected() {
-        const tags = prompt("tags (, seperated)")
-        if (!tags) return
-
-        const tagsList = tags.split(",")
-        for (let item of globalsNewUi.selectedEntries) {
-            api_addEntryTags(item.ItemId, tagsList)
-        }
-        //FIXME: tags do not update immediately
+        promptUI("tags (, seperated)").then(tags => {
+            if (!tags) return
+            const tagsList = tags.split(",")
+            //FIXME: tags do not update immediately
+            for (let item of globalsNewUi.selectedEntries) {
+                item.Tags = item.Tags.concat(tagsList)
+                api_addEntryTags(item.ItemId, tagsList)
+            }
+        })
     },
 
     put(html: string | HTMLElement | ShadowRoot) {
@@ -382,10 +384,11 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
             let queryParams = `?id=${item.ItemId}`
             if (action === "Finish") {
-                let rating = promptNumber("Rating", "Not a number\nRating")
-                if (rating !== null) {
-                    queryParams += `&rating=${rating}`
-                }
+                promptNumber("Rating", "Not a number\nRating").then(rating => {
+                    if (rating !== null) {
+                        queryParams += `&rating=${rating}`
+                    }
+                })
             }
 
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -1243,8 +1246,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     const cost = root.getElementById("cost")
     if (cost) {
-        cost.onclick = function() {
-            const newPrice = promptNumber("New cost", "not a number", parseFloat)
+        cost.onclick = async function() {
+            const newPrice = await promptNumber("New cost", "not a number", parseFloat)
             if (newPrice === null) return
             let item = findInfoEntryById(itemId)
             item.PurchasePrice = newPrice as number
@@ -1264,8 +1267,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     const newTag = root.getElementById("create-tag")
     if (newTag) {
-        newTag.onclick = function() {
-            const name = prompt("Tag name (, seperated)")
+        newTag.onclick = async function() {
+            const name = await promptUI("Tag name (, seperated)")
             if (!name) return
             let names = name.split(",")
             item.Tags = item.Tags?.concat(names) || names
@@ -1614,8 +1617,8 @@ const de_actions = {
             })
         }
     }),
-    newobjectfield: displayEntryAction((item, root) => {
-        const name = prompt("Field name")
+    newobjectfield: displayEntryAction(async (item, root) => {
+        const name = await promptUI("Field name")
         if (!name) return
 
         const strObj = getCurrentObjectInObjEditor(item.ItemId, root) as string
@@ -1673,8 +1676,8 @@ const de_actions = {
             }, 3000)
         }
     }),
-    copyto: displayEntryAction(item => {
-        let id = promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
+    copyto: displayEntryAction(async(item) => {
+        let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
         if (id === null) return
         let idInt = BigInt(id)
 
@@ -1682,8 +1685,8 @@ const de_actions = {
             .then(res => res?.text())
             .then(console.log)
     }),
-    setviewcount: displayEntryAction(item => {
-        let count = promptNumber("New view count", 'Not a number, view count')
+    setviewcount: displayEntryAction(async(item) => {
+        let count = await promptNumber("New view count", 'Not a number, view count')
         if (count === null) return
 
         authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
@@ -1705,7 +1708,7 @@ const de_actions = {
             .catch(console.error)
     }),
     setprogress: displayEntryAction(async (item, root) => {
-        let newEp = prompt("Current position:")
+        let newEp = await promptUI("Current position")
         if (!newEp) return
 
         await api_setPos(item.ItemId, String(newEp))
@@ -1715,13 +1718,13 @@ const de_actions = {
             [String(item.ItemId)]: { user }
         })
     }),
-    setrating: displayEntryAction(item => {
+    setrating: displayEntryAction(async (item) => {
         let user = findUserEntryById(item.ItemId)
         if (!user) {
             alert("Failed to get current rating")
             return
         }
-        let newRating = prompt("New rating")
+        let newRating = await promptUI("New rating")
         if (!newRating || isNaN(Number(newRating))) {
             return
         }

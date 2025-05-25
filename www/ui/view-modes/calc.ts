@@ -25,10 +25,10 @@ const modeCalc: DisplayMode = {
             removecCalcItem(item)
         }
     },
-    
+
     refresh(id) {
         const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
-        if(!el) return
+        if (!el) return
         refreshCalcItem(findInfoEntryById(id), el)
     },
 
@@ -47,28 +47,30 @@ const modeCalc: DisplayMode = {
     },
 
     putSelectedInCollection() {
-        const collectionName = prompt("Id of collection")
-        if (!collectionName) return
+        promptUI("Id of collection").then(collectionName => {
+            if (!collectionName) return
 
-        let waiting = []
-        for (let item of this._getValidEntries()) {
-            waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
-        }
-        Promise.all(waiting).then(res => {
-            for (let r of res) {
-                console.log(r?.status)
+            let waiting = []
+            for (let item of this._getValidEntries()) {
+                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
             }
+            Promise.all(waiting).then(res => {
+                for (let r of res) {
+                    console.log(r?.status)
+                }
+            })
         })
     },
 
     addTagsToSelected() {
-        const tags = prompt("tags (, seperated)")
-        if (!tags) return
+        promptUI("tags (, seperated)").then(tags => {
+            if (!tags) return
+            const tagsList = tags.split(",")
+            for (let item of this._getValidEntries()) {
+                api_addEntryTags(item.ItemId, tagsList)
+            }
+        })
 
-        const tagsList = tags.split(",")
-        for (let item of this._getValidEntries()) {
-            api_addEntryTags(item.ItemId, tagsList)
-        }
     }
 }
 

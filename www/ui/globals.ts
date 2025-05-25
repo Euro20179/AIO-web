@@ -17,10 +17,11 @@ function alert(text: string) {
     setTimeout(el.remove.bind(el), 15000)
 }
 
-function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): number | bigint | null{
-    let n = prompt(text)
+async function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): Promise<number | bigint | null>{
+    let n = await promptUI(text)
     while (n !== null && n !== "" && isNaN(Number(numberConverter(n)))) {
-        n = prompt(textFail)
+        console.log(n)
+        n = await promptUI(textFail)
     }
     if (n === null || n === "") return null
     return numberConverter(n)
