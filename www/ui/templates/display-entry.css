@@ -397,7 +397,6 @@
         height: 100%;
         border: none;
         margin: 0;
-        resize: none;
     }
 
     :is(#descendants-section, #copies-section) div {
