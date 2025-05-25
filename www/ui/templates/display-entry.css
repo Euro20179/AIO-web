@@ -26,6 +26,7 @@
     }
 
     select {
+        /*select is colored wrong in safari*/
         -webkit-appearance: none;
         -moz-appearance: revert;
     }
@@ -33,6 +34,10 @@
     hr {
         border-style: dashed;
         border-color: var(--text-color);
+    }
+
+    article {
+        padding: var(--small-gap);
     }
 
     :host(display-entry) {
