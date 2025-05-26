@@ -19,9 +19,13 @@ sortBySelector.onchange = function() {
     sortEntriesUI()
 }
 
+function getAIOWeb(user: UserEntry) {
+    return JSON.parse(user.Extra).AIOWeb || {}
+}
+
 function getUserExtra(user: UserEntry, prop: string) {
     try {
-        return JSON.parse(user.Extra).AIOWeb?.[prop] || null
+        return getAIOWeb(user)[prop] || null
     }
     catch(err) {
         console.error(err)

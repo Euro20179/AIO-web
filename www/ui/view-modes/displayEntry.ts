@@ -590,6 +590,8 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
             return JSON.parse(meta.Datapoints) || {}
         case "meta-media-dependant":
             return JSON.parse(meta.MediaDependant) || {}
+        case "aio-web":
+            return getAIOWeb(user)
         case "user":
             return user || {}
         case "meta":
@@ -1103,6 +1105,9 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                 case "meta-media-dependant":
                     updateObjectTbl(JSON.parse(meta.MediaDependant), objectTbl)
                     break
+                case "aio-web":
+                    updateObjectTbl(getAIOWeb(user), objectTbl)
+                    break
                 case "user":
                     updateObjectTbl(user, objectTbl)
                     break
@@ -1580,6 +1585,10 @@ const de_actions = {
                 keyName = "MediaDependant"
                 endpoint = "metadata/"
                 break
+            case "aio-web":
+                keyName = "_AIOWEB"
+                endpoint = "engagement/"
+                break
             default:
                 alert(`${editedObject} saving is not implemented yet`)
                 return
@@ -1606,8 +1615,18 @@ const de_actions = {
             }
         }
 
-        if (keyName)
+        if (keyName && keyName !== "_AIOWEB")
             into[keyName] = JSON.stringify(newObj)
+        else if (keyName === "_AIOWEB") {
+            let user = findUserEntryById(item.ItemId)
+            let extra = JSON.parse(user.Extra || "{}")
+            extra["AIOWeb"] = newObj
+            user.Extra = JSON.stringify(extra)
+            into = user
+            updateInfo2({
+                [String(item.ItemId)]: { user }
+            })
+        }
         else into = newObj
 
         if (editedObject === "entry") {
@@ -1627,7 +1646,7 @@ const de_actions = {
             updateInfo2({
                 [strId]: { info: into as InfoEntry }
             })
-        } else {
+        } else if (probablyMetaEntry(into)) {
             updateInfo2({
                 [strId]: { meta: into as MetadataEntry }
             })
