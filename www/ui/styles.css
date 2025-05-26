@@ -231,11 +231,16 @@
         div:has(> [name="sort-by"]) {
             flex-shrink: 2;
             grid-template-rows: 1fr 1fr;
-            width: 20cqi;
+            width: min(20cqi, 100px);
+
+            @container (width > 900px) {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr;
+                width: 20cqi;
+            }
         }
 
         [name="sort-by"] {
-            max-width: 200px;
             flex-grow: 0.3;
             width: 100%;
         }
@@ -281,7 +286,6 @@
     #result-stats::before {
         content: "Stats";
         border-right: 1px dashed white;
-        border-left: 1px dashed white;
         text-align: center;
 
         padding: 0 10px;
