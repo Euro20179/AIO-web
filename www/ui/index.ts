@@ -293,7 +293,6 @@ async function main() {
 
 
     //must happen synchronously to make item render properly
-    await loadUserEvents(uid)
 
     api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
@@ -327,8 +326,8 @@ async function main() {
         renderSidebar(entries)
     }
 
-    //do this second because metadata can get really large, and having to wait for it could take a while
-    items_refreshMetadata(uid).then(() => {
+    //do this second because metadata, and events can get really large, and having to wait for it could take a while
+    Promise.all([items_refreshMetadata(uid), loadUserEvents(uid)]).then(() => {
         //clear and rerender sidebar to make thumbnail load when it appears on screen
         //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
         clearSidebar()
