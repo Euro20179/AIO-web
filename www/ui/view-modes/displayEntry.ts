@@ -578,7 +578,7 @@ function updateObjectTbl(obj: object, objectTbl: HTMLTableElement, clear = true)
     }
 }
 
-function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
+function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
     const editedObject = (el.getElementById("current-edited-object") as HTMLSelectElement).value
     const user = findUserEntryById(itemId) as UserEntry
     const meta = findMetadataById(itemId) as MetadataEntry
@@ -597,7 +597,7 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot) {
         case "entry":
             return findInfoEntryById(itemId) || {}
         default:
-            return "{}"
+            return {}
     }
 }
 
@@ -1568,14 +1568,17 @@ const de_actions = {
             case "user-extra":
                 into = findUserEntryById(item.ItemId) as UserEntry
                 keyName = "Extra"
+                endpoint = "engagement/"
                 break
             case "meta-datapoints":
                 into = findMetadataById(item.ItemId) as MetadataEntry
                 keyName = "Datapoints"
+                endpoint = "metadata/"
                 break
             case "meta-media-dependant":
                 into = findMetadataById(item.ItemId) as MetadataEntry
                 keyName = "MediaDependant"
+                endpoint = "metadata/"
                 break
             default:
                 alert(`${editedObject} saving is not implemented yet`)
@@ -1634,8 +1637,7 @@ const de_actions = {
         const name = await promptUI("Field name")
         if (!name) return
 
-        const strObj = getCurrentObjectInObjEditor(item.ItemId, root) as string
-        const obj = JSON.parse(strObj)
+        const obj: any = getCurrentObjectInObjEditor(item.ItemId, root)
         if (name in obj) return
 
         obj[name] = ""
