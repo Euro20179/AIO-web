@@ -72,13 +72,16 @@
         }
     }
 
+    #sidebar-form {
+        position: relative;
+    }
+
     #help-link {
         text-align: center;
         display: block;
         align-content: center;
-        padding: 0 1ch;
-        margin: 0 1ch;
         cursor: pointer;
+        margin: 0 1ch;
     }
 
     #gallery-items img {
@@ -208,6 +211,12 @@
                 "stats stats view-toggle";
         }
 
+        @container (width < 600px) {
+            [type="submit"] {
+                display: none;
+            }
+        }
+
 
         :not([multiple]) {
             vertical-align: top;
@@ -215,16 +224,24 @@
 
 
         [name="search-query"] {
+            width: 10cqi;
             flex-grow: 1;
+        }
+
+        div:has(> [name="sort-by"]) {
+            flex-shrink: 2;
+            grid-template-rows: 1fr 1fr;
+            width: 20cqi;
         }
 
         [name="sort-by"] {
             max-width: 200px;
             flex-grow: 0.3;
+            width: 100%;
         }
 
         [name="uid"] {
-            width: 15%;
+            width: 100%;
         }
 
         [data-stat-name="totalCost"]::before {
@@ -236,10 +253,17 @@
         }
     }
 
-    #result-stats {
-        @container (width < 115ch) {
-            justify-self: center;
+    div:has(> #result-stats) {
+        display: flex;
+        overflow: auto;
+        width: max(100px, 30cqi);
+
+        @container (width < 800px) {
+            display: none;
         }
+    }
+
+    #result-stats {
 
         display: flex;
         gap: 10px;

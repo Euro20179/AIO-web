@@ -125,26 +125,29 @@
                 <form action="javascript:loadSearchUI()" id="sidebar-form">
                     <a href="/usage#searching" id="help-link">?</a>
                     <input type="text" name="search-query" placeholder="search query">
-                    <select name="sort-by" title="sort by" onchange="sortEntriesUI()">
-                        <option value="">no sort</option>
-                        <option value="user-title">User Title</option>
-                        <option value="native-title">Native Title</option>
-                        <option value="auto-title">Auto Title</option>
-                        <option value="rating">User Rating</option>
-                        <option value="general-rating">General rating</option>
-                        <option value="rating-disparity"
-                            title="How different your rating is from the general consensous">
-                            Rating disparity</option>
-                        <option value="release-year">Release year</option>
-                        <option value="cost">Cost</option>
-                        <option value="added">Added</option>
-                    </select>
-                    <select name="uid">
-                        <option value="0">ALL</option>
-                    </select>
-                    <button type="submit">sort'n'search</button>
+                    <div class="grid">
+                        <select name="sort-by" title="sort by" onchange="sortEntriesUI()">
+                            <option value="">no sort</option>
+                            <option value="user-title">User Title</option>
+                            <option value="native-title">Native Title</option>
+                            <option value="auto-title">Auto Title</option>
+                            <option value="rating">User Rating</option>
+                            <option value="general-rating">General rating</option>
+                            <option value="rating-disparity"
+                                title="How different your rating is from the general consensous">
+                                Rating disparity</option>
+                            <option value="release-year">Release year</option>
+                            <option value="cost">Cost</option>
+                            <option value="added">Added</option>
+                        </select>
+                        <select name="uid">
+                            <option value="0">ALL</option>
+                        </select>
+                    </div>
+                    <button type="submit">🔎</button>
                 </form>
-                <div style="display: flex; overflow: auto; width: max(100px, 30cqi);">
+                <!--used for proper overflow-->
+                <div>
                     <div class="result-stats" id="result-stats">
                         <entries-statistic data-stat-name="results" class="stat"></entries-statistic>
                         <entries-statistic data-stat-name="totalCost" class="stat"></entries-statistic>
@@ -201,7 +204,8 @@
                 </div>
 
                 <div id="calc-output" class="overflow">
-                    <p class="center"><mark>WARNING</mark>, if you are planning on using functions that modify items, this mode is rather dangerous, prefer scripting mode instead</p>
+                    <p class="center"><mark>WARNING</mark>, if you are planning on using functions that modify items,
+                        this mode is rather dangerous, prefer scripting mode instead</p>
                     <div class="flex row">
                         <textarea id="calc-expression" style="flex-grow: 1" placeholer="expression"></textarea>
                         <button onclick="sortCalcDisplay()">Sort</button>
