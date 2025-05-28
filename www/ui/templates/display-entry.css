@@ -165,7 +165,7 @@
         counter-reset: event-no;
 
         .grid {
-            grid-template-columns: 20% 1fr;
+            grid-template-columns: 20% 20% 1fr;
         }
 
         :is(td, th) {
