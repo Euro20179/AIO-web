@@ -838,6 +838,8 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
                     .catch(console.error)
             }
 
+            outer.append(del)
+
             const btn = document.createElement("button")
             btn.classList.add("tag")
             btn.innerText = tag
@@ -998,7 +1000,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
                     <!-- this nonsense is so that the title lines up with the events -->
                     <th>
                         <div class="grid column">
-                            <button onclick="de_actions['newevent'](this)">➕︎</button><span style="text-align: center">Event</span>
+                            <button onclick="openModalUI('new-event-form', this.getRootNode())">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
                     <th>Time</th>
@@ -1054,7 +1056,6 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
                         <td>
                             <div class="grid column">
                                 <button class="delete" onclick="deleteEvent(this, ${ts}, ${afterts}, ${beforets})">🗑</button>
-                                <button onclick="editEvent(this, ${ts}, ${afterts}, ${beforets}, '${name}')">✏︎</button>
                                 ${name}
                             </div>
                         </td>
@@ -1787,13 +1788,6 @@ const de_actions = {
             .catch(console.error)
         api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
     }),
-    newevent: displayEntryAction((item, root) => {
-        let newEventForm = root.querySelector("#new-event-form form") as HTMLFormElement
-        for(let input of newEventForm.querySelectorAll("input")) {
-            input.value = ""
-        }
-        openModalUI("new-event-form", root)
-    }),
 } as const
 
 //backwards compat {{{
@@ -1817,34 +1811,4 @@ function deleteEvent(el: HTMLElement, ts: number, after: number, before: number)
         )
         .catch(alert)
 
-}
-
-function editEvent(el: HTMLElement, ts: number, after: number, before: number, name: string) {
-    let newEventForm = (el.getRootNode() as ShadowRoot).querySelector("#new-event-form form") as HTMLFormElement
-    let afterISO = new Date(after).toISOString()
-    let beforeISO = new Date(before).toISOString()
-    let tsISO = new Date(ts).toISOString();
-
-    (newEventForm.querySelector("[name=\"name\"]") as HTMLInputElement).value = name;
-    (newEventForm.querySelector("[name=\"before\"]") as HTMLInputElement).value = before != 0 ? beforeISO.slice(0, -1) : "";
-    (newEventForm.querySelector("[name=\"after\"]") as HTMLInputElement).value = after != 0 ? afterISO.slice(0, -1) : "";
-    (newEventForm.querySelector("[name=\"timestamp\"]") as HTMLInputElement).value = ts != 0 ? tsISO.slice(0, -1) : "";
-
-    function onsubmit() {
-        const data = new FormData(newEventForm)
-        deleteEvent(el, ts, after, before)
-        const itemId = getIdFromDisplayElement(el)
-        api_registerEvent(itemId,
-            String(data.get("name")),
-            new Date(String(data.get("timestamp"))).getTime(),
-            new Date(String(data.get("after"))).getTime(),
-            Intl.DateTimeFormat().resolvedOptions().timeZone,
-            new Date(String(data.get("before"))).getTime()
-        )
-        newEventForm.removeEventListener("submit", onsubmit)
-    }
-
-    newEventForm.addEventListener("submit", onsubmit)
-
-    openModalUI("new-event-form", el.getRootNode())
 }
