@@ -4,7 +4,11 @@ const ACCOUNTS: Record<number, string> = {}
 
 function setError(text: string) {
     const errorOut = document.getElementById("error")
-    errorOut?.setAttribute("data-error", text)
+    if (text == "") {
+        errorOut?.removeAttribute("data-error")
+    } else {
+        errorOut?.setAttribute("data-error", text)
+    }
 }
 
 function alert(text: string) {
@@ -17,7 +21,7 @@ function alert(text: string) {
     setTimeout(el.remove.bind(el), 15000)
 }
 
-async function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): Promise<number | bigint | null>{
+async function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): Promise<number | bigint | null> {
     let n = await promptUI(text)
     while (n !== null && n !== "" && isNaN(Number(numberConverter(n)))) {
         console.log(n)

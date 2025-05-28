@@ -27,7 +27,7 @@ function getUserExtra(user: UserEntry, prop: string) {
     try {
         return getAIOWeb(user)[prop] || null
     }
-    catch(err) {
+    catch (err) {
         console.error(err)
         return null
     }
@@ -65,7 +65,13 @@ async function loadLibraries() {
 }
 
 async function loadInfoEntries() {
-    await items_loadEntries(getUidUI(), false)
+    setError("Loading items")
+    await items_refreshInfoEntries(getUidUI())
+    setError("")
+
+    items_refreshUserEntries(getUidUI()).then(() => {
+        updateInfo2(globalsNewUi.entries)
+    })
 
     return globalsNewUi.entries
 }

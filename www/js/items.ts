@@ -120,7 +120,7 @@ function items_setResults(items: bigint[]) {
     }
 }
 
-function items_addItem(item: {meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry}) {
+function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry }) {
     globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
 
@@ -209,6 +209,19 @@ async function items_refreshUserEntries(uid: number) {
     }
 }
 
+async function items_refreshInfoEntries(uid: number) {
+    let items = await api_loadList<InfoEntry>("list-entries", uid)
+    for (let item of items) {
+        let stashed = globalsNewUi.entries[String(item.ItemId)]
+        if (!stashed) {
+            globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item)
+        }
+        else {
+            stashed.info = item
+        }
+    }
+}
+
 async function items_loadEntries(uid: number, loadMeta: boolean = true) {
     let loading: (Promise<InfoEntry[]> | Promise<UserEntry[]> | Promise<MetadataEntry[]>)[] = [
         api_loadList<InfoEntry>("list-entries", uid),
@@ -294,7 +307,7 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 if (!aUInfo || !bUInfo) return 0
                 return bUInfo?.UserRating - aUInfo?.UserRating
             })
-        } else if(sortBy == "added") {
+        } else if (sortBy == "added") {
             entries = entries.sort((a, b) => {
                 let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
                 let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
@@ -335,11 +348,11 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 let bm = findMetadataById(b.ItemId)
                 return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
             })
-        } else if(sortBy === "user-title") {
+        } else if (sortBy === "user-title") {
             entries = entries.sort((a, b) => {
                 return a.En_Title < b.En_Title ? 0 : 1
             })
-        } else if(sortBy === "auto-title") {
+        } else if (sortBy === "auto-title") {
             entries = entries.sort((a, b) => {
                 let am = findMetadataById(a.ItemId)
                 let bm = findMetadataById(b.ItemId)
@@ -347,16 +360,16 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 let bt = bm.Title || bm.Native_Title || b.En_Title || b.Native_Title
                 return at < bt ? 0 : 1
             })
-        } else if(sortBy === "native-title") {
+        } else if (sortBy === "native-title") {
             entries = entries.sort((a, b) => {
                 let am = findMetadataById(a.ItemId)
                 let bm = findMetadataById(b.ItemId)
                 let at = am.Native_Title || a.Native_Title
                 let bt = bm.Native_Title || b.Native_Title
-                if(at === "") {
+                if (at === "") {
                     return bt ? 1 : 0
                 }
-                if(bt === "") {
+                if (bt === "") {
                     return at ? 0 : 1
                 }
                 return at < bt ? 0 : 1
@@ -431,10 +444,10 @@ async function nameToFormat(name: string): Promise<number> {
 function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean) {
     const item = findInfoEntryById(itemId)
     let total = includeSelf ? item.PurchasePrice : 0
-    if(includeChildren) {
+    if (includeChildren) {
         let children = Object.values(globalsNewUi.entries).filter(v => v.info.ParentId === itemId)
         for (let child of children) {
-            if(recursive) {
+            if (recursive) {
                 //includeChildren in this case will always be true
                 total += items_calculateCost(child.ItemId, includeSelf, true, includeCopies, true)
             } else {
@@ -442,10 +455,10 @@ function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildr
             }
         }
     }
-    if(includeCopies) {
+    if (includeCopies) {
         let copies = Object.values(globalsNewUi.entries).filter(v => v.info.CopyOf === itemId)
         for (let copy of copies) {
-            if(recursive) {
+            if (recursive) {
                 //includeChildren in this case will always be true
                 total += items_calculateCost(copy.ItemId, includeSelf, true, includeCopies, true)
             } else {
