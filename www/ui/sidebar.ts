@@ -92,14 +92,7 @@ function reorderSidebar(itemOrder: bigint[], select = true) {
 }
 
 function changeSidebarItemData(id: bigint, el: HTMLElement) {
-    const e = new CustomEvent("data-changed", {
-        detail: {
-            item: findInfoEntryById(id),
-            user: findUserEntryById(id),
-            meta: findMetadataById(id),
-        }
-    })
-    el.dispatchEvent(e)
+    updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
     el.setAttribute("data-entry-id", String(id))
 }
 
@@ -168,14 +161,6 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
         if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         }
-    })
-
-    elem.addEventListener("data-changed", function(e) {
-        const event = e as CustomEvent
-        const item = event.detail.item as InfoEntry
-        const user = event.detail.user as UserEntry
-        const meta = event.detail.meta as MetadataEntry
-        updateSidebarEntryContents(item, user, meta, elem.shadowRoot as ShadowRoot)
     })
 
     changeSidebarItemData(item.ItemId, elem)

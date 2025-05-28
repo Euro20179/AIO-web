@@ -125,15 +125,7 @@ function saveItemChanges(root: ShadowRoot, itemId: bigint) {
 }
 
 function changeDisplayItemData(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: HTMLElement) {
-    const e = new CustomEvent("data-changed", {
-        detail: {
-            item,
-            user,
-            meta,
-            events,
-        }
-    })
-    el.dispatchEvent(e)
+    updateDisplayEntryContents(item, user, meta, events, el.shadowRoot as ShadowRoot)
     el.setAttribute("data-item-id", String(item.ItemId))
 }
 
@@ -1283,16 +1275,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                 .catch(console.error)
         }
     }
-
-    el.addEventListener("data-changed", function(_e) {
-        let e = _e as CustomEvent
-        const event = e
-        const item = /**@type {InfoEntry}*/(event.detail.item)
-        const user = /**@type {UserEntry}*/(event.detail.user)
-        const meta = /**@type {MetadataEntry}*/(event.detail.meta)
-        const events = /**@type {UserEvent[]}*/(event.detail.events)
-        updateDisplayEntryContents(item, user, meta, events, el.shadowRoot as ShadowRoot)
-    })
 
     changeDisplayItemData(item, user, meta, events, el)
     return el
