@@ -338,7 +338,11 @@ async function main() {
 
     //small pause to allow the fetch to happen *after* items are rendered on firefox
     new Promise(res => setTimeout(res, 500)).then(() => {
-        items_refreshMetadata(uid).then(() => alert("All metadata loaded"))
+        items_refreshMetadata(uid).then(() => {
+            alert("All metadata loaded")
+
+            reorderSidebar(sortEntries(Object.values(globalsNewUi.entries).map(v => v.info), sortBySelector.value).map(v => v.ItemId), false)
+        })
     })
 
     if (display_item_only) {
