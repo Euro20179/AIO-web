@@ -391,6 +391,10 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 }
                 return at < bt ? 0 : 1
             })
+        } else if(sortBy === "item-id") {
+            entries = entries.sort((a, b) => {
+                return Number(b.ItemId - a.ItemId)
+            })
         }
     }
     return entries
