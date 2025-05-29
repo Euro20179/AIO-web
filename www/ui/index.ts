@@ -14,11 +14,6 @@ userSelector.onchange = function() {
     refreshInfo(getUidUI()).then(() => loadSearchUI())
 }
 
-const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
-sortBySelector.onchange = function() {
-    sortEntriesUI()
-}
-
 function getAIOWeb(user: UserEntry) {
     return JSON.parse(user.Extra).AIOWeb || {}
 }
@@ -121,9 +116,9 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 
     entries = entries.filter(v => v.Library === globalsNewUi.viewingLibrary)
 
-    if (filters.sortBy !== "") {
-        entries = sortEntries(entries, filters.sortBy)
-    }
+    // if (filters.sortBy !== "") {
+    //     entries = sortEntries(entries, filters.sortBy)
+    // }
 
     for (let filter of filters.filterRules) {
         filter = filter.trim()

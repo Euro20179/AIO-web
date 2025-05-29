@@ -154,7 +154,7 @@ async function loadSearchUI() {
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0)
+    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
