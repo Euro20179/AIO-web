@@ -24,6 +24,10 @@ function clearSidebar() {
 }
 
 function refreshSidebarItem(itemId: bigint) {
+    //DO NOT REFRESH if this item is not a result, otherwise it'll add unecessary sidebar items
+    if(!globalsNewUi.results.find(v => v.ItemId === itemId)) {
+        return
+    }
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     let item = findInfoEntryById(itemId)
     if (el) {
