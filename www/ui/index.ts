@@ -332,18 +332,16 @@ async function main() {
         renderSidebar(entries)
     }
 
-    //do this second because metadata, and events can get really large, and having to wait for it could take a while
-    Promise.all([items_refreshMetadata(uid), loadUserEvents(uid)]).then(() => {
-        //clear and rerender sidebar to make thumbnail load when it appears on screen
-        //it loads when it appears on screen because of the observation thing, which only happens when the item is first rendered in the sidebar
-        clearSidebar()
+    //do this second because events can get really large, and having to wait for it could take a while
+    loadUserEvents(uid).then(() => {
+        if (mode.refresh && globalsNewUi.selectedEntries.length) {
+            mode.refresh(globalsNewUi.selectedEntries[0].ItemId)
+        }
+    })
 
-        clearItems()
-
-        const data = getSearchDataUI()
-        let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), data.get("sort-by")?.toString() ?? "user-title")
-        items_setResults(newEntries.map(v => v.ItemId))
-        renderSidebar(newEntries)
+    //small pause to allow the fetch to happen *after* items are rendered on firefox
+    new Promise(res => setTimeout(res, 500)).then(() => {
+        items_refreshMetadata(uid).then(() => alert("All metadata loaded"))
     })
 
     if (display_item_only) {

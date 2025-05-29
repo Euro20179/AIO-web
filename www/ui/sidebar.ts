@@ -157,7 +157,8 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
         }
     }
 
-    elem.addEventListener("on-screen-appear", function(e) {
+    elem.addEventListener("on-screen-appear", async function(e) {
+        let meta = await findMetadataByIdAtAllCosts(item.ItemId)
         if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         }

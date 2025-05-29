@@ -124,6 +124,23 @@ function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: I
     globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
 
+async function loadMetadataById(id: bigint): Promise<MetadataEntry> {
+    let m = await api_getEntryMetadata(id, getUidUI())
+    if(m === null) {
+        alert(`Failed to load metadata for id: ${id}`)
+        return globalsNewUi.entries[String(id)].meta = genericMetadata(id)
+    }
+    return globalsNewUi.entries[String(id)].meta = m
+}
+
+async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
+    let m = findMetadataById(id)
+    if(m.Datapoints.match(/"_AIO_GENERIC":true/)) {
+        return await loadMetadataById(id)
+    }
+    return m
+}
+
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)].meta
@@ -173,7 +190,7 @@ function genericMetadata(itemId: bigint): MetadataEntry {
         ReleaseYear: 0,
         Thumbnail: "",
         MediaDependant: "",
-        Datapoints: "{}",
+        Datapoints: "{\"_AIO_GENERIC\":true}",
         Title: "",
         Native_Title: "",
         Provider: "",

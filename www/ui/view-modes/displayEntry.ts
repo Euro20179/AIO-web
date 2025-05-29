@@ -740,7 +740,11 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 /**
  * @description updates special-case legacy elements
  */
-function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+    //just in case we have generic metadata
+    //if meta is not generic, this operation is cheap, no need for a guard
+    meta = await findMetadataByIdAtAllCosts(meta.ItemId)
+
     updateBasicDisplayEntryContents(item, user, meta, el)
 
     const displayEntryTitle = el.getElementById("main-title")
@@ -1062,7 +1066,7 @@ function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     }
 }
 
-function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string) {
+function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string): HTMLElement {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
