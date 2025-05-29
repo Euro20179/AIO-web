@@ -14,6 +14,8 @@ userSelector.onchange = function() {
     refreshInfo(getUidUI()).then(() => loadSearchUI())
 }
 
+const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+
 function getAIOWeb(user: UserEntry) {
     return JSON.parse(user.Extra).AIOWeb || {}
 }
