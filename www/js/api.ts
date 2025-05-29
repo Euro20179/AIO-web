@@ -232,17 +232,26 @@ async function api_queryV3(searchString: string, uid: number, orderby: string = 
         case "rating":
             orderby = "UserRating"
             break
+        case "general-rating":
+            orderby = "(CAST(Rating as REAL) / CAST(RatingMax AS REAL))"
+            break
+        case "release-year":
+            orderby = "ReleaseYear"
+            break
         case "cost":
             orderby = "PurchasePrice"
             break
         case "added":
             orderby = "CASE event WHEN 'Added' THEN timestamp ELSE 0 END"
             break
+        case "item-id":
+            orderby = "entryInfo.itemId"
+            break
 
     }
 
     let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
-    if(orderby != "") {
+    if (orderby != "") {
         qs += `&order-by=${encodeURIComponent(orderby)}`
     }
 
