@@ -1008,45 +1008,9 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
             const ts = event.Timestamp
             const afterts = event.After
             const beforets = event.Before
-            const timeZone = event.TimeZone || "UTC"
             const name = event.Event
 
-            let timeTd = ""
-            let innerTD = ""
-
-            if (afterts) {
-                let date = new Date(afterts)
-                let time = date.toLocaleTimeString("en", { timeZone })
-                let dd = date.toLocaleDateString("en", { timeZone })
-                innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
-            }
-
-            if (ts) {
-                let date = new Date(ts)
-                let time = date.toLocaleTimeString("en", { timeZone })
-                let dd = date.toLocaleDateString("en", { timeZone })
-                if (innerTD) {
-                    innerTD += " &lt; "
-                }
-                innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
-                //if there is no exact timestamp, put a ? in the middle of afterts and beforets
-            } else {
-                if (innerTD) {
-                    innerTD += " &lt; "
-                }
-                innerTD += " ? "
-            }
-
-            if (beforets) {
-                let bdate = new Date(beforets)
-                let btime = bdate.toLocaleTimeString("en", { timeZone })
-                let bdd = bdate.toLocaleDateString("en", { timeZone })
-                if (innerTD) {
-                    innerTD += " &lt; "
-                }
-                innerTD += `<span title="${btime} (${timeZone})">${bdd}</span>`
-            }
-            timeTd = `<td>${innerTD}</td>`
+            let timeTd = `<td>${items_eventTSHTML(event)}</td>`
 
             html += `<tr>
                         <td>

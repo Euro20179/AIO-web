@@ -20,8 +20,8 @@ function mode_isSelected(id: bigint) {
     return false
 }
 
-const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting]
-const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output"]
+const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting, modeEvents]
+const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output", "event-output"]
 
 let idx = modeOutputIds.indexOf(location.hash.slice(1))
 let curModeName = modeOutputIds[idx]

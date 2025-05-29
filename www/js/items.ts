@@ -126,7 +126,7 @@ function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: I
 
 async function loadMetadataById(id: bigint): Promise<MetadataEntry> {
     let m = await api_getEntryMetadata(id, getUidUI())
-    if(m === null) {
+    if (m === null) {
         alert(`Failed to load metadata for id: ${id}`)
         return globalsNewUi.entries[String(id)].meta = genericMetadata(id)
     }
@@ -135,7 +135,7 @@ async function loadMetadataById(id: bigint): Promise<MetadataEntry> {
 
 async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
     let m = findMetadataById(id)
-    if(m.Datapoints.match(/"_AIO_GENERIC":true/)) {
+    if (m.Datapoints.match(/"_AIO_GENERIC":true/)) {
         return await loadMetadataById(id)
     }
     return m
@@ -391,7 +391,7 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
                 }
                 return at < bt ? 0 : 1
             })
-        } else if(sortBy === "item-id") {
+        } else if (sortBy === "item-id") {
             entries = entries.sort((a, b) => {
                 return Number(b.ItemId - a.ItemId)
             })
@@ -488,4 +488,75 @@ function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildr
         }
     }
     return total
+}
+
+function _eventTimeEstimate(event: UserEvent) {
+    if (event.Timestamp) {
+        return event.Timestamp
+    }
+
+    if (event.Before && event.After) {
+        return (event.Before + event.After) / 2
+    }
+
+    if (event.Before) {
+        return event.Before - 1
+    }
+    if (event.After) {
+        return event.After - 1
+    }
+    return 0
+}
+
+//FIXME: does not handle timezones
+function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
+    let l = _eventTimeEstimate(left)
+    let r = _eventTimeEstimate(right)
+    if (l == r) {
+        return 0
+    }
+    return l > r ? -1 : 1
+}
+
+function items_eventTSHTML(event: UserEvent) {
+    const ts = event.Timestamp
+    const afterts = event.After
+    const beforets = event.Before
+    const timeZone = event.TimeZone || "UTC"
+    let innerTD = ""
+
+    if (afterts) {
+        let date = new Date(afterts)
+        let time = date.toLocaleTimeString("en", { timeZone })
+        let dd = date.toLocaleDateString("en", { timeZone })
+        innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
+    }
+
+    if (ts) {
+        let date = new Date(ts)
+        let time = date.toLocaleTimeString("en", { timeZone })
+        let dd = date.toLocaleDateString("en", { timeZone })
+        if (innerTD) {
+            innerTD += " &lt; "
+        }
+        innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
+        //if there is no exact timestamp, put a ? in the middle of afterts and beforets
+    } else {
+        if (innerTD) {
+            innerTD += " &lt; "
+        }
+        innerTD += " ? "
+    }
+
+    if (beforets) {
+        let bdate = new Date(beforets)
+        let btime = bdate.toLocaleTimeString("en", { timeZone })
+        let bdd = bdate.toLocaleDateString("en", { timeZone })
+        if (innerTD) {
+            innerTD += " &lt; "
+        }
+        innerTD += `<span title="${btime} (${timeZone})">${bdd}</span>`
+    }
+
+    return innerTD
 }

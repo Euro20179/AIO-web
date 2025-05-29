@@ -62,6 +62,7 @@
         #graph-output,
         #calc-output,
         #gallery-output,
+        #event-output,
         #script-output) {
         &:target {
             display: inherit;
@@ -307,7 +308,7 @@
         container-name: viewing-area;
         container-type: size;
 
-        &:not(:has(:where(display-entry, #calc-output:target, #gallery-output:target, #graph-output:target))) {
+        &:not(:has(:where(display-entry, #calc-output:target, #gallery-output:target, #graph-output:target, #event-output:target))) {
             #error-output {
                 display: unset;
             }

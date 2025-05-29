@@ -157,6 +157,7 @@
                 <select name="view-toggle" id="view-toggle" class="view-toggle">
                     <option value="entry-output">Normal mode</option>
                     <option value="graph-output">Graph mode</option>
+                    <option value="event-output">Event mode</option>
                     <option value="calc-output">Calc mode</option>
                     <option value="gallery-output">Gallery mode</option>
                     <option value="script-output">Script mode</option>
@@ -201,6 +202,18 @@
                 </div>
 
                 <div id="entry-output" class="overflow">
+                </div>
+
+                <div id="event-output" class="overflow">
+                    <table id="event-output-table">
+                        <thead>
+                            <tr>
+                                <th>For</th>
+                                <th>Event</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
 
                 <div id="calc-output" class="overflow">
@@ -293,6 +306,7 @@
     <script src="/ui/view-modes/calc.js"></script>
     <script src="/ui/view-modes/gallery.js"></script>
     <script src="/ui/view-modes/scriptMode.js"></script>
+    <script src="/ui/view-modes/event-mode.js"></script>
     <script src="/ui/view-modes/modes.js"></script>
     <script src="/ui/ui.js"></script>
     <script src="/ui/index.js"></script>
