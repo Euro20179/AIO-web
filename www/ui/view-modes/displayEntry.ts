@@ -157,7 +157,7 @@ function onIntersection(entries: IntersectionObserverEntry[]) {
 
             let newItem = displayQueue.shift()
             if (!newItem) continue
-            modeDisplayEntry.add(newItem, false)
+            modeDisplayEntry.add(newItem)
         }
     }
 }
@@ -221,13 +221,11 @@ const observer = new IntersectionObserver(onIntersection, {
 })
 
 const modeDisplayEntry: DisplayMode = {
-    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
-        updateStats && changeResultStatsWithItem(entry)
+    add(entry, parent?: HTMLElement | DocumentFragment) {
         return renderDisplayItem(entry.ItemId, parent)
     },
 
-    sub(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItem(entry, -1)
+    sub(entry) {
         removeDisplayItem(entry.ItemId)
     },
 
@@ -238,10 +236,8 @@ const modeDisplayEntry: DisplayMode = {
             refreshDisplayItem(id)
     },
 
-    addList(entry, updateStats = true) {
+    addList(entry) {
         displayEntryIntersected.clear()
-
-        updateStats && changeResultStatsWithItemList(entry, 1)
         for (let i = 0; i < entry.length; i++) {
             if (i > 5) {
                 displayQueue.push(entry[i])
@@ -251,9 +247,7 @@ const modeDisplayEntry: DisplayMode = {
         }
     },
 
-    subList(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entry, -1)
-
+    subList(entry) {
         const itemIdsToRemove = entry.map(v => v.ItemId)
         displayQueue = displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
 
@@ -1441,7 +1435,7 @@ function copyThis(item: InfoEntry) {
                     eventCopy.ItemId = itemCopy.ItemId
                     globalsNewUi.entries[String(itemCopy.ItemId)].events.push(eventCopy)
                 }
-                mode.add(itemCopy, true)
+                selectItem(itemCopy, mode)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
             })
             .catch(console.error)

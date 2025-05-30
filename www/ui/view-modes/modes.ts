@@ -1,9 +1,9 @@
 
 type DisplayMode = {
-    add: (entry: InfoEntry, updateStats?: boolean, parent?: HTMLElement | DocumentFragment) => HTMLElement
-    sub: (entry: InfoEntry, updateStats?: boolean) => any
-    addList: (entry: InfoEntry[], updateStats?: boolean) => any
-    subList: (entry: InfoEntry[], updateStats?: boolean) => any
+    add: (entry: InfoEntry, parent?: HTMLElement | DocumentFragment) => HTMLElement
+    sub: (entry: InfoEntry) => any
+    addList: (entry: InfoEntry[]) => any
+    subList: (entry: InfoEntry[]) => any
     refresh?: (id: bigint) => any
     putSelectedInCollection?: () => any
     addTagsToSelected?: () => any
@@ -30,17 +30,20 @@ let mode = modes[idx]
 
 function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true, parent?: HTMLElement | DocumentFragment): HTMLElement {
     globalsNewUi.selectedEntries.push(item)
-    return mode.add(item, updateStats, parent)
+    updateStats && changeResultStatsWithItem(item)
+    return mode.add(item, parent)
 }
 
 function deselectItem(item: InfoEntry, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(a => a.ItemId !== item.ItemId)
-    mode.sub(item, updateStats)
+    updateStats && changeResultStatsWithItem(item, -1)
+    mode.sub(item)
 }
 
 function selectItemList(itemList: InfoEntry[], mode: DisplayMode, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
-    mode.addList(itemList, updateStats)
+    updateStats && changeResultStatsWithItemList(itemList)
+    mode.addList(itemList)
 }
 
 function toggleItem(item: InfoEntry, updateStats: boolean = true) {
@@ -52,8 +55,10 @@ function toggleItem(item: InfoEntry, updateStats: boolean = true) {
 }
 
 function clearItems(items?: InfoEntry[]) {
+    items ||= globalsNewUi.selectedEntries.filter(Boolean)
     //FIXME: for some reason selectedEntries has an `undefined` item in it when the user has not items
-    mode.subList(items || globalsNewUi.selectedEntries.filter(Boolean))
+    mode.subList(items)
+    changeResultStatsWithItemList(items, -1)
     globalsNewUi.selectedEntries = []
 }
 

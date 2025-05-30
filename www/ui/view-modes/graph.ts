@@ -440,23 +440,20 @@ groupBySelect.onchange = typeSelection.onchange = function() {
 }
 
 const modeGraphView: DisplayMode = {
-    add(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItem(entry)
+    add(entry) {
         makeGraphs(globalsNewUi.selectedEntries)
         return document.getElementById("graph-output") as HTMLElement
     },
 
-    sub(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItem(entry, -1)
+    sub(entry) {
         makeGraphs(globalsNewUi.selectedEntries)
     },
 
-    addList(entries, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entries)
+    addList(entries) {
         makeGraphs(globalsNewUi.selectedEntries)
     },
 
-    subList(entries, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entries, -1)
+    subList(entries) {
+        makeGraphs(globalsNewUi.selectedEntries)
     }
 }

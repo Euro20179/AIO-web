@@ -19,25 +19,21 @@ function removeGalleryItem(entry: InfoEntry) {
 }
 
 const modeGallery: DisplayMode = {
-    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
-        updateStats && changeResultStatsWithItem(entry)
+    add(entry, parent?: HTMLElement | DocumentFragment) {
         return renderGalleryItem(entry, parent)
     },
 
-    sub(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItem(entry, -1)
+    sub(entry) {
         removeGalleryItem(entry)
     },
 
-    addList(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entry, 1)
+    addList(entry) {
         for (let item of entry) {
             renderGalleryItem(item)
         }
     },
 
-    subList(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entry, -1)
+    subList(entry) {
         for (let item of entry) {
             removeGalleryItem(item)
         }

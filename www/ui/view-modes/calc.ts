@@ -2,25 +2,21 @@ const calcItems = document.getElementById("calc-items") as HTMLDivElement
 const expressionInput = document.getElementById("calc-expression") as HTMLTextAreaElement
 
 const modeCalc: DisplayMode = {
-    add(entry, updateStats = true, parent?: HTMLElement | DocumentFragment) {
-        updateStats && changeResultStatsWithItem(entry)
+    add(entry, parent?: HTMLElement | DocumentFragment) {
         return renderCalcItem(entry, parent)
     },
 
-    sub(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItem(entry, -1)
+    sub(entry) {
         removecCalcItem(entry)
     },
 
-    addList(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entry, 1)
+    addList(entry) {
         for (let item of entry) {
             renderCalcItem(item)
         }
     },
 
-    subList(entry, updateStats = true) {
-        updateStats && changeResultStatsWithItemList(entry, -1)
+    subList(entry) {
         for (let item of entry) {
             removecCalcItem(item)
         }

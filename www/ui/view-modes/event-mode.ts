@@ -65,25 +65,25 @@ function _reRenderEventTable() {
 }
 
 const modeEvents: DisplayMode = {
-    add(entry, updateStats, parent) {
+    add(entry, parent) {
         eventOrder.addList(...findUserEventsById(entry.ItemId))
         _reRenderEventTable()
         return document.createElement("div")
     },
 
-    addList(entry, updateStats) {
+    addList(entry) {
         for (let e of entry) {
             eventOrder.addList(...findUserEventsById(e.ItemId))
         }
         _reRenderEventTable()
     },
 
-    sub(entry, updateStats) {
+    sub(entry) {
         eventOrder.removeList(...findUserEventsById(entry.ItemId))
         _reRenderEventTable()
     },
 
-    subList(entry, updateStats) {
+    subList(entry) {
         for (let e of entry) {
             eventOrder.removeList(...findUserEventsById(e.ItemId))
         }

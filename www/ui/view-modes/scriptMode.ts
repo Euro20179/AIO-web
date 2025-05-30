@@ -3,7 +3,7 @@ const scriptBox = document.getElementById("script") as HTMLTextAreaElement
 const scriptOutput = document.getElementById("script-execute-output") as HTMLDivElement
 
 const modeScripting: DisplayMode = {
-    add(entry, updateStats?: boolean, parent: HTMLElement | DocumentFragment = scriptOutput) {
+    add(entry, parent: HTMLElement | DocumentFragment = scriptOutput) {
         if (mode !== modeScripting) return scriptOutput
         const e = renderDisplayItem(entry.ItemId, parent)
         e.style.display = "block"
