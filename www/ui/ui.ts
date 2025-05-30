@@ -127,7 +127,7 @@ function sortEntriesUI() {
 
 function getUidUI() {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
-    if(!uidSelector) return 0
+    if (!uidSelector) return 0
     return Number(uidSelector.value)
 }
 
@@ -217,14 +217,14 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
 
     api_overwriteMetadataEntry(item.ItemId).then(res => {
         if (res?.status !== 200) {
-            console.error(res)
             alert("Failed to get metadata")
             return
         }
 
         alert("Metadata set")
 
-        res.json().then((newMeta: MetadataEntry) => {
+        res.text().then((newMetaText: string) => {
+            let newMeta = api_deserializeJsonl(newMetaText).next().value
             let sId = String(item.ItemId)
             updateInfo2({ [sId]: { meta: newMeta } })
 
@@ -294,17 +294,10 @@ async function newEntryUI(form: HTMLFormElement) {
         events = events.filter(v => v.ItemId === json.ItemId)
 
         items_addItem({
-            meta: genericMetadata(json.ItemId),
+            meta,
             user: genericUserEntry(json.ItemId),
             events: [],
             info: json
-        })
-
-        updateInfo2({
-            [json.ItemId]: {
-                meta,
-                events
-            }
         })
 
         ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)

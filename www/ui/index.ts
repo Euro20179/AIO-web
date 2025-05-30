@@ -342,6 +342,9 @@ async function main() {
             alert("All metadata loaded")
 
             reorderSidebar(sortEntries(Object.values(globalsNewUi.entries).map(v => v.info), sortBySelector.value).map(v => v.ItemId), false)
+            if (mode.refresh && globalsNewUi.selectedEntries.length) {
+                mode.refresh(globalsNewUi.selectedEntries[0].ItemId)
+            }
         })
     })
 
