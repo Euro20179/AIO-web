@@ -367,7 +367,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
         //this action does multiple things
         if (action?.includes("+")) continue
 
-        btn.addEventListener("click", _ => {
+        btn.addEventListener("click", async (_) => {
             const item = findInfoEntryById(itemId) as InfoEntry
 
             if (!confirm(`Are you sure you want to ${action} this entry`)) {
@@ -376,11 +376,10 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
             let queryParams = `?id=${item.ItemId}`
             if (action === "Finish") {
-                promptNumber("Rating", "Not a number\nRating").then(rating => {
-                    if (rating !== null) {
-                        queryParams += `&rating=${rating}`
-                    }
-                })
+                let rating = await promptNumber("Rating", "Not a number\nRating")
+                if (rating !== null) {
+                    queryParams += `&rating=${rating}`
+                }
             }
 
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
