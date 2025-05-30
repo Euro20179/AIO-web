@@ -490,7 +490,7 @@ function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildr
     return total
 }
 
-function _eventTimeEstimate(event: UserEvent) {
+function items_eventTimeEstimate(event: UserEvent) {
     if (event.Timestamp) {
         return event.Timestamp
     }
@@ -510,8 +510,8 @@ function _eventTimeEstimate(event: UserEvent) {
 
 //FIXME: does not handle timezones
 function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
-    let l = _eventTimeEstimate(left)
-    let r = _eventTimeEstimate(right)
+    let l = items_eventTimeEstimate(left)
+    let r = items_eventTimeEstimate(right)
     if (l == r) {
         return 0
     }
