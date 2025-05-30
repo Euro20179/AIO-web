@@ -4,7 +4,10 @@ class Heap {
     left: Heap | null = null
     right: Heap | null = null
 
-    constructor(event: UserEvent | null = null) {
+    parent: Heap | null
+
+    constructor(event: UserEvent | null = null, parent: Heap | null = null) {
+        this.parent = parent
         this.#data = {
             el: document.createElement("tr"),
             event
@@ -13,6 +16,20 @@ class Heap {
 
     get el() {
         return this.#data.el
+    }
+
+    getCount() {
+        let c = 0
+        if (!this.isEmpty()) {
+            c++
+        }
+        if (this.left) {
+            c += this.left.getCount()
+        }
+        if (this.right) {
+            c += this.right.getCount()
+        }
+        return c
     }
 
     clear() {
@@ -24,8 +41,7 @@ class Heap {
 
         let right = tree.#data.event
         let left = this.#data.event
-        if (!left) return 1
-        if (!right) return 0
+        if (!left || !right) return 1
 
         return items_compareEventTiming(left, right)
     }
@@ -56,16 +72,22 @@ class Heap {
         withHeap.#data.el = tempel
     }
 
+    #removeDeadChildren() {
+        if (this.left?.isEmpty()) {
+            this.left = null
+        } else if (this.left) {
+            this.left.#removeDeadChildren()
+        }
+        if (this.right?.isEmpty()) {
+            this.right = null
+        } else if (this.right) {
+            this.right.#removeDeadChildren()
+        }
+    }
+
     #removeEmptyNodes() {
-        if (this.isEmpty()) {
-            this.#bringUp()
-        }
-        if (this.left) {
-            this.left.#removeEmptyNodes()
-        }
-        if (this.right) {
-            this.right.#removeEmptyNodes()
-        }
+        this.#bringUp()
+        this.#removeDeadChildren()
         this.#refactor()
     }
 
@@ -123,21 +145,23 @@ class Heap {
             this.#data.event = event
             return this
         } else {
-            return this.#add(new Heap(event))
+            return this.#add(new Heap(event, this))
         }
     }
 
     #bringUp() {
-        if(this.left) {
+        if (!this.isEmpty()) return
+
+        if (this.left) {
             this.#swap(this.left)
             this.left.#bringUp()
-            if(this.left.isEmpty()) {
+            if (this.left.isEmpty()) {
                 this.left = null
             }
-        } else if(this.right) {
+        } else if (this.right) {
             this.#swap(this.right)
             this.right.#bringUp()
-            if(this.right.isEmpty()) {
+            if (this.right.isEmpty()) {
                 this.right = null
             }
         }
@@ -145,22 +169,20 @@ class Heap {
 
     remove(event: UserEvent) {
         if (this.#data.event == null) {
-            this.#removeEmptyNodes()
         }
-        else if (items_eventEQ(this.#data.event, event)) {
+        else if (this.#data.event && items_eventEQ(this.#data.event, event)) {
             this.#data.event = null
-            this.#removeEmptyNodes()
+            if (this.parent) {
+                //if this node is not the root node, it will not be removed from the overall tree unless called from the parent
+                this.parent.#removeEmptyNodes()
+            } else {
+                this.#removeEmptyNodes()
+            }
         }
         else if (items_compareEventTiming(this.#data.event, event) !== -1 && this.right) {
             this.right.remove(event)
-            if(this.right.isEmpty()) {
-                this.right = null
-            }
         } else if (this.left) {
             this.left.remove(event)
-            if(this.left.isEmpty()) {
-                this.left = null
-            }
         }
     }
 
