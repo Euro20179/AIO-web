@@ -560,3 +560,11 @@ function items_eventTSHTML(event: UserEvent) {
 
     return innerTD
 }
+
+function _cononicalizeEvent(event: UserEvent) {
+    return `${event.ItemId}>>${event.Event}:${event.Before}:${event.Timestamp}:${event.After}Z${event.TimeZone}`
+}
+
+function items_eventEQ(left: UserEvent, right: UserEvent) {
+    return _cononicalizeEvent(left) == _cononicalizeEvent(right)
+}

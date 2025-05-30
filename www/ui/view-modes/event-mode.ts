@@ -1,28 +1,31 @@
 class Heap {
-    el: HTMLTableRowElement
-    #event: UserEvent | null
+    #data: { el: HTMLTableRowElement, event: UserEvent | null }
 
     left: Heap | null = null
     right: Heap | null = null
 
-    count: number = 0
-
     constructor(event: UserEvent | null = null) {
-        this.el = document.createElement("tr")
-        this.#event = event
+        this.#data = {
+            el: document.createElement("tr"),
+            event
+        }
+    }
+
+    get el() {
+        return this.#data.el
     }
 
     clear() {
         this.left = null
         this.right = null
-        this.count = 0
     }
 
     compare(tree: Heap): -1 | 0 | 1 {
 
-        let right = tree.#event
-        let left = this.#event
-        if (!left || !right) return 0
+        let right = tree.#data.event
+        let left = this.#data.event
+        if (!left) return 1
+        if (!right) return 0
 
         return items_compareEventTiming(left, right)
     }
@@ -31,23 +34,40 @@ class Heap {
         let nameTD = document.createElement("td")
         let timeTD = document.createElement("td")
         let forTD = document.createElement("TD")
-        if (this.#event) {
-            nameTD.append(this.#event.Event)
-            timeTD.innerHTML = items_eventTSHTML(this.#event)
-            forTD.append(findInfoEntryById(this.#event.ItemId).En_Title)
+        if (this.#data.event) {
+            nameTD.append(this.#data.event.Event)
+            timeTD.innerHTML = items_eventTSHTML(this.#data.event)
+            forTD.append(findInfoEntryById(this.#data.event.ItemId).En_Title)
         }
-        this.el.replaceChildren(forTD, nameTD, timeTD)
-        console.log(this.el, timeTD, nameTD)
+        this.#data.el.replaceChildren(forTD, nameTD, timeTD)
+    }
+
+    isEmpty() {
+        return this.#data.event === null
     }
 
     #swap(withHeap: Heap) {
-        let temp = this.#event
-        this.#event = withHeap.#event
-        withHeap.#event = temp
+        let temp = this.#data.event
+        this.#data.event = withHeap.#data.event
+        withHeap.#data.event = temp
 
-        let tempel = this.el
-        this.el = withHeap.el
-        withHeap.el = tempel
+        let tempel = this.#data.el
+        this.#data.el = withHeap.#data.el
+        withHeap.#data.el = tempel
+    }
+
+    #removeEmptyNodes() {
+        if (this.#data.event == null) {
+            this.left = null
+            this.right = null
+        }
+        if (this.left) {
+            this.left.#removeEmptyNodes()
+        }
+        if (this.right) {
+            this.right.#removeEmptyNodes()
+        }
+        this.#refactor()
     }
 
     #refactor() {
@@ -85,8 +105,6 @@ class Heap {
     }
 
     #add(tree: Heap) {
-        this.count++
-
         let comp = this.compare(tree)
         switch (comp) {
             case 0:
@@ -102,12 +120,28 @@ class Heap {
     }
 
     add(event: UserEvent) {
-        if (this.#event == null) {
-            this.#event = event
+        if (this.#data.event == null) {
+            this.#data.event = event
             return this
         } else {
             return this.#add(new Heap(event))
         }
+    }
+
+    remove(event: UserEvent) {
+        if (this.#data.event == null) {
+        }
+        else if (items_eventEQ(this.#data.event, event)) {
+            this.#data.event = null
+            this.setEl()
+        }
+        else if (items_compareEventTiming(this.#data.event, event) !== -1 && this.right) {
+            this.right.remove(event)
+        } else if (this.left) {
+            this.left.remove(event)
+        }
+        this.#removeEmptyNodes()
+        this.#refactor()
     }
 
     buildElementLists() {
@@ -119,12 +153,11 @@ class Heap {
 
         this.setEl()
 
-        elems.push(this.el)
+        elems.push(this.#data.el)
 
         if (this.left) {
             elems = elems.concat(this.left.buildElementLists())
         }
-
 
         return elems
     }
@@ -159,10 +192,18 @@ const modeEvents: DisplayMode = {
     },
 
     sub(entry, updateStats) {
-
+        for (let event of findUserEventsById(entry.ItemId)) {
+            eventHeap.remove(event)
+        }
+        _reRenderEventTable()
     },
 
     subList(entry, updateStats) {
-
+        for (let e of entry) {
+            for (let event of findUserEventsById(e.ItemId)) {
+                eventHeap.remove(event)
+            }
+        }
+        _reRenderEventTable()
     },
 }
