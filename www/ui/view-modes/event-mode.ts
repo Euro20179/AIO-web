@@ -57,9 +57,8 @@ class Heap {
     }
 
     #removeEmptyNodes() {
-        if (this.#data.event == null) {
-            this.left = null
-            this.right = null
+        if (this.isEmpty()) {
+            this.#bringUp()
         }
         if (this.left) {
             this.left.#removeEmptyNodes()
@@ -128,20 +127,41 @@ class Heap {
         }
     }
 
+    #bringUp() {
+        if(this.left) {
+            this.#swap(this.left)
+            this.left.#bringUp()
+            if(this.left.isEmpty()) {
+                this.left = null
+            }
+        } else if(this.right) {
+            this.#swap(this.right)
+            this.right.#bringUp()
+            if(this.right.isEmpty()) {
+                this.right = null
+            }
+        }
+    }
+
     remove(event: UserEvent) {
         if (this.#data.event == null) {
+            this.#removeEmptyNodes()
         }
         else if (items_eventEQ(this.#data.event, event)) {
             this.#data.event = null
-            this.setEl()
+            this.#removeEmptyNodes()
         }
         else if (items_compareEventTiming(this.#data.event, event) !== -1 && this.right) {
             this.right.remove(event)
+            if(this.right.isEmpty()) {
+                this.right = null
+            }
         } else if (this.left) {
             this.left.remove(event)
+            if(this.left.isEmpty()) {
+                this.left = null
+            }
         }
-        this.#removeEmptyNodes()
-        this.#refactor()
     }
 
     buildElementLists() {
