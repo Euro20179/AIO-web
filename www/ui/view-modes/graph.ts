@@ -453,7 +453,8 @@ const modeGraphView: DisplayMode = {
         makeGraphs(globalsNewUi.selectedEntries)
     },
 
+    //FIXME: when viewall is turned off, the graphs aren't cleared
     subList(entries) {
-        makeGraphs(globalsNewUi.selectedEntries)
+        // makeGraphs(globalsNewUi.selectedEntries)
     }
 }
