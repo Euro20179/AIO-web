@@ -242,7 +242,13 @@ async function api_queryV3(searchString: string, uid: number, orderby: string = 
             orderby = "PurchasePrice"
             break
         case "added":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId LIMIT 1)"
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
+            break
+        case "viewing":
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+            break
+        case "finished":
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
             break
         case "item-id":
             orderby = "entryInfo.itemId"
