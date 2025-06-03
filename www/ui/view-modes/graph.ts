@@ -22,13 +22,16 @@ const typeSelection = document.getElementById("chart-type") as HTMLSelectElement
 
 const groupByInput = document.getElementById("group-by-expr") as HTMLInputElement
 
-function ChartManager(mkChart: (entries: InfoEntry[]) => Promise<any>) {
-    let chrt: any = null
+const _charts: Record<string, any> = {}
+
+function ChartManager(name: string, mkChart: (entries: InfoEntry[]) => Promise<any>) {
+    _charts[name] = null
     return async function(entries: InfoEntry[]) {
+        let chrt = _charts[name]
         if (chrt) {
             chrt.destroy()
         }
-        chrt = await mkChart(entries)
+        _charts[name] = await mkChart(entries)
     }
 }
 
@@ -147,10 +150,10 @@ function getWatchTime(watchCount: number, meta: MetadataEntry): number {
         return 0
     }
     let data
-    try{
+    try {
         data = JSON.parse(meta.MediaDependant)
     }
-    catch(err){
+    catch (err) {
         console.error("Could not parse json", meta.MediaDependant)
         return 0
     }
@@ -310,7 +313,7 @@ function sortXY(x: string[], y: any[]) {
     return [x, y]
 }
 
-const watchTimeByYear = ChartManager(async (entries) => {
+const watchTimeByYear = ChartManager("watch-time-by-year", async (entries) => {
     let [years, data] = await organizeData(entries)
 
     let watchTimes = data
@@ -326,7 +329,7 @@ const watchTimeByYear = ChartManager(async (entries) => {
     return mkXTypeChart(getCtx2("watch-time-by-year"), years, watchTimes, "Watch time")
 })
 
-const adjRatingByYear = ChartManager(async (entries) => {
+const adjRatingByYear = ChartManager("adj-rating-by-year", async (entries) => {
     let [years, data] = await organizeData(entries)
 
     let items = data
@@ -358,7 +361,7 @@ const adjRatingByYear = ChartManager(async (entries) => {
     return mkXTypeChart(getCtx2("adj-rating-by-year"), years, ratings, 'adj ratings')
 })
 
-const costByFormat = ChartManager(async (entries) => {
+const costByFormat = ChartManager("cost-by-format", async (entries) => {
     entries = entries.filter(v => v.PurchasePrice > 0)
     let [labels, data] = await organizeData(entries)
     let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
@@ -366,7 +369,7 @@ const costByFormat = ChartManager(async (entries) => {
     return mkXTypeChart(getCtx2("cost-by-format"), labels, totals, "Cost by")
 })
 
-const ratingByYear = ChartManager(async (entries) => {
+const ratingByYear = ChartManager("rating-by-year", async (entries) => {
     let [years, data] = await organizeData(entries)
     const ratings = data
         .map(v => v
@@ -380,7 +383,7 @@ const ratingByYear = ChartManager(async (entries) => {
     return mkXTypeChart(rbyCtx, years, ratings, 'ratings')
 })
 
-const generalRating = ChartManager(async (entries) => {
+const generalRating = ChartManager("general-rating-by-year", async (entries) => {
     let [years, data] = await organizeData(entries)
     const ratings = data.map(v => {
         return v.map(i => {
@@ -396,7 +399,7 @@ const generalRating = ChartManager(async (entries) => {
     return mkXTypeChart(getCtx2("general-rating-by-year"), years, ratings, "general ratings")
 })
 
-const ratingDisparityGraph = ChartManager(async (entries) => {
+const ratingDisparityGraph = ChartManager("rating-disparity-graph", async (entries) => {
     let [years, data] = await organizeData(entries)
     const disparity = data.map(v => {
         return v.map(i => {
@@ -414,7 +417,7 @@ const ratingDisparityGraph = ChartManager(async (entries) => {
     return mkXTypeChart(getCtx2("rating-disparity-graph"), years, disparity, "Rating disparity")
 })
 
-const byc = ChartManager(async (entries) => {
+const byc = ChartManager("by-year", async (entries) => {
     let [years, data] = await organizeData(entries)
     const counts = data.map(v => v.length)
 
@@ -439,6 +442,15 @@ groupBySelect.onchange = typeSelection.onchange = function() {
     makeGraphs(globalsNewUi.selectedEntries)
 }
 
+function destroyCharts() {
+    for (let chName in _charts) {
+        let chrt = _charts[chName]
+        if (chrt) {
+            chrt.destroy()
+        }
+    }
+}
+
 const modeGraphView: DisplayMode = {
     add(entry) {
         makeGraphs(globalsNewUi.selectedEntries)
@@ -453,8 +465,7 @@ const modeGraphView: DisplayMode = {
         makeGraphs(globalsNewUi.selectedEntries)
     },
 
-    //FIXME: when viewall is turned off, the graphs aren't cleared
     subList(entries) {
-        // makeGraphs(globalsNewUi.selectedEntries)
+        destroyCharts()
     }
 }
