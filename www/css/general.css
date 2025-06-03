@@ -39,6 +39,11 @@
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
+
+        &:focus{
+            outline: none;
+            border: 3px solid var(--green);
+        }
     }
 
     select {
