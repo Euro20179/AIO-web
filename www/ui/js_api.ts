@@ -7,6 +7,10 @@ function ua_download(data: string, name: string, ft: string): number {
     return 0
 }
 
+function ui_prompt(prompt: string, _default?: string, cb?: (result: string | null) => any) {
+    promptUI(prompt, _default).then(cb)
+}
+
 function ui_setstat(name: string, val: number): number {
     setResultStat(name, val)
     return val

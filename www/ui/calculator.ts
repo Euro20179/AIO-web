@@ -1786,6 +1786,17 @@ class CalcVarTable {
             return Type.from(ua_download(d, jsName, fileType))
         }))
 
+        this.symbols.set("ui_prompt", new Func((prompt, _default, cb) => {
+            ui_prompt(prompt.jsStr(), _default.jsStr(), result => {
+                if(result === null) {
+                    cb.call([])
+                } else {
+                    cb.call([new Str(result)])
+                }
+            })
+            return new Num(0)
+        }))
+
         this.symbols.set("ui_askitem", new Func(cb => {
             ui_askitem().then(id => {
                 let result
