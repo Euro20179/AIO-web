@@ -368,8 +368,10 @@ function parseExpression(input: string, symbols: CalcVarTable) {
 
 function buildNumber(text: string, curPos: number): [string, number] {
     let num = text[curPos]
-    while ("0123456789".includes(text[++curPos])) {
+    let isFloat = false
+    while ("0123456789".includes(text[++curPos]) || (text[curPos] === "." && !isFloat)) {
         num += text[curPos]
+        if(text[curPos] === ".") isFloat = true
     }
     return [num, curPos]
 }
@@ -413,7 +415,7 @@ function lex(input: string): Token[] {
 
     while (pos < input.length) {
         let ch = input[pos]
-        if ("0123456789".includes(ch)) {
+        if ("0123456789.".includes(ch)) {
             let [num, newPos] = buildNumber(input, pos)
             tokens.push(new Token("Num", num));
             pos = newPos
@@ -1432,9 +1434,13 @@ class CalcVarTable {
             return new Num(x.toNum().jsValue ** y.toNum().jsValue)
         }))
 
-        this.symbols.set("round", new Func(n => {
+        this.symbols.set("round", new Func((n, by) => {
             if (!(n instanceof Num)) {
                 return new Num(0)
+            }
+            if(by) {
+                const roundBy = by.toNum().jsValue
+                return new Num(Math.round(n.jsValue * (10 ** roundBy)) / (10 ** roundBy))
             }
             return new Num(Math.round(n.jsValue))
         }))
