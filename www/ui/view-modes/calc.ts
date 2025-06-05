@@ -22,16 +22,16 @@ const modeCalc: DisplayMode = {
         }
     },
 
-    //PROBLEM: if something within the user's code causes calc to get updated
-    //an infinite cycle will occure because
-    //run user's code -> updateInfo -> calc updates -> run user's code
-    //SOLUTION:
-    //remove refresh
-    // refresh(id) {
-    //     const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
-    //     if (!el) return
-    //     refreshCalcItem(findInfoEntryById(id), el)
-    // },
+    refresh(id) {
+        const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
+        if (!el) return
+        //PROBLEM: if something within the user's code causes calc to get updated
+        //an infinite cycle will occure because
+        //run user's code -> updateInfo -> calc updates -> run user's code
+        //SOLUTION:
+        //DO NOT UPDATE EXPRESSION
+        refreshCalcItem(findInfoEntryById(id), el)
+    },
 
     *_getValidEntries() {
         const selected = Object.groupBy(globalsNewUi.selectedEntries, item => String(item.ItemId))
@@ -104,7 +104,7 @@ function removecCalcItem(item: InfoEntry) {
     el?.remove()
 }
 
-function refreshCalcItem(item: InfoEntry, el: HTMLElement) {
+function refreshCalcItem(item: InfoEntry, el: HTMLElement, updateExpr = false) {
     let root = el.shadowRoot
     if (!root) return el
 
@@ -112,7 +112,10 @@ function refreshCalcItem(item: InfoEntry, el: HTMLElement) {
 
     let meta = findMetadataById(item.ItemId)
 
-    let val = updateExpressionOutput(item)
+    if (updateExpr) {
+        let val = updateExpressionOutput(item)
+        el.setAttribute("data-expression-output", String(val.jsStr()))
+    }
 
     let name = root.getElementById('name') as HTMLElement
     name.innerText = item.En_Title
@@ -121,7 +124,6 @@ function refreshCalcItem(item: InfoEntry, el: HTMLElement) {
     if (meta?.Thumbnail) {
         img.src = fixThumbnailURL(meta?.Thumbnail)
     }
-    el.setAttribute("data-expression-output", String(val.jsStr()))
     el.setAttribute("data-item-id", String(item.ItemId))
 
     return el
@@ -129,7 +131,7 @@ function refreshCalcItem(item: InfoEntry, el: HTMLElement) {
 
 function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems): HTMLElement {
     let el = document.createElement("calc-entry")
-    refreshCalcItem(item, el)
+    refreshCalcItem(item, el, true)
     parent.append(el)
     return el
 }
