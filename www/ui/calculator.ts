@@ -2078,6 +2078,24 @@ class CalcVarTable {
             return new Num(0)
         }))
 
+        this.symbols.set("children", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            return new Arr(findDescendants(jsId).map(v => new EntryTy(v.info)).toArray())
+        }))
+
+        this.symbols.set("copies", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            return new Arr(findCopies(jsId).map(v => new EntryTy(v.info)).toArray())
+        }))
+
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
             api_setRating(BigInt(itemId.jsStr()), newRating.jsStr()).then(async (res) => {
