@@ -1434,6 +1434,16 @@ class CalcVarTable {
             return new Num(x.toNum().jsValue ** y.toNum().jsValue)
         }))
 
+        this.symbols.set("avg", new Func((nums) => {
+            let len = nums.len().jsValue
+            let total = 0
+            for(let i = 0; i < len; i++) {
+                let cur = nums.getattr(new Num(i))
+                total += cur.toNum().jsValue
+            }
+            return new Num(total / len)
+        }))
+
         this.symbols.set("round", new Func((n, by) => {
             if (!(n instanceof Num)) {
                 return new Num(0)
