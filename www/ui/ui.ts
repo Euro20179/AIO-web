@@ -40,6 +40,12 @@ document.addEventListener("keydown", e => {
             (form.querySelector('[name="search-query"]') as HTMLInputElement).focus()
             break
         }
+        case "m": {
+            e.preventDefault()
+            let viewToggle = document.getElementById("view-toggle") as HTMLSelectElement
+            viewToggle.focus()
+            break
+        }
     }
 })
 
