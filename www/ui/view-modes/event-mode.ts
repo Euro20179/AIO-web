@@ -37,9 +37,11 @@ class OrderedEvents {
         })
     }
 
-    buildElementLists() {
+    buildElementLists(exclude?: UserEvent[]) {
         let els = []
+        exclude ||= []
         for (let event of this.events) {
+            if (exclude.includes(event)) continue
             let tr = document.createElement("tr")
             let nameTD = document.createElement("td")
             let timeTD = document.createElement("td")
@@ -52,16 +54,43 @@ class OrderedEvents {
         }
         return els
     }
+
+    list() {
+        return this.events
+    }
 }
 
 const eventOutput = document.getElementById("event-output-table") as HTMLTableElement
+const eventFilter = document.getElementById("event-filter") as HTMLInputElement
 
+//instead of literally removing elements we dont want form eventOrder,
+//keep track of the ones we dont want then dont render those
+//this is because if we remove from eventOrder, we can't add them back
+const excludedEvents: UserEvent[] = []
 const eventOrder = new OrderedEvents()
 
 function _reRenderEventTable() {
     let header = eventOutput.firstElementChild as HTMLTableRowElement
-    let rest = eventOrder.buildElementLists()
+    let rest = eventOrder.buildElementLists(excludedEvents)
     eventOutput.replaceChildren(header, ...rest)
+}
+
+eventFilter.onchange = function() {
+    if (eventFilter.value === "") return
+    excludedEvents.length = 0
+
+    for (let event of eventOrder.list()) {
+        let tbl = makeSymbolsTableFromObj(event)
+        for(let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting"]) {
+            let is = event.Event === status
+            tbl.set(status.toLowerCase(), new Num(Number(is)))
+        }
+        let res = parseExpression(eventFilter.value, tbl)
+        if (!res.truthy()) {
+            excludedEvents.push(event)
+        }
+    }
+    _reRenderEventTable()
 }
 
 const modeEvents: DisplayMode = {
