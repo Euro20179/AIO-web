@@ -81,7 +81,7 @@ function _filterEvents(script: string) {
 
     for (let event of eventOrder.list()) {
         let tbl = makeSymbolsTableFromObj(event)
-        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting"]) {
+        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming"]) {
             let is = event.Event === status
             tbl.set(status.toLowerCase(), new Num(Number(is)))
         }
