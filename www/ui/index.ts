@@ -4,8 +4,6 @@ type ClientSearchFilters = {
     sortBy: string
 }
 
-const statsOutput = document.getElementById("result-stats") as HTMLElement
-
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
 

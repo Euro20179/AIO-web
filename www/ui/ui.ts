@@ -3,57 +3,52 @@
  * with client-side inputs
 */
 
+const statsOutput = document.getElementById("result-stats") as HTMLElement
+
 type _StatCalculator = (item: InfoEntry, multiplier: number) => number
 class Statistic {
     name: string
     calculation: _StatCalculator
     additive: boolean
+
+    #value: number = 0
+    el: HTMLElement
     constructor(name: string, additive: boolean, calculation: _StatCalculator) {
         this.name = name
         this.additive = additive
         this.calculation = calculation
+        this.el = document.createElement("entries-statistic")
+        this.el.setAttribute("data-stat-name", this.name)
+        statsOutput.append(this.el)
+    }
+    set value(v: number) {
+        this.#value = v
+        this.el.innerText = String(this.#value)
+    }
+    get value() {
+        return this.#value
+    }
+    set(value: number) {
+        this.value = value
+    }
+    add(value: number) {
+        this.value += value
+    }
+    changeWithItem(item: InfoEntry, mult: number) {
+        let value = this.calculation(item, mult)
+        if (!this.additive) {
+            this.value = value
+        } else {
+            this.value += value
+        }
     }
 }
 
 let statistics = [
+    new Statistic("results", false, () => globalsNewUi.results.length),
     new Statistic("count", true, (_, mult) => 1 * mult),
     new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult)
 ]
-
-let resultStatsProxy: ResultStats | { reset(): void } = new Proxy({
-    reset() {
-        for (let stat of statistics) {
-            this[stat.name] = 0
-        }
-    }
-}, {
-    get(target, p, receiver) {
-        //@ts-ignore
-        let val = Reflect.get(...arguments)
-        if (!val) {
-            return 0
-        }
-        return val
-    },
-    set(_obj, prop, value) {
-        //@ts-ignore
-        if (!Reflect.set(...arguments)) {
-            return false
-        }
-        let el = statsOutput.querySelector(`[data-stat-name="${String(prop)}"]`)
-        if (!el) {
-            el = document.createElement("entries-statistic")
-            el.setAttribute("data-stat-name", String(prop))
-            statsOutput.append(el)
-        }
-        el.setAttribute("data-value", String(value))
-        return true
-    }
-})
-
-type ResultStats = {
-    [key: string]: number
-}
 
 document.addEventListener("keydown", e => {
     if (!e.ctrlKey) return
@@ -93,6 +88,12 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
     })
 }
 
+function resetStats() {
+    for(let stat of statistics) {
+        stat.set(0)
+    }
+}
+
 function openModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
@@ -126,23 +127,27 @@ function deleteStat(name: string) {
 }
 
 function setResultStat(key: string, value: number) {
-    //@ts-ignore
-    resultStatsProxy[key] = value
+    for (let stat of statistics) {
+        if (stat.name !== key) continue
+
+        stat.set(value)
+        break
+    }
 }
 
 function changeResultStats(key: string, value: number) {
-    //@ts-ignore
-    resultStatsProxy[key] += value
+    for(let stat of statistics) {
+        if(stat.name !== key) continue
+
+        stat.add(value)
+        break
+    }
 }
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
     if (!item) return
     for (let stat of statistics) {
-        if (!stat.additive) {
-            setResultStat(stat.name, stat.calculation(item, multiplier))
-        } else {
-            changeResultStats(stat.name, stat.calculation(item, multiplier))
-        }
+        stat.changeWithItem(item, multiplier)
     }
 }
 
