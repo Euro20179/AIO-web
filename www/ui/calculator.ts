@@ -23,7 +23,7 @@ const TT = {
     TransformArrow: "=>",
     FilterArrow: "?>",
     Colon: ":",
-    Bs: "\\"
+    Bs: "\\",
 }
 
 const keywords = [
@@ -1670,6 +1670,28 @@ class CalcVarTable {
             let children = [...findCopies(jsId)]
 
             return new Arr(children.map(v => new EntryTy(v.info)))
+        }))
+
+        this.symbols.set("price", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            let price = findInfoEntryById(jsId).PurchasePrice || 0
+
+            return new Num(price)
+        }))
+
+        this.symbols.set("rating", new Func(id => {
+            const jsId = id.toNum().jsValue
+            if (typeof jsId !== 'bigint') {
+                return new Str("id is not a bigint")
+            }
+
+            let rating = findUserEntryById(jsId).UserRating
+
+            return new Num(rating)
         }))
 
         this.symbols.set("entry", new Func((id) => {
