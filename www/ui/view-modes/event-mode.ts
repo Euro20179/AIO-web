@@ -70,26 +70,31 @@ const excludedEvents: UserEvent[] = []
 const eventOrder = new OrderedEvents()
 
 function _reRenderEventTable() {
+    _filterEvents(eventFilter.value)
     let header = eventOutput.firstElementChild as HTMLTableRowElement
     let rest = eventOrder.buildElementLists(excludedEvents)
     eventOutput.replaceChildren(header, ...rest)
 }
 
-eventFilter.onchange = function() {
-    if (eventFilter.value === "") return
+function _filterEvents(script: string) {
     excludedEvents.length = 0
 
     for (let event of eventOrder.list()) {
         let tbl = makeSymbolsTableFromObj(event)
-        for(let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting"]) {
+        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting"]) {
             let is = event.Event === status
             tbl.set(status.toLowerCase(), new Num(Number(is)))
         }
-        let res = parseExpression(eventFilter.value, tbl)
+        let res = parseExpression(script, tbl)
         if (!res.truthy()) {
             excludedEvents.push(event)
         }
     }
+}
+
+eventFilter.onchange = function() {
+    if (eventFilter.value === "") return
+
     _reRenderEventTable()
 }
 
