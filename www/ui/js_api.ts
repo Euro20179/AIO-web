@@ -11,13 +11,18 @@ function ui_prompt(prompt: string, _default?: string, cb?: (result: string | nul
     promptUI(prompt, _default).then(cb)
 }
 
+function ui_createstat(name: string, additive: boolean, calculation: _StatCalculator): number {
+    createStat(name, additive, calculation)
+    return 0
+}
+
 function ui_setstat(name: string, val: number): number {
     setResultStat(name, val)
     return val
 }
 
 function ui_delstat(name: string): boolean {
-    return deleteResultStat(name)
+    return deleteStat(name)
 }
 
 function ui_sort(by: string): number {

@@ -3,15 +3,38 @@
  * with client-side inputs
 */
 
+type _StatCalculator = (item: InfoEntry, multiplier: number) => number
+class Statistic {
+    name: string
+    calculation: _StatCalculator
+    additive: boolean
+    constructor(name: string, additive: boolean, calculation: _StatCalculator) {
+        this.name = name
+        this.additive = additive
+        this.calculation = calculation
+    }
+}
+
+let statistics = [
+    new Statistic("count", true, (_, mult) => 1 * mult),
+    new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult)
+]
+
 let resultStatsProxy: ResultStats | { reset(): void } = new Proxy({
-    count: 0,
-    totalCost: 0,
-    results: 0,
     reset() {
-        this.count = 0
-        this.totalCost = 0
+        for (let stat of statistics) {
+            this[stat.name] = 0
+        }
     }
 }, {
+    get(target, p, receiver) {
+        //@ts-ignore
+        let val = Reflect.get(...arguments)
+        if (!val) {
+            return 0
+        }
+        return val
+    },
     set(_obj, prop, value) {
         //@ts-ignore
         if (!Reflect.set(...arguments)) {
@@ -92,6 +115,16 @@ function toggleModalUI(modalName: string, root: { getElementById(elementId: stri
     }
 }
 
+function createStat(name: string, additive: boolean, calculation: _StatCalculator) {
+    statistics.push(new Statistic(name, additive, calculation))
+    setResultStat(name, 0)
+}
+
+function deleteStat(name: string) {
+    statistics = statistics.filter(v => v.name !== name)
+    return deleteResultStat(name)
+}
+
 function setResultStat(key: string, value: number) {
     //@ts-ignore
     resultStatsProxy[key] = value
@@ -104,8 +137,13 @@ function changeResultStats(key: string, value: number) {
 
 function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
     if (!item) return
-    changeResultStats("totalCost", item.PurchasePrice * multiplier)
-    changeResultStats("count", 1 * multiplier)
+    for (let stat of statistics) {
+        if (!stat.additive) {
+            setResultStat(stat.name, stat.calculation(item, multiplier))
+        } else {
+            changeResultStats(stat.name, stat.calculation(item, multiplier))
+        }
+    }
 }
 
 function deleteResultStat(key: string) {

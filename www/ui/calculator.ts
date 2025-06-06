@@ -1832,6 +1832,19 @@ class CalcVarTable {
             return new Num(0)
         }))
 
+        this.symbols.set("ui_createstat", new Func((name, additive, calculator) => {
+            return new Num(
+                ui_createstat(
+                    name.jsStr(),
+                    additive.truthy(),
+                    (item, mult) => calculator.call([
+                        new EntryTy(item),
+                        new Num(mult)
+                    ]).toNum().jsValue
+                )
+            )
+        }))
+
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
