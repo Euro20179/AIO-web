@@ -42,6 +42,15 @@ class Statistic {
             this.value += value
         }
     }
+    changeWithItemList(items: InfoEntry[], mult: number) {
+        if (!this.additive) {
+            this.value = this.calculation(items[0] || genericInfo(0n, getUidUI()), mult)
+        } else {
+            for (let item of items) {
+                this.value += this.calculation(item, mult)
+            }
+        }
+    }
 }
 
 let statistics = [
@@ -89,7 +98,7 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
 }
 
 function resetStats() {
-    for(let stat of statistics) {
+    for (let stat of statistics) {
         stat.set(0)
     }
 }
@@ -136,8 +145,8 @@ function setResultStat(key: string, value: number) {
 }
 
 function changeResultStats(key: string, value: number) {
-    for(let stat of statistics) {
-        if(stat.name !== key) continue
+    for (let stat of statistics) {
+        if (stat.name !== key) continue
 
         stat.add(value)
         break
@@ -161,8 +170,8 @@ function deleteResultStat(key: string) {
 }
 
 function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 1) {
-    for (let item of items) {
-        changeResultStatsWithItem(item, multiplier)
+    for(let stat of statistics) {
+        stat.changeWithItemList(items, multiplier)
     }
 }
 

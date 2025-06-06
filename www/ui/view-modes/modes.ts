@@ -59,7 +59,7 @@ function clearItems(updateStats: boolean = true) {
     let items = globalsNewUi.selectedEntries.filter(Boolean)
     globalsNewUi.selectedEntries = []
     mode.subList(items)
-    updateStats && changeResultStatsWithItemList(items, -1)
+    updateStats && resetStats()
 }
 
 function putSelectedToCollection() {
