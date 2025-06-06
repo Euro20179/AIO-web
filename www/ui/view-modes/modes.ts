@@ -54,12 +54,12 @@ function toggleItem(item: InfoEntry, updateStats: boolean = true) {
     }
 }
 
-function clearItems() {
+function clearItems(updateStats: boolean = true) {
     //FIXME: for some reason selectedEntries has an `undefined` item in it when the user has not items
     let items = globalsNewUi.selectedEntries.filter(Boolean)
     globalsNewUi.selectedEntries = []
     mode.subList(items)
-    changeResultStatsWithItemList(items, -1)
+    updateStats && changeResultStatsWithItemList(items, -1)
 }
 
 function putSelectedToCollection() {
@@ -105,9 +105,9 @@ document.getElementById("view-toggle")?.addEventListener("change", e => {
 
 const viewAllElem = document.getElementById("view-all") as HTMLInputElement
 viewAllElem.addEventListener("change", e => {
+    resetStats()
     if(!viewAllElem.checked) {
-        clearItems()
-        resetStats()
+        clearItems(false)
     } else {
         selectItemList(globalsNewUi.results.map(v => v.info), mode)
     }
