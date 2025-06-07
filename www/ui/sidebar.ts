@@ -1,7 +1,5 @@
 const sidebarItems = document.getElementById("sidebar-items") as HTMLElement
 
-const sidebarIntersected: Set<string> = new Set()
-
 const sidebarItemsOnScreen: Set<HTMLElement> = new Set()
 
 const sidebarObserver = new IntersectionObserver((entries) => {
@@ -14,7 +12,7 @@ const sidebarObserver = new IntersectionObserver((entries) => {
         }
     }
 }, {
-    root: sidebarItems,
+    root: document.getElementById("sidebar"),
     rootMargin: "0px",
     threshold: 0.1
 })
@@ -45,8 +43,6 @@ addEventListener("resize", () => {
 
 function clearSidebar() {
 
-    sidebarIntersected.clear()
-
     while (sidebarItems.firstElementChild) {
         sidebarObserver.unobserve(sidebarItems.firstElementChild)
         sidebarItems.firstElementChild.remove()
@@ -73,8 +69,6 @@ function refreshSidebarItem(itemId: bigint) {
 
 
 function removeSidebarItem(item: InfoEntry) {
-    sidebarIntersected.delete(String(item.ItemId))
-
     sidebarItems.querySelector(`[data-entry-id="${item.ItemId}"]`)?.remove()
 }
 
