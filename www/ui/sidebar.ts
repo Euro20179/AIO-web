@@ -124,12 +124,12 @@ function changeSidebarItemData(id: bigint, el: HTMLElement) {
     el.setAttribute("data-entry-id", String(id))
 }
 
-function sidebarEntryOpenMultiple(item: InfoEntry, mode: DisplayMode) {
+function sidebarEntryOpenOne(item: InfoEntry, mode: DisplayMode) {
     clearItems()
     selectItem(item, mode)
 }
 
-function sidebarEntryOpenOne(item: InfoEntry) {
+function sidebarEntryOpenMultiple(item: InfoEntry) {
     toggleItem(item)
 }
 
@@ -170,9 +170,9 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
                 open(`/ui/display.html?item-id=${item.ItemId}`, "_blank", "popup=true,width=960,height=960")
             }
             else if (e.ctrlKey) {
-                sidebarEntryOpenOne(item)
+                sidebarEntryOpenMultiple(item)
             } else {
-                sidebarEntryOpenMultiple(item, mode)
+                sidebarEntryOpenOne(item, mode)
             }
         })
 

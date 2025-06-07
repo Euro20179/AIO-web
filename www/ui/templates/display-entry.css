@@ -140,6 +140,17 @@
             opacity: 50%;
             border-style: dotted;
         }
+
+        #media-info {
+            width: 100%;
+        }
+
+        @container entry (width < 450px) {
+            float: revert;
+            max-width: revert;
+            display: flex;
+            justify-content: center;
+        }
     }
 
     #cost::before {
