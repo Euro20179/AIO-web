@@ -44,7 +44,7 @@ func setupAIOWebStorage() {
 
 func createUserSettings(uid int64) {
 	os.MkdirAll(SETTINGS_ROOT+fmt.Sprintf("/aio-web/%d", uid), 0o700)
-	os.WriteFile(SETTINGS_ROOT + fmt.Sprintf("/aio-web/%d/settings.json", uid), []byte("{}"), 0o644)
+	os.WriteFile(SETTINGS_ROOT+fmt.Sprintf("/aio-web/%d/settings.json", uid), []byte("{}"), 0o644)
 }
 
 func readUserSettings(uid int64) UserSettings {
@@ -76,11 +76,39 @@ func setUserSetting(uid int64, name string, value any) error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(SETTINGS_ROOT + fmt.Sprintf("/aio-web/%d/settings.json", uid), text, os.FileMode(os.O_WRONLY))
+	err = os.WriteFile(SETTINGS_ROOT+fmt.Sprintf("/aio-web/%d/settings.json", uid), text, os.FileMode(os.O_WRONLY))
 	return err
 }
 
 func root(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path == "/login" {
+		auth := req.Header.Get("Authorization")
+		println(auth)
+
+		b64 := ""
+
+		if strings.HasPrefix(auth, "Basic ") {
+			b64 = auth[len("Basic "):]
+		}
+
+		w.Header().Set("Location", "/ui")
+		if b64 != "" {
+			uid, status, err := ckAuth(b64)
+			if status == 200 {
+				w.Header().Set("Set-Cookie", fmt.Sprintf("login=%s", b64))
+				w.Header().Add("Set-Cookie", fmt.Sprintf("uid=%d", uid))
+				w.WriteHeader(301)
+			} else {
+				w.WriteHeader(status)
+				w.Write([]byte(err.Error()))
+			}
+		} else {
+			w.Header().Add("WWW-Authenticate", "Basic realm=\"ssd\"")
+			w.WriteHeader(401)
+			w.Write([]byte("Login"))
+		}
+		return
+	}
 	rootPath := "./www"
 	path := req.URL.Path
 	// if strings.HasPrefix(path, "/html") {
@@ -159,7 +187,6 @@ func ckAuth(auth string) (int64, int, error) {
 }
 
 func getSetting(w http.ResponseWriter, req *http.Request) {
-
 	uidStr := req.URL.Query().Get("uid")
 	uid, err := strconv.ParseInt(uidStr, 10, 64)
 	if err != nil {
@@ -178,7 +205,6 @@ func getSetting(w http.ResponseWriter, req *http.Request) {
 
 func setSetting(w http.ResponseWriter, req *http.Request) {
 	uid, status, err := ckAuth(req.URL.Query().Get("auth"))
-
 	if err != nil {
 		w.WriteHeader(status)
 		println(err.Error())
@@ -234,5 +260,6 @@ start:
 	http.HandleFunc("/settings/set", setSetting)
 
 	http.HandleFunc("/", root)
+	http.HandleFunc("/login", root)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 }

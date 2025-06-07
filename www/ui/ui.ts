@@ -5,6 +5,22 @@
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
+
+const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
+    let [k, ...val] = v.trim().split("=")
+    let valAll = val.join("=")
+    return [k, valAll]
+}))
+
+if (cookies['login']) {
+    sessionStorage.setItem("userAuth", cookies['login'])
+}
+
+
+// if (document.cookie.match(/login=[A-Za-z0-9=/]+/)) {
+//     sessionStorage.setItem("userAuth", document.cookie.slice("login=".length))
+// }
+
 type _StatCalculator = (item: InfoEntry, multiplier: number) => number
 class Statistic {
     name: string
@@ -170,7 +186,7 @@ function deleteResultStat(key: string) {
 }
 
 function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 1) {
-    for(let stat of statistics) {
+    for (let stat of statistics) {
         stat.changeWithItemList(items, multiplier)
     }
 }
@@ -554,23 +570,26 @@ async function fillFormatSelectionUI() {
 
 type StartupLang = "javascript" | "aiol" | ""
 function doUIStartupScript(script: string, lang: StartupLang) {
+    if (script === "") return
+
     if (lang == "aiol" || lang == "") {
         parseExpression(script, new CalcVarTable())
     } else {
-        saveEval(script)
+        //this is the user's own script, this should be fine
+        eval(script)
     }
 }
 
 type UserSettings = {
     UIStartupScript: string
-    StartupLang:     StartupLang
+    StartupLang: StartupLang
 }
 
 async function getSettings(uid: number): Promise<UserSettings> {
-    let res = await fetch(`/settings/get?uid=${uid}`)
-    if(res.status !== 200) {
-        console.error(res.status)
-        return {UIStartupScript: "", StartupLang: ""}
+    let res = await authorizedRequest(`/settings/get?uid=${uid}`)
+    if (res === null || res.status !== 200) {
+        console.error(res?.status)
+        return { UIStartupScript: "", StartupLang: "" }
     }
     return await res.json() as UserSettings
 }

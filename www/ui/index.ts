@@ -343,7 +343,7 @@ async function main() {
 
             reorderSidebar(sortEntries(Object.values(globalsNewUi.entries).map(v => v.info), sortBySelector.value).map(v => v.ItemId), false)
             if (mode.refresh && globalsNewUi.selectedEntries.length) {
-                for(let item of globalsNewUi.selectedEntries) {
+                for (let item of globalsNewUi.selectedEntries) {
                     mode.refresh(item.ItemId)
                 }
             }
@@ -355,8 +355,11 @@ async function main() {
         mainUI?.classList.add("display-mode")
     }
 
-    const settings = await getSettings(getUidUI())
-    doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
+    //if the user is logged in, do ui startup script for their user and their user only
+    if (cookies['uid'] && sessionStorage.getItem("userAuth")) {
+        const settings = await getSettings(Number(cookies['uid']))
+        doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
+    }
 }
 
 main()
