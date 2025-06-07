@@ -328,8 +328,8 @@ async function api_createEntry(params: NewEntryParams) {
 }
 
 
-let userAuth = sessionStorage.getItem("userAuth") || ""
 async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response | null> {
+    let userAuth = sessionStorage.getItem("userAuth") || ""
     options ||= {}
     options.headers ||= {}
     if (userAuth == "") {
