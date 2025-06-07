@@ -163,7 +163,13 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
         img.addEventListener("mousedown", e => {
-            if (e.ctrlKey) {
+            if(e.button === 1) {
+                open(`/ui/display.html?item-id=${item.ItemId}`, "_blank")
+            }
+            else if (e.altKey) {
+                open(`/ui/display.html?item-id=${item.ItemId}`, "_blank", "popup=true,width=960,height=960")
+            }
+            else if (e.ctrlKey) {
                 sidebarEntryOpenOne(item)
             } else {
                 sidebarEntryOpenMultiple(item, mode)
