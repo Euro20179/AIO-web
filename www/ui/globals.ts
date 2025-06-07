@@ -56,3 +56,20 @@ function sequenceNumberGrabber(text: string, allItems: string[]): number | null 
         }
     })[0][1])
 }
+
+function saveEval(script: string) {
+    let old = XMLHttpRequest
+    //@ts-ignore
+    window.XMLHttpRequest = null
+    let oldFetch = fetch
+    window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
+        if (!confirm(`A request is about to be made to ${path}, is this ok?`)) {
+            return await oldFetch("/")
+        }
+        return await oldFetch(path, opts)
+    }
+    let res = new Function(script)()
+    window.XMLHttpRequest = old
+    window.fetch = oldFetch
+    return res
+}

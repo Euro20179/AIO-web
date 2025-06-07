@@ -250,6 +250,7 @@ async function main() {
         return
     }
 
+
     fillFormatSelectionUI()
 
     for (let acc of await api_listAccounts()) {
@@ -274,6 +275,7 @@ async function main() {
     } else if (urlParams.has("uid")) {
         uidSelector.value = urlParams.get("uid") as string
     }
+
 
     const initialSearch = (
         urlParams.has("item-id")
@@ -352,6 +354,9 @@ async function main() {
         let mainUI = document.getElementById("main-ui")
         mainUI?.classList.add("display-mode")
     }
+
+    const settings = await getSettings(getUidUI())
+    doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
 }
 
 main()

@@ -160,12 +160,13 @@ func ckAuth(auth string) (int64, int, error) {
 
 func getSetting(w http.ResponseWriter, req *http.Request) {
 
-	uid, status, err := ckAuth(req.URL.Query().Get("auth"))
-
+	uidStr := req.URL.Query().Get("uid")
+	uid, err := strconv.ParseInt(uidStr, 10, 64)
 	if err != nil {
-		w.WriteHeader(status)
 		println(err.Error())
+		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
+		return
 	}
 
 	settings := readUserSettings(uid)

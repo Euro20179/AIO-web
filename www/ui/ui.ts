@@ -551,3 +551,26 @@ async function fillFormatSelectionUI() {
 
     formatSelector.replaceChildren(...opts)
 }
+
+type StartupLang = "javascript" | "aiol" | ""
+function doUIStartupScript(script: string, lang: StartupLang) {
+    if (lang == "aiol" || lang == "") {
+        parseExpression(script, new CalcVarTable())
+    } else {
+        saveEval(script)
+    }
+}
+
+type UserSettings = {
+    UIStartupScript: string
+    StartupLang:     StartupLang
+}
+
+async function getSettings(uid: number): Promise<UserSettings> {
+    let res = await fetch(`/settings/get?uid=${uid}`)
+    if(res.status !== 200) {
+        console.error(res.status)
+        return {UIStartupScript: "", StartupLang: ""}
+    }
+    return await res.json() as UserSettings
+}
