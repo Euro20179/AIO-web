@@ -98,7 +98,7 @@ class items_Entry {
     events: UserEvent[]
 
     constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
-        this.info = typeof info === 'bigint' ? genericInfo(info, getUidUI()) : info
+        this.info = typeof info === 'bigint' ? genericInfo(info, 0) : info
         this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId)
         this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId)
         this.events = events || []
@@ -124,8 +124,8 @@ function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: I
     globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
 
-async function loadMetadataById(id: bigint): Promise<MetadataEntry> {
-    let m = await api_getEntryMetadata(id, getUidUI())
+async function loadMetadataById(id: bigint, uid = 0): Promise<MetadataEntry> {
+    let m = await api_getEntryMetadata(id, uid)
     if (m === null) {
         alert(`Failed to load metadata for id: ${id}`)
         return globalsNewUi.entries[String(id)].meta = genericMetadata(id)
@@ -316,86 +316,85 @@ function sortEvents(events: UserEvent[]) {
 }
 
 function sortEntries(entries: InfoEntry[], sortBy: string) {
-    if (sortBy != "") {
-        if (sortBy == "rating") {
-            entries = entries.sort((a, b) => {
-                let aUInfo = findUserEntryById(a.ItemId)
-                let bUInfo = findUserEntryById(b.ItemId)
-                if (!aUInfo || !bUInfo) return 0
-                return bUInfo?.UserRating - aUInfo?.UserRating
-            })
-        } else if (sortBy == "added") {
-            entries = entries.sort((a, b) => {
-                let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
-                let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
-                let aAdded = ae?.Timestamp || ae?.After || 0
-                let bAdded = be?.Timestamp || be?.After || 0
-                return bAdded - aAdded
-            })
-        } else if (sortBy == "cost") {
-            entries = entries.sort((a, b) => {
-                return b.PurchasePrice - a.PurchasePrice
-            })
-        } else if (sortBy == "general-rating") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                if (!bm || !am) return 0
-                return normalizeRating(bm.Rating, bm.RatingMax || 100) - normalizeRating(am.Rating, am.RatingMax || 100)
-            })
-        } else if (sortBy == "rating-disparity") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let au = findUserEntryById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                let bu = findUserEntryById(b.ItemId)
-                if (!bm || !am) return 0
-                let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
-                let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
+    if (sortBy === "") return entries
+    if (sortBy == "rating") {
+        entries = entries.sort((a, b) => {
+            let aUInfo = findUserEntryById(a.ItemId)
+            let bUInfo = findUserEntryById(b.ItemId)
+            if (!aUInfo || !bUInfo) return 0
+            return bUInfo?.UserRating - aUInfo?.UserRating
+        })
+    } else if (sortBy == "added") {
+        entries = entries.sort((a, b) => {
+            let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
+            let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
+            let aAdded = ae?.Timestamp || ae?.After || 0
+            let bAdded = be?.Timestamp || be?.After || 0
+            return bAdded - aAdded
+        })
+    } else if (sortBy == "cost") {
+        entries = entries.sort((a, b) => {
+            return b.PurchasePrice - a.PurchasePrice
+        })
+    } else if (sortBy == "general-rating") {
+        entries = entries.sort((a, b) => {
+            let am = findMetadataById(a.ItemId)
+            let bm = findMetadataById(b.ItemId)
+            if (!bm || !am) return 0
+            return normalizeRating(bm.Rating, bm.RatingMax || 100) - normalizeRating(am.Rating, am.RatingMax || 100)
+        })
+    } else if (sortBy == "rating-disparity") {
+        entries = entries.sort((a, b) => {
+            let am = findMetadataById(a.ItemId)
+            let au = findUserEntryById(a.ItemId)
+            let bm = findMetadataById(b.ItemId)
+            let bu = findUserEntryById(b.ItemId)
+            if (!bm || !am) return 0
+            let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
+            let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
 
-                let aUser = Number(au?.UserRating)
-                let bUser = Number(bu?.UserRating)
+            let aUser = Number(au?.UserRating)
+            let bUser = Number(bu?.UserRating)
 
 
-                return (aGeneral - aUser) - (bGeneral - bUser)
-            })
-        } else if (sortBy == "release-year") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
-            })
-        } else if (sortBy === "user-title") {
-            entries = entries.sort((a, b) => {
-                return a.En_Title < b.En_Title ? 0 : 1
-            })
-        } else if (sortBy === "auto-title") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                let at = am.Title || am.Native_Title || a.En_Title || a.Native_Title
-                let bt = bm.Title || bm.Native_Title || b.En_Title || b.Native_Title
-                return at < bt ? 0 : 1
-            })
-        } else if (sortBy === "native-title") {
-            entries = entries.sort((a, b) => {
-                let am = findMetadataById(a.ItemId)
-                let bm = findMetadataById(b.ItemId)
-                let at = am.Native_Title || a.Native_Title
-                let bt = bm.Native_Title || b.Native_Title
-                if (at === "") {
-                    return bt ? 1 : 0
-                }
-                if (bt === "") {
-                    return at ? 0 : 1
-                }
-                return at < bt ? 0 : 1
-            })
-        } else if (sortBy === "item-id") {
-            entries = entries.sort((a, b) => {
-                return Number(b.ItemId - a.ItemId)
-            })
-        }
+            return (aGeneral - aUser) - (bGeneral - bUser)
+        })
+    } else if (sortBy == "release-year") {
+        entries = entries.sort((a, b) => {
+            let am = findMetadataById(a.ItemId)
+            let bm = findMetadataById(b.ItemId)
+            return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
+        })
+    } else if (sortBy === "user-title") {
+        entries = entries.sort((a, b) => {
+            return a.En_Title < b.En_Title ? 0 : 1
+        })
+    } else if (sortBy === "auto-title") {
+        entries = entries.sort((a, b) => {
+            let am = findMetadataById(a.ItemId)
+            let bm = findMetadataById(b.ItemId)
+            let at = am.Title || am.Native_Title || a.En_Title || a.Native_Title
+            let bt = bm.Title || bm.Native_Title || b.En_Title || b.Native_Title
+            return at < bt ? 0 : 1
+        })
+    } else if (sortBy === "native-title") {
+        entries = entries.sort((a, b) => {
+            let am = findMetadataById(a.ItemId)
+            let bm = findMetadataById(b.ItemId)
+            let at = am.Native_Title || a.Native_Title
+            let bt = bm.Native_Title || b.Native_Title
+            if (at === "") {
+                return bt ? 1 : 0
+            }
+            if (bt === "") {
+                return at ? 0 : 1
+            }
+            return at < bt ? 0 : 1
+        })
+    } else if (sortBy === "item-id") {
+        entries = entries.sort((a, b) => {
+            return Number(b.ItemId - a.ItemId)
+        })
     }
     return entries
 }
