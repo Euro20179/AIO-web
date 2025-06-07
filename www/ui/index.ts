@@ -41,7 +41,7 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
     let extra = JSON.parse(user.Extra)
     let AIOWeb = extra.AIOWeb || {}
 
-    //the user can modify this field, but it MUST be an object
+    //the user can modify this field in the object editor, but it MUST be an object
     if (typeof AIOWeb !== "object") {
         AIOWeb = {}
     }
