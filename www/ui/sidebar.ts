@@ -1,16 +1,46 @@
 const sidebarItems = document.getElementById("sidebar-items") as HTMLElement
 
 const sidebarIntersected: Set<string> = new Set()
+
+const sidebarItemsOnScreen: Set<HTMLElement> = new Set()
+
 const sidebarObserver = new IntersectionObserver((entries) => {
     for (let entry of entries) {
         if (entry.isIntersecting) {
             entry.target.dispatchEvent(new Event("on-screen-appear"))
+            sidebarItemsOnScreen.add(entry.target as HTMLElement)
+        } else if (sidebarItemsOnScreen.has(entry.target as HTMLElement)) {
+            sidebarItemsOnScreen.delete(entry.target as HTMLElement)
         }
     }
 }, {
-    root: document.getElementById("sidebar"),
+    root: sidebarItems,
     rootMargin: "0px",
     threshold: 0.1
+})
+
+let resizeTO = 0
+let setToNone = false
+addEventListener("resize", () => {
+    if (!setToNone) {
+        for (let sidebarEntry of document.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
+            if (sidebarItemsOnScreen.has(sidebarEntry)) continue
+            sidebarEntry.style.display = 'none'
+        }
+        setToNone = true
+    }
+
+    if (resizeTO) {
+        clearTimeout(resizeTO)
+    }
+    resizeTO = setTimeout(() => {
+        setToNone = false
+        resizeTO = 0
+        for (let sidebarEntry of document.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
+            if (sidebarItemsOnScreen.has(sidebarEntry)) continue
+            sidebarEntry.style.display = ''
+        }
+    }, 200)
 })
 
 function clearSidebar() {
@@ -25,7 +55,7 @@ function clearSidebar() {
 
 function refreshSidebarItem(itemId: bigint) {
     //DO NOT REFRESH if this item is not a result, otherwise it'll add unecessary sidebar items
-    if(!globalsNewUi.results.find(v => v.ItemId === itemId)) {
+    if (!globalsNewUi.results.find(v => v.ItemId === itemId)) {
         return
     }
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
