@@ -153,8 +153,8 @@ function ui_modeclear(): number {
 }
 
 function ui_setuid(newId: string): string {
-    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
-    return uidSelector.value = newId
+    setUIDUI(newId)
+    return newId
 }
 
 function ui_getuid(): number {

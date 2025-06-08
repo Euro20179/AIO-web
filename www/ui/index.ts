@@ -4,8 +4,14 @@ type ClientSearchFilters = {
     sortBy: string
 }
 
-const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
+const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
+librarySelector.onchange = function() {
+    let val = librarySelector.value
+    globalsNewUi.viewingLibrary = BigInt(val)
+
+    loadSearchUI()
+}
 
 const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
 userSelector.onchange = function() {
@@ -13,7 +19,6 @@ userSelector.onchange = function() {
 }
 
 const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
-
 sortBySelector.onchange = function() {
     sortEntriesUI()
 }
@@ -259,82 +264,29 @@ async function refreshInfo(uid: number) {
 async function main() {
     const urlParams = new URLSearchParams(document.location.search)
 
-    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
-    if (!uidSelector) {
-        alert("Failed to 💧H Y D R A T E💧 the user selection list, aborting")
-        return
-    }
-
-
     fillFormatSelectionUI()
+    fillTypeSelectionUI()
+    fillUserSelectionUI().then(() => {
+        setUserFromURLParams(urlParams)
+    })
 
-    for (let acc of await api_listAccounts()) {
-        const opt = document.createElement("option")
-        const [id, name] = acc.split(":")
-
-        ACCOUNTS[Number(id)] = name
-
-        opt.value = id
-        opt.innerText = name
-        uidSelector.append(opt)
-    }
-
-    if (urlParams.has("uname")) {
-        let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === urlParams.get("uname") as string)[0]
-
-        if (!uid) {
-            setError(`username: ${urlParams.get("uname")} does not exist`)
-            return
-        }
-        uidSelector.value = String(uid)
-    } else if (urlParams.has("uid")) {
-        uidSelector.value = urlParams.get("uid") as string
-    }
-
+    loadLibraries()
 
     const initialSearch = (
         urlParams.has("item-id")
             ? `metadata.ItemId = ${urlParams.get("item-id")}`
             : urlParams.get("q")
     )
-    const display_item_only = urlParams.has("display")
 
     const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
-    if (searchInput && initialSearch) {
-        searchInput.value = decodeURIComponent(initialSearch)
-    }
 
     mode_setMode(curModeName)
-
 
     const uid = getUidUI()
 
     //must happen synchronously to make item render properly
     await loadInfoEntries()
-    loadLibraries()
 
-    api_listTypes().then(types => {
-        const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
-
-        if (typeDropdown === null) {
-            console.error("type dropdown could not be found")
-            return
-        }
-
-        for (let type of types.sort()) {
-            const option = document.createElement("option")
-            option.value = type
-            option.innerText = type
-            typeDropdown.append(option)
-        }
-    })
-
-    librarySelector.onchange = function() {
-        let val = librarySelector.value
-        globalsNewUi.viewingLibrary = BigInt(val)
-
-        loadSearchUI()
-    }
 
     if (initialSearch || searchInput.value) {
         ui_search(initialSearch || searchInput.value)
@@ -348,7 +300,9 @@ async function main() {
     //do this second because events can get really large, and having to wait for it could take a while
     loadUserEvents(uid).then(() => {
         if (mode.refresh && globalsNewUi.selectedEntries.length) {
-            mode.refresh(globalsNewUi.selectedEntries[0].ItemId)
+            for (let item of globalsNewUi.selectedEntries) {
+                mode.refresh(item.ItemId)
+            }
         }
     })
 
@@ -366,9 +320,8 @@ async function main() {
         })
     })
 
-    if (display_item_only) {
-        let mainUI = document.getElementById("main-ui")
-        mainUI?.classList.add("display-mode")
+    if (urlParams.has("display")) {
+        setDisplayModeUI(true)
     }
 
     //if the user is logged in, do ui startup script for their user and their user only

@@ -575,6 +575,70 @@ async function fillFormatSelectionUI() {
     formatSelector.replaceChildren(...opts)
 }
 
+async function fillTypeSelectionUI() {
+    const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
+
+    if (typeDropdown === null) {
+        console.error("type dropdown could not be found")
+        return
+    }
+
+    for (let type of await api_listTypes()) {
+        const option = document.createElement("option")
+        option.value = type
+        option.innerText = type
+        typeDropdown.append(option)
+    }
+}
+
+async function fillUserSelectionUI() {
+    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
+    if (!uidSelector) {
+        alert("Failed to 💧H Y D R A T E💧 the user selection list, aborting")
+        return
+    }
+
+    for (let acc of await api_listAccounts()) {
+        const opt = document.createElement("option")
+        const [id, name] = acc.split(":")
+
+        ACCOUNTS[Number(id)] = name
+
+        opt.value = id
+        opt.innerText = name
+        uidSelector.append(opt)
+    }
+}
+
+function setUIDUI(uid: string) {
+    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
+    uidSelector && (uidSelector.value = uid)
+}
+
+function setUserFromURLParams(params: URLSearchParams) {
+    if (params.has("uname")) {
+        let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === params.get("uname") as string)[0]
+        if (!uid) {
+            setError(`username: ${params.get("uname")} does not exist`)
+            return
+        }
+        setUIDUI(String(uid))
+    } else if (params.has("uid")) {
+        setUIDUI(params.get("uid") as string)
+    }
+}
+
+function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
+    let mainUI = document.getElementById("main-ui")
+    if (on === "toggle") {
+        mainUI?.classList.toggle("display-mode")
+    } else if (on) {
+        mainUI?.classList.add("display-mode")
+    } else {
+        mainUI?.classList.remove("display-mode")
+    }
+}
+
 type StartupLang = "javascript" | "aiol" | ""
 function doUIStartupScript(script: string, lang: StartupLang) {
     if (script === "") return
