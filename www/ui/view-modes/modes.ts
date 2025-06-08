@@ -31,6 +31,7 @@ let mode = modes[idx]
 function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true, parent?: HTMLElement | DocumentFragment): HTMLElement {
     globalsNewUi.selectedEntries.push(item)
     updateStats && changeResultStatsWithItem(item)
+    updatePageInfoWithItemUI(item)
     return mode.add(item, parent)
 }
 
@@ -43,6 +44,7 @@ function deselectItem(item: InfoEntry, updateStats: boolean = true) {
 function selectItemList(itemList: InfoEntry[], mode: DisplayMode, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
     updateStats && changeResultStatsWithItemList(itemList)
+    updatePageInfoWithItemUI(itemList[0])
     mode.addList(itemList)
 }
 

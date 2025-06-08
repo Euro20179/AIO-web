@@ -650,6 +650,18 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     }
 }
 
+function setFaviconUI(path: string) {
+    let link = (document.querySelector("link[rel=\"shortcut icon\"]") || document.createElement("link")) as HTMLLinkElement
+    link.setAttribute("rel", "shortcut icon")
+    link.href = path
+    document.head.append(link)
+}
+
+function updatePageInfoWithItemUI(item: InfoEntry) {
+    document.title = `[AIO] | ${item.En_Title || item.Native_Title}`
+    setFaviconUI(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
+}
+
 type StartupLang = "javascript" | "aiol" | ""
 function doUIStartupScript(script: string, lang: StartupLang) {
     if (script === "") return
