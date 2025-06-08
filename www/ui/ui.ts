@@ -10,6 +10,10 @@ function getUserAuth(from: { getItem(key: string): string | null } = localStorag
     return from.getItem.bind(from)("userAuth")
 }
 
+function storeUserUID(id: string) {
+    localStorage.setItem("userUID", id)
+}
+
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 
@@ -21,6 +25,10 @@ const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
 
 if (cookies['login']) {
     setUserAuth(cookies['login'])
+    setUIDUI(cookies['uid'])
+}
+if(cookies['uid']) {
+    storeUserUID(cookies['uid'])
 }
 
 
@@ -615,7 +623,8 @@ function setUIDUI(uid: string) {
     uidSelector && (uidSelector.value = uid)
 }
 
-function setUserFromURLParams(params: URLSearchParams) {
+function setUIDFromHeuristicsUI() {
+    const params = new URLSearchParams(document.location.search)
     if (params.has("uname")) {
         let uid = Object.entries(ACCOUNTS).filter(([_, name]) => name === params.get("uname") as string)[0]
         if (!uid) {
@@ -625,6 +634,8 @@ function setUserFromURLParams(params: URLSearchParams) {
         setUIDUI(String(uid))
     } else if (params.has("uid")) {
         setUIDUI(params.get("uid") as string)
+    } else if (localStorage.getItem("userUID")) {
+        setUIDUI(localStorage.getItem("userUID") as string)
     }
 }
 

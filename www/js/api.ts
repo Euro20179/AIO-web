@@ -427,3 +427,17 @@ async function api_listAccounts() {
     const users = (await res.text()).split("\n").filter(Boolean)
     return users
 }
+
+async function api_authorized(auth: string): Promise<false | number> {
+    let res = await fetch(`${AIO}/account/authorized`, {
+        headers: {
+            Authorization: `Basic ${auth}`
+        }
+    })
+    if (res.status === 401) {
+        return false
+    }
+
+    let text = await res.text()
+    return Number(text)
+}

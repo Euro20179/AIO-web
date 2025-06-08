@@ -267,7 +267,7 @@ async function main() {
     fillFormatSelectionUI()
     fillTypeSelectionUI()
     fillUserSelectionUI().then(() => {
-        setUserFromURLParams(urlParams)
+        setUIDFromHeuristicsUI()
     })
 
     loadLibraries()
@@ -325,9 +325,8 @@ async function main() {
     }
 
     //if the user is logged in, do ui startup script for their user and their user only
-    if (cookies['uid'] && getUserAuth()) {
-        ui_setuid(cookies['uid'])
-        const settings = await getSettings(Number(cookies['uid']))
+    if (localStorage.getItem("userUID") && getUserAuth()) {
+        const settings = await getSettings(Number(localStorage.getItem("userUID")))
         doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
     }
 }
