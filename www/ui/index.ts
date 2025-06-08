@@ -267,7 +267,6 @@ async function main() {
         setDisplayModeUI(true)
     }
 
-
     fillFormatSelectionUI()
     fillTypeSelectionUI()
     fillUserSelectionUI().then(() => {

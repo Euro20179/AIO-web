@@ -49,12 +49,17 @@
 
     <dialog id="new-entry" popover>
         <h3>New Entry</h3>
+        <button onclick="closeModalUI('new-entry')"
+            style="position: absolute; height: 2em; top: 5px; right: 5px; aspect-ratio: 1;">X</button>
         <form id="new-item-form" method="dialog" action="javascript:newEntryUI()">
             <div class="flex" style="width: 100%;">
                 <input type="text" placeholder="title" name="title" required style="flex-grow: 1;">
-                <input type="text" placeholder="native title" name="native-title" style="flex-grow: 1;">
+                <select name="type" title="The type of media" required>
+                    <option value="">Type</option>
+                </select>
             </div>
-            <div class="flex">
+            <input type="text" placeholder="native title" name="native-title" style="width: 100%;">
+            <div class="flex" style="width: 100%;">
                 <select name="user-status" style="flex-grow: 0.5;">
                     <option value="">Status</option>
                     <option value="Planned">Planned</option>
@@ -65,39 +70,34 @@
                     <option value="ReViewing">Re viewing</option>
                     <option value="Waiting">Waiting</option>
                 </select>
-                <input type="number" min="0" step="0.01" name="price" placeholder="price">
+                <input type="number" min="0" step="0.01" name="price" placeholder="price" style="flex-grow:1;">
             </div>
             <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location">
             <div class="flex" style="gap: 2ch;">
-                <select name="type" title="The type of media" required>
-                    <option value="">Type</option>
-                </select>
-                <label for="fetch-metadata"><input id="fetch-metadata" type="checkbox" name="get-metadata"> Get
-                    metadata</label>
                 <div>
                     <select name="format" required title="Format type"></select>
-                    <label for="is-digital" style="text-wrap: nowrap;">digital? <input type="checkbox" id='is-digital'
-                            name="is-digital"></label>
+                    <label for="is-digital" style="text-wrap: nowrap;"><input type="checkbox" id='is-digital'
+                            style="vertical-align: middle;" name="is-digital"> digital?</label>
                 </div>
+                <label for="fetch-metadata"><input id="fetch-metadata" type="checkbox" name="get-metadata"> Get
+                    metadata</label>
             </div>
-            <details open style="width: 100%;">
-                <summary class="center">
-                    Art style
-                </summary>
-                <div class="flex" style="gap: 2ch;">
-                    <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
-                        Anime</label>
-                    <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
-                        Cartoon</label>
-                    <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
-                        Hand drawn</label>
-                    <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
-                        Digitally drawn </label>
-                    <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-                    <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
-                        action</label>
-                </div>
-            </details>
+            <p class="center">
+                Art style
+            </p>
+            <div class="flex" style="gap: 2ch;">
+                <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
+                    Anime</label>
+                <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
+                    Cartoon</label>
+                <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
+                    Hand drawn</label>
+                <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
+                    Digitally drawn </label>
+                <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
+                <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
+                    action</label>
+            </div>
             <br>
             <input type="text" placeholder="tags (',' separated)" name="tags" value="">
             <div class="flex j-space-between" style="align-content: center; gap: 5%;">
