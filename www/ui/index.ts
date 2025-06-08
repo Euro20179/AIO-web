@@ -263,6 +263,10 @@ async function refreshInfo(uid: number) {
 
 async function main() {
     const urlParams = new URLSearchParams(document.location.search)
+    if (urlParams.has("display")) {
+        setDisplayModeUI(true)
+    }
+
 
     fillFormatSelectionUI()
     fillTypeSelectionUI()
@@ -319,10 +323,6 @@ async function main() {
             }
         })
     })
-
-    if (urlParams.has("display")) {
-        setDisplayModeUI(true)
-    }
 
     //if the user is logged in, do ui startup script for their user and their user only
     if (localStorage.getItem("userUID") && getUserAuth()) {
