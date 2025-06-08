@@ -194,11 +194,11 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
 
 function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)): number {
     const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
-    if(sortBySelector.querySelector(`option[value="${name}"]`)) {
-        return 1
+    let opt = sortBySelector.querySelector(`option[value="${name}"]`) as HTMLOptionElement | null
+    if(!(opt instanceof HTMLOptionElement)) {
+        opt = document.createElement("option") as HTMLOptionElement
     }
     items_addSort(name, sortFN)
-    const opt = document.createElement("option")
     opt.value = name
     opt.innerText = name
     sortBySelector.append(opt)
