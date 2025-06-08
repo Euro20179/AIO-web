@@ -1,4 +1,4 @@
-function fillElement(root: HTMLElement | ShadowRoot , selector: string, text: string, fillmode: "append" | "innerhtml" | `attribute=${string}` = "append") {
+function fillElement(root: HTMLElement | ShadowRoot, selector: string, text: string, fillmode: "append" | "innerhtml" | `attribute=${string}` = "append") {
     let elem = /**@type {HTMLElement}*/(root.querySelector(selector))
     if (!elem) {
         return
@@ -14,25 +14,22 @@ function fillElement(root: HTMLElement | ShadowRoot , selector: string, text: st
 }
 
 function applyUserRating(rating: number, root: HTMLElement) {
-    for(const tier of ["splus", "s", "a", "b", "c", "d", "f", "z"]) {
-        root.classList.remove(`${tier}-tier`)
+
+    const tierSettings = settings_get("tiers")
+
+    for (const [name, _] of tierSettings) {
+        root.classList.remove(`${name}-tier`)
     }
-    if (rating > 100) {
-        root.classList.add("splus-tier")
-    } else if (rating > 96) {
-        root.classList.add("s-tier")
-    } else if (rating > 87) {
-        root.classList.add("a-tier")
-    } else if (rating > 78) {
-        root.classList.add("b-tier")
-    } else if (rating > 70) {
-        root.classList.add("c-tier")
-    } else if (rating > 65) {
-        root.classList.add("d-tier")
-    } else if (rating > 0) {
-        root.classList.add('f-tier')
-    } else {
-        root.classList.add("z-tier")
+
+    for (let [name, minRating, tierName] of tierSettings) {
+        if (
+            (typeof minRating === 'function' && minRating(rating))
+            || (typeof minRating === 'number' && rating >= minRating)
+        ) {
+            tierName ||=`${name}-tier`
+            root.classList.add(String(tierName))
+            break
+        }
     }
 }
 

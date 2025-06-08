@@ -2,6 +2,7 @@
  * This file is for functions that should be called by the ui to handle api operations
  * with client-side inputs
 */
+
 function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
     into.setItem.bind(into)("userAuth", auth)
 }
