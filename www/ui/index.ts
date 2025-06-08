@@ -72,6 +72,7 @@ async function loadInfoEntries() {
         items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
     } else {
         await refreshment
+        alert("Items refreshed")
     }
 
     setError("")

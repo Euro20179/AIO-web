@@ -155,22 +155,22 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
 
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.meta
+    return globalsNewUi.entries[String(id)]?.meta || genericMetadata(id)
 }
 
 function findUserEntryById(id: bigint): UserEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.user
+    return globalsNewUi.entries[String(id)]?.user || genericUserEntry(id)
 }
 
 function findUserEventsById(id: bigint): UserEvent[] {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.events
+    return globalsNewUi.entries[String(id)]?.events || []
 }
 
 function findInfoEntryById(id: bigint): InfoEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.info
+    return globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
 }
 function genericInfo(itemId: bigint, uid: number): InfoEntry {
     return {
