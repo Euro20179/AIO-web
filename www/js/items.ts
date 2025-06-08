@@ -300,9 +300,19 @@ function sortEvents(events: UserEvent[]) {
     })
 }
 
+const customSorts = new Map<string, ((a: InfoEntry, b: InfoEntry) => number)>
+
+function items_addSort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)) {
+    customSorts.set(name, sortFN)
+}
+
 function sortEntries(entries: InfoEntry[], sortBy: string) {
     if (sortBy === "") return entries
-    if (sortBy == "rating") {
+
+    let customSort = customSorts.get(sortBy)
+    if(customSort) {
+        entries = entries.sort(customSort)
+    } else if (sortBy == "rating") {
         entries = entries.sort((a, b) => {
             let aUInfo = findUserEntryById(a.ItemId)
             let bUInfo = findUserEntryById(b.ItemId)

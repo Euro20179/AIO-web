@@ -192,6 +192,19 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
     return 0
 }
 
+function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)): number {
+    const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+    if(sortBySelector.querySelector(`option[value="${name}"]`)) {
+        return 1
+    }
+    items_addSort(name, sortFN)
+    const opt = document.createElement("option")
+    opt.value = name
+    opt.innerText = name
+    sortBySelector.append(opt)
+    return 0
+}
+
 async function ui_askitem() {
     return await selectItemUI()
 }

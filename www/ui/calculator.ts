@@ -371,7 +371,7 @@ function buildNumber(text: string, curPos: number): [string, number] {
     let isFloat = false
     while ("0123456789".includes(text[++curPos]) || (text[curPos] === "." && !isFloat)) {
         num += text[curPos]
-        if(text[curPos] === ".") isFloat = true
+        if (text[curPos] === ".") isFloat = true
     }
     return [num, curPos]
 }
@@ -955,7 +955,7 @@ class Type {
             case 'undefined':
                 return new Str("undefined")
             case 'object':
-                if(value === null) {
+                if (value === null) {
                     return new Num(0)
                 }
                 if (value instanceof Type) {
@@ -1437,7 +1437,7 @@ class CalcVarTable {
         this.symbols.set("avg", new Func((nums) => {
             let len = nums.len().jsValue
             let total = 0
-            for(let i = 0; i < len; i++) {
+            for (let i = 0; i < len; i++) {
                 let cur = nums.getattr(new Num(i))
                 total += cur.toNum().jsValue
             }
@@ -1448,7 +1448,7 @@ class CalcVarTable {
             if (!(n instanceof Num)) {
                 return new Num(0)
             }
-            if(by) {
+            if (by) {
                 const roundBy = by.toNum().jsValue
                 return new Num(Math.round(n.jsValue * (10 ** roundBy)) / (10 ** roundBy))
             }
@@ -1810,7 +1810,7 @@ class CalcVarTable {
 
         this.symbols.set("ui_prompt", new Func((prompt, _default, cb) => {
             ui_prompt(prompt.jsStr(), _default.jsStr(), result => {
-                if(result === null) {
+                if (result === null) {
                     cb.call([])
                 } else {
                     cb.call([new Str(result)])
@@ -1830,6 +1830,18 @@ class CalcVarTable {
                 cb.call([result])
             })
             return new Num(0)
+        }))
+
+        this.symbols.set("ui_addsort", new Func((name, sortFn) => {
+            return new Num(
+                ui_addsort(
+                    name.jsStr(),
+                    (a, b) => sortFn.call([
+                        new EntryTy(a),
+                        new EntryTy(b)
+                    ]).toNum().jsValue
+                )
+            )
         }))
 
         this.symbols.set("ui_createstat", new Func((name, additive, calculator) => {
