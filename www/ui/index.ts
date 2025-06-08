@@ -314,7 +314,7 @@ async function main() {
         items_refreshMetadata(uid).then(() => {
             alert("All metadata loaded")
 
-            reorderSidebar(sortEntries(Object.values(globalsNewUi.entries).map(v => v.info), sortBySelector.value).map(v => v.ItemId), false)
+            // reorderSidebar(sortEntries(Object.values(globalsNewUi.entries).map(v => v.info), sortBySelector.value).map(v => v.ItemId), false)
             if (mode.refresh && globalsNewUi.selectedEntries.length) {
                 for (let item of globalsNewUi.selectedEntries) {
                     mode.refresh(item.ItemId)
