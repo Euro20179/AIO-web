@@ -1,0 +1,9 @@
+{
+  "short_name": "AIOW",
+  "name": "AIO Web Frontend",
+  "start_url": "/ui",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
+
