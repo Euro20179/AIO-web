@@ -279,6 +279,8 @@
         flex-grow: 1;
         min-width: 100px;
 
+        height: 30cqb;
+
         resize: both;
         overflow: auto;
     }
@@ -288,7 +290,6 @@
     }
 
     :is(#description, #notes) {
-        max-height: 50cqb;
         overflow: auto auto;
 
         /*since basically anything can be in these, create a new formatting context
