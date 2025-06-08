@@ -329,13 +329,13 @@ async function api_createEntry(params: NewEntryParams) {
 
 
 async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response | null> {
-    let userAuth = sessionStorage.getItem("userAuth") || ""
+    let userAuth = getUserAuth() || ""
     options ||= {}
     options.headers ||= {}
     if (userAuth == "") {
         try {
             userAuth = await signinUI(options?.["signin-reason"] || "")
-            sessionStorage.setItem("userAuth", userAuth)
+            setUserAuth(userAuth)
         } catch (err) {
             return null
         }

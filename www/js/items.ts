@@ -120,6 +120,18 @@ function items_setResults(items: bigint[]) {
     }
 }
 
+function items_setEntries(items: InfoEntry[]) {
+    for (let item of items) {
+        let stashed = globalsNewUi.entries[String(item.ItemId)]
+        if (!stashed) {
+            globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item, findUserEntryById(item.ItemId), findMetadataById(item.ItemId), findUserEventsById(item.ItemId))
+        }
+        else {
+            stashed.info = item
+        }
+    }
+}
+
 function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry }) {
     globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
@@ -143,22 +155,22 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
 
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)].meta
+    return globalsNewUi.entries[String(id)]?.meta
 }
 
 function findUserEntryById(id: bigint): UserEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)].user
+    return globalsNewUi.entries[String(id)]?.user
 }
 
 function findUserEventsById(id: bigint): UserEvent[] {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)].events
+    return globalsNewUi.entries[String(id)]?.events
 }
 
 function findInfoEntryById(id: bigint): InfoEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)].info
+    return globalsNewUi.entries[String(id)]?.info
 }
 function genericInfo(itemId: bigint, uid: number): InfoEntry {
     return {
@@ -228,6 +240,7 @@ async function items_refreshUserEntries(uid: number) {
 
 async function items_refreshInfoEntries(uid: number) {
     let items = await api_loadList<InfoEntry>("list-entries", uid)
+
     for (let item of items) {
         let stashed = globalsNewUi.entries[String(item.ItemId)]
         if (!stashed) {
@@ -237,35 +250,7 @@ async function items_refreshInfoEntries(uid: number) {
             stashed.info = item
         }
     }
-}
 
-async function items_loadEntries(uid: number, loadMeta: boolean = true) {
-    let loading: (Promise<InfoEntry[]> | Promise<UserEntry[]> | Promise<MetadataEntry[]>)[] = [
-        api_loadList<InfoEntry>("list-entries", uid),
-        api_loadList<UserEntry>("engagement/list-entries", uid),
-    ]
-    if (loadMeta) {
-        loading.push(api_loadList<MetadataEntry>("metadata/list-entries", uid))
-    }
-    const res = await Promise.all(loading)
-
-    let obj: Record<string, items_Entry> = {}
-    for (let tbls of res) {
-        for (let tbl of tbls) {
-            let item = obj[String(tbl.ItemId)] || new items_Entry(tbl.ItemId)
-            if (probablyMetaEntry(tbl)) {
-                item.meta = tbl
-            }
-            else if (probablyInfoEntry(tbl)) {
-                item.info = tbl
-            } else {
-                item.user = tbl
-            }
-            obj[String(tbl.ItemId)] = item
-        }
-    }
-
-    return globalsNewUi.entries = obj
 }
 
 async function items_loadLibraries(uid: number) {

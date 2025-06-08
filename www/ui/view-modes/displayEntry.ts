@@ -1023,6 +1023,10 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 }
 
+function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {
+    return open(`/ui/display.html?item-id=${itemId}`, target, popup ? "popup=true" : undefined)
+}
+
 function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string): HTMLElement {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot

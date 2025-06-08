@@ -2,6 +2,13 @@
  * This file is for functions that should be called by the ui to handle api operations
  * with client-side inputs
 */
+function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
+    into.setItem.bind(into)("userAuth", auth)
+}
+
+function getUserAuth(from: { getItem(key: string): string | null } = localStorage) {
+    return from.getItem.bind(from)("userAuth")
+}
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
@@ -13,7 +20,7 @@ const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
 }))
 
 if (cookies['login']) {
-    sessionStorage.setItem("userAuth", cookies['login'])
+    setUserAuth(cookies['login'])
 }
 
 
@@ -524,7 +531,7 @@ async function signinUI(reason: string): Promise<string> {
         return await new Promise((res, rej) => {
             //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
             setInterval(() => {
-                let auth = sessionStorage.getItem("userAuth")
+                let auth = getUserAuth()
                 if (auth) {
                     res(auth)
                 }

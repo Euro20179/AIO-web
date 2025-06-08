@@ -295,9 +295,9 @@ async function main() {
 
     mode_setMode(curModeName)
 
+
     const uid = getUidUI()
     await Promise.all([loadLibraries(), loadInfoEntries()])
-
 
     //must happen synchronously to make item render properly
 
@@ -360,7 +360,7 @@ async function main() {
     }
 
     //if the user is logged in, do ui startup script for their user and their user only
-    if (cookies['uid'] && sessionStorage.getItem("userAuth")) {
+    if (cookies['uid'] && getUserAuth()) {
         const settings = await getSettings(Number(cookies['uid']))
         doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
     }

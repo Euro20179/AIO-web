@@ -164,10 +164,10 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     if (img) {
         img.addEventListener("mousedown", e => {
             if(e.button === 1) {
-                open(`/ui/display.html?item-id=${item.ItemId}`, "_blank")
+                displayItemInWindow(item.ItemId)
             }
             else if (e.altKey) {
-                open(`/ui/display.html?item-id=${item.ItemId}`, "_blank", "popup=true,width=960,height=960")
+                displayItemInWindow(item.ItemId, "_blank", true)
             }
             else if (e.ctrlKey) {
                 sidebarEntryOpenMultiple(item)
