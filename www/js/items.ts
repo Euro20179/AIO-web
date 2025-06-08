@@ -333,6 +333,8 @@ sorts.set("cost", (a, b) => {
     return b.PurchasePrice - a.PurchasePrice
 })
 
+sorts.set("item-id", (a, b) => Number(b.ItemId - a.ItemId))
+
 sorts.set("rating-disparity", (a, b) => {
     let am = findMetadataById(a.ItemId)
     let au = findUserEntryById(a.ItemId)
