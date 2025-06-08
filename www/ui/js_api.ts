@@ -205,6 +205,13 @@ function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => numbe
     return 0
 }
 
+function ui_delsort(name: string) {
+    let opt = sortBySelector.querySelector(`option[value="${name}"]`)
+    if(!opt) return 1
+    opt.remove()
+    items_delSort(name)
+}
+
 async function ui_askitem() {
     return await selectItemUI()
 }

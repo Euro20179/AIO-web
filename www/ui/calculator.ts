@@ -1844,6 +1844,12 @@ class CalcVarTable {
             )
         }))
 
+        this.symbols.set("ui_delsort", new Func(name => {
+            return new Num(
+                ui_delsort(name.jsStr())
+            )
+        }))
+
         this.symbols.set("ui_createstat", new Func((name, additive, calculator) => {
             return new Num(
                 ui_createstat(

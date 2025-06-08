@@ -300,96 +300,87 @@ function sortEvents(events: UserEvent[]) {
     })
 }
 
-const customSorts = new Map<string, ((a: InfoEntry, b: InfoEntry) => number)>
+const sorts = new Map<string, ((a: InfoEntry, b: InfoEntry) => number)>
+
+sorts.set("rating", (a, b) => {
+    let aUInfo = findUserEntryById(a.ItemId)
+    let bUInfo = findUserEntryById(b.ItemId)
+    if (!aUInfo || !bUInfo) return 0
+    return bUInfo?.UserRating - aUInfo?.UserRating
+})
+
+sorts.set("added", (a, b) => {
+    let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
+    let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
+    let aAdded = ae?.Timestamp || ae?.After || 0
+    let bAdded = be?.Timestamp || be?.After || 0
+    return bAdded - aAdded
+})
+
+sorts.set("general-rating", (a, b) => {
+    let am = findMetadataById(a.ItemId)
+    let bm = findMetadataById(b.ItemId)
+    return bm.Rating / bm.RatingMax - am.Rating / am.RatingMax
+})
+
+sorts.set("release-year", (a, b) => {
+    let am = findMetadataById(a.ItemId)
+    let bm = findMetadataById(b.ItemId)
+    return bm.ReleaseYear - am.ReleaseYear
+})
+
+sorts.set("cost", (a, b) => {
+    return b.PurchasePrice - a.PurchasePrice
+})
+
+sorts.set("rating-disparity", (a, b) => {
+    let am = findMetadataById(a.ItemId)
+    let au = findUserEntryById(a.ItemId)
+    let bm = findMetadataById(b.ItemId)
+    let bu = findUserEntryById(b.ItemId)
+    if (!bm || !am) return 0
+    let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
+    let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
+
+    let aUser = Number(au?.UserRating)
+    let bUser = Number(bu?.UserRating)
+
+
+    return (aGeneral - aUser) - (bGeneral - bUser)
+})
+
+sorts.set("user-title", (a, b) => {
+    return a.En_Title < b.En_Title ? 0 : 1
+})
+
+sorts.set("native-title", (a, b) => {
+    let am = findMetadataById(a.ItemId)
+    let bm = findMetadataById(b.ItemId)
+    let at = am.Native_Title || a.Native_Title
+    let bt = bm.Native_Title || b.Native_Title
+    if (at === "") {
+        return bt ? 1 : 0
+    }
+    if (bt === "") {
+        return at ? 0 : 1
+    }
+    return at < bt ? 0 : 1
+})
 
 function items_addSort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)) {
-    customSorts.set(name, sortFN)
+    sorts.set(name, sortFN)
+}
+
+function items_delSort(name: string) {
+    sorts.delete(name)
 }
 
 function sortEntries(entries: InfoEntry[], sortBy: string) {
     if (sortBy === "") return entries
 
-    let customSort = customSorts.get(sortBy)
-    if(customSort) {
+    let customSort = sorts.get(sortBy)
+    if (customSort) {
         entries = entries.sort(customSort)
-    } else if (sortBy == "rating") {
-        entries = entries.sort((a, b) => {
-            let aUInfo = findUserEntryById(a.ItemId)
-            let bUInfo = findUserEntryById(b.ItemId)
-            if (!aUInfo || !bUInfo) return 0
-            return bUInfo?.UserRating - aUInfo?.UserRating
-        })
-    } else if (sortBy == "added") {
-        entries = entries.sort((a, b) => {
-            let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
-            let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
-            let aAdded = ae?.Timestamp || ae?.After || 0
-            let bAdded = be?.Timestamp || be?.After || 0
-            return bAdded - aAdded
-        })
-    } else if (sortBy == "cost") {
-        entries = entries.sort((a, b) => {
-            return b.PurchasePrice - a.PurchasePrice
-        })
-    } else if (sortBy == "general-rating") {
-        entries = entries.sort((a, b) => {
-            let am = findMetadataById(a.ItemId)
-            let bm = findMetadataById(b.ItemId)
-            if (!bm || !am) return 0
-            return normalizeRating(bm.Rating, bm.RatingMax || 100) - normalizeRating(am.Rating, am.RatingMax || 100)
-        })
-    } else if (sortBy == "rating-disparity") {
-        entries = entries.sort((a, b) => {
-            let am = findMetadataById(a.ItemId)
-            let au = findUserEntryById(a.ItemId)
-            let bm = findMetadataById(b.ItemId)
-            let bu = findUserEntryById(b.ItemId)
-            if (!bm || !am) return 0
-            let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
-            let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
-
-            let aUser = Number(au?.UserRating)
-            let bUser = Number(bu?.UserRating)
-
-
-            return (aGeneral - aUser) - (bGeneral - bUser)
-        })
-    } else if (sortBy == "release-year") {
-        entries = entries.sort((a, b) => {
-            let am = findMetadataById(a.ItemId)
-            let bm = findMetadataById(b.ItemId)
-            return (bm?.ReleaseYear || 0) - (am?.ReleaseYear || 0)
-        })
-    } else if (sortBy === "user-title") {
-        entries = entries.sort((a, b) => {
-            return a.En_Title < b.En_Title ? 0 : 1
-        })
-    } else if (sortBy === "auto-title") {
-        entries = entries.sort((a, b) => {
-            let am = findMetadataById(a.ItemId)
-            let bm = findMetadataById(b.ItemId)
-            let at = am.Title || am.Native_Title || a.En_Title || a.Native_Title
-            let bt = bm.Title || bm.Native_Title || b.En_Title || b.Native_Title
-            return at < bt ? 0 : 1
-        })
-    } else if (sortBy === "native-title") {
-        entries = entries.sort((a, b) => {
-            let am = findMetadataById(a.ItemId)
-            let bm = findMetadataById(b.ItemId)
-            let at = am.Native_Title || a.Native_Title
-            let bt = bm.Native_Title || b.Native_Title
-            if (at === "") {
-                return bt ? 1 : 0
-            }
-            if (bt === "") {
-                return at ? 0 : 1
-            }
-            return at < bt ? 0 : 1
-        })
-    } else if (sortBy === "item-id") {
-        entries = entries.sort((a, b) => {
-            return Number(b.ItemId - a.ItemId)
-        })
     }
     return entries
 }
