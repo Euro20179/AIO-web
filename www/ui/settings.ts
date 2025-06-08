@@ -1,6 +1,8 @@
 const settings = {
+    //list so that the user can determine the tier order
     tiers: [
-        ["splus", 100],
+        //name of the tier, (minimum rating, or a func => boolean), optional css className
+        ["splus", 101],
         ["s", 97],
         ["a", 88],
         ["b", 79],
