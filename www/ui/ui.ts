@@ -555,6 +555,9 @@ async function signinUI(reason: string): Promise<string> {
             let username = data.get("username")
             let password = data.get("password")
             loginPopover.close()
+
+            api_username2UID(username!.toString()).then(uid => storeUserUID(String(uid)))
+
             res(btoa(`${username}:${password}`))
         }
 
