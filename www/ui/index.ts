@@ -373,6 +373,7 @@ async function main() {
 
     //if the user is logged in, do ui startup script for their user and their user only
     if (cookies['uid'] && getUserAuth()) {
+        ui_setuid(cookies['uid'])
         const settings = await getSettings(Number(cookies['uid']))
         doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
     }
