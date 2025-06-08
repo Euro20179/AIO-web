@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Settings</title>
+    <link href="/ui/styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1>Settings</h1>
+    <h3 id="status"></h3>
+    <form method="get" action="javascript:void(0)">
+        <input name="setting" value="StartupLang" type="hidden">
+        <label for="startup-lang">Startup script language</label>
+        <select id="startup-lang" name="value" onchange="done(this.form)">
+            <option value="javascript">javascript</option>
+            <option value="aiol">aiol</option>
+        </select>
+    </form>
+    <form method="get" action="javascript:void(0)" id="script-form">
+        <input name="setting" value="UIStartupScript" type="hidden">
+        <label for="startup-script">Startup script</label>
+        <textarea id="startup-script" onchange="done(this.form)" rows="40" cols="80" form="script-form"
+            name="value"></textarea>
+    </form>
+</body>
+<script>
+
+    const urlData = new URLSearchParams(document.location.search)
+    const uid = Number(urlData.get("uid") || prompt("uid"))
+
+    fetch(`/settings/get?uid=${uid}`)
+        .then(res => res.json())
+        .then(settings => {
+            window['startup-script'].value = settings["UIStartupScript"]
+            window['startup-lang'].value = settings['StartupLang']
+        })
+
+    function alert(text) {
+        status.innerText = text
+    }
+    function done(form) {
+        const data = new FormData(form)
+        console.log(data)
+        fetch(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}`)
+            .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
+    }
+</script>
+
+</html>

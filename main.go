@@ -204,7 +204,16 @@ func getSetting(w http.ResponseWriter, req *http.Request) {
 }
 
 func setSetting(w http.ResponseWriter, req *http.Request) {
-	uid, status, err := ckAuth(req.URL.Query().Get("auth"))
+	auth := req.URL.Query().Get("auth")
+	if auth == "" {
+		header := req.Header.Get("Authorization")
+
+		if strings.HasPrefix(header, "Basic ") {
+			auth = header[len("Basic "):]
+		}
+	}
+
+	uid, status, err := ckAuth(auth)
 	if err != nil {
 		w.WriteHeader(status)
 		println(err.Error())
@@ -256,6 +265,7 @@ start:
 
 	http.HandleFunc("/user/{username}", userRedirect)
 	http.HandleFunc("/uid/{uid}", userIDRedirect)
+
 	http.HandleFunc("/settings/get", getSetting)
 	http.HandleFunc("/settings/set", setSetting)
 
