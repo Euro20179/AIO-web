@@ -65,8 +65,18 @@ async function loadLibraries() {
 
 async function loadInfoEntries() {
     setError("Loading items")
-    await items_refreshInfoEntries(getUidUI())
+
+    let refreshment = items_refreshInfoEntries(getUidUI())
+    let cachedItems = localStorage.getItem("items")
+    if (cachedItems) {
+        items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
+    } else {
+        await refreshment
+    }
+
     setError("")
+
+    localStorage.setItem("items", Object.values(globalsNewUi.entries).map(v => api_serializeEntry(v.info)).join("\n"))
 
     items_refreshUserEntries(getUidUI()).then(() => {
         updateInfo2(globalsNewUi.entries)
@@ -297,9 +307,10 @@ async function main() {
 
 
     const uid = getUidUI()
-    await Promise.all([loadLibraries(), loadInfoEntries()])
 
     //must happen synchronously to make item render properly
+    await loadInfoEntries()
+    loadLibraries()
 
     api_listTypes().then(types => {
         const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
