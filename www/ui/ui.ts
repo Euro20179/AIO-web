@@ -162,6 +162,12 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     userScripts.set(name, new UserScript(onrun, desc))
 }
 
+/**
+ * Shows a prompt dialog to the user
+ * @param {string} html - The prompt message to display
+ * @param {string} [_default] - Optional default value for the prompt
+ * @returns {Promise<string | null>} the user's response
+ */
 async function promptUI(html?: string, _default?: string): Promise<string | null> {
     const pEl = document.getElementById("prompt") as HTMLDialogElement
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
@@ -183,24 +189,42 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
     })
 }
 
+/**
+ * Sets all statistics to 0
+ */
 function resetStatsUI() {
     for (let stat of statistics) {
         stat.set(0)
     }
 }
 
+/**
+ * Opens a modal by id
+ * @param {string} modalName - the id of the modal to open
+ * @param root - the elemnt which is the parent of the modal to find
+ */
 function openModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
     dialog.showModal()
 }
 
+/**
+ * Closes a modal by id
+ * @param {string} modalName - the id of the modal to close
+ * @param root - the elemnt which is the parent of the modal to find
+ */
 function closeModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
     dialog.close()
 }
 
+/**
+ * Toggles a modal's open status by id
+ * @param {string} modalName - the id of the modal to toggle
+ * @param root - the elemnt which is the parent of the modal to find
+ */
 function toggleModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
@@ -261,6 +285,9 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
     }
 }
 
+/**
+ * Sorts entries, and reorders the sidebar based on the selected sort in the sort-by selector
+ */
 function sortEntriesUI() {
     let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), sortBySelector.value)
     let ids = newEntries.map(v => v.ItemId)
@@ -269,18 +296,29 @@ function sortEntriesUI() {
     reorderSidebar(ids)
 }
 
+/**
+ * Gets the currently selected uid from the uid selector
+ */
 function getUidUI() {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
     if (!uidSelector) return 0
     return Number(uidSelector.value)
 }
 
-function getSearchDataUI() {
+/**
+ * Gets the form data from the search form
+ * @returns {FormData} the data
+ */
+function getSearchDataUI(): FormData {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
     let data = new FormData(form)
     return data
 }
 
+/**
+ * Akin to the user submitting the search form
+ * @param {Record<string, string>} params - values to override
+ */
 function mkSearchUI(params: Record<string, string>) {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
     for (let param in params) {
@@ -291,6 +329,15 @@ function mkSearchUI(params: Record<string, string>) {
     form.submit()
 }
 
+/**
+ * Performs a search based on the search form
+ * Side effects:
+ * - sets the result count statistic to the amount of results
+ * - sets the global results list to the new results
+ * - clears selected items
+ * - re-renders the side bar with the new results
+ * - if there are no results, sets the error to "No results"
+ */
 async function loadSearchUI() {
     let form = document.getElementById("sidebar-form") as HTMLFormElement
 
@@ -315,6 +362,10 @@ async function loadSearchUI() {
     renderSidebar(globalsNewUi.results.map(v => v.info), false)
 }
 
+/**
+ * Similar to aio_delete, but asks the user first
+ * @param {InfoEntry} item - the item to delete
+ */
 function deleteEntryUI(item: InfoEntry) {
     if (!confirm("Are you sure you want to delete this item")) {
         return
@@ -329,6 +380,11 @@ function deleteEntryUI(item: InfoEntry) {
     })
 }
 
+/**
+ * Based on an id, and location provider, find the location of that item
+ * @param {bigint} id - the item to find the location of
+ * @param {string} [provider] - the provider to use
+ */
 async function fetchLocationUI(id: bigint, provider?: string) {
     let res = await api_fetchLocation(id, getUidUI(), provider)
     if (res?.status !== 200) {
@@ -373,6 +429,13 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     })
 }
 
+/**
+ * Creates a new entry based on a form
+ * Side effects:
+ * - adds the new item to the global entries list
+ * - calls ui_search() with <q>En_Title = 'new-item-name'</q>
+ * @param {HTMLFormElement} form - the form to use for creating an entry
+ */
 async function newEntryUI(form: HTMLFormElement) {
     document.getElementById("new-entry")?.hidePopover()
     const data = new FormData(form)
@@ -536,7 +599,7 @@ type SelectItemOptions = Partial<{
 }>
 
 /**
- * @description lets the user select an item, be sure to use fillItemListingUI first
+ * lets the user select an item, be sure to use fillItemListingUI first
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
     const popover = document.getElementById("items-listing") as HTMLDialogElement
@@ -702,16 +765,9 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     }
 }
 
-function setFaviconUI(path: string) {
-    let link = (document.querySelector("link[rel=\"shortcut icon\"]") || document.createElement("link")) as HTMLLinkElement
-    link.setAttribute("rel", "shortcut icon")
-    link.href = path
-    document.head.append(link)
-}
-
 function updatePageInfoWithItemUI(item: InfoEntry) {
     document.title = `[AIO] | ${item.En_Title || item.Native_Title}`
-    setFaviconUI(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
+    ua_setfavicon(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
 }
 
 type StartupLang = "javascript" | "aiol" | ""

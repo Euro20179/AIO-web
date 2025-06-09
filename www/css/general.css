@@ -136,6 +136,7 @@
 
     mark {
         background-color: var(--yellow);
+        color: var(--main);
     }
 
     :is(input, select):required:invalid {

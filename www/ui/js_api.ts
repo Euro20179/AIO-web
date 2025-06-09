@@ -15,6 +15,17 @@ function ua_download(data: string, name: string, ft: string): number {
 }
 
 /**
+ * Sets the favicon
+ * @param {string} path - the url for the favicon
+ */
+function ua_setfavicon(path: string) {
+    let link = (document.querySelector("link[rel=\"shortcut icon\"]") || document.createElement("link")) as HTMLLinkElement
+    link.setAttribute("rel", "shortcut icon")
+    link.href = path
+    document.head.append(link)
+}
+
+/**
  * Shows a prompt dialog to the user
  * @param {string} prompt - The prompt message to display
  * @param {string} [_default] - Optional default value for the prompt

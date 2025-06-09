@@ -105,14 +105,29 @@ generate_js_api_docs() {
         if ($1 == "@param") {
             # Try to match with type first
 
-            if ($2 ~ /^{/ && $2 ~ /}$/) {
+
+            if ($2 ~ /^{/) {
+                param_type_end = 0
+                for (i = 2; i < NF; i++) {
+                    if ($i ~ /}$/) {
+                        param_type_end = i
+                        break
+                    }
+                }
+
+                param_type = ""
                 sub(/{/, "", $2)
-                sub(/}/, "", $2)
+                sub(/}/, "", $param_type_end)
+                for (i = 2; i <= param_type_end; i++) {
+                    sub(/</, "\\&lt;", $i)
+                    param_type = param_type " " $i
+                }
+                param_name_pos = param_type_end + 1
                 param_text = param_text "<span class=\"parameter-item\">"
-                param_text = param_text "<span class=\"parameter-name\"><code>" $3 "</code></span>"
-                param_text = param_text "<span class=\"parameter-type\">(" $2 ")</span>"
+                param_text = param_text "<span class=\"parameter-name\"><code>" $param_name_pos "</code></span>"
+                param_text = param_text "<span class=\"parameter-type\">(" param_type ")</span>"
                 desc = ""
-                for (i = 4; i <= NF; i++) {
+                for (i = 4 + param_type_end - 2; i <= NF; i++) {
                     desc = desc " " $i
                 }
                 param_text = param_text "<span class=\"parameter-description\">" desc "</span>"
@@ -178,6 +193,7 @@ generate_js_api_docs() {
             
             # Print return type if any
             if (return_text != "") {
+                sub(/</, "\\&lt;", return_text)
                 print "<section class=\"return\">"
                 print "<h4>Returns</h4>"
                 print "<span class=\"return-type\">" return_text "</span>"
