@@ -891,11 +891,9 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         notesEl.innerHTML = parseNotes(user.Notes)
 
     //Rating
-    if (ratingEl && user.UserRating) {
+    if (ratingEl) {
         applyUserRating(user.UserRating, ratingEl)
-        ratingEl.innerHTML = String(user.UserRating)
-    } else if (ratingEl) {
-        ratingEl.innerText = "Unrated"
+        ratingEl.innerHTML = user.UserRating ? String(user.UserRating) : "Unrated"
     }
 
     //Audience Rating
