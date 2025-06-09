@@ -37,15 +37,15 @@ if(cookies['uid']) {
 //     sessionStorage.setItem("userAuth", document.cookie.slice("login=".length))
 // }
 
-type _StatCalculator = (item: InfoEntry, multiplier: number) => number
+type StatCalculator = (item: InfoEntry, multiplier: number) => number
 class Statistic {
     name: string
-    calculation: _StatCalculator
+    calculation: StatCalculator
     additive: boolean
 
     #value: number = 0
     el: HTMLElement
-    constructor(name: string, additive: boolean, calculation: _StatCalculator) {
+    constructor(name: string, additive: boolean, calculation: StatCalculator) {
         this.name = name
         this.additive = additive
         this.calculation = calculation
@@ -157,7 +157,7 @@ function toggleModalUI(modalName: string, root: { getElementById(elementId: stri
     }
 }
 
-function createStat(name: string, additive: boolean, calculation: _StatCalculator) {
+function createStat(name: string, additive: boolean, calculation: StatCalculator) {
     statistics.push(new Statistic(name, additive, calculation))
     setResultStat(name, 0)
 }

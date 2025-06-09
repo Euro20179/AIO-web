@@ -93,27 +93,23 @@ generate_js_api_docs() {
         
         # Handle @param tag
         if ($0 ~ /^@param/) {
-            # Extract parameter name and description
-            match($0, /@param\s+([^\s]+)\s+-\s+(.+)/, arr)
+            # Try to match with type first
+            match($0, /@param\s+{([^}]+)}\s+([^\s]+)\s+-\s+(.+)/, arr)
             if (arr[1] != "") {
                 param_text = param_text "<span class=\"parameter-item\">"
-                param_text = param_text "<span class=\"parameter-name\"><code>" arr[1] "</code></span>"
-                # Extract type from function signature
-                if (func_name != "") {
-                    match($0, /function\s+[^(]+\(([^)]+)\)/, sig_arr)
-                    if (sig_arr[1] != "") {
-                        split(sig_arr[1], params, ",")
-                        for (i in params) {
-                            split(params[i], param_parts, ":")
-                            if (param_parts[1] == arr[1]) {
-                                param_text = param_text "<span class=\"parameter-type\">(" param_parts[2] ")</span>"
-                                break
-                            }
-                        }
-                    }
-                }
-                param_text = param_text "<span class=\"parameter-description\">" arr[2] "</span>"
+                param_text = param_text "<span class=\"parameter-name\"><code>" arr[2] "</code></span>"
+                param_text = param_text "<span class=\"parameter-type\">(" arr[1] ")</span>"
+                param_text = param_text "<span class=\"parameter-description\">" arr[3] "</span>"
                 param_text = param_text "</span>"
+            } else {
+                # Try to match without type
+                match($0, /@param\s+([^\s]+)\s+-\s+(.+)/, arr)
+                if (arr[1] != "") {
+                    param_text = param_text "<span class=\"parameter-item\">"
+                    param_text = param_text "<span class=\"parameter-name\"><code>" arr[1] "</code></span>"
+                    param_text = param_text "<span class=\"parameter-description\">" arr[2] "</span>"
+                    param_text = param_text "</span>"
+                }
             }
             next
         }
@@ -128,7 +124,7 @@ generate_js_api_docs() {
         }
         
         # Collect main documentation text
-        doc_text = doc_text $0 " "
+        doc_text = doc_text $0 "<BR>"
     }
     
     # Process function declaration
@@ -168,29 +164,29 @@ generate_js_api_docs() {
             }
             
             # Print function documentation
-            print "<li class=\"function-doc\">"
-            print "<span class=\"function-name\"><code>" func_name "</code></span>"
+            print "<article class=\"doc-card\">"
+            print "<p class=\"function-name\"><code>" func_name "</code></p>"
             if (doc_text != "") {
-                print "<span class=\"function-description\">" doc_text "</span>"
+                print "<p class=\"function-description\">" doc_text "</p>"
             }
             
             # Print parameters if any
             if (param_text != "") {
-                print "<span class=\"parameter-section\">"
-                print "<span class=\"parameter-header\">Parameters:</span>"
+                print "<section class=\"parameters\">"
+                print "<h4>Parameters</h4>"
                 print "<span class=\"parameter-list\">" param_text "</span>"
-                print "</span>"
+                print "</section>"
             }
             
             # Print return type if any
             if (return_text != "") {
-                print "<span class=\"return-section\">"
-                print "<span class=\"return-header\">Returns:</span>"
+                print "<section class=\"return\">"
+                print "<h4>Returns</h4>"
                 print "<span class=\"return-type\">" return_text "</span>"
-                print "</span>"
+                print "</section>"
             }
             
-            print "</li>"
+            print "</article>"
         }
     }
     

@@ -2,6 +2,10 @@
 <section class="js-api-docs">
     <link rel="stylesheet" href="/css/general.css">
     <style>
+        * {
+            color: var(--text-color);
+        }
+
         .js-api-docs {
             max-width: 1200px;
             margin: 0 auto;
@@ -10,7 +14,6 @@
 
         .js-api-docs h1 {
             margin-bottom: 0.5rem;
-            color: var(--text-color);
         }
 
         .search-container {
@@ -23,7 +26,6 @@
             background: var(--main);
             border: 1px solid var(--blue);
             border-radius: var(--border-roundness);
-            color: var(--text-color);
             font-family: monospace;
         }
 
@@ -36,7 +38,6 @@
             margin: 1rem 0 0.5rem;
             padding-bottom: 0.25rem;
             border-bottom: 2px solid var(--blue);
-            color: var(--text-color);
         }
 
         .js-api-docs ul {
@@ -48,7 +49,7 @@
             gap: 0.5rem;
         }
 
-        .function-doc {
+        .doc-card {
             background: var(--main);
             border: 1px solid var(--blue);
             border-radius: var(--border-roundness);
@@ -56,14 +57,30 @@
             height: 100%;
         }
 
-        .function-name {
+        .function-name,
+        .event-name {
             display: block;
+            font-size: 1.1rem;
+            margin: 0;
             margin-bottom: 0.25rem;
         }
 
-        .function-name code {
-            font-size: 1.1rem;
+        .function-signature {
+            margin: 0;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--lavender);
+        }
+
+        .function-signature code {
+            font-weight: normal;
+            background: none;
+            padding: 0;
+        }
+
+        code {
             font-weight: 600;
+            font-family: monospace;
             color: var(--light-blue);
             background: var(--secondary);
             padding: 0.1rem 0.3rem;
@@ -71,24 +88,18 @@
         }
 
         .function-description {
-            display: block;
+            margin: 0;
             margin-bottom: 0.5rem;
-            color: var(--text-color);
         }
 
-        .parameter-section,
-        .return-section {
-            display: block;
+        .parameters, .return {
             margin-top: 0.5rem;
             padding-top: 0.5rem;
             border-top: 2px solid var(--secondary);
         }
 
-        .parameter-header,
-        .return-header {
-            font-weight: 600;
-            color: var(--text-color);
-            margin-bottom: 0.25rem;
+        :where(.parameters, .return) > h4 {
+            margin: 0 0 0.25rem 0;
         }
 
         .parameter-list {
@@ -101,14 +112,6 @@
             padding-left: 0.5rem;
         }
 
-        .parameter-name code {
-            font-family: monospace;
-            background: var(--secondary);
-            padding: 0.1rem 0.2rem;
-            border-radius: var(--border-roundness);
-            color: var(--light-blue);
-        }
-
         .parameter-type {
             color: var(--lavender);
             font-family: monospace;
@@ -118,7 +121,6 @@
         .parameter-description {
             display: block;
             margin-top: 0.125rem;
-            color: var(--text-color);
         }
 
         .return-type {
@@ -133,13 +135,17 @@
     </style>
     <h1>JavaScript API</h1>
     <p>The application provides a JavaScript API that can be used to interact with the UI and data.</p>
+    <p>
+        Generally the <code>ui_*</code> functions will have side effects that modify the ui. for pure versions of
+        functions use <code>aio_*</code> functions.
+    </p>
     <div class="search-container">
         <input type="text" class="search-input" placeholder="Search functions..." id="function-search">
     </div>
     <script>
         document.getElementById("function-search").addEventListener("input", function (e) {
             const searchTerm = e.target.value.toLowerCase();
-            const functions = document.querySelectorAll(".function-doc");
+            const functions = document.querySelectorAll(".doc-card");
             const sections = document.querySelectorAll(".js-api-docs h3");
             let currentSection = null;
             let hasVisibleFunctions = false;
@@ -168,5 +174,17 @@
             });
         });
     </script>
-    {{CONTENT}}
+    <section>
+        <h2>API Events</h2>
+        <ul>
+            <li class="doc-card">
+                <p class="function-name"><code>aio-metadata-loaded</code></p> The metadata from pageload has finished
+                loading
+            </li>
+        </ul>
+    </section>
+    <section>
+        <h2>API Functions</h2>
+        {{CONTENT}}
+    </section>
 </section>

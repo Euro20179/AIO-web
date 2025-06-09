@@ -1,8 +1,8 @@
 /**
  * Downloads data as a file in the browser
- * @param data - The content to download
- * @param name - The filename for the download
- * @param ft - The file type/mime type
+ * @param {string} data - The content to download
+ * @param {string} name - The filename for the download
+ * @param {string} ft - The file type/mime type
  * @returns 0 on success
  */
 function ua_download(data: string, name: string, ft: string): number {
@@ -16,9 +16,9 @@ function ua_download(data: string, name: string, ft: string): number {
 
 /**
  * Shows a prompt dialog to the user
- * @param prompt - The prompt message to display
- * @param _default - Optional default value for the prompt
- * @param cb - Optional callback function that receives the user's input
+ * @param {string} prompt - The prompt message to display
+ * @param {string} [_default] - Optional default value for the prompt
+ * @param {function(string|null): any} [cb] - Optional callback function that receives the user's input
  */
 function ui_prompt(prompt: string, _default?: string, cb?: (result: string | null) => any) {
     promptUI(prompt, _default).then(cb)
@@ -26,20 +26,22 @@ function ui_prompt(prompt: string, _default?: string, cb?: (result: string | nul
 
 /**
  * Creates a new statistic in the UI
- * @param name - Name of the statistic
- * @param additive - Whether the stat is additive
- * @param calculation - The calculation function for the stat
+ * Side effects:
+ * - puts a statistic in the statistics area
+ * @param {string} name - Name of the statistic
+ * @param {boolean} additive - Whether the stat is additive
+ * @param {StatCalculator} calculation - The calculation function for the stat
  * @returns 0 on success
  */
-function ui_createstat(name: string, additive: boolean, calculation: _StatCalculator): number {
+function ui_createstat(name: string, additive: boolean, calculation: StatCalculator): number {
     createStat(name, additive, calculation)
     return 0
 }
 
 /**
  * Sets the value of a statistic
- * @param name - Name of the statistic
- * @param val - Value to set
+ * @param {string} name - Name of the statistic
+ * @param {number} val - Value to set
  * @returns The value that was set
  */
 function ui_setstat(name: string, val: number): number {
@@ -49,7 +51,9 @@ function ui_setstat(name: string, val: number): number {
 
 /**
  * Deletes a statistic
- * @param name - Name of the statistic to delete
+ * Side effects:
+ * - removes the statistic from the statistics area
+ * @param {string} name - Name of the statistic to delete
  * @returns true if successful, false otherwise
  */
 function ui_delstat(name: string): boolean {
@@ -58,7 +62,11 @@ function ui_delstat(name: string): boolean {
 
 /**
  * Sorts entries in the UI by a specified criteria
- * @param by - The sorting criteria
+ * Side effects:
+ * - clears all selected items
+ * - reorders the sidebar
+ * - selects the first item in the sidebar
+ * @param {string} by - The sorting criteria
  * @returns 0 on success
  */
 function ui_sort(by: string): number {
@@ -70,8 +78,13 @@ function ui_sort(by: string): number {
 
 /**
  * Performs a search in the UI
- * @param query - The search query
- * @param cb - Optional callback that receives the search results
+ * Side effects:
+ * - fills the search bar with {query}
+ * - clears selected items
+ * - refills the sidebar with the new results
+ * - uses the sort-by select element for sorting
+ * @param {string} query - The search query
+ * @param {function(items_Entry[]): any} [cb] - Optional callback that receives the search results
  * @returns 0 on success
  */
 function ui_search(query: string, cb?: (results: items_Entry[]) => any): number {
@@ -87,7 +100,7 @@ function ui_search(query: string, cb?: (results: items_Entry[]) => any): number 
 
 /**
  * Sets the current UI mode
- * @param modeName - Name of the mode to set
+ * @param {string} modeName - Name of the mode to set
  * @returns 0 on success, 1 if mode is invalid
  */
 function ui_setmode(modeName: string): number {
@@ -109,8 +122,8 @@ function ui_sidebarclear(): number {
 }
 
 /**
- * Selects an item in the sidebar
- * @param id - The ID of the item to select (can be bigint or entry object)
+ * Renders an item in the sidebar (duplicates allowed)
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to select (can be bigint or entry object)
  * @returns 0 on success, 1 if item not found
  */
 function ui_sidebarselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
@@ -126,8 +139,8 @@ function ui_sidebarselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): n
 }
 
 /**
- * Renders an item in the sidebar
- * @param id - The ID of the item to render (can be bigint or entry object)
+ * Renders a sidebar-entry, and returns the resulting element
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to render (can be bigint or entry object)
  * @returns HTMLElement on success, 1 if item not found
  */
 function ui_sidebarrender(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTMLElement {
@@ -143,7 +156,7 @@ function ui_sidebarrender(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1
 
 /**
  * Toggles the selection state of an item
- * @param id - The ID of the item to toggle (can be bigint or entry object)
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to toggle (can be bigint or entry object)
  * @returns 0 if deselected, 1 if selected, 2 if item not found
  */
 function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
@@ -165,7 +178,7 @@ function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
 
 /**
  * Selects an item
- * @param id - The ID of the item to select (can be bigint or entry object)
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to select (can be bigint or entry object)
  * @returns HTMLElement on success, 1 if item not found, 2 if already selected
  */
 function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | HTMLElement {
@@ -184,7 +197,7 @@ function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | 
 
 /**
  * Deselects an item
- * @param id - The ID of the item to deselect (can be bigint or entry object)
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to deselect (can be bigint or entry object)
  * @returns Empty string on success, 1 if item not found, 2 if not selected
  */
 function ui_deselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | "" {
@@ -203,8 +216,8 @@ function ui_deselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 
 }
 
 /**
- * Renders an item
- * @param id - The ID of the item to render (can be bigint or entry object)
+ * Renders a display-entry, and returns the resulting element
+ * @param {bigint|InfoEntry|MetadataEntry|UserEntry} id - The ID of the item to render (can be bigint or entry object)
  * @returns HTMLElement on success, 1 if item not found
  */
 function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTMLElement {
@@ -230,7 +243,7 @@ function ui_clear(): number {
 }
 
 /**
- * Clears the current mode
+ * Clears the current mode (including anything added with ui_put())
  * @returns 0 on success, 1 if mode doesn't support clearing
  */
 function ui_modeclear(): number {
@@ -243,7 +256,9 @@ function ui_modeclear(): number {
 
 /**
  * Sets the user ID in the UI
- * @param newId - The new user ID
+ * Side effects:
+ * - sets the uid select element to the new uid
+ * @param {string} newId - The new user ID
  * @returns The new user ID
  */
 function ui_setuid(newId: string): string {
@@ -262,7 +277,11 @@ function ui_getuid(): number {
 
 /**
  * Sets the search results in the UI
- * @param results - Array of InfoEntry objects
+ * Side effects:
+ * - re-renders the sidebar
+ * - clears selected items
+ * - selects the first item from the sidebar
+ * @param {InfoEntry[]} results - Array of InfoEntry objects
  * @returns 0 on success
  */
 function ui_setresults(results: InfoEntry[]): number {
@@ -289,7 +308,9 @@ function ui_selected(): InfoEntry[] {
 
 /**
  * Adds HTML content to the current mode
- * @param html - HTML content to add (string or HTMLElement)
+ * Side effects:
+ * - ONLY clearable with ui_modeclear()
+ * @param {...(string|HTMLElement)} html - HTML content to add (string or HTMLElement)
  * @returns Empty string on success, 1 if mode doesn't support putting content
  */
 function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
@@ -304,7 +325,10 @@ function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
 
 /**
  * Reorders items in the sidebar
- * @param ids - Array of item IDs to reorder
+ * Side effects:
+ * - clears selected entries
+ * - selects the new first item in the sidebar
+ * @param {...(bigint|InfoEntry|MetadataEntry|UserEntry)} ids - Array of item IDs to reorder
  * @returns 0 on success
  */
 function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEntry)[]): number {
@@ -315,8 +339,10 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
 
 /**
  * Adds a new sorting option
- * @param name - Name of the sorting option
- * @param sortFN - Sorting function
+ * Side effects:
+ * - adds the new option to the sort-by element
+ * @param {string} name - Name of the sorting option
+ * @param {function(InfoEntry,InfoEntry): number} sortFN - Sorting function
  * @returns 0 on success
  */
 function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)): number {
@@ -334,7 +360,9 @@ function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => numbe
 
 /**
  * Removes a sorting option
- * @param name - Name of the sorting option to remove
+ * Side effects:
+ * - removes the option from the sort-by element
+ * @param {string} name - Name of the sorting option to remove
  * @returns 1 if option not found
  */
 function ui_delsort(name: string) {
@@ -354,7 +382,7 @@ async function ui_askitem() {
 
 /**
  * Performs a search query
- * @param query - The search query
+ * @param {string} query - The search query
  * @returns Promise that resolves to an array of InfoEntry objects
  */
 async function aio_search(query: string): Promise<InfoEntry[]> {
@@ -363,7 +391,7 @@ async function aio_search(query: string): Promise<InfoEntry[]> {
 
 /**
  * Sets an entry in the system
- * @param entry - The InfoEntry to set
+ * @param {InfoEntry} entry - The InfoEntry to set
  * @returns Promise that resolves to true if successful, false otherwise
  */
 async function aio_setentry(entry: InfoEntry): Promise<boolean> {
@@ -379,7 +407,7 @@ async function aio_setentry(entry: InfoEntry): Promise<boolean> {
 
 /**
  * Sets metadata for an entry
- * @param meta - The MetadataEntry to set
+ * @param {MetadataEntry} meta - The MetadataEntry to set
  * @returns Promise that resolves to true if successful, false otherwise
  */
 async function aio_setmeta(meta: MetadataEntry): Promise<boolean> {
@@ -397,7 +425,7 @@ async function aio_setmeta(meta: MetadataEntry): Promise<boolean> {
 
 /**
  * Sets a user entry
- * @param user - The UserEntry to set
+ * @param {UserEntry} user - The UserEntry to set
  * @returns Promise that resolves to true if successful, false otherwise
  */
 async function aio_setuser(user: UserEntry): Promise<boolean> {
