@@ -113,6 +113,10 @@ class items_Entry {
     }
 }
 
+/**
+ * Sets the global results list
+ * @param {bigint[]} items - the item ids to set as the reults
+*/
 function items_setResults(items: bigint[]) {
     globalsNewUi.results = []
     for (let id of items) {
@@ -120,6 +124,10 @@ function items_setResults(items: bigint[]) {
     }
 }
 
+/**
+ * Updates or creates entries in the global entries map
+ * @param {InfoEntry[]} items - the items to update or create
+*/
 function items_setEntries(items: InfoEntry[]) {
     for (let item of items) {
         let stashed = globalsNewUi.entries[String(item.ItemId)]
@@ -132,6 +140,10 @@ function items_setEntries(items: InfoEntry[]) {
     }
 }
 
+/**
+ * Adds an item to the global entries map
+ * @param item - the item to add
+*/
 function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry }) {
     globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
@@ -153,25 +165,50 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
     return m
 }
 
+/**
+    * Finds the metadata for an entry by id
+    * If it can't find it, a generic metadata object is returned
+    * @param {bigint} id - the id to find metadata for
+    * @returns {MetadataEntry}
+*/
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)]?.meta || genericMetadata(id)
 }
 
+/**
+    * Finds the user info for an entry by id
+    * If it can't find it, a generic user info object is returned
+    * @param {bigint} id - the id to find user info for
+    * @returns {UserEntry}
+*/
 function findUserEntryById(id: bigint): UserEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)]?.user || genericUserEntry(id)
 }
 
+/**
+    * Finds the event list for an entry by id
+    * If it can't find it, an empty list is returned
+    * @param {bigint} id - the id to find events for
+    * @returns {UserEvent[]}
+*/
 function findUserEventsById(id: bigint): UserEvent[] {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
     return globalsNewUi.entries[String(id)]?.events || []
 }
 
+/**
+    * Finds the info for an entry by id
+    * If it can't find it, a generic info object is returned
+    * @param {bigint} id - the id to find info for
+    * @returns {InfoEntry}
+*/
 function findInfoEntryById(id: bigint): InfoEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
     return globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
 }
+
 function genericInfo(itemId: bigint, uid: number): InfoEntry {
     return {
         Uid: uid,
@@ -223,6 +260,10 @@ function genericUserEntry(itemId: bigint): UserEntry {
     }
 }
 
+/**
+    * Puts the metadata for all entries in the global entries map into an object
+    * @returns a record with item ids for keys, and MetadataEntry values
+*/
 function items_getAllMeta() {
     let meta: Record<string, MetadataEntry> = {}
     for (let key in globalsNewUi.entries) {
@@ -231,6 +272,9 @@ function items_getAllMeta() {
     return meta
 }
 
+/**
+    * loads all user info, and updates the global entries list
+*/
 async function items_refreshUserEntries(uid: number) {
     let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
     for (let item of items) {
@@ -238,6 +282,9 @@ async function items_refreshUserEntries(uid: number) {
     }
 }
 
+/**
+    * loads all info, and updates the global entries list, creating new entries if they dont exist
+*/
 async function items_refreshInfoEntries(uid: number) {
     let items = await api_loadList<InfoEntry>("list-entries", uid)
 
@@ -253,6 +300,9 @@ async function items_refreshInfoEntries(uid: number) {
 
 }
 
+/**
+    * loads all libraries, and puts them in the global libraries map
+*/
 async function items_loadLibraries(uid: number) {
     const items = await api_queryV3(`type = 'Library' . entryInfo.uid = ${uid}`, uid)
 
@@ -261,6 +311,9 @@ async function items_loadLibraries(uid: number) {
     }
 }
 
+/**
+    * loads all metadata info, and updates the global entries list
+*/
 async function items_refreshMetadata(uid: number) {
     let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)
     for (let item of items) {
@@ -369,14 +422,28 @@ sorts.set("native-title", (a, b) => {
     return at < bt ? 0 : 1
 })
 
+/**
+    * adds a new sort method that sortEntries can use
+    * @param {string} name - the name of the sort
+    * @param {((a: InfoEntry, b: InfoEntry) => number} sortFN - the function that does the sorting
+*/
 function items_addSort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)) {
     sorts.set(name, sortFN)
 }
 
+/**
+    * deletes a sort method
+    * @param {string} name - the sort to delete
+*/
 function items_delSort(name: string) {
     sorts.delete(name)
 }
 
+/**
+    * sorts a list of entries
+    * @param {InfoEntry[]} entries - the entries to sort
+    * @param {string} sortBy - the sorting method to use
+*/
 function sortEntries(entries: InfoEntry[], sortBy: string) {
     if (sortBy === "") return entries
 
@@ -387,7 +454,12 @@ function sortEntries(entries: InfoEntry[], sortBy: string) {
     return entries
 }
 
-function typeToSymbol(type: string) {
+/**
+    * converts an item type to a symbol
+    * @param {string} type - the type to convert
+    * @returns {string} - a 1 character symbol
+*/
+function typeToSymbol(type: string): string {
     const conversion = {
         "Show": "📺︎",
         "Movie": "📽",
@@ -418,6 +490,11 @@ function fixThumbnailURL(url: string) {
     return url
 }
 
+/**
+    * converts an item format to a human readable name
+    * @param {number} format - the format
+    * @returns {Promise<string>}
+*/
 async function formatToName(format: number): Promise<string> {
     const DIGI_MOD = 0x1000
     let out = ""
@@ -449,7 +526,16 @@ async function nameToFormat(name: string): Promise<number> {
     return val
 }
 
-function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean) {
+/**
+ * Calculate the total cost of an item
+ * @param {bigint} itemId - the item id to find the cost of
+ * @param {boolean} includeSelf - whether or not to include itself in the cost calculation
+ * @param {boolean} includeChildren - whether or not to include its children in the cost calculation
+ * @param {boolean} includeCopies - whether or not to include copies in the cost calculation
+ * @param {boolean} recursive - if includeChildren is set, apply this function to all of its children
+ * @returns {number}
+*/
+function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean): number {
     const item = findInfoEntryById(itemId)
     let total = includeSelf ? item.PurchasePrice : 0
     if (includeChildren) {
@@ -496,6 +582,14 @@ function items_eventTimeEstimate(event: UserEvent) {
 }
 
 //FIXME: does not handle timezones
+/**
+ * Compares 2 event's times
+ * @param {UserEvent} left
+ * @param {UserEvent} right
+ * @returns -1 if left occured AFTER right
+ * @returns 0 if they occured at the same time
+ * @returns 1 if left occured BEFORE right
+ */
 function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
     let l = items_eventTimeEstimate(left)
     let r = items_eventTimeEstimate(right)
@@ -552,6 +646,12 @@ function _cononicalizeEvent(event: UserEvent) {
     return `${event.ItemId}>>${event.Event}:${event.Before}:${event.Timestamp}:${event.After}Z${event.TimeZone}`
 }
 
-function items_eventEQ(left: UserEvent, right: UserEvent) {
+/**
+    * Checks if 2 events are the same
+    * @param {UserEvent} left
+    * @param {UserEvent} right
+    * @returns {boolean}
+*/
+function items_eventEQ(left: UserEvent, right: UserEvent): boolean {
     return _cononicalizeEvent(left) == _cononicalizeEvent(right)
 }

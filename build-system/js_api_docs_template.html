@@ -6,6 +6,29 @@
             color: var(--text-color);
         }
 
+        .function-name.private {
+            font-style: italic;
+            color: var(--red);
+        }
+
+        .function-name.unstable {
+            color: var(--warn);
+        }
+
+        .function-name.deprecated {
+            text-decoration: line-through;
+            text-decoration-color: currentColor;
+            text-decoration-thickness: 0.1em;
+        }
+
+        .unstable::after {
+            content: " (unstable)";
+        }
+
+        .private::after {
+            content: " (private)"
+        }
+
         .js-api-docs {
             max-width: 1200px;
             margin: 0 auto;
@@ -63,6 +86,7 @@
             font-size: 1.1rem;
             margin: 0;
             margin-bottom: 0.25rem;
+            color: var(--light-blue);
         }
 
         .function-signature {
@@ -75,7 +99,7 @@
         code {
             font-weight: 600;
             font-family: monospace;
-            color: var(--light-blue);
+            color: inherit;
             background: var(--secondary);
             padding: 0.1rem 0.3rem;
             border-radius: var(--border-roundness);

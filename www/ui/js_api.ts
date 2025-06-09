@@ -79,7 +79,7 @@ function ui_sort(by: string): number {
 /**
  * Performs a search in the UI
  * Side effects:
- * - fills the search bar with {query}
+ * - fills the search bar with query
  * - clears selected items
  * - refills the sidebar with the new results
  * - uses the sort-by select element for sorting
@@ -378,6 +378,15 @@ function ui_delsort(name: string) {
  */
 async function ui_askitem() {
     return await selectItemUI()
+}
+
+/**
+ * Sets the error text
+ * <i>hint: to clear the error, pass ""</i>
+ * @param {string} err - The error text
+ */
+function ui_seterr(err: string): void {
+    setError(err)
 }
 
 /**
