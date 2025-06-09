@@ -56,7 +56,7 @@ generate_js_api_docs() {
     local temp_file=$(mktemp)
     
     # Extract function documentation using awk
-    awk '
+    gawk '
     # Initialize variables
     BEGIN {
         # State tracking
