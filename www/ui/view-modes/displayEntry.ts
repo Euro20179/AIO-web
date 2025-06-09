@@ -985,7 +985,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //Events
     if (eventsTbl && eventsToLookAt.length) {
-        eventsToLookAt.sort((a, b) => items_eventTimeEstimate(b) - items_eventTimeEstimate(a))
+        eventsToLookAt.sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
         let html = `
             <thead>
                 <tr>
