@@ -320,18 +320,12 @@ function deleteEntryUI(item: InfoEntry) {
         return
     }
 
-    api_deleteEntry(item.ItemId).then(res => {
-        if (res?.status != 200) {
-            console.error(res)
+    aio_delete(item.ItemId).then(res => {
+        if (res === 1) {
             alert("Failed to delete item")
             return
         }
         alert(`Deleted: ${item.En_Title} (${item.Native_Title ? item.Native_Title + " : " : ""}${item.ItemId})`)
-        updateInfo2({
-            [String(item.ItemId)]: { info: item }
-        }, true)
-        deselectItem(item)
-        removeSidebarItem(item)
     })
 }
 
