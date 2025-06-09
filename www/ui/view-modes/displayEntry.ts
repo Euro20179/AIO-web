@@ -389,7 +389,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 })
                 .then(text => {
                     alert(text)
-                    Promise.all([loadUserEvents(getUidUI()), items_refreshUserEntries(getUidUI())]).then(() =>
+                    Promise.all([loadUserEvents(item.Uid), items_refreshUserEntries(item.Uid)]).then(() =>
                         updateInfo2({
                             [String(item.ItemId)]: {
                                 user: findUserEntryById(item.ItemId),
@@ -1720,14 +1720,12 @@ const de_actions = {
         }
 
         api_setRating(item.ItemId, newRating)
-            .then(() => {
+            .then(async() => {
                 let user = findUserEntryById(item.ItemId)
-                if (!user) {
-                    return refreshInfo(getUidUI())
-                }
+                await loadUserEvents(item.Uid)
                 user.UserRating = Number(newRating)
                 updateInfo2({
-                    [String(item.ItemId)]: { user }
+                    [String(item.ItemId)]: { user, events: findUserEventsById(item.ItemId) }
                 })
             })
             .catch(console.error)
