@@ -4,6 +4,7 @@
     --light-blue: var(--aio-limas-light-blue, #b4e4ff);
     --blue: var(--aio-limas-blue, #95bdff);
     --yellow: var(--aio-limas-yellow, #e5c890);
+    --warn: var(--aio-limas-warn, var(--yellow));
     --lavender: var(--aio-limas-lavender, #b4befe);
     --red: var(--aio-limas-red, #e78284);
 
