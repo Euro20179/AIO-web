@@ -45,6 +45,18 @@
 
 @layer components {
 
+    .user-script {
+        border: 1px solid var(--light-blue);
+        padding: 5px;
+        border-radius: var(--border-roundness);
+
+        h3 {
+            cursor: pointer;
+            text-decoration: underline;
+            text-transform:capitalize;
+        }
+    }
+
     #error-output {
         display: none;
     }

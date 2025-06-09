@@ -30,20 +30,20 @@ let mode = modes[idx]
 
 function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true, parent?: HTMLElement | DocumentFragment): HTMLElement {
     globalsNewUi.selectedEntries.push(item)
-    updateStats && changeResultStatsWithItem(item)
+    updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
     return mode.add(item, parent)
 }
 
 function deselectItem(item: InfoEntry, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(a => a.ItemId !== item.ItemId)
-    updateStats && changeResultStatsWithItem(item, -1)
+    updateStats && changeResultStatsWithItemUI(item, -1)
     mode.sub(item)
 }
 
 function selectItemList(itemList: InfoEntry[], mode: DisplayMode, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
-    updateStats && changeResultStatsWithItemList(itemList)
+    updateStats && changeResultStatsWithItemListUI(itemList)
     updatePageInfoWithItemUI(itemList[0])
     mode.addList(itemList)
 }
@@ -61,7 +61,7 @@ function clearItems(updateStats: boolean = true) {
     let items = globalsNewUi.selectedEntries.filter(Boolean)
     globalsNewUi.selectedEntries = []
     mode.subList(items)
-    updateStats && resetStats()
+    updateStats && resetStatsUI()
 }
 
 function putSelectedToCollection() {
@@ -107,7 +107,7 @@ document.getElementById("view-toggle")?.addEventListener("change", e => {
 
 const viewAllElem = document.getElementById("view-all") as HTMLInputElement
 viewAllElem.addEventListener("change", e => {
-    resetStats()
+    resetStatsUI()
     if(!viewAllElem.checked) {
         clearItems(false)
     } else {

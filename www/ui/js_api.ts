@@ -34,7 +34,7 @@ function ui_prompt(prompt: string, _default?: string, cb?: (result: string | nul
  * @returns 0 on success
  */
 function ui_createstat(name: string, additive: boolean, calculation: StatCalculator): number {
-    createStat(name, additive, calculation)
+    createStatUI(name, additive, calculation)
     return 0
 }
 
@@ -45,7 +45,7 @@ function ui_createstat(name: string, additive: boolean, calculation: StatCalcula
  * @returns The value that was set
  */
 function ui_setstat(name: string, val: number): number {
-    setResultStat(name, val)
+    setResultStatUI(name, val)
     return val
 }
 
@@ -57,7 +57,7 @@ function ui_setstat(name: string, val: number): number {
  * @returns true if successful, false otherwise
  */
 function ui_delstat(name: string): boolean {
-    return deleteStat(name)
+    return deleteStatUI(name)
 }
 
 /**
@@ -389,10 +389,21 @@ function ui_seterr(err: string): void {
     setError(err)
 }
 
+
 /**
- * Performs a search query
+ * An alias for addUserScriptUI
+ */
+function ui_newscript() {
+    //@ts-ignore
+    addUserScriptUI(...arguments)
+}
+
+/**
+ * <del>Performs a search query</del>
+ * <ins>Use api_queryV3 instead</ins>
  * @param {string} query - The search query
  * @returns Promise that resolves to an array of InfoEntry objects
+ * @deprecated
  */
 async function aio_search(query: string): Promise<InfoEntry[]> {
     return await api_queryV3(query, getUidUI())
@@ -448,4 +459,26 @@ async function aio_setuser(user: UserEntry): Promise<boolean> {
         }
     })
     return true
+}
+
+/**
+ * Deletes an entry
+ * Side effects:
+ * - removes item from sidebar
+ * - removes item from global entries map
+ * - clears selected items
+ * - selects the new first item in the sidebar
+ * @param {bigint} item - the item id to delete
+ * @returns 1 on failure to delete else 0
+ */
+async function aio_delete(item: bigint) {
+    const res = await api_deleteEntry(item)
+    if(!res || res.status !== 200) {
+        return 1
+    }
+    removeSidebarItem(findInfoEntryById(item))
+    items_delEntry(item)
+    clearItems()
+    sidebarSelectNth(1)
+    return 0
 }

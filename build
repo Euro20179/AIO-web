@@ -127,21 +127,7 @@ generate_js_api_docs() {
                 param_text = param_text "<span class=\"parameter-description\">" desc "</span>"
                 param_text = param_text "</span>"
             }
-            #param_text = param_text "<BR>" $3
 
-            #match($0, /@param\s+{([^}]+)}\s+([^\s]+)\s+-\s+(.+)/, arr)
-
-            #if (arr[1] != "") {
-            #} else {
-            #    # Try to match without type
-            #    match($0, /@param\s+([^\s]+)\s+-\s+(.+)/, arr)
-            #    if (arr[1] != "") {
-            #        param_text = param_text "<span class=\"parameter-item\">"
-            #        param_text = param_text "<span class=\"parameter-name\"><code>" arr[1] "</code></span>"
-            #        param_text = param_text "<span class=\"parameter-description\">" arr[2] "</span>"
-            #        param_text = param_text "</span>"
-            #    }
-            #}
             next
         }
         

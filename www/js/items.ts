@@ -140,6 +140,10 @@ function items_setEntries(items: InfoEntry[]) {
     }
 }
 
+function items_delEntry(item: bigint) {
+    delete globalsNewUi.entries[String(item)]
+}
+
 /**
  * Adds an item to the global entries map
  * @param item - the item to add

@@ -28,7 +28,7 @@ if (cookies['login']) {
     setUserAuth(cookies['login'])
     setUIDUI(cookies['uid'])
 }
-if(cookies['uid']) {
+if (cookies['uid']) {
     storeUserUID(cookies['uid'])
 }
 
@@ -105,8 +105,62 @@ document.addEventListener("keydown", e => {
             viewToggle.focus()
             break
         }
+        case "p": {
+            openModalUI("script-select")
+            e.preventDefault()
+            break
+        }
     }
 })
+
+type UserScript_FN =(selected: InfoEntry[], results: InfoEntry[]) => any
+class UserScript {
+    exec: UserScript_FN
+    desc: string
+    constructor(exec: UserScript_FN, desc: string) {
+        this.desc = desc
+        this.exec = exec
+    }
+}
+
+const userScripts = new Map<string, UserScript>
+
+/**
+ * Runs a user script
+ * Side effects:
+ * - closes the #script-select modal
+ * @param {string} name - the name of the script to run
+ */
+function runUserScriptUI(name: string) {
+    const script = userScripts.get(name)
+    if(!script) return
+    script.exec(globalsNewUi.selectedEntries, globalsNewUi.results.map(v => v.info))
+    closeModalUI("script-select")
+}
+
+/**
+ * Creates a new user script
+ * Side effects
+ * - adds a new script element to #script-select
+ * @param {string} name - name of the script
+ * @param {UserScript_FN} onrun - a function that takes 2 arguments, InfoEntry[] of selected items, and InfoEntry[] of search results
+ * @param {string} desc - what the script does
+ */
+function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
+    const scriptSelect = document.getElementById("script-select")
+    if(!scriptSelect) return
+    const par = document.createElement("div")
+    par.classList.add("user-script")
+    par.id = `user-script-${name}`
+    const title = document.createElement("h3")
+    const d = document.createElement("p")
+    d.innerHTML = desc
+    par.replaceChildren(title, d)
+    title.innerText = name
+    title.onclick = () => runUserScriptUI(name)
+    scriptSelect.append(par)
+    userScripts.set(name, new UserScript(onrun, desc))
+}
 
 async function promptUI(html?: string, _default?: string): Promise<string | null> {
     const pEl = document.getElementById("prompt") as HTMLDialogElement
@@ -129,7 +183,7 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
     })
 }
 
-function resetStats() {
+function resetStatsUI() {
     for (let stat of statistics) {
         stat.set(0)
     }
@@ -157,17 +211,17 @@ function toggleModalUI(modalName: string, root: { getElementById(elementId: stri
     }
 }
 
-function createStat(name: string, additive: boolean, calculation: StatCalculator) {
+function createStatUI(name: string, additive: boolean, calculation: StatCalculator) {
     statistics.push(new Statistic(name, additive, calculation))
-    setResultStat(name, 0)
+    setResultStatUI(name, 0)
 }
 
-function deleteStat(name: string) {
+function deleteStatUI(name: string) {
     statistics = statistics.filter(v => v.name !== name)
-    return deleteResultStat(name)
+    return deleteResultStatUI(name)
 }
 
-function setResultStat(key: string, value: number) {
+function setResultStatUI(key: string, value: number) {
     for (let stat of statistics) {
         if (stat.name !== key) continue
 
@@ -176,7 +230,7 @@ function setResultStat(key: string, value: number) {
     }
 }
 
-function changeResultStats(key: string, value: number) {
+function changeResultStatsUI(key: string, value: number) {
     for (let stat of statistics) {
         if (stat.name !== key) continue
 
@@ -185,14 +239,14 @@ function changeResultStats(key: string, value: number) {
     }
 }
 
-function changeResultStatsWithItem(item: InfoEntry, multiplier: number = 1) {
+function changeResultStatsWithItemUI(item: InfoEntry, multiplier: number = 1) {
     if (!item) return
     for (let stat of statistics) {
         stat.changeWithItem(item, multiplier)
     }
 }
 
-function deleteResultStat(key: string) {
+function deleteResultStatUI(key: string) {
     let el = statsOutput.querySelector(`[data-stat-name="${key}"]`)
     if (el) {
         el.remove()
@@ -201,7 +255,7 @@ function deleteResultStat(key: string) {
     return false
 }
 
-function changeResultStatsWithItemList(items: InfoEntry[], multiplier: number = 1) {
+function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number = 1) {
     for (let stat of statistics) {
         stat.changeWithItemList(items, multiplier)
     }
@@ -248,7 +302,7 @@ async function loadSearchUI() {
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
-    setResultStat("results", entries.length)
+    setResultStatUI("results", entries.length)
 
     items_setResults(entries.map(v => v.ItemId))
 

@@ -217,10 +217,21 @@ async function api_setThumbnail(id: bigint, thumbnail: string) {
     })
 }
 
+/**
+ * Sets the parent of id to parent
+ * @param {bigint} id
+ * @param {bigint} parent
+ */
 async function api_setParent(id: bigint, parent: bigint) {
     return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
+/**
+ * Performs a search
+ * @param {string} searchString - the search query
+ * @param {number} uid - can be 0 to allow results from all users
+ * @param {string} [orderby=""]
+*/
 async function api_queryV3(searchString: string, uid: number, orderby: string = ""): Promise<InfoEntry[]> {
     switch (orderby) {
         case "user-title":

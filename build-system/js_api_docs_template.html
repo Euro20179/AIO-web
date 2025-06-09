@@ -159,6 +159,7 @@
     <script>
         document.getElementById("function-search").addEventListener("input", function (e) {
             const searchTerm = e.target.value.toLowerCase();
+
             const functions = document.querySelectorAll(".doc-card");
             const sections = document.querySelectorAll(".js-api-docs h3");
             let currentSection = null;

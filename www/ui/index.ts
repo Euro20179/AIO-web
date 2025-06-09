@@ -71,18 +71,21 @@ async function loadLibraries() {
 async function loadInfoEntries() {
     setError("Loading items")
 
-    let refreshment = items_refreshInfoEntries(getUidUI())
-    let cachedItems = localStorage.getItem("items")
-    if (cachedItems) {
-        items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
-    } else {
-        await refreshment
-        alert("Items refreshed")
-    }
+    await items_refreshInfoEntries(getUidUI())
+    // let cachedItems = localStorage.getItem("items")
+    // if (cachedItems) {
+    //     items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
+    //     refreshment.then(() => {
+    //         items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
+    //     })
+    // } else {
+    //     await refreshment
+    //     alert("Items refreshed")
+    // }
 
     setError("")
 
-    localStorage.setItem("items", Object.values(globalsNewUi.entries).map(v => api_serializeEntry(v.info)).join("\n"))
+    // localStorage.setItem("items", Object.values(globalsNewUi.entries).map(v => api_serializeEntry(v.info)).join("\n"))
 
     items_refreshUserEntries(getUidUI()).then(() => {
         updateInfo2(globalsNewUi.entries)
@@ -110,7 +113,7 @@ function defaultMetadata(id: bigint): MetadataEntry {
 
 
 /**
- * @description pulls out relevant filters for the client
+ * pulls out relevant filters for the client
  * has the side effect of modifying search-query, removing any parts deemed filters for the client
  * eg: \[start:end\]
  */

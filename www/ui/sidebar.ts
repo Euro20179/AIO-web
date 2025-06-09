@@ -129,6 +129,18 @@ function sidebarEntryOpenOne(item: InfoEntry, mode: DisplayMode) {
     selectItem(item, mode)
 }
 
+/**
+ * selects the nth sidebar entry, where n starts at 1
+ */
+function sidebarSelectNth(n: number) {
+    const el = sidebarItems.querySelector(`:nth-child(${n})`)
+    if(!el) return
+    const id = BigInt(el.getAttribute("data-entry-id") || 0)
+    if(id == 0n) return
+
+    selectItem(findInfoEntryById(id), mode)
+}
+
 function sidebarEntryOpenMultiple(item: InfoEntry) {
     toggleItem(item)
 }
