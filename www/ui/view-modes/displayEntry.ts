@@ -962,7 +962,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     if (progressEl && "max" in progressEl && "value" in progressEl && mediaDependant[`${type}-episodes`] && user.Status === "Viewing") {
         progressEl.max = mediaDependant[`${type}-episodes`]
 
-        progressEl.value = userPos
+        progressEl.value = userPos || 0
 
     }
     if (captionEl) {
