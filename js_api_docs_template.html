@@ -16,6 +16,21 @@
             margin-bottom: 0.5rem;
         }
 
+        .js-api-docs h3 {
+            margin: 1rem 0 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--blue);
+        }
+
+        .js-api-docs ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+        }
+
         .search-container {
             margin: 1rem 0;
         }
@@ -32,21 +47,6 @@
         .search-input:focus {
             outline: none;
             border-color: var(--light-blue);
-        }
-
-        .js-api-docs h3 {
-            margin: 1rem 0 0.5rem;
-            padding-bottom: 0.25rem;
-            border-bottom: 2px solid var(--blue);
-        }
-
-        .js-api-docs ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
         }
 
         .doc-card {
@@ -72,12 +72,6 @@
             color: var(--lavender);
         }
 
-        .function-signature code {
-            font-weight: normal;
-            background: none;
-            padding: 0;
-        }
-
         code {
             font-weight: 600;
             font-family: monospace;
@@ -92,13 +86,14 @@
             margin-bottom: 0.5rem;
         }
 
-        .parameters, .return {
+        .parameters,
+        .return {
             margin-top: 0.5rem;
             padding-top: 0.5rem;
             border-top: 2px solid var(--secondary);
         }
 
-        :where(.parameters, .return) > h4 {
+        :where(.parameters, .return)>h4 {
             margin: 0 0 0.25rem 0;
         }
 
@@ -112,6 +107,7 @@
             padding-left: 0.5rem;
         }
 
+        .return-type,
         .parameter-type {
             color: var(--lavender);
             font-family: monospace;
@@ -121,12 +117,6 @@
         .parameter-description {
             display: block;
             margin-top: 0.125rem;
-        }
-
-        .return-type {
-            font-family: monospace;
-            color: var(--lavender);
-            margin-left: 0.25rem;
         }
 
         .hidden {
@@ -178,8 +168,12 @@
         <h2>API Events</h2>
         <ul>
             <li class="doc-card">
-                <p class="function-name"><code>aio-metadata-loaded</code></p> The metadata from pageload has finished
-                loading
+                <p class="function-name">
+                    <code>aio-metadata-loaded</code>
+                </p>
+                <p class="function-description">
+                    The metadata from pageload has finished loading
+                </p>
             </li>
         </ul>
     </section>
