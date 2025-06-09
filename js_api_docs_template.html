@@ -1,151 +1,172 @@
 <!DOCTYPE html>
 <section class="js-api-docs">
-<link rel="stylesheet" href="/css/general.css">
-<style>
-.js-api-docs {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-.js-api-docs h1 {
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-}
-.search-container {
-  margin: 1rem 0;
-}
-.search-input {
-  width: 100%;
-  padding: 0.5rem;
-  background: var(--main);
-  border: 1px solid var(--blue);
-  border-radius: var(--border-roundness);
-  color: var(--text-color);
-  font-family: monospace;
-}
-.search-input:focus {
-  outline: none;
-  border-color: var(--light-blue);
-}
-.js-api-docs h3 {
-  margin: 1rem 0 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 2px solid var(--blue);
-  color: var(--text-color);
-}
-.js-api-docs ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-}
-.function-doc {
-  background: var(--main);
-  border: 1px solid var(--blue);
-  border-radius: var(--border-roundness);
-  padding: 0.75rem;
-  height: 100%;
-}
-.function-name {
-  display: block;
-  margin-bottom: 0.25rem;
-}
-.function-name code {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--light-blue);
-  background: var(--secondary);
-  padding: 0.1rem 0.3rem;
-  border-radius: var(--border-roundness);
-}
-.function-description {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--text-color);
-}
-.parameter-section, .return-section {
-  display: block;
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 2px solid var(--secondary);
-}
-.parameter-header, .return-header {
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 0.25rem;
-}
-.parameter-list {
-  display: block;
-}
-.parameter-item {
-  display: block;
-  margin-bottom: 0.25rem;
-  padding-left: 0.5rem;
-}
-.parameter-name code {
-  font-family: monospace;
-  background: var(--secondary);
-  padding: 0.1rem 0.2rem;
-  border-radius: var(--border-roundness);
-  color: var(--light-blue);
-}
-.parameter-type {
-  color: var(--lavender);
-  font-family: monospace;
-  margin-left: 0.25rem;
-}
-.parameter-description {
-  display: block;
-  margin-top: 0.125rem;
-  color: var(--text-color);
-}
-.return-type {
-  font-family: monospace;
-  color: var(--lavender);
-  margin-left: 0.25rem;
-}
-.hidden {
-  display: none;
-}
-</style>
-<h1>JavaScript API</h1>
-<p>The application provides a JavaScript API that can be used to interact with the UI and data. Here are the available functions:</p>
-<div class="search-container">
-<input type="text" class="search-input" placeholder="Search functions..." id="function-search">
-</div>
-<script>
-document.getElementById("function-search").addEventListener("input", function(e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const functions = document.querySelectorAll(".function-doc");
-  const sections = document.querySelectorAll(".js-api-docs h3");
-  let currentSection = null;
-  let hasVisibleFunctions = false;
-  let sectionHasVisibleFunctions = {};
+    <link rel="stylesheet" href="/css/general.css">
+    <style>
+        .js-api-docs {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
 
-  functions.forEach(func => {
-    const name = func.querySelector(".function-name code").textContent;
-    const desc = func.querySelector(".function-description")?.textContent || "";
-    const params = func.querySelector(".parameter-description")?.textContent || "";
-    const returns = func.querySelector(".return-type")?.textContent || "";
-    const searchableText = (name + " " + desc + " " + params + " " + returns).toLowerCase();
-    const isVisible = searchableText.includes(searchTerm);
-    func.classList.toggle("hidden", !isVisible);
-    if (isVisible) hasVisibleFunctions = true;
-  });
+        .js-api-docs h1 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
 
-  // Update section visibility
-  sections.forEach(section => {
-    const sectionName = section.textContent;
-    const nextSection = section.nextElementSibling;
-    if (nextSection && nextSection.tagName === "UL") {
-      const hasVisible = Array.from(nextSection.children).some(li => !li.classList.contains("hidden"));
-      section.classList.toggle("hidden", !hasVisible);
-      nextSection.classList.toggle("hidden", !hasVisible);
-    }
-  });
-});
-</script>
-{{CONTENT}}
-</section> 
+        .search-container {
+            margin: 1rem 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--main);
+            border: 1px solid var(--blue);
+            border-radius: var(--border-roundness);
+            color: var(--text-color);
+            font-family: monospace;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--light-blue);
+        }
+
+        .js-api-docs h3 {
+            margin: 1rem 0 0.5rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--blue);
+            color: var(--text-color);
+        }
+
+        .js-api-docs ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .function-doc {
+            background: var(--main);
+            border: 1px solid var(--blue);
+            border-radius: var(--border-roundness);
+            padding: 0.75rem;
+            height: 100%;
+        }
+
+        .function-name {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .function-name code {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--light-blue);
+            background: var(--secondary);
+            padding: 0.1rem 0.3rem;
+            border-radius: var(--border-roundness);
+        }
+
+        .function-description {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .parameter-section,
+        .return-section {
+            display: block;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 2px solid var(--secondary);
+        }
+
+        .parameter-header,
+        .return-header {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .parameter-list {
+            display: block;
+        }
+
+        .parameter-item {
+            display: block;
+            margin-bottom: 0.25rem;
+            padding-left: 0.5rem;
+        }
+
+        .parameter-name code {
+            font-family: monospace;
+            background: var(--secondary);
+            padding: 0.1rem 0.2rem;
+            border-radius: var(--border-roundness);
+            color: var(--light-blue);
+        }
+
+        .parameter-type {
+            color: var(--lavender);
+            font-family: monospace;
+            margin-left: 0.25rem;
+        }
+
+        .parameter-description {
+            display: block;
+            margin-top: 0.125rem;
+            color: var(--text-color);
+        }
+
+        .return-type {
+            font-family: monospace;
+            color: var(--lavender);
+            margin-left: 0.25rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <h1>JavaScript API</h1>
+    <p>The application provides a JavaScript API that can be used to interact with the UI and data.</p>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search functions..." id="function-search">
+    </div>
+    <script>
+        document.getElementById("function-search").addEventListener("input", function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const functions = document.querySelectorAll(".function-doc");
+            const sections = document.querySelectorAll(".js-api-docs h3");
+            let currentSection = null;
+            let hasVisibleFunctions = false;
+            let sectionHasVisibleFunctions = {};
+
+            functions.forEach(func => {
+                const name = func.querySelector(".function-name code").textContent;
+                const desc = func.querySelector(".function-description")?.textContent || "";
+                const params = func.querySelector(".parameter-description")?.textContent || "";
+                const returns = func.querySelector(".return-type")?.textContent || "";
+                const searchableText = (name + " " + desc + " " + params + " " + returns).toLowerCase();
+                const isVisible = searchableText.includes(searchTerm);
+                func.classList.toggle("hidden", !isVisible);
+                if (isVisible) hasVisibleFunctions = true;
+            });
+
+            // Update section visibility
+            sections.forEach(section => {
+                const sectionName = section.textContent;
+                const nextSection = section.nextElementSibling;
+                if (nextSection && nextSection.tagName === "UL") {
+                    const hasVisible = Array.from(nextSection.children).some(li => !li.classList.contains("hidden"));
+                    section.classList.toggle("hidden", !hasVisible);
+                    nextSection.classList.toggle("hidden", !hasVisible);
+                }
+            });
+        });
+    </script>
+    {{CONTENT}}
+</section>
