@@ -47,6 +47,165 @@ handle_configts_from_ini
 
 #}}}
 
+# Generate JS API documentation
+generate_js_api_docs() {
+    local js_api_file="./www/ui/js_api.ts"
+    local docs_file="./www/usage/js_api_docs.html"
+    
+    # Create temporary file for processing
+    local temp_file=$(mktemp)
+    
+    # Extract function documentation using awk
+    awk '
+    # Initialize variables
+    BEGIN {
+        # State tracking
+        in_doc = 0
+        current_section = ""
+        
+        # Documentation parts
+        func_name = ""
+        doc_text = ""
+        param_text = ""
+        return_text = ""
+    }
+    
+    # Start of JSDoc comment
+    /^\/\*\*/ {
+        in_doc = 1
+        func_name = ""
+        doc_text = ""
+        param_text = ""
+        return_text = ""
+        next
+    }
+    
+    # End of JSDoc comment
+    in_doc && /^\s*\*\// {
+        in_doc = 0
+        next
+    }
+    
+    # Process JSDoc content
+    in_doc {
+        # Remove leading * and spaces
+        sub(/^\s*\* ?/, "", $0)
+        
+        # Handle @param tag
+        if ($0 ~ /^@param/) {
+            # Extract parameter name and description
+            match($0, /@param\s+([^\s]+)\s+-\s+(.+)/, arr)
+            if (arr[1] != "") {
+                param_text = param_text "<span class=\"parameter-item\">"
+                param_text = param_text "<span class=\"parameter-name\"><code>" arr[1] "</code></span>"
+                # Extract type from function signature
+                if (func_name != "") {
+                    match($0, /function\s+[^(]+\(([^)]+)\)/, sig_arr)
+                    if (sig_arr[1] != "") {
+                        split(sig_arr[1], params, ",")
+                        for (i in params) {
+                            split(params[i], param_parts, ":")
+                            if (param_parts[1] == arr[1]) {
+                                param_text = param_text "<span class=\"parameter-type\">(" param_parts[2] ")</span>"
+                                break
+                            }
+                        }
+                    }
+                }
+                param_text = param_text "<span class=\"parameter-description\">" arr[2] "</span>"
+                param_text = param_text "</span>"
+            }
+            next
+        }
+        
+        # Handle @returns tag
+        if ($0 ~ /^@returns/) {
+            match($0, /@returns\s+(.+)/, arr)
+            if (arr[1] != "") {
+                return_text = arr[1]
+            }
+            next
+        }
+        
+        # Collect main documentation text
+        doc_text = doc_text $0 " "
+    }
+    
+    # Process function declaration
+    !in_doc && /^(async\s+)?function/ {
+        match($0, /function\s+([a-zA-Z0-9_]+)/, arr)
+        if (arr[1] != "") {
+            func_name = arr[1]
+            
+            # Determine section based on function prefix
+            if (func_name ~ /^ui_/) {
+                if (current_section != "UI Functions") {
+                    if (current_section != "") {
+                        print "</ul>"
+                    }
+                    current_section = "UI Functions"
+                    print "<h3>UI Functions</h3>"
+                    print "<ul>"
+                }
+            } else if (func_name ~ /^aio_/) {
+                if (current_section != "API Functions") {
+                    if (current_section != "") {
+                        print "</ul>"
+                    }
+                    current_section = "API Functions"
+                    print "<h3>API Functions</h3>"
+                    print "<ul>"
+                }
+            } else if (func_name ~ /^ua_/) {
+                if (current_section != "User Agent Functions") {
+                    if (current_section != "") {
+                        print "</ul>"
+                    }
+                    current_section = "User Agent Functions"
+                    print "<h3>User Agent Functions</h3>"
+                    print "<ul>"
+                }
+            }
+            
+            # Print function documentation
+            print "<li class=\"function-doc\">"
+            print "<span class=\"function-name\"><code>" func_name "</code></span>"
+            if (doc_text != "") {
+                print "<span class=\"function-description\">" doc_text "</span>"
+            }
+            
+            # Print parameters if any
+            if (param_text != "") {
+                print "<span class=\"parameter-section\">"
+                print "<span class=\"parameter-header\">Parameters:</span>"
+                print "<span class=\"parameter-list\">" param_text "</span>"
+                print "</span>"
+            }
+            
+            # Print return type if any
+            if (return_text != "") {
+                print "<span class=\"return-section\">"
+                print "<span class=\"return-header\">Returns:</span>"
+                print "<span class=\"return-type\">" return_text "</span>"
+                print "</span>"
+            }
+            
+            print "</li>"
+        }
+    }
+    
+    # Print footer
+    END {
+        print "</ul>"
+    }
+    ' "$js_api_file" | sed -e "/{{CONTENT}}/r /dev/stdin" -e "/{{CONTENT}}/d" "$(dirname "$0")/js_api_docs_template.html" > "$temp_file"
+    
+    # Move the processed file to the final location
+    mv "$temp_file" "$docs_file"
+}
+
+generate_js_api_docs
+
 #esbuild/typescript stuff
 esbuild $(find . -regex '.*\.ts$') --minify --outdir=www $esbuildOpts
 
