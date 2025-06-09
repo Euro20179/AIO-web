@@ -340,12 +340,11 @@ function* findCopies(itemId: bigint) {
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
-    for (let evId in grouped) {
-        const events = grouped[evId]
-        if (globalsNewUi.entries[evId]) {
-            //@ts-ignore
-            globalsNewUi.entries[evId].events = events
-        }
+    for(let entry in globalsNewUi.entries) {
+        //we must loop through all entries because :
+        //if an item had an event, but now has 0 events, if we loop through the new events, it will never hit that item that now has no events
+        //therefore it will never be updated
+        globalsNewUi.entries[entry].events = grouped[entry] || []
     }
 }
 

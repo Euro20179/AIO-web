@@ -246,6 +246,22 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
         if (mode.refresh) {
             mode.refresh(BigInt(id))
         }
+
+
+        const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
+        if (parent && globalsNewUi.entries[String(parent)]) {
+            //if the parent is this, or itself, just dont update
+            if (![BigInt(id), parent].includes(globalsNewUi.entries[String(parent)].info.ParentId)) {
+                updateInfo2({
+                    [String(parent)]: {
+                        info: findInfoEntryById(parent),
+                        user: findUserEntryById(parent),
+                        events: findUserEventsById(parent),
+                        meta: findMetadataById(parent)
+                    }
+                })
+            }
+        }
     }
 
     if (updatedLibraries) {

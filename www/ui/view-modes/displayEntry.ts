@@ -211,7 +211,6 @@ function de_newevent(form: HTMLFormElement) {
             form.parentElement?.hidePopover()
         })
         .catch(alert)
-    //TODO: should be a modal thing for date picking
 }
 
 const observer = new IntersectionObserver(onIntersection, {
@@ -979,8 +978,14 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
+    let eventsToLookAt = events
+    for (let child of findDescendants(item.ItemId)) {
+        eventsToLookAt = eventsToLookAt.concat(findUserEventsById(child.ItemId))
+    }
+
     //Events
-    if (eventsTbl && events.length) {
+    if (eventsTbl && eventsToLookAt.length) {
+        eventsToLookAt.sort((a, b) => items_eventTimeEstimate(b) - items_eventTimeEstimate(a))
         let html = `
             <thead>
                 <tr>
@@ -995,18 +1000,22 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
             </thead>
             <tbody>
         `
-        for (let event of events) {
+        for (let event of eventsToLookAt) {
             const ts = event.Timestamp
             const afterts = event.After
             const beforets = event.Before
-            const name = event.Event
+            let name = event.Event
+
+            if (event.ItemId !== item.ItemId) {
+                name = `(${findInfoEntryById(event.ItemId).En_Title}) ${name}`
+            }
 
             let timeTd = `<td>${items_eventTSHTML(event)}</td>`
 
             html += `<tr>
                         <td>
                             <div class="grid column">
-                                <button class="delete" onclick="deleteEvent(this, ${ts}, ${afterts}, ${beforets})">🗑</button>
+                                <button class="delete" onclick="deleteEventForItemId(${event.ItemId}n, ${ts}, ${afterts}, ${beforets})">🗑</button>
                                 ${name}
                             </div>
                         </td>
@@ -1720,7 +1729,7 @@ const de_actions = {
         }
 
         api_setRating(item.ItemId, newRating)
-            .then(async() => {
+            .then(async () => {
                 let user = findUserEntryById(item.ItemId)
                 await loadUserEvents(item.Uid)
                 user.UserRating = Number(newRating)
@@ -1739,19 +1748,23 @@ const displayEntryEditStyles = de_actions["editstyles"]
 const displayEntrySave = de_actions["save"]
 // }}}
 
-function deleteEvent(el: HTMLElement, ts: number, after: number, before: number) {
+function deleteEventForItemId(itemId: bigint, ts: number, after: number, before: number) {
     if (!confirm("Are you sure you would like to delete this event")) {
         return
     }
-    const itemId = getIdFromDisplayElement(el)
     api_deleteEvent(itemId, ts, after, before)
         .then(res => res?.text())
-        .then(() =>
+        .then((text) =>
             loadUserEvents(getUidUI())
-                .then(() => updateInfo2({
-                    [String(itemId)]: globalsNewUi.entries[String(itemId)]
-                }))
+                .then(() => {
+                    updateInfo2({
+                        [String(itemId)]: globalsNewUi.entries[String(itemId)]
+                    })
+                })
         )
         .catch(alert)
+}
 
+function deleteEvent(el: HTMLElement, ts: number, after: number, before: number) {
+    deleteEventForItemId(getIdFromDisplayElement(el), ts, after, before)
 }
