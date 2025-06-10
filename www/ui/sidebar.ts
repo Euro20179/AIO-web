@@ -41,6 +41,20 @@ addEventListener("resize", () => {
     }, 200)
 })
 
+function focusNthSidebarItem(n: number) {
+    sidebarItems.querySelector(`:nth-child(${n})`)?.focus()
+}
+
+function focusNextSidebarItem(backward: boolean = false) {
+    const active = document.activeElement
+    if(!active) return
+    const next = backward
+        ? active.previousElementSibling
+        : active.nextElementSibling
+    if(next && next instanceof HTMLElement)
+        next.focus()
+}
+
 function clearSidebar() {
 
     while (sidebarItems.firstElementChild) {
@@ -185,7 +199,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
             }
         }
         img.addEventListener("mousedown", e => {
-            if(e.button === 1 || e.button === 0) {
+            if (e.button === 1 || e.button === 0) {
                 handleMouse(e.button, e.altKey, e.ctrlKey)
                 e.preventDefault()
             }

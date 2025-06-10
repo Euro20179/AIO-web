@@ -60,7 +60,10 @@ customElements.define("sidebar-entry", class extends HTMLElement {
         root.appendChild(content)
         root.adoptedStyleSheets.push(sidebarStyles)
         this.root = root
+    }
 
+    focus() {
+        this.root.querySelector("img")?.focus()
     }
 })
 

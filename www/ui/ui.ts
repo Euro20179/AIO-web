@@ -144,6 +144,20 @@ document.addEventListener("keydown", e => {
             e.preventDefault()
             break
         }
+        case "ArrowDown": {
+            e.preventDefault()
+            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
+                focusNthSidebarItem(1)
+            } else focusNextSidebarItem()
+            break
+        }
+        case "ArrowUp": {
+            e.preventDefault()
+            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
+                focusNthSidebarItem(sidebarItems.childElementCount)
+            } else focusNextSidebarItem(true)
+            break
+        }
     }
     if ("0123456789".includes(e.key)) {
         clearItems()
