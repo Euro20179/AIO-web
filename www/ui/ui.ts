@@ -15,13 +15,13 @@ function storeUserUID(id: string) {
     localStorage.setItem("userUID", id)
 }
 
-function toggleUI(id: string) {
+function toggleUI(id: string, on?: '' | "none") {
     const elem = document.getElementById(id) as HTMLElement | null
     if (!elem) return
-    elem.style.display =
+    elem.style.display = on ?? (
         elem.style.display
             ? ''
-            : "none"
+            : "none")
 }
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
@@ -169,10 +169,14 @@ document.addEventListener("keydown", e => {
         case "V": {
             let mainUI = document.getElementById("main-ui")
             //we dont want dual-window mode to be toggleable if we are in display mode
-            if(mainUI?.classList.contains("display-mode")) {
+            if (mainUI?.classList.contains("display-mode")) {
                 return
             }
-            toggleCatalogModeUI()
+            if (isCatalogModeUI()) {
+                closeCatalogModeUI()
+            } else {
+                openCatalogModeUI()
+            }
             e.preventDefault()
             break
         }
@@ -284,7 +288,7 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
  */
 function resetStatsUI() {
     for (let stat of statistics) {
-        if(!stat.resetable) continue
+        if (!stat.resetable) continue
         stat.set(0)
     }
 }
@@ -855,27 +859,39 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     }
 }
 
-function toggleCatalogModeUI() {
+let catalogWin: Window | null = null
+
+function isCatalogModeUI() {
+    return catalogWin !== null
+}
+
+function openCatalogModeUI() {
+    let mainUI = document.getElementById("main-ui")
+    if (!mainUI || mainUI.classList.contains("catalog-mode")) return
+
+    let urlParams = new URLSearchParams(location.search)
+    urlParams.set("display", "true")
+    urlParams.set("no-select", "true")
+    const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
+    catalogWin = open(newURL, "_blank", "popup=true")
+    if (catalogWin) {
+        catalogWin.addEventListener("beforeunload", () => {
+            console.log(catalogWin)
+            closeCatalogModeUI()
+        })
+        mode_chwin(catalogWin)
+        mainUI.classList.add("catalog-mode")
+        toggleUI("viewing-area", "none")
+    }
+}
+
+function closeCatalogModeUI() {
+    mode_chwin(window)
     let mainUI = document.getElementById("main-ui")
     if (!mainUI) return
-
-    if (mainUI.classList.contains("catalog-mode")) {
-        mode_chwin(window)
-    } else {
-        let urlParams = new URLSearchParams(location.search)
-        urlParams.set("display", "true")
-        urlParams.set("no-select", "true")
-        const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
-        const win = open(newURL, "_blank", "popup=true")
-        if (win) {
-            win.addEventListener("beforeunload", () => {
-                toggleCatalogModeUI()
-            })
-            mode_chwin(win)
-        }
-    }
-    mainUI.classList.toggle("catalog-mode")
-    toggleUI("viewing-area")
+    mainUI.classList.remove("catalog-mode")
+    toggleUI("viewing-area", "")
+    catalogWin = null
 }
 
 function updatePageInfoWithItemUI(item: InfoEntry) {
