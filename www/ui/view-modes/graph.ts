@@ -1,5 +1,7 @@
+let graph_curWin: Window = window
+
 function getCtx2(id: string): CanvasRenderingContext2D {
-    const canv = document.getElementById(id) as HTMLCanvasElement
+    const canv = graph_curWin.document.getElementById(id) as HTMLCanvasElement
     return canv.getContext("2d") as CanvasRenderingContext2D
 }
 
@@ -14,13 +16,11 @@ const typeColors = {
     "Collection": "#b4befe"
 }
 
-const ctx = getCtx2("by-year")
-const rbyCtx = getCtx2("rating-by-year")
 
-const groupBySelect = document.getElementById("group-by") as HTMLSelectElement
-const typeSelection = document.getElementById("chart-type") as HTMLSelectElement
+let groupBySelect = document.getElementById("group-by") as HTMLSelectElement
+let typeSelection = document.getElementById("chart-type") as HTMLSelectElement
 
-const groupByInput = document.getElementById("group-by-expr") as HTMLInputElement
+let groupByInput = document.getElementById("group-by-expr") as HTMLInputElement
 
 const _charts: Record<string, any> = {}
 
@@ -248,7 +248,7 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
     }
 
 
-    let sortBy = document.getElementsByName("sort-by")[0] as HTMLInputElement
+    let sortBy = graph_curWin.document.getElementsByName("sort-by")[0] as HTMLInputElement
 
     //filling in years messes up the sorting, idk why
     if (sortBy.value == "") {
@@ -370,6 +370,7 @@ const costByFormat = ChartManager("cost-by-format", async (entries) => {
 })
 
 const ratingByYear = ChartManager("rating-by-year", async (entries) => {
+    const rbyCtx = getCtx2("rating-by-year")
     let [years, data] = await organizeData(entries)
     const ratings = data
         .map(v => v
@@ -418,6 +419,7 @@ const ratingDisparityGraph = ChartManager("rating-disparity-graph", async (entri
 })
 
 const byc = ChartManager("by-year", async (entries) => {
+    const ctx = getCtx2("by-year")
     let [years, data] = await organizeData(entries)
     const counts = data.map(v => v.length)
 
@@ -454,7 +456,7 @@ function destroyCharts() {
 const modeGraphView: DisplayMode = {
     add(entry) {
         makeGraphs(globalsNewUi.selectedEntries)
-        return document.getElementById("graph-output") as HTMLElement
+        return graph_curWin.document.getElementById("graph-output") as HTMLElement
     },
 
     sub(entry) {
@@ -467,5 +469,26 @@ const modeGraphView: DisplayMode = {
 
     subList(entries) {
         destroyCharts()
+    },
+
+    clearSelected() {
+        destroyCharts()
+    },
+
+    chwin(win) {
+        destroyCharts()
+        graph_curWin = win
+        groupBySelect = win.document.getElementById("group-by") as HTMLSelectElement
+        typeSelection = win.document.getElementById("chart-type") as HTMLSelectElement
+
+        groupByInput = win.document.getElementById("group-by-expr") as HTMLInputElement
+        groupByInput.onchange = function() {
+            makeGraphs(globalsNewUi.selectedEntries)
+        }
+
+        groupBySelect.onchange = typeSelection.onchange = function() {
+            makeGraphs(globalsNewUi.selectedEntries)
+        }
+        makeGraphs(globalsNewUi.selectedEntries)
     }
 }

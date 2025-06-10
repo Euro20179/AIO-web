@@ -1,5 +1,6 @@
-const calcItems = document.getElementById("calc-items") as HTMLDivElement
-const expressionInput = document.getElementById("calc-expression") as HTMLTextAreaElement
+let calcItems = document.getElementById("calc-items") as HTMLDivElement
+let expressionInput = document.getElementById("calc-expression") as HTMLTextAreaElement
+expressionInput.onchange = _updateEachCalcItem
 
 const modeCalc: DisplayMode = {
     add(entry, parent?: HTMLElement | DocumentFragment) {
@@ -20,6 +21,10 @@ const modeCalc: DisplayMode = {
         for (let item of entry) {
             removecCalcItem(item)
         }
+    },
+
+    clearSelected() {
+        calcItems.innerHTML = ""
     },
 
     refresh(id) {
@@ -71,10 +76,16 @@ const modeCalc: DisplayMode = {
                 api_addEntryTags(item.ItemId, tagsList)
             }
         })
-    }
+    },
+
+    chwin(win) {
+        calcItems = win.document.getElementById("calc-items") as HTMLDivElement
+        expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
+        expressionInput.onchange = _updateEachCalcItem
+    },
 }
 
-expressionInput.onchange = function() {
+function _updateEachCalcItem() {
     for (let entry of globalsNewUi.selectedEntries) {
         let val = updateExpressionOutput(entry)
         let el = calcItems.querySelector(`[data-item-id="${entry.ItemId}"]`)

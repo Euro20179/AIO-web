@@ -1,9 +1,9 @@
-const galleryItems = document.getElementById("gallery-items") as HTMLDivElement
+let galleryItems = document.getElementById("gallery-items") as HTMLDivElement
 
-function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = galleryItems){
+function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = galleryItems) {
     let el = new Image()
     let meta = findMetadataById(item.ItemId)
-    if(meta?.Thumbnail) {
+    if (meta?.Thumbnail) {
         el.src = fixThumbnailURL(meta.Thumbnail)
     }
     el.title = item.En_Title
@@ -37,5 +37,15 @@ const modeGallery: DisplayMode = {
         for (let item of entry) {
             removeGalleryItem(item)
         }
-    }
+    },
+
+    clearSelected() {
+        for (let child of galleryItems.querySelectorAll(`[data-item-id]`)) {
+            child.remove()
+        }
+    },
+
+    chwin(win) {
+        galleryItems = win.document.getElementById("gallery-items") as HTMLDivElement
+    },
 }

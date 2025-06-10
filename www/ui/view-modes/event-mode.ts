@@ -4,6 +4,10 @@ class OrderedEvents {
         this.events = []
     }
 
+    clear() {
+        this.events = []
+    }
+
     add(event: UserEvent) {
         this.events.push(event)
         this.sort()
@@ -60,8 +64,8 @@ class OrderedEvents {
     }
 }
 
-const eventOutput = document.getElementById("event-output-table") as HTMLTableElement
-const eventFilter = document.getElementById("event-filter") as HTMLInputElement
+let eventOutput = document.getElementById("event-output-table") as HTMLTableElement
+let eventFilter = document.getElementById("event-filter") as HTMLInputElement
 
 //instead of literally removing elements we dont want form eventOrder,
 //keep track of the ones we dont want then dont render those
@@ -121,6 +125,22 @@ const modeEvents: DisplayMode = {
         for (let e of entry) {
             eventOrder.removeList(...findUserEventsById(e.ItemId))
         }
+        _reRenderEventTable()
+    },
+
+    chwin(win) {
+        eventOutput = win.document.getElementById("event-output-table") as HTMLTableElement
+        eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
+        eventFilter.onchange = function() {
+            if (eventFilter.value === "") return
+
+            _reRenderEventTable()
+        }
+
+    },
+
+    clearSelected() {
+        eventOrder.clear()
         _reRenderEventTable()
     },
 }

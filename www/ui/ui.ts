@@ -15,6 +15,15 @@ function storeUserUID(id: string) {
     localStorage.setItem("userUID", id)
 }
 
+function toggleUI(id: string) {
+    const elem = document.getElementById(id) as HTMLElement | null
+    if (!elem) return
+    elem.style.display =
+        elem.style.display
+            ? ''
+            : "none"
+}
+
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 const itemFilter = document.getElementById("item-filter") as HTMLInputElement
@@ -60,6 +69,7 @@ class Statistic {
     name: string
     calculation: StatCalculator
     additive: boolean
+    resetable: boolean = true
 
     #value: number = 0
     el: HTMLElement
@@ -109,6 +119,8 @@ let statistics = [
     new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult)
 ]
 
+statistics[0].resetable = false
+
 document.addEventListener("keydown", e => {
     if (!e.ctrlKey) return
     switch (e.key) {
@@ -141,6 +153,31 @@ document.addEventListener("keydown", e => {
         }
         case "N": {
             openModalUI("new-entry")
+            e.preventDefault()
+            break
+        }
+        case "S": {
+            toggleUI("search-area")
+            e.preventDefault()
+            break
+        }
+        case "B": {
+            toggleUI("sidebar")
+            e.preventDefault()
+            break
+        }
+        case "V": {
+            let mainUI = document.getElementById("main-ui")
+            //we dont want dual-window mode to be toggleable if we are in display mode
+            if(mainUI?.classList.contains("display-mode")) {
+                return
+            }
+            toggleCatalogModeUI()
+            e.preventDefault()
+            break
+        }
+        case "D": {
+            setDisplayModeUI()
             e.preventDefault()
             break
         }
@@ -247,6 +284,7 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
  */
 function resetStatsUI() {
     for (let stat of statistics) {
+        if(!stat.resetable) continue
         stat.set(0)
     }
 }
@@ -411,6 +449,7 @@ async function loadSearchUI() {
         setError("No results")
         return
     }
+
     renderSidebar(getFilteredResultsUI(), false)
 }
 
@@ -637,7 +676,6 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
     const popover = document.getElementById("items-listing") as HTMLDialogElement
-    console.log(popover.returnValue)
     if (item === null) {
         input.value = "0"
         return
@@ -815,6 +853,29 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     } else {
         mainUI?.classList.remove("display-mode")
     }
+}
+
+function toggleCatalogModeUI() {
+    let mainUI = document.getElementById("main-ui")
+    if (!mainUI) return
+
+    if (mainUI.classList.contains("catalog-mode")) {
+        mode_chwin(window)
+    } else {
+        let urlParams = new URLSearchParams(location.search)
+        urlParams.set("display", "true")
+        urlParams.set("no-select", "true")
+        const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
+        const win = open(newURL, "_blank", "popup=true")
+        if (win) {
+            win.addEventListener("beforeunload", () => {
+                toggleCatalogModeUI()
+            })
+            mode_chwin(win)
+        }
+    }
+    mainUI.classList.toggle("catalog-mode")
+    toggleUI("viewing-area")
 }
 
 function updatePageInfoWithItemUI(item: InfoEntry) {

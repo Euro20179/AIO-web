@@ -47,11 +47,11 @@ function focusNthSidebarItem(n: number) {
 
 function focusNextSidebarItem(backward: boolean = false) {
     const active = document.activeElement
-    if(!active) return
+    if (!active) return
     const next = backward
         ? active.previousElementSibling
         : active.nextElementSibling
-    if(next && next instanceof HTMLElement)
+    if (next && next instanceof HTMLElement)
         next.focus()
 }
 

@@ -24,7 +24,6 @@ function alert(text: string) {
 async function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): Promise<number | bigint | null> {
     let n = await promptUI(text)
     while (n !== null && n !== "" && isNaN(Number(numberConverter(n)))) {
-        console.log(n)
         n = await promptUI(textFail)
     }
     if (n === null || n === "") return null

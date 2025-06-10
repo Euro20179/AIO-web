@@ -296,7 +296,9 @@ async function main() {
 
     const initialSearch = (
         urlParams.has("item-id")
-            ? `metadata.ItemId = ${urlParams.get("item-id")}`
+            ? urlParams.get("item-id")!.split(",")
+                .map(v => `metadata.itemid = ${v}`)
+                .join(" OR ")
             : urlParams.get("q")
     )
 
@@ -311,12 +313,15 @@ async function main() {
 
 
     if (initialSearch || searchInput.value) {
-        ui_search(initialSearch || searchInput.value)
+        ui_search(initialSearch || searchInput.value, () => {
+            dispatchEvent(new CustomEvent("aio-items-rendered"))
+        })
     } else {
         let entries = Object.values(globalsNewUi.entries).map(v => v.info)
         entries = sortEntries(entries, sortBySelector.value)
         items_setResults(entries.map(v => v.ItemId))
         renderSidebar(getFilteredResultsUI(), true)
+        dispatchEvent(new CustomEvent("aio-items-rendered"))
     }
 
     //do this second because events can get really large, and having to wait for it could take a while

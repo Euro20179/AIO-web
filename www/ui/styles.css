@@ -176,6 +176,23 @@
             position: relative;
         }
 
+        &.catalog-mode {
+            grid-template-areas: "form form form" "sidebar sidebar sidebar" "sidebar sidebar sidebar";
+
+            #sidebar-items {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            #sidebar {
+                width: initial;
+            }
+
+            sidebar-entry {
+                width: 20cqi;
+            }
+        }
+
         &.display-mode {
             display: block;
         }

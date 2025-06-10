@@ -1,4 +1,4 @@
-const displayItems = document.getElementById("entry-output") as HTMLElement
+let displayItems = document.getElementById("entry-output") as HTMLElement
 
 let displayQueue: InfoEntry[] = []
 
@@ -228,6 +228,13 @@ const modeDisplayEntry: DisplayMode = {
         removeDisplayItem(entry.ItemId)
     },
 
+    chwin(win) {
+        let newOutput =win.document.getElementById("entry-output") 
+        if(newOutput) {
+            displayItems = newOutput
+        }
+    },
+
     refresh(id) {
         let el = document.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
@@ -288,6 +295,12 @@ const modeDisplayEntry: DisplayMode = {
             return
         }
         displayItems.append(html)
+    },
+
+    clearSelected() {
+        for(let child of displayItems.querySelectorAll("display-entry")) {
+            child.remove()
+        }
     },
 
     clear() {
@@ -1050,7 +1063,7 @@ function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: b
 }
 
 function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string): HTMLElement {
-    let el = document.createElement("display-entry")
+    let el = displayItems.ownerDocument.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
 
@@ -1158,7 +1171,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let newChildButton = root.getElementById("new-child")
     if (newChildButton) {
         newChildButton.addEventListener("click", e => {
-            const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
+            const newEntryDialog = displayItems.ownerDocument.getElementById("new-entry") as HTMLDialogElement
             const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -1168,7 +1181,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let newCopyButton = root.getElementById("new-copy")
     if (newCopyButton) {
         newCopyButton.addEventListener("click", e => {
-            const newEntryDialog = document.getElementById("new-entry") as HTMLDialogElement
+            const newEntryDialog = displayItems.ownerDocument.getElementById("new-entry") as HTMLDialogElement
             const parentIdInput = newEntryDialog.querySelector(`[name="copyOf"]`) as HTMLInputElement
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -1265,14 +1278,14 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
 function removeDisplayItem(itemId: bigint) {
     displayEntryIntersected.delete(String(itemId))
-    const el = /**@type {HTMLElement}*/(displayItems.querySelector(`[data-item-id="${itemId}"]`))
+    const el = displayItems.querySelector(`[data-item-id="${itemId}"]`)
     if (!el) return
     el.remove()
     observer.unobserve(el)
 }
 
 function refreshDisplayItem(itemId: bigint) {
-    let el = document.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
+    let el = displayItems.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
     if (!info) return
 
@@ -1305,14 +1318,14 @@ function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot, target: HT
 }
 
 function _fetchLocationBackup(itemId: bigint) {
-    const listing = document.getElementById("items-listing")
+    const listing = displayItems.ownerDocument.getElementById("items-listing")
 
     const item = findInfoEntryById(itemId) as InfoEntry
 
     let provider = item.Type === "Show" ? "sonarr" : "radarr"
     alert(`Using ${provider} to find location`)
 
-    const popover = document.getElementById("items-listing") as HTMLDivElement
+    const popover = displayItems.ownerDocument.getElementById("items-listing") as HTMLDivElement
 
     async function onfetchLocation(res: Response | null) {
         if (!res) {
@@ -1668,7 +1681,7 @@ const de_actions = {
         const templEditor = root.getElementById("template-editor")
         if (!templEditor || !(templEditor instanceof HTMLTextAreaElement)) return
 
-        const preview = document.open(location.toString(), "_blank", "popup=true")
+        const preview = displayItems.ownerDocument.open(location.toString(), "_blank", "popup=true")
         if (!preview) return
 
         preview.onload = () => {

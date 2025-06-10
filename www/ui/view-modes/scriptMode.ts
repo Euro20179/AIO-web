@@ -1,6 +1,6 @@
-const run = document.getElementById("script-execute") as HTMLButtonElement
-const scriptBox = document.getElementById("script") as HTMLTextAreaElement
-const scriptOutput = document.getElementById("script-execute-output") as HTMLDivElement
+let run = document.getElementById("script-execute") as HTMLButtonElement
+let scriptBox = document.getElementById("script") as HTMLTextAreaElement
+let scriptOutput = document.getElementById("script-execute-output") as HTMLDivElement
 
 const modeScripting: DisplayMode = {
     add(entry, parent: HTMLElement | DocumentFragment = scriptOutput) {
@@ -31,6 +31,19 @@ const modeScripting: DisplayMode = {
         scriptOutput.innerHTML = ""
     },
 
+    clearSelected() {
+        for(let elem of scriptOutput.querySelectorAll(`[data-item-id]`)) {
+            elem.remove()
+        }
+    },
+
+    chwin(win) {
+        run = win.document.getElementById("script-execute") as HTMLButtonElement
+        scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
+        scriptOutput = win.document.getElementById("script-execute-output") as HTMLDivElement
+        run.onclick = execute
+    },
+
     put(html: string | HTMLElement | ShadowRoot) {
         if (typeof html === 'string') {
             scriptOutput.innerHTML += html
@@ -40,7 +53,7 @@ const modeScripting: DisplayMode = {
     },
 }
 
-run.onclick = function() {
+function execute() {
     let script = scriptBox.value
 
     let tbl = new CalcVarTable()
@@ -70,3 +83,5 @@ run.onclick = function() {
         scriptOutput.append(value.jsStr())
     }
 }
+
+run.onclick = execute
