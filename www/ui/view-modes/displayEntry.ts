@@ -303,6 +303,8 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     clearSelected() {
+        displayQueue.length = 0
+        displayEntryIntersected.clear()
         for (let child of displayItems.querySelectorAll("display-entry")) {
             removeDisplayItem(BigInt(child.getAttribute("data-item-id")))
         }
