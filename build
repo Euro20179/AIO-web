@@ -225,8 +225,22 @@ generate_js_api_docs() {
 
 generate_js_api_docs
 
+generateSidebarStyles () {
+    styles=$(cat "./www/css/colors.css" "./www/css/general.css" "./www/ui/templates/sidebar-entry.css")
+    python -c "
+( (f := open('./www/ui/components.js', 'r+')),
+   text := f.read(),
+   text := text.replace(\"{{{_BUILDTIME_REPLACE_}}}\${Math.random()}\", \"\"\"${styles}\"\"\"),
+   f.seek(0),
+   f.write(text),
+   f.close()
+)"
+}
+
 #esbuild/typescript stuff
 esbuild $(find . -regex '.*\.ts$') --minify --outdir=www $esbuildOpts
+
+generateSidebarStyles
 
 #compile html into one BIG html to avoid having to have all of this in one massive file while working on it. It gets really annoying lol
 idx="./www/ui/index.html"

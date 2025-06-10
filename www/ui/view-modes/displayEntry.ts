@@ -236,7 +236,6 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     addList(entry) {
-        displayEntryIntersected.clear()
         for (let i = 0; i < entry.length; i++) {
             if (i > 5) {
                 displayQueue.push(entry[i])

@@ -213,11 +213,12 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 
 function renderSidebar(entries: InfoEntry[], clearRendered = true) {
     if (!entries.length) return
-    if (clearRendered) {
-        clearSidebar()
-    }
+    const fragments = []
     for (let i = 0; i < entries.length; i++) {
-        renderSidebarItem(entries[i])
+        const frag = new DocumentFragment
+        renderSidebarItem(entries[i], frag)
+        fragments.push(frag)
     }
+    sidebarItems.replaceChildren(...fragments)
     selectSidebarItems(entries, clearRendered)
 }

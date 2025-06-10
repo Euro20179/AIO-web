@@ -28,12 +28,12 @@ function getFilteredResultsUI(list = globalsNewUi.results): InfoEntry[] {
     for (let item of list) {
         for (let str of [item.info.En_Title, item.info.Native_Title, item.meta.Title, item.meta.Native_Title]) {
             if (str.toLowerCase().includes(search)) {
-                newArr.push(item)
+                newArr.push(item.info)
                 break
             }
         }
     }
-    return newArr.map(v => v.info)
+    return newArr
 }
 
 const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
@@ -372,7 +372,6 @@ async function loadSearchUI() {
     items_setResults(entries.map(v => v.ItemId))
 
     clearItems()
-    clearSidebar()
     if (entries.length === 0) {
         setError("No results")
         return

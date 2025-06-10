@@ -1,6 +1,3 @@
-@import "/css/general.css";
-@import "/ui/css-styles/rating-styles.css";
-
 :host(sidebar-entry)::before {
     float: left;
 }

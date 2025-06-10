@@ -26,7 +26,7 @@ function applyUserRating(rating: number, root: HTMLElement) {
             (typeof minRating === 'function' && minRating(rating))
             || (typeof minRating === 'number' && rating >= minRating)
         ) {
-            tierName ||=`${name}-tier`
+            tierName ||= `${name}-tier`
             root.classList.add(String(tierName))
             break
         }
@@ -45,6 +45,10 @@ customElements.define("display-entry", class extends HTMLElement {
     }
 })
 
+const sidebarStyles = new CSSStyleSheet
+//gets replaced with colors.css, general.css, sidebar-entry.css in that order
+//the math.random is so that the build system doesn't inline this text, i need the ``
+sidebarStyles.replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`)
 customElements.define("sidebar-entry", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
@@ -53,6 +57,7 @@ customElements.define("sidebar-entry", class extends HTMLElement {
         let content = template.content.cloneNode(true) as HTMLElement
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
+        root.adoptedStyleSheets.push(sidebarStyles)
         this.root = root
 
     }

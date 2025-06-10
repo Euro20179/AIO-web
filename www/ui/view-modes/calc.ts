@@ -71,7 +71,6 @@ const modeCalc: DisplayMode = {
                 api_addEntryTags(item.ItemId, tagsList)
             }
         })
-
     }
 }
 
