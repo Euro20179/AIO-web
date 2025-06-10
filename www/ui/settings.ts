@@ -11,7 +11,7 @@ const settings = {
         ["f", 1],
         ["z", (n: number) => n < 0],
         ["zero", 0]
-    ]
+    ],
 }
 
 type Settings = typeof settings

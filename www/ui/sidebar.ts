@@ -55,16 +55,12 @@ function refreshSidebarItem(itemId: bigint) {
         return
     }
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
-    let item = findInfoEntryById(itemId)
     if (el) {
         changeSidebarItemData(itemId, el)
-    } else {
-        renderSidebarItem(item)
+        let meta = findMetadataById(itemId)
+        if (meta)
+            updateSidebarThumbnail(itemId, meta?.Thumbnail)
     }
-
-    let meta = findMetadataById(itemId)
-    if (meta)
-        updateSidebarThumbnail(itemId, meta?.Thumbnail)
 }
 
 
@@ -134,9 +130,9 @@ function sidebarEntryOpenOne(item: InfoEntry, mode: DisplayMode) {
  */
 function sidebarSelectNth(n: number) {
     const el = sidebarItems.querySelector(`:nth-child(${n})`)
-    if(!el) return
+    if (!el) return
     const id = BigInt(el.getAttribute("data-entry-id") || 0)
-    if(id == 0n) return
+    if (id == 0n) return
 
     selectItem(findInfoEntryById(id), mode)
 }
@@ -175,7 +171,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
         img.addEventListener("mousedown", e => {
-            if(e.button === 1) {
+            if (e.button === 1) {
                 displayItemInWindow(item.ItemId)
             }
             else if (e.altKey) {

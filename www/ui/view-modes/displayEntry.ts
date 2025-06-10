@@ -439,7 +439,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 }
 
 
-function whatToInclude(el: ShadowRoot): {self: boolean, children: boolean, copies: boolean, recursive: boolean} {
+function whatToInclude(el: ShadowRoot): { self: boolean, children: boolean, copies: boolean, recursive: boolean } {
     const self = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
     const children = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
     const copies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
@@ -471,7 +471,7 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     const { self, children, copies, recursive } = whatToInclude(el)
 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, recursive)
-                        .sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
+        .sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
 
     if (!eventsToLookAt.length) {
         //there are no events
@@ -1196,9 +1196,8 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     const notesEditBox = root.getElementById("notes-edit-box")
 
-    let editTO: number | undefined;
     if (notesEditBox && "value" in notesEditBox) {
-        notesEditBox.onchange = function() {
+        notesEditBox.onchange = util_debounce(() => {
             user.Notes = String(notesEditBox.value)
 
             const userStringified = api_serializeEntry(user)
@@ -1207,25 +1206,21 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                 [String(item.ItemId)]: { user }
             })
 
-            if (editTO) {
-                clearTimeout(editTO)
-            }
-            editTO = setTimeout(() => {
-                authorizedRequest(`${apiPath}/engagement/set-entry`, {
-                    body: userStringified,
-                    method: "POST",
-                    "signin-reason": "save notes"
+            authorizedRequest(`${apiPath}/engagement/set-entry`, {
+                body: userStringified,
+                method: "POST",
+                "signin-reason": "save notes"
+            })
+                .then(res => {
+                    if (res?.status === 200) {
+                        alert("Notes saved")
+                    } else {
+                        alert("Failed to save notes")
+                    }
                 })
-                    .then(res => {
-                        if (res?.status === 200) {
-                            alert("Notes saved")
-                        } else {
-                            alert("Failed to save notes")
-                        }
-                    })
-                    .catch(() => alert("Failed to save notes"))
-            }, 1000)
-        }
+                .catch(() => alert("Failed to save notes"))
+
+        }, 3000)
     }
 
     const cost = root.getElementById("cost")
@@ -1659,14 +1654,10 @@ const de_actions = {
         const styleEditor = root.getElementById("style-editor")
         if (!styleEditor) return
         styleEditor.hidden = !styleEditor.hidden
-        let to: number | null = null
-        styleEditor.onchange = function() {
-            if (to) clearTimeout(to)
-            to = setTimeout(() => {
-                de_actions["save"](elem)
-                alert("saved styles")
-            }, 3000)
-        }
+        styleEditor.onchange = util_debounce(() => {
+            de_actions["save"](elem)
+            alert("saved styles")
+        }, 3000)
     }),
     edittemplate: displayEntryAction((item, root, elem) => {
         const templEditor = root.getElementById("template-editor")

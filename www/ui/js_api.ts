@@ -26,6 +26,22 @@ function ua_setfavicon(path: string) {
 }
 
 /**
+ * run cb after timeout milliseconds, but restart the timer if the function is rerun.
+ * @param {Function} cb
+ * @param {number} timeout
+ * @returns a function that can be run to start/restart the timer
+ */
+function util_debounce(cb: Function, timeout: number) {
+    let to: number | undefined
+    return function() {
+        if(to) {
+            clearTimeout(to)
+        }
+        to = setTimeout(cb, timeout)
+    }
+}
+
+/**
  * Shows a prompt dialog to the user
  * @param {string} prompt - The prompt message to display
  * @param {string} [_default] - Optional default value for the prompt

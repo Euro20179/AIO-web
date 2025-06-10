@@ -17,6 +17,24 @@ function storeUserUID(id: string) {
 
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
+const itemFilter = document.getElementById("item-filter") as HTMLInputElement
+itemFilter.oninput = function() {
+    renderSidebar(getFilteredResultsUI(), true)
+}
+
+function getFilteredResultsUI(list = globalsNewUi.results): InfoEntry[] {
+    let newArr = []
+    const search = itemFilter.value.toLowerCase()
+    for (let item of list) {
+        for (let str of [item.info.En_Title, item.info.Native_Title, item.meta.Title, item.meta.Native_Title]) {
+            if (str.toLowerCase().includes(search)) {
+                newArr.push(item)
+                break
+            }
+        }
+    }
+    return newArr.map(v => v.info)
+}
 
 const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
     let [k, ...val] = v.trim().split("=")
@@ -86,7 +104,7 @@ class Statistic {
 }
 
 let statistics = [
-    new Statistic("results", false, () => globalsNewUi.results.length),
+    new Statistic("results", false, () => getFilteredResultsUI().length),
     new Statistic("count", true, (_, mult) => 1 * mult),
     new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult)
 ]
@@ -113,7 +131,7 @@ document.addEventListener("keydown", e => {
     }
 })
 
-type UserScript_FN =(selected: InfoEntry[], results: InfoEntry[]) => any
+type UserScript_FN = (selected: InfoEntry[], results: InfoEntry[]) => any
 class UserScript {
     exec: UserScript_FN
     desc: string
@@ -133,7 +151,7 @@ const userScripts = new Map<string, UserScript>
  */
 function runUserScriptUI(name: string) {
     const script = userScripts.get(name)
-    if(!script) return
+    if (!script) return
     script.exec(globalsNewUi.selectedEntries, globalsNewUi.results.map(v => v.info))
     closeModalUI("script-select")
 }
@@ -148,7 +166,7 @@ function runUserScriptUI(name: string) {
  */
 function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     const scriptSelect = document.getElementById("script-select")
-    if(!scriptSelect) return
+    if (!scriptSelect) return
     const par = document.createElement("div")
     par.classList.add("user-script")
     par.id = `user-script-${name}`
@@ -293,7 +311,7 @@ function sortEntriesUI() {
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
     clearItems()
-    reorderSidebar(ids)
+    reorderSidebar(getFilteredResultsUI().map(v => v.ItemId))
 }
 
 /**
@@ -359,7 +377,7 @@ async function loadSearchUI() {
         setError("No results")
         return
     }
-    renderSidebar(globalsNewUi.results.map(v => v.info), false)
+    renderSidebar(getFilteredResultsUI(), false)
 }
 
 /**

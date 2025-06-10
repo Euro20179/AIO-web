@@ -316,7 +316,7 @@ async function main() {
         let entries = Object.values(globalsNewUi.entries).map(v => v.info)
         entries = sortEntries(entries, sortBySelector.value)
         items_setResults(entries.map(v => v.ItemId))
-        renderSidebar(entries)
+        renderSidebar(getFilteredResultsUI(), true)
     }
 
     //do this second because events can get really large, and having to wait for it could take a while

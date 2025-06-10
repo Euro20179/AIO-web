@@ -11,6 +11,7 @@
 <body>
     <h1>Settings</h1>
     <h3 id="status"></h3>
+
     <form method="get" action="javascript:void(0)">
         <input name="setting" value="StartupLang" type="hidden">
         <label for="startup-lang">Startup script language</label>
@@ -19,6 +20,7 @@
             <option value="aiol">aiol</option>
         </select>
     </form>
+
     <form method="get" action="javascript:void(0)" id="script-form">
         <input name="setting" value="UIStartupScript" type="hidden">
         <label for="startup-script">Startup script</label>
@@ -43,7 +45,6 @@
     }
     function done(form) {
         const data = new FormData(form)
-        console.log(data)
         fetch(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}`)
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
