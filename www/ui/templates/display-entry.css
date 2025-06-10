@@ -27,7 +27,9 @@
 
     select {
         /*select is colored wrong in safari*/
-        -webkit-appearance: none;
+        @supports (-webkit-backdrop-filter: blur(1px)) {
+            -webkit-appearance: none;
+        }
         -moz-appearance: revert;
     }
 
