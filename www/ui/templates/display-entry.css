@@ -110,7 +110,6 @@
     }
 
     #thumbnail {
-        box-shadow: 2px 2px 10px var(--blue);
         border: 1px solid var(--blue);
         align-self: center;
 
