@@ -15,6 +15,10 @@ function storeUserUID(id: string) {
     localStorage.setItem("userUID", id)
 }
 
+function currentDocument() {
+    return catalogWin?.document || document
+}
+
 function toggleUI(id: string, on?: '' | "none") {
     const elem = document.getElementById(id) as HTMLElement | null
     if (!elem) return
@@ -263,7 +267,7 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
  * @returns {Promise<string | null>} the user's response
  */
 async function promptUI(html?: string, _default?: string): Promise<string | null> {
-    const pEl = document.getElementById("prompt") as HTMLDialogElement
+    const pEl = currentDocument().getElementById("prompt") as HTMLDialogElement
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
     const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
@@ -298,7 +302,8 @@ function resetStatsUI() {
  * @param {string} modalName - the id of the modal to open
  * @param root - the elemnt which is the parent of the modal to find
  */
-function openModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+function openModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
+    root ||= catalogWin?.document || document
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
     dialog.showModal()
@@ -309,7 +314,8 @@ function openModalUI(modalName: string, root: { getElementById(elementId: string
  * @param {string} modalName - the id of the modal to close
  * @param root - the elemnt which is the parent of the modal to find
  */
-function closeModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+function closeModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
+    root ||= catalogWin?.document || document
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
     dialog.close()
@@ -320,7 +326,9 @@ function closeModalUI(modalName: string, root: { getElementById(elementId: strin
  * @param {string} modalName - the id of the modal to toggle
  * @param root - the elemnt which is the parent of the modal to find
  */
-function toggleModalUI(modalName: string, root: { getElementById(elementId: string): HTMLElement | null } = document) {
+function toggleModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
+    console.log(catalogWin)
+    root ||= catalogWin?.document || document
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
     if (dialog.open) {
@@ -624,7 +632,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
 }
 
 function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
-    const itemsFillDiv = document.getElementById("put-items-to-select") as HTMLDivElement
+    const itemsFillDiv = currentDocument().getElementById("put-items-to-select") as HTMLDivElement
     itemsFillDiv.innerHTML = ""
 
     const container = itemsFillDiv.querySelector("div") || document.createElement("div")
@@ -679,7 +687,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
 
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
-    const popover = document.getElementById("items-listing") as HTMLDialogElement
+    const popover = currentDocument().getElementById("items-listing") as HTMLDialogElement
     if (item === null) {
         input.value = "0"
         return
@@ -696,9 +704,9 @@ type SelectItemOptions = Partial<{
  * lets the user select an item, be sure to use fillItemListingUI first
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
-    const popover = document.getElementById("items-listing") as HTMLDialogElement
+    const popover = currentDocument().getElementById("items-listing") as HTMLDialogElement
 
-    let f = document.getElementById("items-listing-search") as HTMLFormElement
+    let f = currentDocument().getElementById("items-listing-search") as HTMLFormElement
     let query = f.querySelector('[name="items-listing-search"]') as HTMLInputElement
 
     let { container, onsearch } = options || {}
@@ -737,7 +745,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 }
 
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = document.getElementById("login") as HTMLDialogElement
+    const loginPopover = currentDocument().getElementById("login") as HTMLDialogElement
     (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
 
     //if the popover is already open, something already called this function for the user to sign in
@@ -775,7 +783,7 @@ async function signinUI(reason: string): Promise<string> {
 }
 
 async function fillFormatSelectionUI() {
-    const formatSelector = document.querySelector('[name="format"]') as HTMLSelectElement
+    const formatSelector = currentDocument().querySelector('[name="format"]') as HTMLSelectElement
 
     const formats = await api_listFormats()
     let opts = []
@@ -793,7 +801,7 @@ async function fillFormatSelectionUI() {
 }
 
 async function fillTypeSelectionUI() {
-    const typeDropdown = document.querySelector("#new-item-form [name=\"type\"]")
+    const typeDropdown = currentDocument().querySelector("#new-item-form [name=\"type\"]")
 
     if (typeDropdown === null) {
         console.error("type dropdown could not be found")
