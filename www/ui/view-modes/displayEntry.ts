@@ -439,6 +439,19 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 }
 
 
+function whatToInclude(el: ShadowRoot): {self: boolean, children: boolean, copies: boolean, recursive: boolean} {
+    const self = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
+    const children = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
+    const copies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
+    const recursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
+    return {
+        self,
+        children,
+        copies,
+        recursive
+    }
+}
+
 function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if (!costEl) return
@@ -446,24 +459,18 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     const info = findInfoEntryById(itemId)
     if (!info) return
 
-    const includeSelf = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
-    const includeChildren = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
-    const includeCopies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
-    const includeRecursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
+    const { self, children, copies, recursive } = whatToInclude(el)
 
-    costEl.innerText = String(items_calculateCost(itemId, includeSelf, includeChildren, includeCopies, includeRecursive))
+    costEl.innerText = String(items_calculateCost(itemId, self, children, copies, recursive))
 }
 
 function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     const eventsTbl = el.getElementById("user-actions")
     if (!eventsTbl || !(eventsTbl instanceof HTMLTableElement)) return
 
-    const includeSelf = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
-    const includeChildren = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
-    const includeCopies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
-    const includeRecursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
+    const { self, children, copies, recursive } = whatToInclude(el)
 
-    const eventsToLookAt = items_findAllEvents(itemId, includeSelf, includeChildren, includeCopies, includeRecursive)
+    const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, recursive)
                         .sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
 
     if (!eventsToLookAt.length) {
@@ -490,11 +497,10 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
         const ts = event.Timestamp
         const afterts = event.After
         const beforets = event.Before
-        let name = event.Event
 
-        if (event.ItemId !== itemId) {
-            name = `(${findInfoEntryById(event.ItemId).En_Title}) ${name}`
-        }
+        let name = event.ItemId === itemId
+            ? event.Event
+            : `(${findInfoEntryById(event.ItemId).En_Title}) ${event.Event}`
 
         let timeTd = `<td>${items_eventTSHTML(event)}</td>`
 

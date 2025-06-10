@@ -68,6 +68,13 @@
         </ul>
     </section>
 
+    <section>
+        <h3 id="include">Include</h3>
+        <p>
+            In a display entry, include will determine what is included in the events table and total cost
+        </p>
+    </section>
+
     <hr>
 
     <section>
@@ -76,6 +83,9 @@
         <ul>
             <li><code>/user/{username}</code>: redirects to <code>/ui?uname={username}</code></li>
             <li><code>/uid/{uid}</code>: redirects to <code>/ui?uid={uid}</code></li>
+            <li><code>/login</code>: performs a basic www-authentication, all url parameters are forwarded to
+                <code>/ui</code></li>
+            <li><code>/settings.html</code>: user settings editor</li>
         </ul>
     </section>
 

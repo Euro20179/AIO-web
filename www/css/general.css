@@ -149,6 +149,11 @@
         text-align: center;
     }
 
+    .question {
+        text-decoration-style: dashed;
+        cursor: help;
+    }
+
     .margin-center {
         margin: 0 auto;
     }

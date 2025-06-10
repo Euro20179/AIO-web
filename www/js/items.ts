@@ -530,7 +530,7 @@ async function nameToFormat(name: string): Promise<number> {
 }
 
 /**
- * Like reduce, but the reduction function is called per item related to itemId according to the include* parameters
+ * Like Array.reduce, but the reduction function is called per item related to itemId according to the include* parameters
  * @param {bigint} itemId - the starting item id
  * @param {boolean} includeSelf - whether or not to include the starting item
  * @param {boolean} includeChildren - whether or not to include children
@@ -608,7 +608,6 @@ function items_eventTimeEstimate(event: UserEvent) {
     return 0
 }
 
-//FIXME: does not handle timezones
 /**
  * Compares 2 event's times
  * @param {UserEvent} left
