@@ -170,17 +170,30 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
-        img.addEventListener("mousedown", e => {
-            if (e.button === 1) {
+        img.tabIndex = 0
+        function handleMouse(button: number, altKey: boolean, ctrlKey: boolean) {
+            if (button === 1) {
                 displayItemInWindow(item.ItemId)
             }
-            else if (e.altKey) {
+            else if (altKey) {
                 displayItemInWindow(item.ItemId, "_blank", true)
             }
-            else if (e.ctrlKey) {
+            else if (ctrlKey) {
                 sidebarEntryOpenMultiple(item)
             } else {
                 sidebarEntryOpenOne(item, mode)
+            }
+        }
+        img.addEventListener("mousedown", e => {
+            if(e.button === 1 || e.button === 0) {
+                handleMouse(e.button, e.altKey, e.ctrlKey)
+                e.preventDefault()
+            }
+        })
+        img.addEventListener("keydown", e => {
+            if (e.key === " " || e.key === "Enter") {
+                handleMouse(0, e.altKey, e.ctrlKey)
+                e.preventDefault()
             }
         })
 

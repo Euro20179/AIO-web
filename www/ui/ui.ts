@@ -115,6 +115,17 @@ document.addEventListener("keydown", e => {
         case "/": {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
             (form.querySelector('[name="search-query"]') as HTMLInputElement).focus()
+            e.preventDefault()
+            break
+        }
+        case "?": {
+            document.getElementById("item-filter")?.focus()
+            e.preventDefault()
+            break
+        }
+        case "A": {
+            viewAllElem.click()
+            e.preventDefault()
             break
         }
         case "m": {
@@ -128,6 +139,16 @@ document.addEventListener("keydown", e => {
             e.preventDefault()
             break
         }
+        case "N": {
+            openModalUI("new-entry")
+            e.preventDefault()
+            break
+        }
+    }
+    if ("0123456789".includes(e.key)) {
+        clearItems()
+        sidebarSelectNth(Number(e.key))
+        e.preventDefault()
     }
 })
 
