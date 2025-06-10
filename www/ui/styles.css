@@ -30,7 +30,6 @@
         @supports (-webkit-backdrop-filter: blur(1px)) {
             -webkit-appearance: none;
         }
-        /*safari...*/
         -moz-appearance: revert;
     }
 }

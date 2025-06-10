@@ -875,8 +875,7 @@ function openCatalogModeUI() {
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     catalogWin = open(newURL, "_blank", "popup=true")
     if (catalogWin) {
-        catalogWin.addEventListener("beforeunload", () => {
-            console.log(catalogWin)
+        catalogWin.addEventListener("beforeunload", (e) => {
             closeCatalogModeUI()
         })
         mode_chwin(catalogWin)

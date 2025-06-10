@@ -147,20 +147,6 @@ function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
     root.innerHTML = html
 }
 
-const displayEntryIntersected: Set<string> = new Set()
-
-function onIntersection(entries: IntersectionObserverEntry[]) {
-    for (let entry of entries) {
-        const entryId = entry.target.getAttribute("data-item-id") || "NA"
-        if (entry.isIntersecting && displayQueue.length && !displayEntryIntersected.has(entryId)) {
-            displayEntryIntersected.add(entryId)
-
-            let newItem = displayQueue.shift() as InfoEntry
-            modeDisplayEntry.add(newItem)
-        }
-    }
-}
-
 function de_newevent(form: HTMLFormElement) {
     const data = new FormData(form)
     const name = data.get("name")
@@ -212,12 +198,6 @@ function de_newevent(form: HTMLFormElement) {
         .catch(alert)
 }
 
-let observer = new IntersectionObserver(onIntersection, {
-    root: document.getElementById("entry-output"),
-    rootMargin: "0px",
-    threshold: 0.1
-})
-
 const modeDisplayEntry: DisplayMode = {
     add(entry, parent?: HTMLElement | DocumentFragment) {
         return renderDisplayItem(entry.ItemId, parent)
@@ -229,14 +209,14 @@ const modeDisplayEntry: DisplayMode = {
 
     chwin(win) {
         let newOutput = win.document.getElementById("entry-output")
-        observer.disconnect()
-        observer = new IntersectionObserver(onIntersection, {
-            root: newOutput,
-            rootMargin: "0px",
-            threshold: 0.5
-        })
         if (newOutput) {
             displayItems = newOutput
+            newOutput.addEventListener("scroll", (e) => {
+                if(displayItems.scrollHeight - displayItems.scrollTop > innerHeight) return
+
+                if(displayQueue.length)
+                    renderDisplayItem(displayQueue.shift()?.ItemId)
+            })
         }
     },
 
@@ -304,7 +284,7 @@ const modeDisplayEntry: DisplayMode = {
 
     clearSelected() {
         displayQueue.length = 0
-        displayEntryIntersected.clear()
+        // displayEntryIntersected.clear()
         for (let child of displayItems.querySelectorAll("display-entry")) {
             removeDisplayItem(BigInt(child.getAttribute("data-item-id")))
         }
@@ -1074,8 +1054,6 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
 
-    observer.observe(el)
-
     let user = findUserEntryById(itemId) as UserEntry
 
     if (template || (user && (template = getUserExtra(user, "template")?.trim()))) {
@@ -1284,11 +1262,10 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 }
 
 function removeDisplayItem(itemId: bigint) {
-    displayEntryIntersected.delete(String(itemId))
+    // displayEntryIntersected.delete(String(itemId))
     const el = displayItems.querySelector(`[data-item-id="${itemId}"]`)
     if (!el) return
     el.remove()
-    observer.unobserve(el)
 }
 
 function refreshDisplayItem(itemId: bigint) {

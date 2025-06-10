@@ -285,7 +285,7 @@ async function main() {
     if (urlParams.has("display")) {
         setDisplayModeUI(true)
     } else if(urlParams.has("catalog")) {
-        toggleCatalogModeUI()
+        openCatalogModeUI()
     }
 
 
