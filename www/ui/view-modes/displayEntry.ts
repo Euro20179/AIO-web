@@ -454,6 +454,64 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     costEl.innerText = String(items_calculateCost(itemId, includeSelf, includeChildren, includeCopies, includeRecursive))
 }
 
+function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
+    const eventsTbl = el.getElementById("user-actions")
+    if (!eventsTbl || !(eventsTbl instanceof HTMLTableElement)) return
+
+    const includeSelf = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
+    const includeChildren = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
+    const includeCopies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
+    const includeRecursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
+
+    const eventsToLookAt = items_findAllEvents(itemId, includeSelf, includeChildren, includeCopies, includeRecursive)
+                        .sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
+
+    if (!eventsToLookAt.length) {
+        //there are no events
+        eventsTbl.innerHTML = ""
+        return
+    }
+
+    let html = `
+            <thead>
+                <tr>
+                    <!-- this nonsense is so that the title lines up with the events -->
+                    <th>
+                        <div class="grid column">
+                            <button onclick="openModalUI('new-event-form', this.getRootNode())">➕︎</button><span style="text-align: center">Event</span>
+                        </div>
+                    </th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+        `
+    for (let event of eventsToLookAt) {
+        const ts = event.Timestamp
+        const afterts = event.After
+        const beforets = event.Before
+        let name = event.Event
+
+        if (event.ItemId !== itemId) {
+            name = `(${findInfoEntryById(event.ItemId).En_Title}) ${name}`
+        }
+
+        let timeTd = `<td>${items_eventTSHTML(event)}</td>`
+
+        html += `<tr>
+                        <td>
+                            <div class="grid column">
+                                <button class="delete" onclick="deleteEventForItemId(${event.ItemId}n, ${ts}, ${afterts}, ${beforets})">🗑</button>
+                                ${name}
+                            </div>
+                        </td>
+                            ${timeTd}
+                        </tr>`
+    }
+    html += "</tbody>"
+    eventsTbl.innerHTML = html
+}
+
 function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
@@ -749,7 +807,6 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     const progressEl = el.getElementById("entry-progressbar")
     const captionEl = el.getElementById("entry-progressbar-position-label")
     const mediaInfoTbl = el.getElementById("media-info")
-    const eventsTbl = el.getElementById("user-actions")
     const customStyles = el.getElementById("custom-styles")
 
     const notesEditBox = el.getElementById("notes-edit-box")
@@ -978,56 +1035,9 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
-    let eventsToLookAt = events
-    for (let child of findDescendants(item.ItemId)) {
-        eventsToLookAt = eventsToLookAt.concat(findUserEventsById(child.ItemId))
-    }
 
     //Events
-    if (eventsTbl && eventsToLookAt.length) {
-        eventsToLookAt.sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
-        let html = `
-            <thead>
-                <tr>
-                    <!-- this nonsense is so that the title lines up with the events -->
-                    <th>
-                        <div class="grid column">
-                            <button onclick="openModalUI('new-event-form', this.getRootNode())">➕︎</button><span style="text-align: center">Event</span>
-                        </div>
-                    </th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-        `
-        for (let event of eventsToLookAt) {
-            const ts = event.Timestamp
-            const afterts = event.After
-            const beforets = event.Before
-            let name = event.Event
-
-            if (event.ItemId !== item.ItemId) {
-                name = `(${findInfoEntryById(event.ItemId).En_Title}) ${name}`
-            }
-
-            let timeTd = `<td>${items_eventTSHTML(event)}</td>`
-
-            html += `<tr>
-                        <td>
-                            <div class="grid column">
-                                <button class="delete" onclick="deleteEventForItemId(${event.ItemId}n, ${ts}, ${afterts}, ${beforets})">🗑</button>
-                                ${name}
-                            </div>
-                        </td>
-                            ${timeTd}
-                        </tr>`
-        }
-        html += "</tbody>"
-        eventsTbl.innerHTML = html
-    } else if (eventsTbl) {
-        //there are no events
-        eventsTbl.innerHTML = ""
-    }
+    updateEventsDisplay(el, user.ItemId)
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {
@@ -1091,6 +1101,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         if (!el) continue
         el.onchange = function() {
             updateCostDisplay(root, item.ItemId)
+            updateEventsDisplay(root, item.ItemId)
         }
     }
 

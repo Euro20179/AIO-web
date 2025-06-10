@@ -530,6 +530,54 @@ async function nameToFormat(name: string): Promise<number> {
 }
 
 /**
+ * Like reduce, but the reduction function is called per item related to itemId according to the include* parameters
+ * @param {bigint} itemId - the starting item id
+ * @param {boolean} includeSelf - whether or not to include the starting item
+ * @param {boolean} includeChildren - whether or not to include children
+ * @param {boolean} includeCopies - whether or not to include copies
+ * @param {boolean} recursive - whether or not to apply this function to copies and children (if include{copies,children} are true)
+ * @param {((p: T, c: bigint) => T)} reduction - the reducer function
+ * @param {T} initial the starting value
+ */
+function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T): T {
+    if(includeSelf) {
+        initial = reduction(initial, itemId)
+    }
+    if (includeChildren) {
+        for (let child of findDescendants(itemId)) {
+            if (recursive) {
+                initial = items_reduce(child.ItemId, includeSelf, true, includeCopies, true, reduction, initial)
+            } else {
+                initial = reduction(initial, child.ItemId)
+            }
+        }
+    }
+    if (includeCopies) {
+        for (let copy of findCopies(itemId)) {
+            if (recursive) {
+                initial = items_reduce(copy.ItemId, includeSelf, includeChildren, true, true, reduction, initial)
+            } else {
+                initial = reduction(initial, copy.ItemId)
+            }
+        }
+    }
+    return initial
+}
+
+/**
+ * Gets a list of all events related to itemid
+ * @param {bigint} itemId - the item id to find the events of
+ * @param {boolean} includeSelf - whether or not to include it's own events
+ * @param {boolean} includeChildren - whether or not to include its children's events
+ * @param {boolean} includeCopies - whether or not to include copies' events
+ * @param {boolean} recursive - if includeChildren is set, apply this function to all of its children
+ * @returns {UserEvent[]}
+*/
+function items_findAllEvents(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean): UserEvent[] {
+    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, recursive, (p, c) => p.concat(findUserEventsById(c)), [] as UserEvent[])
+}
+
+/**
  * Calculate the total cost of an item
  * @param {bigint} itemId - the item id to find the cost of
  * @param {boolean} includeSelf - whether or not to include itself in the cost calculation
@@ -539,31 +587,7 @@ async function nameToFormat(name: string): Promise<number> {
  * @returns {number}
 */
 function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean): number {
-    const item = findInfoEntryById(itemId)
-    let total = includeSelf ? item.PurchasePrice : 0
-    if (includeChildren) {
-        let children = Object.values(globalsNewUi.entries).filter(v => v.info.ParentId === itemId)
-        for (let child of children) {
-            if (recursive) {
-                //includeChildren in this case will always be true
-                total += items_calculateCost(child.ItemId, includeSelf, true, includeCopies, true)
-            } else {
-                total += child.info.PurchasePrice
-            }
-        }
-    }
-    if (includeCopies) {
-        let copies = Object.values(globalsNewUi.entries).filter(v => v.info.CopyOf === itemId)
-        for (let copy of copies) {
-            if (recursive) {
-                //includeChildren in this case will always be true
-                total += items_calculateCost(copy.ItemId, includeSelf, true, includeCopies, true)
-            } else {
-                total += copy.info.PurchasePrice
-            }
-        }
-    }
-    return total
+    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
 }
 
 function items_eventTimeEstimate(event: UserEvent) {
