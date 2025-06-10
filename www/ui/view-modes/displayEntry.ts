@@ -155,8 +155,7 @@ function onIntersection(entries: IntersectionObserverEntry[]) {
         if (entry.isIntersecting && displayQueue.length && !displayEntryIntersected.has(entryId)) {
             displayEntryIntersected.add(entryId)
 
-            let newItem = displayQueue.shift()
-            if (!newItem) continue
+            let newItem = displayQueue.shift() as InfoEntry
             modeDisplayEntry.add(newItem)
         }
     }
@@ -213,7 +212,7 @@ function de_newevent(form: HTMLFormElement) {
         .catch(alert)
 }
 
-const observer = new IntersectionObserver(onIntersection, {
+let observer = new IntersectionObserver(onIntersection, {
     root: document.getElementById("entry-output"),
     rootMargin: "0px",
     threshold: 0.1
@@ -229,14 +228,20 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     chwin(win) {
-        let newOutput =win.document.getElementById("entry-output") 
-        if(newOutput) {
+        let newOutput = win.document.getElementById("entry-output")
+        observer.disconnect()
+        observer = new IntersectionObserver(onIntersection, {
+            root: newOutput,
+            rootMargin: "0px",
+            threshold: 0.5
+        })
+        if (newOutput) {
             displayItems = newOutput
         }
     },
 
     refresh(id) {
-        let el = document.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+        let el = displayItems.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
         if (el)
             refreshDisplayItem(id)
@@ -298,8 +303,8 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     clearSelected() {
-        for(let child of displayItems.querySelectorAll("display-entry")) {
-            child.remove()
+        for (let child of displayItems.querySelectorAll("display-entry")) {
+            removeDisplayItem(BigInt(child.getAttribute("data-item-id")))
         }
     },
 
