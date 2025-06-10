@@ -111,6 +111,7 @@ viewAllElem.addEventListener("change", e => {
     if(!viewAllElem.checked) {
         clearItems(false)
     } else {
+        clearItems()
         selectItemList(getFilteredResultsUI(), mode)
     }
 })

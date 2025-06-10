@@ -48,6 +48,7 @@ customElements.define("display-entry", class extends HTMLElement {
 const sidebarStyles = new CSSStyleSheet
 //gets replaced with colors.css, general.css, sidebar-entry.css in that order
 //the math.random is so that the build system doesn't inline this text, i need the ``
+//the reason i am doing this is because sharing the css styles like this triples the speed at which the sidebar can render
 sidebarStyles.replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`)
 customElements.define("sidebar-entry", class extends HTMLElement {
     root: ShadowRoot
