@@ -284,7 +284,10 @@ async function main() {
     const urlParams = new URLSearchParams(document.location.search)
     if (urlParams.has("display")) {
         setDisplayModeUI(true)
+    } else if(urlParams.has("catalog")) {
+        toggleCatalogModeUI()
     }
+
 
     fillFormatSelectionUI()
     fillTypeSelectionUI()

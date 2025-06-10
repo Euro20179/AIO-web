@@ -57,14 +57,15 @@
             <li>
                 <code>uname</code>: the username to display
             </li>
-            <code>q</code>: an initial search query
+            <li><code>q</code>: an initial search query</li>
             <li>
                 <code>item-id</code>: the item id to show (same as <code>?q=ItemId%20=id</code>
             </li>
-            <code>display</code>: get rid of the ui elements, and display the first result found by <code>q</code>,
             <li>
+                <code>display</code>: get rid of the ui elements, and display the first result found by <code>q</code>
                 or the item specified by <code>item-id</code>
             </li>
+            <li><code>catalog</code>: use catalog mode, where the viewing-area is in a seperate window</li>
         </ul>
     </section>
 
@@ -84,7 +85,8 @@
             <li><code>/user/{username}</code>: redirects to <code>/ui?uname={username}</code></li>
             <li><code>/uid/{uid}</code>: redirects to <code>/ui?uid={uid}</code></li>
             <li><code>/login</code>: performs a basic www-authentication, all url parameters are forwarded to
-                <code>/ui</code></li>
+                <code>/ui</code>
+            </li>
             <li><code>/settings.html</code>: user settings editor</li>
         </ul>
     </section>
