@@ -274,7 +274,7 @@
     #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: 15px;
-        width: 50cqb;
+        width: 30cqb;
         flex-grow: 1;
         min-width: 100px;
 
