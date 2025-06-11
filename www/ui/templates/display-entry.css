@@ -10,8 +10,7 @@
 
         td,
         th {
-            border: 1px solid;
-            border-color: var(--blue);
+            border: 1px solid var(--secondary);
         }
     }
 

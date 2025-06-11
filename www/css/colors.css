@@ -54,7 +54,7 @@
 
 @property --main {
     syntax: "<color>";
-    initial-value: #121626;
+    initial-value: #24273a;
     inherits: true;
 }
 
@@ -71,14 +71,19 @@
 }
 
 :root {
-    --secondary:  hsl(
-        from var(--main) h s calc(l * 1.8)
-    );
+    --secondary: hsl(from var(--main) calc(h - 20) s calc(l * 1.8));
+    @supports (color: rgb(calc(sign(1)) 0 0)) {
+        --secondary: hsl(from var(--main) calc(h - 20) s calc(l + (sign(abs(l - 100) - 50) * 20)));
+    }
+
     --input-background: var(--secondary);
     --input-border-color: var(--input-border-color);
     --border-roundness: var(--input-border-roundness);
-    --text-color: hsl(from var(--light-blue) h s 95%);
+    --text-color: hsl(from var(--main) h s 95%);
 
     --scrollbar-bar-color: var(--blue);
     --scrollbar-gutter-color: var(--secondary);
+
+    --highlight: var(--blue);
+    --highlight-text-color: var(--main);
 }
