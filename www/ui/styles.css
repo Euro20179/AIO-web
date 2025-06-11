@@ -1,5 +1,3 @@
-@import "/css/general.css";
-
 @layer general, utility, components;
 
 @layer general {
