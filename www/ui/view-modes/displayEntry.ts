@@ -212,7 +212,7 @@ const modeDisplayEntry: DisplayMode = {
         if (newOutput) {
             displayItems = newOutput
             newOutput.addEventListener("scroll", (e) => {
-                if(displayItems.scrollHeight - displayItems.scrollTop > innerHeight) return
+                if(displayItems.scrollHeight - displayItems.scrollTop > innerHeight + 1000) return
 
                 if(displayQueue.length)
                     renderDisplayItem(displayQueue.shift()?.ItemId)
