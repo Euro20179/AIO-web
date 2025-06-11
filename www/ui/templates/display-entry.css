@@ -280,8 +280,7 @@
     }
 
     #descriptors, #relationship-display {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(30cqi, 1fr));
+        display: flex;
         gap: 2cqi;
 
         margin-top: var(--small-gap);
