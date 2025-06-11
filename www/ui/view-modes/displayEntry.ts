@@ -212,9 +212,9 @@ const modeDisplayEntry: DisplayMode = {
         if (newOutput) {
             displayItems = newOutput
             newOutput.addEventListener("scroll", (e) => {
-                if(displayItems.scrollHeight - displayItems.scrollTop > innerHeight + 1000) return
+                if (displayItems.scrollHeight - displayItems.scrollTop > innerHeight + 1000) return
 
-                if(displayQueue.length)
+                if (displayQueue.length)
                     renderDisplayItem(displayQueue.shift()?.ItemId)
             })
         }
@@ -686,7 +686,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
 
             if (!data) {
                 const fallback = elem.getAttribute("put-data-fallback")
-                if(fallback !== null) {
+                if (fallback !== null) {
                     data = fallback
                 }
             } else {
@@ -1112,6 +1112,30 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         el.onchange = function() {
             updateCostDisplay(root, item.ItemId)
             updateEventsDisplay(root, item.ItemId)
+        }
+    }
+
+    for (let popout of root.querySelectorAll("button.popout") as NodeListOf<HTMLElement>) {
+        const parent = popout.parentElement
+        if (!parent) continue
+        popout.onclick = function() {
+            let win = open("about:blank", "_blank", "popup=true")
+            if (!win) return
+            win.onload = function() {
+                win.document.head.innerHTML = `
+<link rel='stylesheet' href='/css/general.css'>`
+                win.document.body.innerHTML = parent.outerHTML
+                win.document.body.firstElementChild?.classList.remove("none")
+                win.document.body.querySelector("button.popout").onclick = function() {
+                    parent.classList.remove("none")
+                    win.close()
+                }
+            }
+            win.onbeforeunload = function() {
+                parent.classList.remove("none")
+                win.close()
+            }
+            parent.classList.add("none")
         }
     }
 

@@ -145,6 +145,12 @@
 }
 
 @layer utility {
+    .floating {
+        position: absolute;
+        background-color: var(--main);
+        z-index: 100;
+    }
+
     .center {
         text-align: center;
     }
@@ -220,6 +226,10 @@
 
     .block {
         display: block;
+    }
+
+    .none {
+        display: none;
     }
 
     .overflow {

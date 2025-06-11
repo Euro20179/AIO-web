@@ -129,11 +129,12 @@
         <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </menu>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
+        <button class="popout" style="width: fit-content; aspect-ratio: 1; float: right;">↗</button>
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
         <hgroup class="flex column center">
-            <h2 class="m-0 title center" id="main-title"></h2>
+            <h1 class="m-0 title center" id="main-title"></h1>
             <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
             <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
@@ -150,10 +151,6 @@
 
     </figure>
     <div>
-        <hgroup>
-            <div class="flex j-center" style="gap: var(--small-gap);">
-            </div>
-        </hgroup>
         <div>
             <div id="cost-calculation-modifiers" class="flex column j-center">
                 <a href="/usage/index.html#include" class="question">include</a>
@@ -222,6 +219,7 @@
 
     <div class="descriptors" id="descriptors">
         <section>
+            <button class="popout" style="float: right;">↗</button>
             <h4 class="center">Description</h4>
             <article class="description" id="description" put-data="Description" put-data-mode="html"></article>
         </section>
