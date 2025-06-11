@@ -820,6 +820,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     const captionEl = el.getElementById("entry-progressbar-position-label")
     const mediaInfoTbl = el.getElementById("media-info")
     const customStyles = el.getElementById("custom-styles")
+    const locationEl = el.getElementById("location-link")
 
     const notesEditBox = el.getElementById("notes-edit-box")
 
@@ -832,6 +833,12 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //Cost
     updateCostDisplay(el, item.ItemId)
+
+    //Location
+    if (item.Location !== '' && locationEl && "value" in locationEl) {
+        let loc = item.Location
+        locationEl.value = loc
+    }
 
     //user styles
     let userExtra = getUserExtra(user, "styles")
@@ -1285,6 +1292,19 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
                     res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
                 })
                 .catch(console.error)
+        }
+    }
+
+    const locationEl = root.getElementById("location-link")
+    if (locationEl && 'value' in locationEl) {
+        locationEl.onchange = async () => {
+            item.Location = String(locationEl.value)
+            await api_setItem("", item)
+            updateInfo2({
+                [String(item.ItemId)]: {
+                    info: item
+                }
+            })
         }
     }
 

@@ -73,6 +73,7 @@ function execute() {
         scriptEl.src = URL.createObjectURL(b)
         document.body.append(scriptEl)
         scriptEl.remove()
+        URL.revokeObjectURL(scriptEl.src)
         return
     }
 

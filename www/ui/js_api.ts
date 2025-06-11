@@ -11,6 +11,7 @@ function ua_download(data: string, name: string, ft: string): number {
     let b = new Blob([data], { type: ft })
     e.href = URL.createObjectURL(b)
     e.click()
+    URL.revokeObjectURL(e.href)
     return 0
 }
 
