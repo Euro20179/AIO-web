@@ -117,96 +117,99 @@
         <button class="copy-to" entry-action="copyto" title="copy user info to another item">➡</button>
         <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </div>
-    <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
-        <!-- </div> -->
-        <input type="file" hidden id="thumbnail-file-upload">
+    <div class="grid column">
         <menu role="menu" aria-label="metadata actions"
-            style="margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));">
-            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"> </select>
+            style="margin: 0; padding: 0; display: grid; justify-content: start; grid-template-columns: repeat(4, 1fr); width: 100%;">
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
+                style="min-width: 50px;"> </select>
             <select id="format-selector" title="Format type" entry-action="setformat" entry-action-trigger="change"
-                class="center"></select>
+                class="center" style="min-width: 50px;"></select>
             <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
                 title="identify item">ℹ</button>
             <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
         </menu>
-        <img src="" alt="" class="thumbnail" id="thumbnail">
-        <table class="media-info" id="media-info"></table>
         <menu role="menu" aria-label="item modifications"
-            style="margin: 0; padding: 0; display: grid; grid-template-rows: repeat(1, 1fr); grid-template-columns: repeat(3, 1fr);">
+            style="margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); justify-content: end; width: 100%;">
             <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
             <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
             <button class="edit-template" entry-action="toggle" elem-id="template-editor-container"
                 title="edit item's html template">&lt;&gt;</button>
         </menu>
-        <div class="header-subtitle" id="header-subtitle">
-            <textarea id="style-editor" hidden rows="80" cols="80"></textarea>
-        </div>
-
-    </figure>
-    <hgroup>
-        <div class="flex j-center" style="gap: var(--small-gap);">
-            <h2 class="title center" id="main-title"></h2>
-        </div>
-        <div class="flex column wrap j-center" style="gap: 2ch">
-            <h3 class="center official-native-title" id="official-native-title"></h3>
-        </div>
-        <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
-            <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
-            <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
-            <span class="cost" id="cost"></span>
-        </div>
-    </hgroup>
-    <div>
-        <div id="cost-calculation-modifiers" class="flex row j-center">
-            <a href="/usage/index.html#include" class="question">include</a>
-            <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
-                Self</label>
-            <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
-                Children</label>
-            <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
-                Copies</label>
-            <label for="include-recusively-in-cost"><input type="checkbox" id="include-recusively-in-cost">
-                Recursive</label>
-        </div>
     </div>
-    <div id="misc-info" class="flex row wrap j-center">
-        <div class="tables flex column" id="event-table-area"
-            style="flex-grow: 1; justify-content: center; display: flow-root; align-self: center;">
-            <table class="user-actions" id="user-actions"></table>
-            <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
-                Event</button>
+    <div>
+        <figure class="thumbnail-fig flex column" id="thumbnail-fig">
+            <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
+            <!-- </div> -->
+            <input type="file" hidden id="thumbnail-file-upload">
+            <img src="" alt="" class="thumbnail" id="thumbnail">
+            <table class="media-info" id="media-info"></table>
+            <div class="header-subtitle" id="header-subtitle">
+                <textarea id="style-editor" hidden rows="80" cols="80"></textarea>
+            </div>
+
+        </figure>
+        <hgroup>
+            <div class="flex j-center" style="gap: var(--small-gap);">
+                <h2 class="title center" id="main-title"></h2>
+                <h3 class="center official-native-title" id="official-native-title"></h3>
+            </div>
+            <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
+                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
+                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
+                <span class="cost" id="cost"></span>
+            </div>
+        </hgroup>
+        <div>
+            <div id="cost-calculation-modifiers" class="flex row j-center">
+                <a href="/usage/index.html#include" class="question">include</a>
+                <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
+                    Self</label>
+                <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
+                    Children</label>
+                <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
+                    Copies</label>
+                <label for="include-recusively-in-cost"><input type="checkbox" id="include-recusively-in-cost">
+                    Recursive</label>
+            </div>
         </div>
-        <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-            <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount"
-                put-data="ViewCount"></p>
-            <figure class="entry-progress">
-                <div class="viewing relative">
-                    <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
-                        value="0"></progress>
-                    <figcaption id="entry-progressbar-position-label"></figcaption>
-                </div>
-            </figure>
-            <menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
-                <div class="flex">
-                    <button data-action="Plan" class="action" title="plan">🗓</button>
-                    <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
-                    <button data-action="Wait" class="action" title="wait">⌚︎</button>
-                </div>
-                <div class="flex">
-                    <button data-action="Finish" class="action" title="finish">🏁</button>
-                    <button data-action="Drop" class="action" title="drop">⏹</button>
-                    <select id="status-selector">
-                        <option value="Planned">Planned</option>
-                        <option value="Viewing">Viewing</option>
-                        <option value="ReViewing">ReViewing</option>
-                        <option value="Paused">Paused</option>
-                        <option value="Waiting">Waiting</option>
-                        <option value="Finished">Finished</option>
-                        <option value="Dropped">Dropped</option>
-                    </select>
-                </div>
-            </menu>
+        <div id="misc-info" class="flex row wrap j-center">
+            <div class="tables flex column" id="event-table-area"
+                style="flex-grow: 1; justify-content: center; display: flow-root; align-self: center;">
+                <table class="user-actions" id="user-actions"></table>
+                <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
+                    Event</button>
+            </div>
+            <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
+                <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount"
+                    put-data="ViewCount"></p>
+                <figure class="entry-progress">
+                    <div class="viewing relative">
+                        <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"
+                            value="0"></progress>
+                        <figcaption id="entry-progressbar-position-label"></figcaption>
+                    </div>
+                </figure>
+                <menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
+                    <div class="flex">
+                        <button data-action="Plan" class="action" title="plan">🗓</button>
+                        <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
+                        <button data-action="Wait" class="action" title="wait">⌚︎</button>
+                    </div>
+                    <div class="flex">
+                        <button data-action="Finish" class="action" title="finish">🏁</button>
+                        <button data-action="Drop" class="action" title="drop">⏹</button>
+                        <select id="status-selector">
+                            <option value="Planned">Planned</option>
+                            <option value="Viewing">Viewing</option>
+                            <option value="ReViewing">ReViewing</option>
+                            <option value="Paused">Paused</option>
+                            <option value="Waiting">Waiting</option>
+                            <option value="Finished">Finished</option>
+                            <option value="Dropped">Dropped</option>
+                        </select>
+                    </div>
+                </menu>
+            </div>
         </div>
     </div>
 

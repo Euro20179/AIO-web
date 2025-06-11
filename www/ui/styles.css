@@ -338,6 +338,7 @@
     #viewing-area {
         container-name: viewing-area;
         container-type: size;
+        grid-area: main;
 
         &:not(:has(:where(display-entry, #calc-output:target, #gallery-output:target, #graph-output:target, #event-output:target))) {
             #error-output {
