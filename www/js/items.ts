@@ -376,7 +376,7 @@ sorts.set("added", (a, b) => {
 sorts.set("general-rating", (a, b) => {
     let am = findMetadataById(a.ItemId)
     let bm = findMetadataById(b.ItemId)
-    return bm.Rating / bm.RatingMax - am.Rating / am.RatingMax
+    return ((bm.Rating / bm.RatingMax) || 0) - ((am.Rating / am.RatingMax) || 0)
 })
 
 sorts.set("release-year", (a, b) => {

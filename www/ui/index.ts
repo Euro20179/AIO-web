@@ -288,6 +288,30 @@ async function main() {
         openCatalogModeUI()
     }
 
+    const onrender = () => {
+        //just in case
+        removeEventListener("aio-items-rendered", onrender)
+        items_refreshMetadata(uid).then(() => {
+            if (mode.refresh && globalsNewUi.selectedEntries.length) {
+                for (let item of globalsNewUi.selectedEntries) {
+                    mode.refresh(item.ItemId)
+                }
+            }
+
+            const ev = new CustomEvent("aio-metadata-loaded")
+            dispatchEvent(ev)
+        })
+    }
+    //allow the fetch to happen *after* items are rendered on firefox
+    //becasue firefox doesn't render the items until after the fetch for some reason
+    addEventListener("aio-items-rendered", onrender)
+
+    //if the user is logged in, do ui startup script for their user and their user only
+    if (localStorage.getItem("userUID") && getUserAuth() && !urlParams.has("no-startup")) {
+        const settings = await getSettings(Number(localStorage.getItem("userUID")))
+        doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
+    }
+
 
     fillFormatSelectionUI()
     fillTypeSelectionUI()
@@ -335,30 +359,6 @@ async function main() {
             }
         }
     })
-
-    const onrender = () => {
-        //just in case
-        removeEventListener("aio-items-rendered", onrender)
-        items_refreshMetadata(uid).then(() => {
-            if (mode.refresh && globalsNewUi.selectedEntries.length) {
-                for (let item of globalsNewUi.selectedEntries) {
-                    mode.refresh(item.ItemId)
-                }
-            }
-
-            const ev = new CustomEvent("aio-metadata-loaded")
-            dispatchEvent(ev)
-        })
-    }
-    //allow the fetch to happen *after* items are rendered on firefox
-    //becasue firefox doesn't render the items until after the fetch for some reason
-    addEventListener("aio-items-rendered", onrender)
-
-    //if the user is logged in, do ui startup script for their user and their user only
-    if (localStorage.getItem("userUID") && getUserAuth() && !urlParams.has("no-startup")) {
-        const settings = await getSettings(Number(localStorage.getItem("userUID")))
-        doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
-    }
 }
 
 main()
