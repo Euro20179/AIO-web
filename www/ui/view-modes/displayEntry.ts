@@ -839,7 +839,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         api_listTypes().then(types => {
             typeSelector.innerHTML = ""
             for (let ty of types) {
-                const option = displayItems.ownerDocument.createElement("option")
+                const option = document.createElement("option")
                 option.value = ty
                 option.innerText = ty
                 typeSelector.append(option)
@@ -854,7 +854,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         api_listFormats().then(formats => {
             formatSelector.innerHTML = ""
             for (let fNo in formats) {
-                const option = displayItems.ownerDocument.createElement("option")
+                const option = document.createElement("option")
                 option.value = fNo
                 option.innerText = formats[fNo]
                 formatSelector.append(option)
@@ -870,9 +870,9 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         for (let tag of item.Tags || []) {
             tag = tag.trim()
             if (!tag) continue
-            const outer = displayItems.ownerDocument.createElement("div")
+            const outer = document.createElement("div")
 
-            const del = displayItems.ownerDocument.createElement("button")
+            const del = document.createElement("button")
             del.innerText = "🗑"
             del.classList.add("delete")
 
@@ -890,7 +890,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
             outer.append(del)
 
-            const btn = displayItems.ownerDocument.createElement("button")
+            const btn = document.createElement("button")
             btn.classList.add("tag")
             btn.innerText = tag
             outer.append(btn)
@@ -1050,7 +1050,7 @@ function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: b
 }
 
 function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string): HTMLElement {
-    let el = displayItems.ownerDocument.createElement("display-entry")
+    let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
 
