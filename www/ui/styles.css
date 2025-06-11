@@ -180,6 +180,10 @@
 
         &.catalog-mode {
             grid-template-areas: "form form form" "sidebar sidebar sidebar" "sidebar sidebar sidebar";
+
+            #sidebar {
+                width: 100vw;
+            }
         }
 
         &.display-mode {
@@ -433,7 +437,7 @@
     #sidebar {
         grid-area: sidebar;
         height: 100%;
-        width: clamp(100px, 20cqi, 200px);
+        width: 200px;
         resize: horizontal;
 
         container: sidebar / inline-size;
