@@ -2,15 +2,6 @@ const apiPath = `${AIO}${API}`
 
 const ACCOUNTS: Record<number, string> = {}
 
-function setError(text: string) {
-    const errorOut = document.getElementById("error")
-    if (text == "") {
-        errorOut?.removeAttribute("data-error")
-    } else {
-        errorOut?.setAttribute("data-error", text)
-    }
-}
-
 function alert(text: string) {
     const notificationsArea = document.getElementById("notifications") as HTMLDivElement
     const el = document.createElement("div")

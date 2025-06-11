@@ -3,6 +3,15 @@
  * with client-side inputs
 */
 
+function setError(text: string) {
+    const errorOut = currentDocument().getElementById("error")
+    if (text == "") {
+        errorOut?.removeAttribute("data-error")
+    } else {
+        errorOut?.setAttribute("data-error", text)
+    }
+}
+
 function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
     into.setItem.bind(into)("userAuth", auth)
 }
