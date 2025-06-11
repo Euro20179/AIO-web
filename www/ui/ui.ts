@@ -888,7 +888,7 @@ function openCatalogModeUI() {
         catalogWin.addEventListener("beforeunload", (e) => {
             closeCatalogModeUI()
         })
-        mode_chwin(catalogWin)
+        mode_chwin(catalogWin as Window & typeof globalThis)
         mainUI.classList.add("catalog-mode")
         toggleUI("viewing-area", "none")
     }

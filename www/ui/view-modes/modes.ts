@@ -30,9 +30,9 @@ let curModeName = modeOutputIds[idx]
 
 let mode = modes[idx]
 
-let mode_curWin: Window = window
+let mode_curWin = window
 
-function mode_chwin(newWin: Window) {
+function mode_chwin(newWin: Window & typeof globalThis) {
     if (newWin === window) {
         mode_curWin.close()
         mode_curWin = window

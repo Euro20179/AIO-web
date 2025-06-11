@@ -465,7 +465,7 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
 
 function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     const eventsTbl = el.getElementById("user-actions")
-    if (!eventsTbl || !(eventsTbl.tagName === "TABLE")) return
+    if (!eventsTbl || !(eventsTbl instanceof mode_curWin.HTMLTableElement)) return
 
     const { self, children, copies, recursive } = whatToInclude(el)
 
@@ -835,7 +835,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //type selector
     const typeSelector = el.getElementById("type-selector")
-    if (typeSelector && (typeSelector.tagName === "SELECT")) {
+    if (typeSelector && (typeSelector instanceof mode_curWin.HTMLSelectElement)) {
         api_listTypes().then(types => {
             typeSelector.innerHTML = ""
             for (let ty of types) {
@@ -850,7 +850,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //format selector
     const formatSelector = el.getElementById("format-selector")
-    if (formatSelector && (formatSelector.tagName === "SELECT")) {
+    if (formatSelector && (formatSelector instanceof mode_curWin.HTMLSelectElement)) {
         api_listFormats().then(formats => {
             formatSelector.innerHTML = ""
             for (let fNo in formats) {
@@ -938,7 +938,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     //Thumbnail
-    if (imgEl && imgEl.tagName === "IMG") {
+    if (imgEl && imgEl instanceof mode_curWin.HTMLImageElement) {
         //@ts-ignore
         imgEl.alt = meta.Title || item.En_Title
         //@ts-ignore
@@ -1141,7 +1141,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     let extra = getUserExtra(user, "styles")
 
     let styleEditor = root.getElementById("style-editor")
-    if (styleEditor && styleEditor.tagName === "TEXTAREA") {
+    if (styleEditor && styleEditor instanceof mode_curWin.HTMLTextAreaElement) {
         (styleEditor as HTMLTextAreaElement).value = extra || ""
         styleEditor.addEventListener("change", e => {
             const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
@@ -1149,7 +1149,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         })
     }
     let templEditor = root.getElementById("template-editor")
-    if (templEditor && templEditor.tagName === "TEXTAREA") {
+    if (templEditor && templEditor instanceof mode_curWin.HTMLTextAreaElement) {
         (templEditor as HTMLTextAreaElement).value = getUserExtra(user, "template") || ""
     }
 
@@ -1473,7 +1473,7 @@ const de_actions = {
         if (!id) return
         let toShow = root.getElementById(id)
         if (!toShow) return
-        if (toShow.tagName === "DIALOG") {
+        if (toShow instanceof mode_curWin.HTMLDialogElement) {
             if (toShow.open) {
                 toShow.close()
             } else {
@@ -1663,7 +1663,7 @@ const de_actions = {
     }),
     previewtemplate: displayEntryAction(function(item, root) {
         const templEditor = root.getElementById("template-editor")
-        if (!templEditor || !(templEditor.tagName === "TEXTAREA")) return
+        if (!templEditor || !(templEditor instanceof mode_curWin.HTMLTextAreaElement)) return
 
         const preview = displayItems.ownerDocument.open(location.toString(), "_blank", "popup=true")
         if (!preview) return

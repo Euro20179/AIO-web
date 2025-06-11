@@ -28,7 +28,7 @@ const modeCalc: DisplayMode = {
     },
 
     refresh(id) {
-        const el = document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
+        const el = calcItems.ownerDocument.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
         if (!el) return
         //PROBLEM: if something within the user's code causes calc to get updated
         //an infinite cycle will occure because
