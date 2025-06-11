@@ -180,19 +180,6 @@
 
         &.catalog-mode {
             grid-template-areas: "form form form" "sidebar sidebar sidebar" "sidebar sidebar sidebar";
-
-            #sidebar-items {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            #sidebar {
-                width: initial;
-            }
-
-            sidebar-entry {
-                width: 20cqi;
-            }
         }
 
         &.display-mode {
@@ -447,6 +434,7 @@
         grid-area: sidebar;
         height: 100%;
         width: clamp(100px, 20cqi, 200px);
+        resize: horizontal;
 
         container: sidebar / inline-size;
 
@@ -481,9 +469,8 @@
     }
 
     #sidebar-items {
-        display: flex;
-        width: clamp(200px, 35vw, 35vw);
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 
         min-height: 10dvh;
         max-height: 83%;
