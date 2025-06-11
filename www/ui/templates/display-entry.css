@@ -26,10 +26,12 @@
     }
 
     select {
+
         /*select is colored wrong in safari*/
         @supports (-webkit-backdrop-filter: blur(1px)) {
             -webkit-appearance: none;
         }
+
         -moz-appearance: revert;
     }
 
@@ -142,11 +144,14 @@
             border-style: dotted;
         }
 
-        #media-info {
-            width: 100%;
-        }
-
         @container entry (width < 450px) {
+            display: none;
+        }
+    }
+
+    #media-info {
+        width: 100%;
+        &:not(:has(tr:nth-child(2))) {
             display: none;
         }
     }
@@ -263,9 +268,9 @@
         vertical-align: middle;
     }
 
-    #descriptors {
-        display: flex;
-        flex-wrap: wrap;
+    #descriptors, #relationship-display {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(30cqi, 1fr));
         gap: 2cqi;
 
         margin-top: var(--small-gap);
@@ -275,7 +280,7 @@
     #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: 15px;
-        width: 30cqb;
+        width: 100%;
         flex-grow: 1;
         min-width: 100px;
 
@@ -301,8 +306,6 @@
         img {
             max-width: 100%;
         }
-
-        width: 100%;
     }
 
     section:has(> #description:empty) {
@@ -352,6 +355,7 @@
         &::before {
             content: "(";
         }
+
         &::after {
             content: ")";
         }
