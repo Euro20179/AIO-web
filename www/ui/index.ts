@@ -284,7 +284,7 @@ async function main() {
     const urlParams = new URLSearchParams(document.location.search)
     if (urlParams.has("display")) {
         setDisplayModeUI(true)
-    } else if(urlParams.has("catalog")) {
+    } else if (urlParams.has("catalog")) {
         openCatalogModeUI()
     }
 
@@ -336,8 +336,9 @@ async function main() {
         }
     })
 
-    //small pause to allow the fetch to happen *after* items are rendered on firefox
-    new Promise(res => setTimeout(res, 500)).then(() => {
+    const onrender = () => {
+        //just in case
+        removeEventListener("aio-items-rendered", onrender)
         items_refreshMetadata(uid).then(() => {
             if (mode.refresh && globalsNewUi.selectedEntries.length) {
                 for (let item of globalsNewUi.selectedEntries) {
@@ -348,7 +349,10 @@ async function main() {
             const ev = new CustomEvent("aio-metadata-loaded")
             dispatchEvent(ev)
         })
-    })
+    }
+    //allow the fetch to happen *after* items are rendered on firefox
+    //becasue firefox doesn't render the items until after the fetch for some reason
+    addEventListener("aio-items-rendered", onrender)
 
     //if the user is logged in, do ui startup script for their user and their user only
     if (localStorage.getItem("userUID") && getUserAuth() && !urlParams.has("no-startup")) {
