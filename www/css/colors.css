@@ -1,19 +1,84 @@
+@property --main {
+    syntax: "<color>";
+    initial-value: #121626;
+    inherits: true;
+}
+
+@property --pink {
+    syntax: "<color>";
+    initial-value: #f7c8e0;
+    inherits: true;
+}
+
+@property --green {
+    syntax: "<color>";
+    initial-value: #dfffd8;
+    inherits: true;
+}
+
+@property --light-blue {
+    syntax: "<color>";
+    initial-value: #b4e4ff;
+    inherits: true;
+}
+
+@property --blue {
+    syntax: "<color>";
+    initial-value: #95bdff;
+    inherits: true;
+}
+
+@property --yellow {
+    syntax: "<color>";
+    initial-value: #e5c890;
+    inherits: true;
+}
+
+@property --warn {
+    syntax: "<color>";
+    initial-value: var(--yellow);
+    inherits: true;
+}
+
+@property --lavender {
+    syntax: "<color>";
+    initial-value: #b4befe;
+    inherits: true;
+}
+
+@property --red {
+    syntax: "<color>";
+    initial-value: #e78284;
+    inherits: true;
+}
+
+@property --main {
+    syntax: "<color>";
+    initial-value: #121626;
+    inherits: true;
+}
+
+@property --input-border-color {
+    syntax: "<color>";
+    initial-value: var(--blue);
+    inherits: true;
+}
+
+@property --input-border-roundness {
+    syntax: "<length>";
+    initial-value: 5px;
+    inherits: true;
+}
+
 :root {
-    --pink: var(--aio-limas-pink, #f7c8e0);
-    --green: var(--aio-limas-green, #dfffd8);
-    --light-blue: var(--aio-limas-light-blue, #b4e4ff);
-    --blue: var(--aio-limas-blue, #95bdff);
-    --yellow: var(--aio-limas-yellow, #e5c890);
-    --warn: var(--aio-limas-warn, var(--yellow));
-    --lavender: var(--aio-limas-lavender, #b4befe);
-    --red: var(--aio-limas-red, #e78284);
+    --secondary:  hsl(
+        from var(--main) h s calc(l * 1.8)
+    );
+    --input-background: var(--secondary);
+    --input-border-color: var(--input-border-color);
+    --border-roundness: var(--input-border-roundness);
+    --text-color: hsl(from var(--light-blue) h s 95%);
 
-    --main: var(--aio-limas-main, #121626);
-    --secondary: var(--aio-limas-secondary, hsl(from var(--main) h s calc(l * 1.8)));
-
-    --input-border-color: var(--aio-limas-input-border-color, var(--blue));
-
-    --border-roundness: var(--aio-limas-border-roundness, 5px);
-
-    --text-color: var(--aio-limas-text-color, hsl(from var(--light-blue) h s 95%));
+    --scrollbar-bar-color: var(--blue);
+    --scrollbar-gutter-color: var(--secondary);
 }

@@ -4,6 +4,8 @@
     *::before,
     *::after {
         box-sizing: border-box;
+
+        scrollbar-color: var(--scrollbar-bar-color) var(--scrollbar-gutter-color);
     }
 
     body {
@@ -31,10 +33,10 @@
     textarea,
     input,
     select {
-        --background: hsl(from var(--main) h s calc(l * 1.8)); 
+        color: inherit;
 
         border-style: solid;
-        background: var(--background);
+        background: var(--input-background);
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
@@ -67,13 +69,12 @@
         top: 2%;
         right: 2%;
 
-        border: 1px solid white;
+        border: 1px solid;
         border-radius: var(--border-roundness);
         padding: 5px;
     }
 
     input {
-        color: white;
         padding: 5px;
         border-radius: var(--border-roundness);
         border-width: 1px;
@@ -85,7 +86,6 @@
 
     select {
         border-style: solid;
-        color: white;
         border-radius: var(--border-roundness);
     }
 
@@ -99,7 +99,7 @@
     }
 
     button:hover {
-        background: color-mix(in oklab, currentColor 30%, var(--background) 70%);
+        background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
     }
 
     input[type="checkbox"] {
@@ -115,10 +115,10 @@
     }
 
     dialog {
-        color: white;
+        color: var(--text-color);
 
         background: var(--main);
-        border: 1px solid white;
+        border: 1px solid;
         padding: 5cap 5ch;
 
         * {
