@@ -139,12 +139,16 @@ document.addEventListener("keydown", e => {
     switch (e.key) {
         case "/": {
             let form = document.getElementById("sidebar-form") as HTMLFormElement
-            (form.querySelector('[name="search-query"]') as HTMLInputElement).focus()
+            const search = form.querySelector('[name="search-query"]') as HTMLInputElement
+            search?.focus()
+            search?.select()
             e.preventDefault()
             break
         }
         case "?": {
-            document.getElementById("item-filter")?.focus()
+            itemFilter.focus()
+            itemFilter.select()
+            // document.getElementById("item-filter")?.focus()
             e.preventDefault()
             break
         }
