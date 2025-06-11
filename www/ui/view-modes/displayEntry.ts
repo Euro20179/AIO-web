@@ -465,7 +465,7 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
 
 function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     const eventsTbl = el.getElementById("user-actions")
-    if (!eventsTbl || !(eventsTbl instanceof HTMLTableElement)) return
+    if (!eventsTbl || !(eventsTbl.tagName === "TABLE")) return
 
     const { self, children, copies, recursive } = whatToInclude(el)
 
@@ -835,11 +835,11 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //type selector
     const typeSelector = el.getElementById("type-selector")
-    if (typeSelector && (typeSelector instanceof HTMLSelectElement)) {
+    if (typeSelector && (typeSelector.tagName === "SELECT")) {
         api_listTypes().then(types => {
             typeSelector.innerHTML = ""
             for (let ty of types) {
-                const option = document.createElement("option")
+                const option = displayItems.ownerDocument.createElement("option")
                 option.value = ty
                 option.innerText = ty
                 typeSelector.append(option)
@@ -850,11 +850,11 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //format selector
     const formatSelector = el.getElementById("format-selector")
-    if (formatSelector && (formatSelector instanceof HTMLSelectElement)) {
+    if (formatSelector && (formatSelector.tagName === "SELECT")) {
         api_listFormats().then(formats => {
             formatSelector.innerHTML = ""
             for (let fNo in formats) {
-                const option = document.createElement("option")
+                const option = displayItems.ownerDocument.createElement("option")
                 option.value = fNo
                 option.innerText = formats[fNo]
                 formatSelector.append(option)
@@ -870,9 +870,9 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         for (let tag of item.Tags || []) {
             tag = tag.trim()
             if (!tag) continue
-            const outer = document.createElement("div")
+            const outer = displayItems.ownerDocument.createElement("div")
 
-            const del = document.createElement("button")
+            const del = displayItems.ownerDocument.createElement("button")
             del.innerText = "🗑"
             del.classList.add("delete")
 
@@ -890,7 +890,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
             outer.append(del)
 
-            const btn = document.createElement("button")
+            const btn = displayItems.ownerDocument.createElement("button")
             btn.classList.add("tag")
             btn.innerText = tag
             outer.append(btn)
@@ -1473,7 +1473,7 @@ const de_actions = {
         if (!id) return
         let toShow = root.getElementById(id)
         if (!toShow) return
-        if (toShow instanceof HTMLDialogElement) {
+        if (toShow.tagName === "DIALOG") {
             if (toShow.open) {
                 toShow.close()
             } else {
@@ -1663,7 +1663,7 @@ const de_actions = {
     }),
     previewtemplate: displayEntryAction(function(item, root) {
         const templEditor = root.getElementById("template-editor")
-        if (!templEditor || !(templEditor instanceof HTMLTextAreaElement)) return
+        if (!templEditor || !(templEditor.tagName === "TEXTAREA")) return
 
         const preview = displayItems.ownerDocument.open(location.toString(), "_blank", "popup=true")
         if (!preview) return
