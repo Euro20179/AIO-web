@@ -610,6 +610,7 @@ async function newEntryUI(form: HTMLFormElement) {
         alert("Failed to load new item metadata, please reload")
     })
 }
+
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
 if (newItemForm) {
     newItemForm.onsubmit = function() {
@@ -883,6 +884,7 @@ function openCatalogModeUI() {
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     catalogWin = open(newURL, "_blank", "popup=true")
     if (catalogWin) {
+        catalogWin.aiowisCatalogWindow = true
         catalogWin.addEventListener("beforeunload", (e) => {
             closeCatalogModeUI()
         })
