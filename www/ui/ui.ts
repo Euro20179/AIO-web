@@ -881,10 +881,10 @@ function openCatalogModeUI() {
     let urlParams = new URLSearchParams(location.search)
     urlParams.set("display", "true")
     urlParams.set("no-select", "true")
+    urlParams.set("no-startup", "true")
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     catalogWin = open(newURL, "_blank", "popup=true")
     if (catalogWin) {
-        catalogWin.aiowisCatalogWindow = true
         catalogWin.addEventListener("beforeunload", (e) => {
             closeCatalogModeUI()
         })
