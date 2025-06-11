@@ -64,8 +64,8 @@
     }
 
     .delete {
-        color: var(--red);
-        border-color: var(--red);
+        color: var(--error);
+        border-color: var(--error);
     }
 }
 

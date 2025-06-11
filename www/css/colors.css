@@ -40,6 +40,12 @@
     inherits: true;
 }
 
+@property --error {
+    syntax: "<color>";
+    initial-value: var(--red);
+    inherits: true;
+}
+
 @property --lavender {
     syntax: "<color>";
     initial-value: #b4befe;

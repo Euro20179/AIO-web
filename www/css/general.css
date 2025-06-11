@@ -139,7 +139,7 @@
     }
 
     :is(input, select):required:invalid {
-        border-color: var(--red);
+        border-color: var(--error);
     }
 }
 
