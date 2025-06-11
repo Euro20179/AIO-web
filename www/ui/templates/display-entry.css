@@ -118,7 +118,7 @@
         border: 1px solid var(--blue);
         align-self: center;
 
-        width: min(20cqw, 300px);
+        max-width: min(20cqw, 300px);
 
         cursor: pointer;
     }
