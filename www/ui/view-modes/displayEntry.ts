@@ -677,14 +677,21 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
                 }
 
             } else if (key in item) {
-                data = String(item[key as keyof typeof item])
+                data = item[key as keyof typeof item]
             } else if (key in meta) {
-                data = String(meta[key as keyof typeof meta])
+                data = meta[key as keyof typeof meta]
             } else if (key in user) {
-                data = String(user[key as keyof typeof user])
+                data = user[key as keyof typeof user]
             }
 
-            if (!data) continue
+            if (!data) {
+                const fallback = elem.getAttribute("put-data-fallback")
+                if(fallback !== null) {
+                    data = fallback
+                }
+            } else {
+                data = String(data)
+            }
 
             if (elem.getAttribute("put-data-mode") === "html") {
                 elem.innerHTML = String(data)

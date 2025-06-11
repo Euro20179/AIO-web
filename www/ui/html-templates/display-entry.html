@@ -112,7 +112,7 @@
 </dialog>
 <div class="root" id="root">
     <menu aria-label="item interactions" class="grid"
-        style="grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
+        style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
         <button class="close" entry-action="close" title="remove item from inspection area">X</button>
         <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
             style="min-width: 50px;"> </select>
@@ -132,6 +132,16 @@
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
+        <hgroup class="flex column center">
+            <h2 class="m-0 title center" id="main-title"></h2>
+            <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
+            <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
+            <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
+                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
+                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
+                <span class="cost" id="cost"></span>
+            </div>
+        </hgroup>
         <img src="" alt="" class="thumbnail" id="thumbnail">
         <table class="media-info" id="media-info"></table>
         <div class="header-subtitle" id="header-subtitle">
@@ -142,17 +152,10 @@
     <div>
         <hgroup>
             <div class="flex j-center" style="gap: var(--small-gap);">
-                <h2 class="title center" id="main-title"></h2>
-                <h3 class="center official-native-title" id="official-native-title"></h3>
-            </div>
-            <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
-                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
-                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
-                <span class="cost" id="cost"></span>
             </div>
         </hgroup>
         <div>
-            <div id="cost-calculation-modifiers" class="flex row j-center">
+            <div id="cost-calculation-modifiers" class="flex column j-center">
                 <a href="/usage/index.html#include" class="question">include</a>
                 <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
                     Self</label>

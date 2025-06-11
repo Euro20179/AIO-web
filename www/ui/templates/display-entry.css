@@ -122,8 +122,12 @@
         cursor: pointer;
     }
 
-    #thumbnail-fig {
+    #cost-calculation-modifiers {
         float: right;
+    }
+
+    #thumbnail-fig {
+        float: left;
         margin: 0;
         margin-left: var(--small-gap);
 
@@ -145,7 +149,14 @@
         }
 
         @container entry (width < 450px) {
-            display: none;
+            float: none;
+
+            display: grid;
+            grid-auto-flow: column;
+            justify-content: center;
+
+            max-width: initial;
+            margin: 0;
         }
     }
 
@@ -350,14 +361,6 @@
 
         &:empty {
             display: none;
-        }
-
-        &::before {
-            content: "(";
-        }
-
-        &::after {
-            content: ")";
         }
     }
 
