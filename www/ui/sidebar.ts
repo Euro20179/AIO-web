@@ -45,6 +45,13 @@ function focusNthSidebarItem(n: number) {
     sidebarItems.querySelector(`:nth-child(${n})`)?.focus()
 }
 
+function selectFocusedSidebarItem() {
+    if(document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
+    
+    const id = document.activeElement.getAttribute("data-entry-id") as string
+    selectItem(findInfoEntryById(BigInt(id)), mode)
+}
+
 function focusNextSidebarItem(backward: boolean = false) {
     const active = document.activeElement
     if (!active) return
@@ -184,32 +191,6 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
 
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
-        img.tabIndex = 0
-        function handleMouse(button: number, altKey: boolean, ctrlKey: boolean) {
-            if (button === 1) {
-                displayItemInWindow(item.ItemId)
-            }
-            else if (altKey) {
-                displayItemInWindow(item.ItemId, "_blank", true)
-            }
-            else if (ctrlKey) {
-                sidebarEntryOpenMultiple(item)
-            } else {
-                sidebarEntryOpenOne(item, mode)
-            }
-        }
-        img.addEventListener("mousedown", e => {
-            if (e.button === 1 || e.button === 0) {
-                handleMouse(e.button, e.altKey, e.ctrlKey)
-                e.preventDefault()
-            }
-        })
-        img.addEventListener("keydown", e => {
-            if (e.key === " " || e.key === "Enter") {
-                handleMouse(0, e.altKey, e.ctrlKey)
-                e.preventDefault()
-            }
-        })
 
         if (options?.renderImg && meta.Thumbnail) {
             img.src = fixThumbnailURL(meta.Thumbnail)
@@ -217,6 +198,33 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
             sidebarObserver.observe(elem)
         }
     }
+    function handleMouse(button: number, altKey: boolean, ctrlKey: boolean) {
+        if (button === 1) {
+            displayItemInWindow(item.ItemId)
+        }
+        else if (altKey) {
+            displayItemInWindow(item.ItemId, "_blank", true)
+        }
+        else if (ctrlKey) {
+            sidebarEntryOpenMultiple(item)
+        } else {
+            sidebarEntryOpenOne(item, mode)
+        }
+    }
+
+    const btn = elem.shadowRoot.querySelector("button") as HTMLButtonElement
+    btn.addEventListener("mousedown", e => {
+        if (e.button === 1 || e.button === 0) {
+            handleMouse(e.button, e.altKey, e.ctrlKey)
+            e.preventDefault()
+        }
+    })
+    btn.addEventListener("keydown", e => {
+        if (e.key === " " || e.key === "Enter") {
+            handleMouse(0, e.altKey, e.ctrlKey)
+            e.preventDefault()
+        }
+    })
 
     let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
     if (title) {

@@ -212,6 +212,10 @@ document.addEventListener("keydown", e => {
             if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
                 focusNthSidebarItem(1)
             } else focusNextSidebarItem()
+            if (e.shiftKey) {
+                if(!e.altKey) clearItems()
+                selectFocusedSidebarItem()
+            }
             break
         }
         case "ArrowUp": {
@@ -219,6 +223,10 @@ document.addEventListener("keydown", e => {
             if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
                 focusNthSidebarItem(sidebarItems.childElementCount)
             } else focusNextSidebarItem(true)
+            if (e.shiftKey) {
+                if(!e.altKey) clearItems()
+                selectFocusedSidebarItem()
+            }
             break
         }
     }

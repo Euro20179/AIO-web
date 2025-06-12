@@ -83,4 +83,8 @@
     #sidebar-thumbnail:not([src]) {
         height: 70cqb;
     }
+
+    button:focus {
+        outline: auto;
+    }
 }

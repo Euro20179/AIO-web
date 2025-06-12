@@ -63,7 +63,11 @@ customElements.define("sidebar-entry", class extends HTMLElement {
     }
 
     focus() {
-        this.root.querySelector("img")?.focus()
+        this.root.querySelector("button")?.focus()
+    }
+
+    click() {
+        this.root.querySelector("button")?.click()
     }
 })
 
