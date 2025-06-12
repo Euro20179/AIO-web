@@ -151,12 +151,11 @@
         @container entry (width < 450px) {
             float: none;
 
-            display: grid;
-            grid-auto-flow: column;
+            display: flex;
+            flex-direction: row;
+            max-width: revert;
+            flex-wrap: wrap;
             justify-content: center;
-
-            max-width: initial;
-            margin: 0;
         }
     }
 
