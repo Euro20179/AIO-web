@@ -91,8 +91,7 @@
 
     button,
     input[type="submit"] {
-        border: 1px solid currentColor;
-        border-color: var(--input-border-color);
+        border: 1px solid var(--input-border-color);
         border-radius: var(--border-roundness);
         color: var(--text-color);
         cursor: pointer;
@@ -106,7 +105,7 @@
         appearance: none;
         border-style: solid;
         vertical-align: bottom;
-        border-radius: 3px;
+        border-radius: var(--border-roundness);
     }
 
     input[type="checkbox"]:checked {

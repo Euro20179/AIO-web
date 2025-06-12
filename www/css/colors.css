@@ -1,9 +1,3 @@
-@property --main {
-    syntax: "<color>";
-    initial-value: #121626;
-    inherits: true;
-}
-
 @property --pink {
     syntax: "<color>";
     initial-value: #f7c8e0;
@@ -34,18 +28,6 @@
     inherits: true;
 }
 
-@property --warn {
-    syntax: "<color>";
-    initial-value: var(--yellow);
-    inherits: true;
-}
-
-@property --error {
-    syntax: "<color>";
-    initial-value: var(--red);
-    inherits: true;
-}
-
 @property --lavender {
     syntax: "<color>";
     initial-value: #b4befe;
@@ -64,28 +46,43 @@
     inherits: true;
 }
 
-@property --input-border-color {
-    syntax: "<color>";
-    initial-value: var(--blue);
-    inherits: true;
-}
-
 @property --input-border-roundness {
     syntax: "<length>";
     initial-value: 5px;
     inherits: true;
 }
 
+@media (prefers-color-scheme: light) {
+    :root {
+        --text-color: CanvasText;
+        --main: #eff1f5;
+        --red: #d20f39;
+        --pink: #ea76cb;
+        --green: #40a02b;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: hsl(from var(--main) h s calc(l * 95%))
+    }
+}
+
 :root {
     --secondary: hsl(from var(--main) calc(h - 20) s calc(l * 1.8));
+
     @supports (color: rgb(calc(sign(1)) 0 0)) {
-        --secondary: hsl(from var(--main) calc(h - 20) s calc(l + (sign(abs(l - 100) - 50) * 20)));
+        /*oklch doesnt work for some reason*/
+        --secondary: lch(from var(--main) calc(l + (sign(abs(l - 100) - 50) * 20)) c calc(h));
+        --text-color: hsl(from var(--main) h s calc(l + (sign(abs(l - 100) - 50)) * 90));
     }
 
+    --error: var(--red);
+    --warn: var(--yellow);
+
     --input-background: var(--secondary);
-    --input-border-color: var(--input-border-color);
+    --input-border-color: currentColor;
     --border-roundness: var(--input-border-roundness);
-    --text-color: hsl(from var(--main) h s 95%);
 
     --scrollbar-bar-color: var(--blue);
     --scrollbar-gutter-color: var(--secondary);

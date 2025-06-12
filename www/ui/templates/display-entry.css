@@ -289,7 +289,7 @@
     #descriptors>section,
     #relationship-display>section {
         border: 5px solid var(--secondary);
-        border-radius: 15px;
+        border-radius: calc(var(--border-roundness) * 5);
         width: 100%;
         flex-grow: 1;
         min-width: 100px;

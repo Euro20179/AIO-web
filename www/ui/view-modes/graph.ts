@@ -50,11 +50,11 @@ function mkPieChart(ctx: CanvasRenderingContext2D, labels: string[], data: numbe
             plugins: {
                 legend: {
                     labels: {
-                        color: "white"
+                        color: getCSSProp("--text-color", "white"),
                     }
                 },
                 title: {
-                    color: "white",
+                    color: getCSSProp("--text-color", "white"),
                     display: true,
                     text: labelText,
                 }
@@ -87,7 +87,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
             plugins: {
                 legend: {
                     labels: {
-                        color: "white"
+                        color: getCSSProp("--text-color", "white")
                     }
                 }
             },
@@ -98,7 +98,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
                         color: "grey"
                     },
                     ticks: {
-                        color: "white"
+                        color:getCSSProp("--text-color", "white")
                     },
                     beginAtZero: true
                 },
@@ -107,7 +107,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
                         color: "grey"
                     },
                     ticks: {
-                        color: "white"
+                        color:getCSSProp("--text-color", "white")
                     }
                 }
             }

@@ -37,6 +37,11 @@ function toggleUI(id: string, on?: '' | "none") {
             : "none")
 }
 
+function getCSSProp(name: string, fallback: string) {
+    const s = getComputedStyle(document.documentElement)
+    return s.getPropertyValue(name) || fallback
+}
+
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 const itemFilter = document.getElementById("item-filter") as HTMLInputElement
