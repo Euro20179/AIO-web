@@ -176,16 +176,8 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
                 case "a":
                     entries.sort((a, b) => (a.En_Title > b.En_Title ? 1 : -1) * reversed)
                     break;
-                case "e": {
-                    const fn = type.slice(1)
-                    entries.sort(() => eval(fn))
-                    break
-                }
             }
-        } else if (filter.startsWith("filter")) {
-            let expr = filter.slice("filter".length).trim()
-            entries = entries.filter((item) => eval(expr))
-        } else if (filter === "!child") {
+        }else if (filter === "!child") {
             entries = entries.filter(v => v.ParentId === 0n)
         } else if (filter === "!copy") {
             entries = entries.filter(v => v.CopyOf === 0n)
