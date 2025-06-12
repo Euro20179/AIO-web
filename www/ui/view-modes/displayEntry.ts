@@ -1130,6 +1130,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             if (!win) return
             win.document.write(`<!DOCTYPE html>
 <head style='height: 100svh'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' href='/css/colors.css'>
     <link rel='stylesheet' href='/css/general.css'>
 <style>
