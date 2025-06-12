@@ -278,20 +278,24 @@
         vertical-align: middle;
     }
 
-    #descriptors, #relationship-display {
+    #descriptors{
         display: flex;
         gap: 2cqi;
 
         margin-top: var(--small-gap);
     }
 
+    #relationship-display {
+        flex-wrap: wrap;
+    }
+
     #descriptors>section,
     #relationship-display>section {
         border: 5px solid var(--secondary);
         border-radius: calc(var(--border-roundness) * 5);
-        width: 100%;
         flex-grow: 1;
         min-width: 100px;
+        width: 50%;
 
         height: 30cqb;
 
@@ -299,10 +303,11 @@
         overflow: auto;
     }
 
-    #relationship-display {
-        margin-top: var(--small-gap);
-
+    #relationship-display>section  {
+        margin: var(--small-gap) 0;
+        width: auto;
     }
+
 
     :is(#description, #notes) {
         overflow: auto auto;
@@ -420,15 +425,25 @@
     }
 
     #notes-edit-box {
-        width: 100%;
         height: 100%;
         border: none;
         margin: 0;
+        display: inline-block;
     }
 
-    :is(#descendants-section, #copies-section) div {
+    #descendants-section, #copies-section {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    #descendants, #copies {
+        display: flex;
+        flex-grow: 1;
+
+        align-items: center;
+
+        width: 100%;
+        overflow: auto;
 
         gap: 2em;
 
@@ -437,9 +452,10 @@
         }
 
         img {
-            max-width: 7cqi;
+            max-height: 100%;
+            max-width: 100%;
             /*it's in a flex, the aspect-ratio gets messed up if other images of different heights are here*/
-            height: fit-content;
+            /* height: fit-content; */
             cursor: pointer;
         }
 
