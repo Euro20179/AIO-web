@@ -1142,16 +1142,23 @@ height: 100%;
 <body>
     ${parent.outerHTML}
 </body>`)
+            let watcher: CloseWatcher | null = null
             if("CloseWatcher" in window) {
-                const watcher = new win.CloseWatcher
+                watcher = new win.CloseWatcher
                 watcher.onclose = () => {
                     parent.classList.remove("none")
                     win.close()
                     watcher.destroy()
                 }
             }
+            win.document.body.querySelector("button.popout").onclick = () => {
+                win.close()
+                parent.classList.remove("none")
+                if(watcher) watcher.destroy()
+            }
+
             win.onbeforeunload = function() {
-                if("CloseWatcher" in window) watcher.destroy()
+                if(watcher) watcher.destroy()
                 parent.classList.remove("none")
             }
             parent.classList.add("none")
