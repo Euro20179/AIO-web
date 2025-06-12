@@ -1126,22 +1126,17 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         const parent = popout.parentElement
         if (!parent) continue
         popout.onclick = function() {
-            let win = open("about:blank", "_blank", "popup=true")
+            let win = open("", "_blank", "popup=true")
             if (!win) return
-            win.onload = function() {
-                win.document.head.innerHTML = `
-<link rel='stylesheet' href='/css/colors.css'>
-<link rel='stylesheet' href='/css/general.css'>`
-                win.document.body.innerHTML = parent.outerHTML
-                win.document.body.firstElementChild?.classList.remove("none")
-                win.document.body.querySelector("button.popout").onclick = function() {
-                    parent.classList.remove("none")
-                    win.close()
-                }
-            }
-            win.onbeforeunload = function() {
+            win.document.write(`
+    <link rel='stylesheet' href='/css/colors.css'>
+    <link rel='stylesheet' href='/css/general.css'>
+    ${parent.outerHTML}`)
+            const watcher = new win.CloseWatcher
+            watcher.onclose = () => {
                 parent.classList.remove("none")
                 win.close()
+                watcher.destroy()
             }
             parent.classList.add("none")
         }
