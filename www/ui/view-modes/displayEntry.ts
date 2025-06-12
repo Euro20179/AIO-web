@@ -1128,10 +1128,20 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
         popout.onclick = function() {
             let win = open("", "_blank", "popup=true")
             if (!win) return
-            win.document.write(`
+            win.document.write(`<!DOCTYPE html>
+<head style='height: 100svh'>
     <link rel='stylesheet' href='/css/colors.css'>
     <link rel='stylesheet' href='/css/general.css'>
-    ${parent.outerHTML}`)
+<style>
+body {
+margin: 0;
+height: 100%;
+}
+</style>
+</head>
+<body>
+    ${parent.outerHTML}
+</body>`)
             if("CloseWatcher" in window) {
                 const watcher = new win.CloseWatcher
                 watcher.onclose = () => {
