@@ -313,7 +313,7 @@
          * so that overflow doesn't cross into the thumbnail-fig*/
         display: flow-root;
 
-        height: max(20cqb, 200px);
+        max-height: 50cqb;
 
         /*if the image does not have a max width, it will cause overflow*/
         img {
@@ -458,8 +458,10 @@
 
         align-items: center;
 
+        &:not(:empty) {
+            height: max(15cqb, 100px);
+        }
         width: 100%;
-        height: max(15cqb, 100px);
         overflow: auto;
 
         gap: 2em;
