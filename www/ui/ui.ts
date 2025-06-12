@@ -140,6 +140,19 @@ let statistics = [
 statistics[0].resetable = false
 
 document.addEventListener("keydown", e => {
+
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" && (e.shiftKey || e.ctrlKey)) {
+        if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
+            focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
+        } else focusNextSidebarItem(e.key === "ArrowUp")
+        if (e.ctrlKey) {
+            if (!e.shiftKey) clearItems()
+            selectFocusedSidebarItem()
+        }
+        e.preventDefault()
+        return
+    }
+
     if (!e.ctrlKey) return
     switch (e.key) {
         case "/": {
@@ -205,28 +218,6 @@ document.addEventListener("keydown", e => {
         case "D": {
             setDisplayModeUI()
             e.preventDefault()
-            break
-        }
-        case "ArrowDown": {
-            e.preventDefault()
-            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
-                focusNthSidebarItem(1)
-            } else focusNextSidebarItem()
-            if (e.shiftKey) {
-                if(!e.altKey) clearItems()
-                selectFocusedSidebarItem()
-            }
-            break
-        }
-        case "ArrowUp": {
-            e.preventDefault()
-            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
-                focusNthSidebarItem(sidebarItems.childElementCount)
-            } else focusNextSidebarItem(true)
-            if (e.shiftKey) {
-                if(!e.altKey) clearItems()
-                selectFocusedSidebarItem()
-            }
             break
         }
     }

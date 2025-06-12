@@ -47,7 +47,7 @@ function focusNthSidebarItem(n: number) {
 
 function selectFocusedSidebarItem() {
     if(document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
-    
+
     const id = document.activeElement.getAttribute("data-entry-id") as string
     selectItem(findInfoEntryById(BigInt(id)), mode)
 }
