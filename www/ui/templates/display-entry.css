@@ -128,7 +128,6 @@
     #thumbnail-fig {
         float: left;
         margin: 0;
-        margin-left: var(--small-gap);
 
         /*this way, everything in the middle of the page is cenetered nicely*/
         /*and the space to the right entirely belongs to the figure*/
@@ -240,26 +239,24 @@
         }
     }
 
-    #notes:empty::before {
-        content: "Edit me!";
-        opacity: 50%;
-    }
-
     #tags {
-        flex-wrap: wrap;
+        overflow: auto;
         display: flex;
         gap: 2ch;
 
         /*div containing the tags which includes the new tag button*/
-        div:has(> &:not(:empty)) {
-            display: flex;
-            gap: 3ch;
+        *:has(> &:not(:empty)) {
+            gap: 2ch;
+        }
+
+        *:has(> &:empty) {
+            display: none;
         }
 
         /*each div in #tags contains a delete button and the tag itself*/
         &>div {
             display: flex;
-            flex-wrap: wrap;
+            text-wrap: nowrap;
         }
     }
 
@@ -331,9 +328,11 @@
     #notes {
         white-space: pre-wrap;
 
+        &:empty {
+            height: fit-content;
+        }
+
         justify-self: center;
-        height: 60%;
-        max-height: 70%;
         padding: 0;
     }
 
