@@ -1132,11 +1132,17 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     <link rel='stylesheet' href='/css/colors.css'>
     <link rel='stylesheet' href='/css/general.css'>
     ${parent.outerHTML}`)
-            const watcher = new win.CloseWatcher
-            watcher.onclose = () => {
+            if("CloseWatcher" in window) {
+                const watcher = new win.CloseWatcher
+                watcher.onclose = () => {
+                    parent.classList.remove("none")
+                    win.close()
+                    watcher.destroy()
+                }
+            }
+            win.onbeforeunload = function() {
+                if("CloseWatcher" in window) watcher.destroy()
                 parent.classList.remove("none")
-                win.close()
-                watcher.destroy()
             }
             parent.classList.add("none")
         }
