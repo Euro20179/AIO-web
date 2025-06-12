@@ -36,8 +36,7 @@
     }
 
     hr {
-        border-style: dashed;
-        border-color: var(--text-color);
+        border-color: var(--secondary);
     }
 
     article {
@@ -161,6 +160,7 @@
 
     #media-info {
         width: 100%;
+
         &:not(:has(tr:nth-child(2))) {
             display: none;
         }
@@ -278,7 +278,7 @@
         vertical-align: middle;
     }
 
-    #descriptors{
+    #descriptors {
         display: flex;
         gap: 2cqi;
 
@@ -303,7 +303,7 @@
         overflow: auto;
     }
 
-    #relationship-display>section  {
+    #relationship-display>section {
         margin: var(--small-gap) 0;
         width: auto;
     }
@@ -315,6 +315,8 @@
         /*since basically anything can be in these, create a new formatting context
          * so that overflow doesn't cross into the thumbnail-fig*/
         display: flow-root;
+
+        height: max(20cqb, 200px);
 
         /*if the image does not have a max width, it will cause overflow*/
         img {
@@ -431,18 +433,34 @@
         display: inline-block;
     }
 
-    #descendants-section, #copies-section {
+    #descendants-section,
+    #copies-section {
         display: flex;
         flex-direction: column;
+
+        justify-content: center;
+
+        button {
+            height: fit-content;
+            align-self: center;
+        }
+
+        div:first-child {
+            display: flex;
+            gap: var(--small-gap);
+            justify-content: center;
+        }
     }
 
-    #descendants, #copies {
+    #descendants,
+    #copies {
         display: flex;
         flex-grow: 1;
 
         align-items: center;
 
         width: 100%;
+        height: max(10cqb, 100px);
         overflow: auto;
 
         gap: 2em;
