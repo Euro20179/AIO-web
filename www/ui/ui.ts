@@ -755,11 +755,6 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
             onsearch(query.value).then(registerFigClickEvents)
         }
         registerFigClickEvents(container)
-
-        setTimeout(() => {
-            rej(null)
-            popover.close("0")
-        }, 60000)
     })
 }
 
@@ -793,11 +788,6 @@ async function signinUI(reason: string): Promise<string> {
 
             res(btoa(`${username}:${password}`))
         }
-
-        setTimeout(() => {
-            loginPopover.close()
-            rej(null)
-        }, 60000)
     })
 }
 
