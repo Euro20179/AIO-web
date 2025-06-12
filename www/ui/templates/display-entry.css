@@ -326,16 +326,11 @@
         white-space: pre-wrap;
 
         justify-self: center;
+        height: 70%;
+        max-height: 70%;
+        padding: 0;
     }
 
-    section:has(#notes) {
-        display: grid;
-
-        div:has(#tags) {
-            align-self: end;
-            justify-self: center;
-        }
-    }
 
     hgroup {
         >* {

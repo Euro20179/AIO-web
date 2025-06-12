@@ -1130,6 +1130,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             if (!win) return
             win.onload = function() {
                 win.document.head.innerHTML = `
+<link rel='stylesheet' href='/css/colors.css'>
 <link rel='stylesheet' href='/css/general.css'>`
                 win.document.body.innerHTML = parent.outerHTML
                 win.document.body.firstElementChild?.classList.remove("none")

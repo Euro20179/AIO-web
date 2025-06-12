@@ -131,7 +131,6 @@
         <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
     </menu>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <button class="popout" style="width: fit-content; aspect-ratio: 1; float: right;">↗</button>
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
@@ -221,20 +220,17 @@
 
     <div class="descriptors" id="descriptors">
         <section>
-            <button class="popout" style="float: right;">↗</button>
+            <button class="popout" style="float: right; margin: var(--small-gap) var(--small-gap) 0 0;">↗</button>
             <h4 class="center">Description</h4>
             <article class="description" id="description" put-data="Description" put-data-mode="html"></article>
         </section>
         <section>
-            <div
-                style="justify-self: center; display: grid; grid-template-columns: subgrid; grid-template-rows: subgrid; margin-top: var(--small-gap); width: 100%;">
-                <!--this z-index is because i cant click the button because its under things for some reason-->
-                <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())"
-                    style="justify-self: start; width: 35px; aspect-ratio: 1 / 1; margin-left: var(--small-gap); z-index: 1;">✏</button>
-                <h4 class="center" style="margin: 0;">Notes</h4>
-            </div>
+            <button class="popout" style="width: fit-content; aspect-ratio: 1; margin: var(--small-gap) var(--small-gap) 0 0; float: right;">↗</button>
+            <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())"
+                style="float: left; width: 35px; aspect-ratio: 1 / 1; margin: var(--small-gap) var(--small-gap) 0 0;">✏</button>
+            <h4 class="center" style="margin: 0;">Notes</h4>
             <article class="notes" id="notes" put-data="Notes"></article>
-            <div>
+            <div style="text-align: center;">
                 <div class="tags" id="tags"></div>
                 <button id="create-tag">+</button>
             </div>
