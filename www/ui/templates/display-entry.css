@@ -460,7 +460,7 @@
         align-items: center;
 
         width: 100%;
-        height: max(10cqb, 100px);
+        height: max(15cqb, 100px);
         overflow: auto;
 
         gap: 2em;
