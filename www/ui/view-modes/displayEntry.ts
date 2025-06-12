@@ -1129,7 +1129,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
             let win = open("", "_blank", "popup=true")
             if (!win) return
             win.document.write(`<!DOCTYPE html>
-<head style='height: 100svh'>
+<head style='height: 100dvh'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' href='/css/colors.css'>
     <link rel='stylesheet' href='/css/general.css'>
