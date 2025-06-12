@@ -139,10 +139,6 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 
     entries = entries.filter(v => v.Library === globalsNewUi.viewingLibrary)
 
-    // if (filters.sortBy !== "") {
-    //     entries = sortEntries(entries, filters.sortBy)
-    // }
-
     for (let filter of filters.filterRules) {
         filter = filter.trim()
         if (filter.startsWith("is")) {

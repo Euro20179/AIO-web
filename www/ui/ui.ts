@@ -467,7 +467,7 @@ async function loadSearchUI() {
 
     let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
 
-    // entries = applyClientsideSearchFiltering(entries, filters)
+    entries = applyClientsideSearchFiltering(entries, filters)
 
     setResultStatUI("results", entries.length)
 
