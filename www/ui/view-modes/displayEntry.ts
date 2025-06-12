@@ -470,7 +470,7 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     const { self, children, copies, recursive } = whatToInclude(el)
 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, recursive)
-        .sort((a, b) => items_eventTimeEstimate(a) - items_eventTimeEstimate(b))
+        .sort(items_compareEventTiming)
 
     if (!eventsToLookAt.length) {
         //there are no events
