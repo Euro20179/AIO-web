@@ -131,20 +131,28 @@
                     <input type="search" name="search-query" placeholder="search query">
                     <div class="grid">
                         <select name="sort-by" title="sort by">
-                            <option value="">No Sort</option>
-                            <option value="item-id">item id</option>
-                            <option value="user-title">User Title</option>
-                            <option value="native-title">Native Title</option>
-                            <option value="rating">User Rating</option>
-                            <option value="general-rating">General rating</option>
+                            <optgroup label="Misc">
+                                <option value="">No Sort</option>
+                                <option value="item-id">Item Id</option>
+                                <option value="release-year" title="*requires metadata">Release year*</option>
+                                <option value="cost">Cost</option>
+                            </optgroup>
+                            <optgroup label="Title">
+                                <option value="user-title">User Title</option>
+                                <option value="native-title">Native Title</option>
+                            </optgroup>
+                            <optgroup label="Rating">
+                                <option value="rating">User Rating</option>
+                                <option value="general-rating" title="*requires metadata">General rating*</option>
+                            </optgroup>
                             <!-- <option value="rating-disparity" -->
                             <!--     title="How different your rating is from the general consensous"> -->
                             <!--     Rating disparity</option> -->
-                            <option value="release-year">Release year</option>
-                            <option value="cost">Cost</option>
-                            <option value="added">Added</option>
-                            <option value="finished">Finished</option>
-                            <option value="viewing">Viewing</option>
+                            <optgroup label="Event">
+                                <option value="added">Added</option>
+                                <option value="finished" title="**does not happen clientside">Finished**</option>
+                                <option value="viewing" title="**does not happen clientside">Viewing**</option>
+                            </optgroup>
                         </select>
                         <select name="uid">
                             <option value="0">ALL</option>

@@ -850,14 +850,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     //type selector
     const typeSelector = el.getElementById("type-selector")
     if (typeSelector && (typeSelector instanceof mode_curWin.HTMLSelectElement)) {
-        api_listTypes().then(types => {
-            typeSelector.innerHTML = ""
-            for (let ty of types) {
-                const option = document.createElement("option")
-                option.value = ty
-                option.innerText = ty
-                typeSelector.append(option)
-            }
+        fillTypeSelectionUI(typeSelector).then(() => {
             typeSelector.value = item.Type
         })
     }
@@ -865,14 +858,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     //format selector
     const formatSelector = el.getElementById("format-selector")
     if (formatSelector && (formatSelector instanceof mode_curWin.HTMLSelectElement)) {
-        api_listFormats().then(formats => {
-            formatSelector.innerHTML = ""
-            for (let fNo in formats) {
-                const option = document.createElement("option")
-                option.value = fNo
-                option.innerText = formats[fNo]
-                formatSelector.append(option)
-            }
+        fillFormatSelectionUI(formatSelector).then(() => {
             formatSelector.value = String(item.Format)
         })
     }

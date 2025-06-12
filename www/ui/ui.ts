@@ -790,38 +790,99 @@ async function signinUI(reason: string): Promise<string> {
     })
 }
 
-async function fillFormatSelectionUI() {
-    const formatSelector = currentDocument().querySelector('[name="format"]') as HTMLSelectElement
+async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = null) {
+    formatSelector ||= currentDocument().querySelector('[name="format"]') as HTMLSelectElement
+
+    if (formatSelector === null) {
+        console.error("format dropdown could not be found")
+        return
+    }
+
+    const groups = {
+        "DIGITAL": "Misc",
+        "IMAGE": "Misc",
+        "UNOWNED": "Misc",
+        "OTHER": "Misc",
+        "CD": "Optical",
+        "DVD": "Optical",
+        "BLURAY": "Optical",
+        "4KBLURAY": "Optical",
+        "STEAM": "Game",
+        "NIN_SWITCH": "Game",
+        "XBOXONE": "Game",
+        "XBOX360": "Game",
+        "BOARDGAME": "Game",
+        "MANGA": "Book",
+        "BOOK": "Book",
+        "VINYL": "Analog",
+        "VHS": "Analog",
+    }
+
+    const optGroups: Record<string, HTMLOptGroupElement> = {}
+    for(const group of Object.values(groups)) {
+        const g = document.createElement("optgroup")
+        optGroups[group] = g
+        g.label = group
+    }
 
     const formats = await api_listFormats()
-    let opts = []
     for (let fNo in formats) {
         let name = formats[fNo]
         if (name === "MOD_DIGITAL") continue
 
+        console.log(name)
+        let g = optGroups[groups[name as keyof typeof groups] as keyof typeof optGroups]
+
         let opt = document.createElement("option")
         opt.value = fNo
         opt.innerText = formats[fNo]
-        opts.push(opt)
+        g.appendChild(opt)
     }
 
-    formatSelector.replaceChildren(...opts)
+    formatSelector.replaceChildren(...Object.values(optGroups))
 }
 
-async function fillTypeSelectionUI() {
-    const typeDropdown = currentDocument().querySelector("#new-item-form [name=\"type\"]")
+async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null) {
+    typeDropdown ||= currentDocument().querySelector("#new-item-form [name=\"type\"]")
 
     if (typeDropdown === null) {
         console.error("type dropdown could not be found")
         return
     }
 
+    const groups = {
+        "Show": "TV",
+        "Movie": "TV",
+        "MovieShort": "TV",
+        "Documentary": "TV",
+        "Episode": "TV",
+        "Video": "General",
+        "Meme": "General",
+        "Picture": "General",
+        "Song": "General",
+        "Book": "Reading",
+        "Manga": "Reading",
+        "Game": "Activity",
+        "BoardGame": "Activity",
+        "Collection": "Meta",
+        "Library": "Meta"
+    }
+
+    const optGroups: Record<string, HTMLOptGroupElement> = {}
+    for(const group of Object.values(groups)) {
+        const g = document.createElement("optgroup")
+        optGroups[group] = g
+        g.label = group
+    }
+
     for (let type of await api_listTypes()) {
+        let g = optGroups[groups[type as keyof typeof groups] as keyof typeof optGroups]
         const option = document.createElement("option")
         option.value = type
         option.innerText = type
-        typeDropdown.append(option)
+        g.append(option)
     }
+    typeDropdown.replaceChildren(...Object.values(optGroups))
 }
 
 async function fillUserSelectionUI() {

@@ -72,20 +72,8 @@ async function loadInfoEntries() {
     setError("Loading items")
 
     await items_refreshInfoEntries(getUidUI())
-    // let cachedItems = localStorage.getItem("items")
-    // if (cachedItems) {
-    //     items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
-    //     refreshment.then(() => {
-    //         items_setEntries([...api_deserializeJsonl<InfoEntry>(cachedItems)])
-    //     })
-    // } else {
-    //     await refreshment
-    //     alert("Items refreshed")
-    // }
 
     setError("")
-
-    // localStorage.setItem("items", Object.values(globalsNewUi.entries).map(v => api_serializeEntry(v.info)).join("\n"))
 
     items_refreshUserEntries(getUidUI()).then(() => {
         updateInfo2(globalsNewUi.entries)
