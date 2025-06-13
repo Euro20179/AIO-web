@@ -1130,7 +1130,7 @@ height: 100%;
     ${parent.outerHTML}
 </body>`)
             let watcher: CloseWatcher | null = null
-            if("CloseWatcher" in window) {
+            if ("CloseWatcher" in window) {
                 watcher = new win.CloseWatcher
                 watcher.onclose = () => {
                     parent.classList.remove("none")
@@ -1141,11 +1141,11 @@ height: 100%;
             win.document.body.querySelector("button.popout").onclick = () => {
                 win.close()
                 parent.classList.remove("none")
-                if(watcher) watcher.destroy()
+                if (watcher) watcher.destroy()
             }
 
             win.onbeforeunload = function() {
-                if(watcher) watcher.destroy()
+                if (watcher) watcher.destroy()
                 parent.classList.remove("none")
             }
             parent.classList.add("none")
@@ -1238,7 +1238,7 @@ height: 100%;
     const notesEditBox = root.getElementById("notes-edit-box")
 
     if (notesEditBox && "value" in notesEditBox) {
-        notesEditBox.onchange = util_debounce(() => {
+        notesEditBox.onchange = () => {
             user.Notes = String(notesEditBox.value)
 
             const userStringified = api_serializeEntry(user)
@@ -1260,8 +1260,7 @@ height: 100%;
                     }
                 })
                 .catch(() => alert("Failed to save notes"))
-
-        }, 3000)
+        }
     }
 
     const cost = root.getElementById("cost")
