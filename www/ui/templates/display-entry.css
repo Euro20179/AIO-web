@@ -85,7 +85,7 @@
 
     #menu-bar {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
         gap: var(--small-gap);
         column-rule: currentColor 1px dashed;
     }
