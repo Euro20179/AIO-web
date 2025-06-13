@@ -113,23 +113,32 @@
     </table>
 </dialog>
 <div class="root" id="root">
-    <menu aria-label="item interactions" class="grid"
-        style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
-        <button class="close" entry-action="close" title="remove item from inspection area">X</button>
-        <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
-            style="min-width: 50px;"> </select>
-        <select id="format-selector" title="Format type" entry-action="setformat" entry-action-trigger="change"
-            class="center" style="min-width: 50px;"></select>
-        <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
-            title="identify item">ℹ</button>
-        <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
-        <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">🔍︎</button>
-        <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
-        <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
-        <button class="edit-template" entry-action="toggle" elem-id="template-editor-container"
-            title="edit item's html template">&lt;&gt;</button>
-        <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
-    </menu>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <menu aria-label="item type and format" class="grid"
+            style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
+            <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
+                style="min-width: 50px;"> </select>
+            <select id="format-selector" title="Format type" entry-action="setformat" entry-action-trigger="change"
+                class="center" style="min-width: 50px;"></select>
+            <div  style="align-content: center;">
+                <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized" style="aspect-ratio: 1; height: 20px;">
+                <label for="format-digitized" title="Whether or not the format is a digitized version of the format">Digitized </label>
+            </div>
+        </menu>
+        <menu aria-label="item interactions" class="grid"
+            style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
+            <button class="close" entry-action="close" title="remove item from inspection area">X</button>
+            <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
+                title="identify item">ℹ</button>
+            <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
+            <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">🔍︎</button>
+            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
+            <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
+            <button class="edit-template" entry-action="toggle" elem-id="template-editor-container"
+                title="edit item's html template">&lt;&gt;</button>
+            <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
+        </menu>
+    </div>
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
@@ -239,7 +248,7 @@
     </section>
     <!-- </div> -->
     <!-- <div id="relationship-display"> -->
-        <hr>
+    <hr>
     <section class="descendants" id="descendants-section">
         <div>
             <h4 class="center">Children</h4>
@@ -249,7 +258,7 @@
         <div id="descendants">
         </div>
     </section>
-        <hr>
+    <hr>
     <section class="copies" id="copies-section">
         <div>
             <h4 class="center">Copies</h4>

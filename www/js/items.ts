@@ -1,3 +1,5 @@
+const DIGI_MOD = 0x1000
+
 type GlobalsNewUi = {
     entries: Record<string, items_Entry>
     results: items_Entry[]
@@ -512,6 +514,10 @@ async function formatToName(format: number): Promise<string> {
         return `unknown${out}`
     }
     return `${formats[format].toUpperCase()}${out}`
+}
+
+function items_isDigitized(format: number): boolean {
+    return (format & DIGI_MOD) === DIGI_MOD
 }
 
 async function nameToFormat(name: string): Promise<number> {

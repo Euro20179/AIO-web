@@ -859,8 +859,17 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     const formatSelector = el.getElementById("format-selector")
     if (formatSelector && (formatSelector instanceof mode_curWin.HTMLSelectElement)) {
         fillFormatSelectionUI(formatSelector).then(() => {
-            formatSelector.value = String(item.Format)
+            if (items_isDigitized(item.Format)) {
+                formatSelector.value = String(item.Format - DIGI_MOD)
+            } else {
+                formatSelector.value = String(item.Format)
+            }
         })
+    }
+
+    const digitized = el.getElementById("format-digitized")
+    if (digitized && (digitized instanceof mode_curWin.HTMLInputElement)) {
+        digitized.checked = items_isDigitized(item.Format)
     }
 
     //tags
@@ -1524,6 +1533,21 @@ const de_actions = {
     save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
     close: displayEntryAction(item => deselectItem(item)),
     copythis: displayEntryAction(item => copyThis(item)),
+    setdigitization: displayEntryAction((item, _, target) => {
+        if (!target || !(target instanceof HTMLInputElement)) return
+        if (target.checked) {
+            item.Format |= DIGI_MOD
+        } else if (items_isDigitized(item.Format)) {
+            item.Format -= DIGI_MOD
+        }
+        api_setItem("", item).then(() => {
+            updateInfo2({
+                [String(item.ItemId)]: {
+                    info: item
+                }
+            })
+        })
+    }),
     toggle: displayEntryAction((item, root, elem) => {
         let id = elem.getAttribute("elem-id")
         if (!id) return

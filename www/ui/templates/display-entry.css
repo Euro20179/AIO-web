@@ -26,6 +26,7 @@
     }
 
     select {
+
         /*select is colored wrong in safari*/
         @supports (-webkit-backdrop-filter: blur(1px)) {
             -webkit-appearance: none;
@@ -458,6 +459,7 @@
         &:not(:empty) {
             height: max(15cqb, 100px);
         }
+
         width: 100%;
         overflow: auto;
 
