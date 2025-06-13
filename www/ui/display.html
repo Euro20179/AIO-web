@@ -25,9 +25,20 @@
 </body>
 <script>
     let mode_curWin = window
-    function getUserExtra() {
-        return ""
+    function getAIOWeb(user) {
+        return JSON.parse(user.Extra).AIOWeb || {}
     }
+
+    function getUserExtra(user, prop) {
+        try {
+            return getAIOWeb(user)[prop] || null
+        }
+        catch (err) {
+            console.error(err)
+            return null
+        }
+    }
+
     function setUserExtra() {
     }
 
@@ -73,7 +84,6 @@
         items_addItem({meta, events, info, user})
         items_setResults([BigInt(id)])
         renderDisplayItem(meta.ItemId, document.body)
-        console.log(events)
     })
 </script>
 

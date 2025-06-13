@@ -45,8 +45,10 @@ function getCSSProp(name: string, fallback: string) {
 const statsOutput = document.getElementById("result-stats") as HTMLElement
 
 const itemFilter = document.getElementById("item-filter") as HTMLInputElement
-itemFilter.oninput = function() {
-    renderSidebar(getFilteredResultsUI(), true)
+if (itemFilter) {
+    itemFilter.oninput = function() {
+        renderSidebar(getFilteredResultsUI(), true)
+    }
 }
 
 function getFilteredResultsUI(list = globalsNewUi.results): InfoEntry[] {
@@ -97,7 +99,7 @@ class Statistic {
         this.calculation = calculation
         this.el = document.createElement("entries-statistic")
         this.el.setAttribute("data-stat-name", this.name)
-        statsOutput.append(this.el)
+        statsOutput?.append(this.el)
     }
     set value(v: number) {
         this.#value = v
@@ -344,7 +346,6 @@ function closeModalUI(modalName: string, root?: { getElementById(elementId: stri
  * @param root - the elemnt which is the parent of the modal to find
  */
 function toggleModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
-    console.log(catalogWin)
     root ||= catalogWin?.document || document
     let dialog = root.getElementById(modalName)
     if (!dialog || !(dialog instanceof HTMLDialogElement)) return
@@ -819,7 +820,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = 
     }
 
     const optGroups: Record<string, HTMLOptGroupElement> = {}
-    for(const group of Object.values(groups)) {
+    for (const group of Object.values(groups)) {
         const g = document.createElement("optgroup")
         optGroups[group] = g
         g.label = group
@@ -830,7 +831,6 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = 
         let name = formats[fNo]
         if (name === "MOD_DIGITAL") continue
 
-        console.log(name)
         let g = optGroups[groups[name as keyof typeof groups] as keyof typeof optGroups]
 
         let opt = document.createElement("option")
@@ -869,7 +869,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null
     }
 
     const optGroups: Record<string, HTMLOptGroupElement> = {}
-    for(const group of Object.values(groups)) {
+    for (const group of Object.values(groups)) {
         const g = document.createElement("optgroup")
         optGroups[group] = g
         g.label = group
