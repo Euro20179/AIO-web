@@ -702,23 +702,23 @@ function items_hasArtStyle(item: InfoEntry, artStyle: ArtStyle) {
 function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
     switch (artStyle) {
         case "Anime":
-            item.Format |= AS_ANIME
+            item.ArtStyle |= AS_ANIME
             break
         case "Cartoon":
-            item.Format |= AS_CARTOON
+            item.ArtStyle |= AS_CARTOON
             break
         case "Handrawn":
-            item.Format |= AS_HANDRAWN
+            item.ArtStyle |= AS_HANDRAWN
             break
         case "Digital":
-            item.Format |= AS_DIGITAL
+            item.ArtStyle |= AS_DIGITAL
             break
         case "CGI":
-            item.Format |= AS_CGI
+            item.ArtStyle |= AS_CGI
             break
 
         case "Liveaction":
-            item.Format |= AS_LIVE_ACTION
+            item.ArtStyle |= AS_LIVE_ACTION
             break
     }
     return item
@@ -727,22 +727,22 @@ function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
 function items_unsetArtStyle(item: InfoEntry, artStyle: ASName) {
     switch (artStyle) {
         case "Anime":
-            item.Format -= AS_ANIME
+            item.ArtStyle -= AS_ANIME
             break
         case "Cartoon":
-            item.Format -= AS_CARTOON
+            item.ArtStyle -= AS_CARTOON
             break
         case "Handrawn":
-            item.Format -= AS_HANDRAWN
+            item.ArtStyle -= AS_HANDRAWN
             break
         case "Digital":
-            item.Format -= AS_DIGITAL
+            item.ArtStyle -= AS_DIGITAL
             break
         case "CGI":
-            item.Format -= AS_CGI
+            item.ArtStyle -= AS_CGI
             break
         case "Liveaction":
-            item.Format -= AS_LIVE_ACTION
+            item.ArtStyle -= AS_LIVE_ACTION
             break
     }
 }
