@@ -16,6 +16,22 @@ let globalsNewUi: GlobalsNewUi = {
     viewingLibrary: 0n,
 }
 
+const AS_ANIME = 1
+const AS_CARTOON = 2
+const AS_HANDRAWN = 4
+const AS_DIGITAL = 8
+const AS_CGI = 16
+const AS_LIVE_ACTION = 32
+
+type ASName = "Anime" | "Cartoon" | "Handrawn" | "Digital" | "CGI" | "Liveaction"
+
+type ArtStyle = typeof AS_ANIME
+    | typeof AS_CARTOON
+    | typeof AS_HANDRAWN
+    | typeof AS_DIGITAL
+    | typeof AS_CGI
+    | typeof AS_LIVE_ACTION
+
 type UserStatus = "" |
     "Viewing" |
     "Finished" |
@@ -342,7 +358,7 @@ function* findCopies(itemId: bigint) {
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
-    for(let entry in globalsNewUi.entries) {
+    for (let entry in globalsNewUi.entries) {
         //we must loop through all entries because :
         //if an item had an event, but now has 0 events, if we loop through the new events, it will never hit that item that now has no events
         //therefore it will never be updated
@@ -546,7 +562,7 @@ async function nameToFormat(name: string): Promise<number> {
  * @param {T} initial the starting value
  */
 function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T): T {
-    if(includeSelf) {
+    if (includeSelf) {
         initial = reduction(initial, itemId)
     }
     if (includeChildren) {
@@ -625,9 +641,9 @@ function items_eventTimeEstimate(event: UserEvent) {
 function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
     let l = items_eventTimeEstimate(left)
     let r = items_eventTimeEstimate(right)
-    if("Temporal" in window) {
-        let leftTime = new Temporal.ZonedDateTime(BigInt(l) *  1000000n, left.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
-        let rightTime = new Temporal.ZonedDateTime(BigInt(r) *  1000000n, right.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
+    if ("Temporal" in window) {
+        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, left.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
+        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, right.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
         return Temporal.ZonedDateTime.compare(leftTime, rightTime)
     }
     if (l == r) {
@@ -677,4 +693,56 @@ function _cononicalizeEvent(event: UserEvent) {
 */
 function items_eventEQ(left: UserEvent, right: UserEvent): boolean {
     return _cononicalizeEvent(left) == _cononicalizeEvent(right)
+}
+
+function items_hasArtStyle(item: InfoEntry, artStyle: ArtStyle) {
+    return (item.ArtStyle & artStyle) === artStyle
+}
+
+function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
+    switch (artStyle) {
+        case "Anime":
+            item.Format |= AS_ANIME
+            break
+        case "Cartoon":
+            item.Format |= AS_CARTOON
+            break
+        case "Handrawn":
+            item.Format |= AS_HANDRAWN
+            break
+        case "Digital":
+            item.Format |= AS_DIGITAL
+            break
+        case "CGI":
+            item.Format |= AS_CGI
+            break
+
+        case "Liveaction":
+            item.Format |= AS_LIVE_ACTION
+            break
+    }
+    return item
+}
+
+function items_unsetArtStyle(item: InfoEntry, artStyle: ASName) {
+    switch (artStyle) {
+        case "Anime":
+            item.Format -= AS_ANIME
+            break
+        case "Cartoon":
+            item.Format -= AS_CARTOON
+            break
+        case "Handrawn":
+            item.Format -= AS_HANDRAWN
+            break
+        case "Digital":
+            item.Format -= AS_DIGITAL
+            break
+        case "CGI":
+            item.Format -= AS_CGI
+            break
+        case "Liveaction":
+            item.Format -= AS_LIVE_ACTION
+            break
+    }
 }

@@ -83,6 +83,20 @@
         }
     }
 
+    #menu-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: var(--small-gap);
+        column-rule: currentColor 1px dashed;
+    }
+
+    #art-selectors {
+
+        label {
+            text-wrap: nowrap;
+        }
+    }
+
     #item-interactions {
         display: grid;
         grid-auto-flow: row;

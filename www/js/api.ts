@@ -1,3 +1,8 @@
+let formats: { [key: number]: string } = {}
+let _api_as_cache: {[key: number]: string} = {}
+
+let _api_types_cache: EntryType[] = []
+
 function probablyUserItem(item: object): item is UserEntry {
     for (let key of [
         "ItemId",
@@ -65,10 +70,6 @@ type IdentifyResult = {
 }
 
 type Status = string
-
-let formats: { [key: number]: string } = {}
-
-let _api_types_cache: EntryType[] = []
 
 function quoteEscape(text: string, stringQuoteType: '"' | "'") {
     let newText = ""
@@ -150,6 +151,17 @@ function canWait(status: Status) {
 
 function api_formatsCache() {
     return formats
+}
+
+async function api_listArtStyles() {
+    if(Object.keys(_api_as_cache).length > 0) return _api_as_cache
+
+    const res = await fetch(`${apiPath}/type/artstyle`)
+    if(res.status !== 200) return _api_as_cache
+
+    const json = await res.json()
+    console.log(json)
+    return _api_as_cache = json
 }
 
 async function api_listFormats() {

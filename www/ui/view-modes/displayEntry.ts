@@ -822,6 +822,8 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     const customStyles = el.getElementById("custom-styles")
     const locationEl = el.getElementById("location-link")
 
+    const artStylesBox = el.getElementById("art-selectors")
+
     const notesEditBox = el.getElementById("notes-edit-box")
 
     //object editor table
@@ -833,6 +835,17 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //Cost
     updateCostDisplay(el, item.ItemId)
+
+    //Art Style
+    api_listArtStyles().then(as => {
+        for (let a in as) {
+            const cb = el.getElementById(`is-${as[a]}`)
+            if (!cb || !(cb instanceof HTMLInputElement)) continue
+            if (items_hasArtStyle(item, Number(a) as ArtStyle)) {
+                cb.checked = true
+            }
+        }
+    })
 
     //Location
     if (item.Location !== '' && locationEl && "value" in locationEl) {
@@ -1076,6 +1089,31 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     if (!item || !user || !meta || !events) return el
 
     parent.append(el)
+
+    api_listArtStyles().then(as => {
+        for (let a in as) {
+            const cb = root.getElementById(`is-${as[a]}`)
+            if (!cb || !(cb instanceof HTMLInputElement)) continue
+            cb.onchange = (e) => {
+                const cb = e.target as HTMLInputElement
+                const name = cb.getAttribute("id")?.slice(3) as ASName
+                if (cb.checked) {
+                    items_setArtStyle(item, name)
+                } else {
+                    items_unsetArtStyle(item, name)
+                }
+
+                api_setItem("", item).then(() => {
+                    alert(cb.checked ? `${name} set` : `${name} unset`)
+                    updateInfo2({
+                        [String(item.ItemId)]: {
+                            info: item
+                        }
+                    })
+                })
+            }
+        }
+    })
 
     const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {

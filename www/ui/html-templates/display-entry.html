@@ -113,16 +113,30 @@
     </table>
 </dialog>
 <div class="root" id="root">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-        <menu aria-label="item type and format" class="grid"
-            style="margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));padding: 0;">
+    <div id="menu-bar">
+        <menu aria-label="item type and format" class="flex" style="margin: 0; padding: 0;">
             <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
                 style="min-width: 50px;"> </select>
             <select id="format-selector" title="Format type" entry-action="setformat" entry-action-trigger="change"
                 class="center" style="min-width: 50px;"></select>
-            <div  style="align-content: center;">
-                <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized" style="aspect-ratio: 1; height: 20px;">
-                <label for="format-digitized" title="Whether or not the item is a digitized/digital version of the format">Digitized </label>
+            <div style="align-content: center;" class="flex">
+                <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
+                    style="aspect-ratio: 1; height: 10px; align-self: center;">
+                <label for="format-digitized"
+                    title="Whether or not the item is a digitized/digital version of the format" style="align-self: center;">Digitized </label>
+            </div>
+            <div id="art-selectors" class="grid" style="grid-auto-flow: column; overflow: auto;">
+                <label for="is-Anime"><input type="checkbox" id="is-Anime">
+                    Anime</label>
+                <label for="is-Cartoon"><input type="checkbox" id="is-Cartoon">
+                    Cartoon</label>
+                <label for="is-Handrawn"><input type="checkbox" id="is-Handrawn">
+                    Hand drawn</label>
+                <label for="is-Digital"><input type="checkbox" id="is-Digital">
+                    Digitally drawn </label>
+                <label for="is-CGI"><input type="checkbox" name="is-CGI" id="is-cgi"> Cgi</label>
+                <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction"> Live
+                    action</label>
             </div>
         </menu>
         <menu aria-label="item interactions" class="grid"
