@@ -166,7 +166,7 @@
         }
 
         @container body (width < 800px) {
-            grid-template-rows: max-content min-content 3fr;
+            grid-template-rows: min-content min-content 3fr;
             grid-template-columns: 1fr 1fr 0.5fr;
             grid-template-areas:
                 "form form form"
@@ -465,10 +465,21 @@
         grid-template-columns: 80%;
         justify-content: center;
 
+        :has(> #view-all) {
+            width: 100%;
+        }
+
         @container body (width < 800px) {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             justify-content: space-around;
+
+            #item-filter {
+                flex-grow: 1;
+            }
+            :has(> #view-all) {
+                flex-grow: 0.2;
+                width: auto;
+            }
         }
     }
 
