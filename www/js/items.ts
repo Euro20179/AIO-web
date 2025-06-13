@@ -641,7 +641,7 @@ function items_eventTSHTML(event: UserEvent) {
         let date = new Date(afterts)
         let time = date.toLocaleTimeString("en", { timeZone })
         let dd = date.toLocaleDateString("en", { timeZone })
-        innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
+        innerTD += `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
     }
 
     if (ts) {
@@ -651,7 +651,7 @@ function items_eventTSHTML(event: UserEvent) {
         if (innerTD) {
             innerTD += " &lt; "
         }
-        innerTD += `<span title="${time} (${timeZone})">${dd}</span>`
+        innerTD += `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
         //if there is no exact timestamp, put a ? in the middle of afterts and beforets
     } else {
         if (innerTD) {
@@ -667,7 +667,7 @@ function items_eventTSHTML(event: UserEvent) {
         if (innerTD) {
             innerTD += " &lt; "
         }
-        innerTD += `<span title="${btime} (${timeZone})">${bdd}</span>`
+        innerTD += `<time title="${btime} (${timeZone})" datetime="${bdate.toISOString()}">${bdd}</time>`
     }
 
     return innerTD
