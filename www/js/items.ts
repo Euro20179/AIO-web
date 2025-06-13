@@ -637,37 +637,23 @@ function items_eventTSHTML(event: UserEvent) {
     const timeZone = event.TimeZone || "UTC"
     let innerTD = ""
 
-    if (afterts) {
-        let date = new Date(afterts)
+    const mktime = (timestamp: number) => {
+        let date = new Date(timestamp)
         let time = date.toLocaleTimeString("en", { timeZone })
         let dd = date.toLocaleDateString("en", { timeZone })
-        innerTD += `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
+        return `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
     }
 
-    if (ts) {
-        let date = new Date(ts)
-        let time = date.toLocaleTimeString("en", { timeZone })
-        let dd = date.toLocaleDateString("en", { timeZone })
-        if (innerTD) {
-            innerTD += " &lt; "
-        }
-        innerTD += `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
-        //if there is no exact timestamp, put a ? in the middle of afterts and beforets
-    } else {
-        if (innerTD) {
-            innerTD += " &lt; "
-        }
-        innerTD += " ? "
+    if (afterts) {
+        innerTD += mktime(afterts) + " &lt; "
     }
+
+    innerTD += ts
+        ? mktime(ts)
+        : " ? " //if there is no exact timestamp, put a ? in the middle of afterts and beforets
 
     if (beforets) {
-        let bdate = new Date(beforets)
-        let btime = bdate.toLocaleTimeString("en", { timeZone })
-        let bdd = bdate.toLocaleDateString("en", { timeZone })
-        if (innerTD) {
-            innerTD += " &lt; "
-        }
-        innerTD += `<time title="${btime} (${timeZone})" datetime="${bdate.toISOString()}">${bdd}</time>`
+        innerTD += " &lt; " + mktime(beforets)
     }
 
     return innerTD
