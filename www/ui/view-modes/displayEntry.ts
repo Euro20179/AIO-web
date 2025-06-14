@@ -157,6 +157,11 @@ function de_newevent(form: HTMLFormElement) {
     const tsStr = data.get("timestamp")
     const aftertsStr = data.get("after")
     const beforetsStr = data.get("before")
+    const timezoneData = data.get("timezone")
+    const timezone = (timezoneData
+        ? timezoneData.toString()
+        : Intl.DateTimeFormat().resolvedOptions().timeStyle
+    ) || ""
     //@ts-ignore
     let ts = new Date(tsStr).getTime()
     if (isNaN(ts)) {
@@ -173,7 +178,7 @@ function de_newevent(form: HTMLFormElement) {
         beforets = 0
     }
     const itemId = getIdFromDisplayElement(form)
-    api_registerEvent(itemId, name.toString(), ts, afterts, undefined, beforets)
+    api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
         .then(res => res?.text())
         .then(() => {
             let ev = findUserEventsById(itemId)
@@ -183,7 +188,7 @@ function de_newevent(form: HTMLFormElement) {
                     After: afterts,
                     Event: name.toString(),
                     ItemId: itemId,
-                    TimeZone: "",
+                    TimeZone: timezone,
                     Before: beforets
                 }
             )
@@ -835,6 +840,12 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //Cost
     updateCostDisplay(el, item.ItemId)
+
+    //Set the user's default timezone in the tz selector
+    const tzEl = el.getElementById("tz-selector")
+    if (tzEl && tzEl instanceof HTMLSelectElement) {
+        tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
 
     //Art Style
     api_listArtStyles().then(as => {
