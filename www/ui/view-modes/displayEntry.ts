@@ -498,10 +498,6 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
             <tbody>
         `
     for (let event of eventsToLookAt) {
-        const ts = event.Timestamp
-        const afterts = event.After
-        const beforets = event.Before
-
         let name = event.ItemId === itemId
             ? event.Event
             : `(${findInfoEntryById(event.ItemId).En_Title}) ${event.Event}`
@@ -511,7 +507,7 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
         html += `<tr>
                         <td>
                             <div class="grid column">
-                                <button class="delete" onclick="deleteEventForItemId(${event.ItemId}n, ${ts}, ${afterts}, ${beforets})">🗑</button>
+                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && _reloadEvents(${event.ItemId}n))">🗑</button>
                                 ${name}
                             </div>
                         </td>
@@ -1880,6 +1876,30 @@ const displayEntryEditTemplate = de_actions["edittemplate"]
 const displayEntryEditStyles = de_actions["editstyles"]
 const displayEntrySave = de_actions["save"]
 // }}}
+
+async function deleteEventByEventId(eventId: number) {
+    const uid = getUidUI()
+    if (!confirm("Are you sure you want to delete this event")) {
+        return false
+    }
+
+    const res = await api_deleteEventV2(eventId, uid)
+    if (res?.status !== 200) {
+        alert(res?.text() || "Failed to delete event")
+        return true
+    }
+    alert("Successfully deleted event")
+    return true
+}
+
+function _reloadEvents(itemId: bigint) {
+    loadUserEvents(getUidUI())
+        .then(() => {
+            updateInfo2({
+                [String(itemId)]: globalsNewUi.entries[String(itemId)]
+            })
+        })
+}
 
 function deleteEventForItemId(itemId: bigint, ts: number, after: number, before: number) {
     if (!confirm("Are you sure you would like to delete this event")) {

@@ -377,6 +377,10 @@ async function api_deleteEvent(itemId: bigint, ts: number, after: number, before
     return await authorizedRequest(`${apiPath}/engagement/delete-event?id=${itemId}&after=${after}&timestamp=${ts}&before=${before}`)
 }
 
+async function api_deleteEventV2(eventId: number, uid: number) {
+    return await authorizedRequest(`${apiPath}/engagement/delete-event-v2?id=${eventId}&uid=${uid}`)
+}
+
 async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string, before: number = 0) {
     tz ||= Intl.DateTimeFormat().resolvedOptions().timeZone
     return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}&before=${before}`)

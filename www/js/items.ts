@@ -55,6 +55,7 @@ type EntryType = "Show" |
     "Library"
 
 type UserEvent = {
+    EventId: number
     ItemId: bigint
     Event: string
     Timestamp: number
