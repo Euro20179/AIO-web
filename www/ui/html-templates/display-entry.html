@@ -730,7 +730,8 @@
                 <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
                     style="aspect-ratio: 1; height: 10px; align-self: center;">
                 <label for="format-digitized"
-                    title="Whether or not the item is a digitized/digital version of the format" style="align-self: center;">Digitized </label>
+                    title="Whether or not the item is a digitized/digital version of the format"
+                    style="align-self: center;">Digitized </label>
             </div>
             <div id="art-selectors" class="grid" style="grid-auto-flow: column; overflow: auto;">
                 <label for="is-Anime"><input type="checkbox" id="is-Anime">
@@ -871,27 +872,30 @@
     <!-- </div> -->
     <!-- <div id="relationship-display"> -->
     <hr>
-    <section class="descendants" id="descendants-section">
-        <div>
-            <h4 class="center">Children</h4>
-            <button id="new-child" title="Create new item as a child of this">+</button>
-            <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
-        </div>
-        <div id="descendants">
-        </div>
-    </section>
-    <hr>
-    <section class="copies" id="copies-section">
-        <div>
-            <h4 class="center">Copies</h4>
-            <button id="new-copy" title="Create new item as a copy of this">+</button>
-            <button id="copy-from-this" title="Create a new item that is an exact copy of this"
-                entry-action="copythis">Copy
-                this</button>
-        </div>
-        <div id="copies">
-        </div>
-    </section>
+
+    <div class="flex row wrap">
+        <section class="descendants" id="descendants-section">
+            <div>
+                <h4 class="center">Children</h4>
+                <button id="new-child" title="Create new item as a child of this">+</button>
+                <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
+            </div>
+            <div id="descendants">
+            </div>
+        </section>
+        <hr>
+        <section class="copies" id="copies-section">
+            <div>
+                <h4 class="center">Copies</h4>
+                <button id="new-copy" title="Create new item as a copy of this">+</button>
+                <button id="copy-from-this" title="Create a new item that is an exact copy of this"
+                    entry-action="copythis">Copy
+                    this</button>
+            </div>
+            <div id="copies">
+            </div>
+        </section>
+    </div>
     <!-- </div> -->
 
 </div>
