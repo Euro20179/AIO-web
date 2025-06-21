@@ -408,12 +408,12 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
     let imgEl = shadowRoot.getElementById("thumbnail")
     const fileUpload = shadowRoot.getElementById("thumbnail-file-upload")
 
-    if (fileUpload && "files" in fileUpload && Array.isArray(fileUpload.files)) {
+    if (fileUpload instanceof HTMLInputElement && "files" in fileUpload) {
         fileUpload.onchange = async function(_) {
             const item = findInfoEntryById(itemId) as InfoEntry
 
             const reader = new FileReader()
-            const blob = (fileUpload.files as Array<Blob>)?.[0]
+            const blob = (fileUpload.files)?.[0]
             if (!blob) return
             reader.readAsDataURL(blob)
             reader.onload = () => {
