@@ -662,8 +662,8 @@ function items_eventTSHTML(event: UserEvent) {
 
     const mktime = (timestamp: number) => {
         let date = new Date(timestamp)
-        let time = date.toLocaleTimeString("en", { timeZone })
-        let dd = date.toLocaleDateString("en", { timeZone })
+        let time = date.toLocaleTimeString("en")
+        let dd = date.toLocaleDateString("en")
         return `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
     }
 
