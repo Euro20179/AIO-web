@@ -1,5 +1,5 @@
 let formats: { [key: number]: string } = {}
-let _api_as_cache: {[key: number]: string} = {}
+let _api_as_cache: { [key: number]: string } = {}
 
 let _api_types_cache: EntryType[] = []
 
@@ -154,10 +154,10 @@ function api_formatsCache() {
 }
 
 async function api_listArtStyles() {
-    if(Object.keys(_api_as_cache).length > 0) return _api_as_cache
+    if (Object.keys(_api_as_cache).length > 0) return _api_as_cache
 
     const res = await fetch(`${apiPath}/type/artstyle`)
-    if(res.status !== 200) return _api_as_cache
+    if (res.status !== 200) return _api_as_cache
 
     const json = await res.json()
     console.log(json)
@@ -276,7 +276,9 @@ async function api_queryV3(searchString: string, uid: number, orderby: string = 
         case "item-id":
             orderby = "entryInfo.itemId"
             break
-
+            //in case the order by doesnt exist on the server
+        default:
+            orderby = ""
     }
 
     let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`

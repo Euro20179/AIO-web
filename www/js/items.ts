@@ -444,6 +444,16 @@ sorts.set("native-title", (a, b) => {
     return at < bt ? 0 : 1
 })
 
+sorts.set("-aiow-numeric-title", (a, b) => {
+    let at = a.En_Title || a.Native_Title
+    let bt = b.En_Title || b.Native_Title
+
+    const search = /\d+/
+    let an = at.match(search)?.[0]
+    let bn = bt.match(search)?.[0]
+    return (Number(an) - Number(bn)) || 1
+})
+
 /**
     * adds a new sort method that sortEntries can use
     * @param {string} name - the name of the sort
