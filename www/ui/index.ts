@@ -127,6 +127,10 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 
     entries = entries.filter(v => v.Library === globalsNewUi.viewingLibrary)
 
+    if (filters.sortBy.startsWith("-aiow")) {
+        entries = sortEntries(entries, filters.sortBy)
+    }
+
     for (let filter of filters.filterRules) {
         filter = filter.trim()
         if (filter.startsWith("is")) {
@@ -165,7 +169,7 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
                     entries.sort((a, b) => (a.En_Title > b.En_Title ? 1 : -1) * reversed)
                     break;
             }
-        }else if (filter === "!child") {
+        } else if (filter === "!child") {
             entries = entries.filter(v => v.ParentId === 0n)
         } else if (filter === "!copy") {
             entries = entries.filter(v => v.CopyOf === 0n)
