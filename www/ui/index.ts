@@ -110,9 +110,18 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     // let end = -1
 
     let search = searchForm.get("search-query") as string
-    let filters;
-    [search, ...filters] = search.split("->")
-    filters = filters.map(v => v.trim())
+    let inBracket = 0
+    let filterStartPos = -1
+    for(let i = 0; i < search.length; i++) {
+        if(search[i] === "{") inBracket++
+        else if(search[i] === "}") inBracket--
+        if(i > 2 && search[i - 1] == "-" && search[i] == ">" && inBracket <= 0) {
+            filterStartPos = i - 1
+        }
+    }
+    const filters = search.slice(filterStartPos).split("->").map(v => v.trim())
+    if(filterStartPos > -1)
+        search = search.slice(0, filterStartPos)
 
     let sortBy = searchForm.get("sort-by") as string
 
