@@ -767,7 +767,10 @@
         <input type="file" hidden id="thumbnail-file-upload">
         <hgroup class="flex column center">
             <h1 class="m-0 title center" id="main-title"></h1>
-            <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
+            <div class="flex wrap j-center" style="gap: 1ch;">
+                <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
+                <h4 class="m-0" id="on-format"></h4>
+            </div>
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
             <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
                 <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>

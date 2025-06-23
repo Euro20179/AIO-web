@@ -369,6 +369,10 @@
         }
     }
 
+    #on-format::before {
+        content: "on ";
+    }
+
     #official-native-title {
         align-self: center;
 

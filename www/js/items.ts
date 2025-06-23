@@ -514,6 +514,38 @@ function typeToSymbol(type: string): string {
     return type
 }
 
+/**
+    * converts an item format to a symbol
+    * @param {string} format - the type to convert
+    * @returns {string} - a symbol with an optional `+d`
+*/
+function items_formatToSymbol(format: number): string {
+    let out = ""
+    if(items_isDigitized(format)) {
+        format -= DIGI_MOD
+        out = "+d"
+    }
+    return {
+        0: "📼",
+        1: "💿︎",
+        2: "📀",
+        3: "B📀",
+        4: "4KB📀",
+        5: "本",
+        6: "📚︎",
+        7: "🖥️",
+        8: "🎲",
+        9: "S",
+        10: "NS",
+        11: "X1",
+        12: "X360",
+        13: "🤷",
+        14: "V💿︎",
+        15: "🖼️",
+        16: "🚫"
+    }[format] + out
+}
+
 function fixThumbnailURL(url: string) {
     //a / url assumes that the aio server is the same as the web server
     if (url.startsWith("/")) {

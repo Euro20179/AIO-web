@@ -189,7 +189,8 @@ function de_newevent(form: HTMLFormElement) {
                     Event: name.toString(),
                     ItemId: itemId,
                     TimeZone: timezone,
-                    Before: beforets
+                    Before: beforets,
+                    EventId: -1,
                 }
             )
             ev = sortEvents(ev)
@@ -700,7 +701,6 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
                 elem.textContent = String(data)
                 // elem.append(String(data))
             }
-
             break
         }
     }
@@ -887,6 +887,11 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         })
     }
 
+    const onFormat = el.getElementById("on-format")
+    if(onFormat) {
+        onFormat.innerHTML = formatToSymbolUI(item.Format)
+    }
+
     const digitized = el.getElementById("format-digitized")
     if (digitized && (digitized instanceof mode_curWin.HTMLInputElement)) {
         digitized.checked = items_isDigitized(item.Format)
@@ -939,8 +944,12 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
+
     if (getUidUI() === 0)
         displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid])
+
+    let formatIcon = formatToSymbolUI(item.Format)
+    displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
 
 
     //format

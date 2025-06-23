@@ -991,6 +991,19 @@ function doUIStartupScript(script: string, lang: StartupLang) {
     }
 }
 
+function formatToSymbolUI(format: number) {
+    const custom = settings_get("custom_item_formats")
+    let out = ""
+    if(items_isDigitized(format)) {
+        format -= DIGI_MOD
+        out = "+d"
+    }
+    if(format in custom) {
+        return custom[format] + out
+    }
+    return items_formatToSymbol(format) + out
+}
+
 type UserSettings = {
     UIStartupScript: string
     StartupLang: StartupLang
