@@ -369,6 +369,10 @@
         }
     }
 
+    #genres {
+        padding: var(--small-gap);
+    }
+
     #official-native-title {
         align-self: center;
 
