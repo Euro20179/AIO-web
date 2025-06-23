@@ -240,6 +240,18 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
             }
         }
     }
+    else if (groupBy === "Genres") {
+        data = {}
+        for (let item of entries) {
+            for (let genre of JSON.parse(findMetadataById(item.ItemId).Genres || "[]")) {
+                if (data[genre]) {
+                    data[genre].push(item)
+                } else {
+                    data[genre] = [item]
+                }
+            }
+        }
+    }
     else if (groupByInput.value) {
         data = organizeDataByExpr(entries)
     }
