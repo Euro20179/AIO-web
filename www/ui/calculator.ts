@@ -1548,6 +1548,16 @@ class CalcVarTable {
             return new Num(Math.floor(Math.random() * (h - l) + l))
         }))
 
+        this.symbols.set("in", new Func((list, value) => {
+            let len = list.len().jsValue
+            for(let i = 0; i < len; i++) {
+                if(list.getattr(new Num(i)).eq(value)) {
+                    return new Num(1)
+                }
+            }
+            return new Num(0)
+        }))
+
         this.symbols.set("filter", new Func((list, fn) => {
             let newList = []
             let len = list.len().jsValue
