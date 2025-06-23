@@ -106,6 +106,7 @@ type MetadataEntry = {
     Native_Title: string
     Provider: string
     ProviderID: string
+    Genres: string
 }
 
 

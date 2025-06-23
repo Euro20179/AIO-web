@@ -897,6 +897,22 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         digitized.checked = items_isDigitized(item.Format)
     }
 
+    const genresRoot = el.getElementById("genres")
+    if(genresRoot) {
+        const genres = JSON.parse(meta.Genres || "[]")
+        const children = []
+        for(let genre of genres) {
+            const el = document.createElement("button")
+            el.classList.add("tag")
+            el.onclick = function() {
+                ui_search(`#g:${genre.replaceAll(" ", "\\ ")}`)
+            }
+            el.append(genre)
+            children.push(el)
+        }
+        genresRoot.replaceChildren(...children)
+    }
+
     //tags
     const tagsRoot = el.getElementById("tags")
     if (tagsRoot) {
