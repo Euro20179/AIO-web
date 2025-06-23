@@ -888,7 +888,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     const onFormat = el.getElementById("on-format")
-    if(onFormat) {
+    if(onFormat && !(await formatToName(item.Format)).startsWith("UNOWNED")) {
         onFormat.innerHTML = formatToSymbolUI(item.Format)
     }
 
