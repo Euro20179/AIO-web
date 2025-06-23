@@ -1789,7 +1789,7 @@ class CalcVarTable {
         }))
 
         this.symbols.set("deserialize", new Func(text => {
-            return new Obj(api_deserializeJsonl(text.jsStr()).next().value)
+            return Type.from(api_deserializeJsonl(text.jsStr()).next().value)
         }))
 
         this.symbols.set("clear", new Func(() => {
