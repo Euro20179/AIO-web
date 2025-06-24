@@ -529,9 +529,9 @@ function items_formatToSymbol(format: number): string {
     return {
         0: "📼",
         1: "💿︎",
-        2: "📀",
-        3: "B📀",
-        4: "4KB📀",
+        2: "📀︎",
+        3: "<font color='#007fb6'>📀︎</font>",
+        4: "4K<font color='#007fb6'>📀︎</font>",
         5: "本",
         6: "📚︎",
         7: "🖥️",
