@@ -24,15 +24,18 @@ let groupByInput = document.getElementById("group-by-expr") as HTMLInputElement
 
 const _charts: Record<string, any> = {}
 
+const _chartsToRun: any[] = []
+
 function ChartManager(name: string, mkChart: (entries: InfoEntry[]) => Promise<any>) {
     _charts[name] = null
-    return async function(entries: InfoEntry[]) {
+    _chartsToRun.push(async function(entries: InfoEntry[]) {
         let chrt = _charts[name]
         if (chrt) {
             chrt.destroy()
         }
         _charts[name] = await mkChart(entries)
-    }
+    })
+    return _chartsToRun[_chartsToRun.length - 1]
 }
 
 function mkPieChart(ctx: CanvasRenderingContext2D, labels: string[], data: number[], labelText: string, colors: string[] = []) {
@@ -70,6 +73,37 @@ function mkPieChart(ctx: CanvasRenderingContext2D, labels: string[], data: numbe
     return new Chart(ctx, obj)
 }
 
+function mkBubbleChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText: string) {
+    //@ts-ignore
+    return new Chart(ctx, {
+        type: "bubble",
+        data: {
+            labels: x,
+            datasets: [{
+                label: labelText,
+                data: y,
+                borderWidth: 1,
+                backgroundColor: "#95bdff"
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    labels: {
+                        color: getCSSProp("--text-color", "white"),
+                    }
+                },
+                title: {
+                    color: getCSSProp("--text-color", "white"),
+                    display: true,
+                    text: labelText,
+                }
+            },
+            responsive: true
+        }
+    })
+}
+
 function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText: string) {
     //@ts-ignore
     return new Chart(ctx, {
@@ -98,7 +132,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
                         color: "grey"
                     },
                     ticks: {
-                        color:getCSSProp("--text-color", "white")
+                        color: getCSSProp("--text-color", "white")
                     },
                     beginAtZero: true
                 },
@@ -107,7 +141,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
                         color: "grey"
                     },
                     ticks: {
-                        color:getCSSProp("--text-color", "white")
+                        color: getCSSProp("--text-color", "white")
                     }
                 }
             }
@@ -115,10 +149,43 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
     })
 }
 
+function chartAddChart() {
+    const form = document.getElementById("add-chart") as HTMLFormElement
+    const data = new FormData(form)
+    const yForm = data.get("y-formula")
+    const xForm = data.get("x-formula")
+    const name = data.get("chart-name")?.toString() || "new-chart"
+
+    const canvPar = document.createElement("div")
+    const canv = document.createElement("canvas")
+    canv.id = name
+    canvPar.append(canv)
+
+    graph_curWin.document.getElementById("graph-output")?.querySelector("div")?.append(canvPar)
+
+     ChartManager(name, async entries => {
+        let y = []
+        let x = []
+        const yExpr = yForm?.toString() || "0"
+        const xExpr = xForm?.toString() || "1"
+        for (let $0 of entries) {
+            y.push(eval(yExpr))
+            x.push(eval(xExpr))
+        }
+
+        x = x.sort()
+        console.log(x)
+
+        return mkXTypeChart(getCtx2(name), x, y, name)
+    })(ui_selected())
+}
+
 function mkXTypeChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText: string) {
     const ty = typeSelection.value
     if (ty === "bar") {
         return mkBarChart(ctx, x, y, labelText)
+    } else if (ty === "bubble") {
+        return mkBubbleChart(ctx, x, y, labelText)
     } else {
         let totalY = ty === "pie-percentage"
             ? y.reduce((p, c) => p + c, 0)
@@ -439,13 +506,16 @@ const byc = ChartManager("by-year", async (entries) => {
 })
 
 function makeGraphs(entries: InfoEntry[]) {
-    byc(entries)
-    ratingByYear(entries)
-    adjRatingByYear(entries)
-    costByFormat(entries)
-    watchTimeByYear(entries)
-    generalRating(entries)
-    ratingDisparityGraph(entries)
+    for (const chart of _chartsToRun) {
+        chart(entries)
+    }
+    // byc(entries)
+    // ratingByYear(entries)
+    // adjRatingByYear(entries)
+    // costByFormat(entries)
+    // watchTimeByYear(entries)
+    // generalRating(entries)
+    // ratingDisparityGraph(entries)
 }
 
 groupByInput.onchange = function() {
