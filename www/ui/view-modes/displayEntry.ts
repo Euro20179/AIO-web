@@ -1064,7 +1064,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         let modifiedKeys: { [k: string]: string } = {}
         for (let key in mediaDependant) {
             const val = mediaDependant[key]
-            key = key.split("-").slice(1).join(" ")
+            console.log(key, val)
             modifiedKeys[key] = val
         }
         mkGenericTbl(mediaInfoTbl, modifiedKeys)
@@ -1074,15 +1074,18 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     let userPos = parseInt(user.CurrentPosition)
 
     el.host.setAttribute("data-user-status", user.Status)
-    if (progressEl && "max" in progressEl && "value" in progressEl && mediaDependant[`${type}-episodes`] && user.Status === "Viewing") {
-        progressEl.max = mediaDependant[`${type}-episodes`]
+
+    const lengthInNumber = mediaDependant[`${type}-episodes`] || mediaDependant[`${type}-volumes`]
+
+    if (progressEl && "max" in progressEl && "value" in progressEl && lengthInNumber && user.Status === "Viewing") {
+        progressEl.max = lengthInNumber
 
         progressEl.value = userPos || 0
 
     }
     if (captionEl) {
-        captionEl.innerText = `${user.CurrentPosition}/${mediaDependant[`${type}-episodes`]}`
-        captionEl.title = `${Math.round(userPos / parseInt(mediaDependant[`${type}-episodes`]) * 1000) / 10}%`
+        captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
+        captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber) * 1000) / 10}%`
     }
 
     //relation elements
