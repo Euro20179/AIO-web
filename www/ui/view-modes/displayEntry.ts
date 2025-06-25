@@ -234,13 +234,17 @@ const modeDisplayEntry: DisplayMode = {
     },
 
     addList(entry) {
-        for (let i = 0; i < entry.length; i++) {
-            if (i > 5) {
-                displayQueue.push(entry[i])
-            } else {
-                renderDisplayItem(entry[i].ItemId)
+        (async () => {
+            for (let i = 0; i < entry.length; i++) {
+                if ("scheduler" in mode_curWin && i % 20 === 0 && i !== 0) {
+                    await scheduler.yield()
+                } else if (i > 5 && !("scheduler" in window)) {
+                    displayQueue.push(entry[i])
+                } else {
+                    renderDisplayItem(entry[i].ItemId)
+                }
             }
-        }
+        })()
     },
 
     subList(entry) {
@@ -888,7 +892,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     const onFormat = el.getElementById("on-format")
-    if(onFormat && !(await formatToName(item.Format)).startsWith("UNOWNED")) {
+    if (onFormat && !(await formatToName(item.Format)).startsWith("UNOWNED")) {
         onFormat.innerHTML = formatToSymbolUI(item.Format)
     }
 
@@ -898,10 +902,10 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     const genresRoot = el.getElementById("genres")
-    if(genresRoot) {
+    if (genresRoot) {
         const genres = JSON.parse(meta.Genres || "[]")
         const children = []
-        for(let genre of genres) {
+        for (let genre of genres) {
             const el = document.createElement("button")
             el.classList.add("tag")
             el.onclick = function() {
@@ -1064,7 +1068,6 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         let modifiedKeys: { [k: string]: string } = {}
         for (let key in mediaDependant) {
             const val = mediaDependant[key]
-            console.log(key, val)
             modifiedKeys[key] = val
         }
         mkGenericTbl(mediaInfoTbl, modifiedKeys)

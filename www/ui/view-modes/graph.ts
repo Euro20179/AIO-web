@@ -174,7 +174,6 @@ function chartAddChart() {
         }
 
         x = x.sort()
-        console.log(x)
 
         return mkXTypeChart(getCtx2(name), x, y, name)
     })(ui_selected())

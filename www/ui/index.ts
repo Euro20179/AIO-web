@@ -123,7 +123,6 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     let filters: string[] = []
     if (filterStartPos > -1) {
         filters = search.slice(filterStartPos).split("->").map(v => v.trim())
-        console.log(filters)
         search = search.slice(0, filterStartPos)
     }
 

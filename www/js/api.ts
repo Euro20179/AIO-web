@@ -160,7 +160,6 @@ async function api_listArtStyles() {
     if (res.status !== 200) return _api_as_cache
 
     const json = await res.json()
-    console.log(json)
     return _api_as_cache = json
 }
 
