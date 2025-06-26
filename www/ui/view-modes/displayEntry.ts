@@ -181,24 +181,7 @@ function de_newevent(form: HTMLFormElement) {
     api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
         .then(res => res?.text())
         .then(() => {
-            let ev = findUserEventsById(itemId)
-            ev.push(
-                {
-                    Timestamp: ts,
-                    After: afterts,
-                    Event: name.toString(),
-                    ItemId: itemId,
-                    TimeZone: timezone,
-                    Before: beforets,
-                    EventId: -1,
-                }
-            )
-            ev = sortEvents(ev)
-            updateInfo2({
-                [String(itemId)]: {
-                    events: ev
-                }
-            })
+            _reloadEvents(itemId)
             form.parentElement?.hidePopover()
         })
         .catch(alert)
