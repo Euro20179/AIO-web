@@ -573,6 +573,7 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let validEntries: Record<string, FormDataEntryValue> = {}
+
     for (let [name, value] of data.entries()) {
         if (value == "") continue
         validEntries[name] = value
@@ -582,7 +583,16 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["libraryId"]
     }
 
-    const queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
+    let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
+    const parentId = form.querySelector("[name=\"parentId\"]").value
+    const copyOfId = form.querySelector("[name=\"copyOf\"]").value
+    if(parentId !== "0") {
+        queryString += `&parentId=${parentId}`
+    }
+    if(copyOfId !== "0") {
+        queryString += `&copyOf=${copyOfId}`
+    }
+    console.log(parentId, copyOfId, queryString)
 
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
