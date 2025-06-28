@@ -1881,7 +1881,11 @@ const de_actions = {
                 })
             })
             .catch(console.error)
-        api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0).catch(console.error)
+        api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0)
+            .then(() => {
+                _reloadEvents(item.ItemId)
+            })
+            .catch(console.error)
     }),
 } as const
 
