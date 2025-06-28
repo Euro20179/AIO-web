@@ -25,13 +25,16 @@ handle_configts_from_ini() {
             ;;
         '') continue ;;
         *)
-            ! [ "$section" = aio_limas ] && continue
-
             name="${line%%[[:space:]]=*}"
             value="${line#*=[[:space:]]}"
-            case "$name" in
-            host) host="$value" ;;
-            api) api="$value" ;;
+            case "$section" in
+            aio_limas)
+                case "$name" in
+                    host) host="$value" ;;
+                    api) api="$value" ;;
+                esac
+                ;;
+            ui) export "$name"="$value" ;;
             esac
             ;;
         esac
@@ -41,6 +44,8 @@ handle_configts_from_ini() {
 //making this not a constant so that a tampermonkey script can change it because i want to change it with a tampermonkey script
 let AIO = "${host:-http://localhost:8080}"
 const API = "${api:-/api/v1}"
+
+const ENABLE_UNSAFE = ${enable_unsafe}
 EOF
 }
 
@@ -225,7 +230,7 @@ generate_js_api_docs() {
 
 generate_js_api_docs
 
-generateSidebarStyles () {
+generateSidebarStyles() {
     styles=$(cat "./www/css/colors.css" "./www/css/general.css" "./www/ui/templates/sidebar-entry.css")
     python -c "
 ( (f := open('./www/ui/components.js', 'r+')),

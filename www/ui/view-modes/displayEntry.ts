@@ -749,6 +749,7 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         }
     }
 
+    if(ENABLE_UNSAFE)
     for (let elem of root.querySelectorAll("script")) {
         let script = elem.textContent
         if (!script) continue
