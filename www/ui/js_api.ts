@@ -258,7 +258,7 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     let frag = document.createDocumentFragment()
 
-    const m = new DisplayMode(frag)
+    const m = new Mode(frag)
 
     return selectItem(entry, false, m)[0]
 }
@@ -280,6 +280,7 @@ function ui_modeclear(): number {
     let valid = 1
     for (let mode of openViewModes) {
         if ("clear" in mode) {
+            //@ts-ignore
             mode.clear()
             valid = 0
         }

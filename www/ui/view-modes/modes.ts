@@ -1,4 +1,4 @@
-class DisplayMode {
+class Mode {
     parent: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
     //using string will querySelector on the (win || window)'s document
@@ -25,7 +25,7 @@ class DisplayMode {
     clearSelected(): any { }
 }
 
-let openViewModes: DisplayMode[] = []
+let openViewModes: Mode[] = []
 // const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting, modeEvents]
 // const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output", "event-output"]
 //
@@ -47,7 +47,7 @@ function mode_isSelected(id: bigint) {
     return false
 }
 
-function mode_chwin(newWin: Window & typeof globalThis, mode: DisplayMode) {
+function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
     if (newWin === window) {
         if (mode.chwin) {
             mode.chwin(window)
@@ -70,7 +70,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: DisplayMode) {
     }
 }
 
-function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: DisplayMode): HTMLElement[] {
+function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
     globalsNewUi.selectedEntries.push(item)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
@@ -101,7 +101,7 @@ function deselectItem(item: InfoEntry, updateStats: boolean = true) {
     }
 }
 
-function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: DisplayMode) {
+function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
     updateStats && changeResultStatsWithItemListUI(itemList)
     if (itemList.length)
@@ -137,13 +137,14 @@ function mode_setMode(name: string) {
     }
 
     const modes = {
-        "entry-output": modeDisplayEntry,
+        "entry-output": DisplayMode,
         "graph-output": modeGraphView,
         "calc-output": CalcMode,
         "gallery-output": modeGallery,
         "script-output": modeScripting,
         "event-output": modeEvents
     }
+    //@ts-ignore
     const newMode = modes[name]
     try {
         let newModes = []
@@ -177,7 +178,7 @@ viewAllElem.addEventListener("change", e => {
     } else {
         clearItems()
         for (let mode of openViewModes) {
-            selectItemList(getFilteredResultsUI(), mode)
+            selectItemList(getFilteredResultsUI(), true, mode)
         }
     }
 })

@@ -1,6 +1,437 @@
-let displayItems = document.getElementById("entry-output") as HTMLElement
+class DisplayMode extends Mode {
+    displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
+        return function(this: DisplayMode, elem: HTMLElement) {
+            let id = getIdFromDisplayElement(elem)
+            let item;
+            (item = findInfoEntryById(id)) && func.call(this, item, elem.getRootNode() as ShadowRoot, elem)
+        }.bind(this)
+    }
 
-let displayQueue: InfoEntry[] = []
+    close() {
+        this.win.document.getElementById("entry-output")?.classList.remove("open")
+    }
+
+    de_actions = {
+        delete: this.displayEntryAction(item => deleteEntryUI(item)),
+        refresh: this.displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
+        fetchlocation: this.displayEntryAction((item) => _fetchLocation.call(this, item.ItemId)),
+        save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
+        close: this.displayEntryAction(item => deselectItem(item)),
+        copythis: this.displayEntryAction(item => copyThis.call(this, item)),
+        setdigitization: this.displayEntryAction((item, _, target) => {
+            if (!target || !(target instanceof HTMLInputElement)) return
+            if (target.checked) {
+                item.Format |= DIGI_MOD
+            } else if (items_isDigitized(item.Format)) {
+                item.Format -= DIGI_MOD
+            }
+            api_setItem("", item).then(() => {
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+            })
+        }),
+        toggle: this.displayEntryAction((item, root, elem) => {
+            let id = elem.getAttribute("elem-id")
+            if (!id) return
+            let toShow = root.getElementById(id)
+            if (!toShow) return
+            if (toShow instanceof this.win.HTMLDialogElement) {
+                if (toShow.open) {
+                    toShow.close()
+                } else {
+                    toShow.showModal()
+                }
+            } else {
+                toShow.hidden = !toShow.hidden
+            }
+        }),
+        setformat: this.displayEntryAction((item, _, target) => {
+            if (!("value" in target)) return
+            api_listFormats().then(formats => {
+                if (!Object.keys(formats).includes(String(target.value))) return
+                item.Format = Number(target.value)
+                api_setItem("", item)
+                    .catch(console.error)
+                    .then(alert.bind(window, `Switched format to: ${formats[Number(target.value)]}`))
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+            })
+        }),
+        settype: this.displayEntryAction((item, _, target) => {
+            if (!("value" in target)) return
+            api_listTypes().then(types => {
+                if (!types.includes(target.value as EntryType)) return
+                item.Type = target.value as EntryType
+                api_setItem("", item)
+                    .catch(console.error)
+                    .then(alert.bind(window, `Switched type to: ${target.value}`))
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+            })
+        }),
+        //TODO: this function is a disaster, each edited object should probably get its own save function
+        saveobject: this.displayEntryAction((item, root) => {
+            const tbl = root.getElementById("display-info-object-tbl")
+
+            const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
+
+            let into: Record<string, any> = {}
+            let keyName
+            let endpoint: Parameters<typeof api_setItem>["0"] = ""
+            switch (editedObject) {
+                case "meta":
+                    endpoint = "metadata/"
+                    break
+                case "entry":
+                    endpoint = ""
+                    break
+                case "user":
+                    endpoint = "engagement/"
+                    break
+                case "user-extra":
+                    into = findUserEntryById(item.ItemId) as UserEntry
+                    keyName = "Extra"
+                    endpoint = "engagement/"
+                    break
+                case "meta-datapoints":
+                    into = findMetadataById(item.ItemId) as MetadataEntry
+                    keyName = "Datapoints"
+                    endpoint = "metadata/"
+                    break
+                case "meta-media-dependant":
+                    into = findMetadataById(item.ItemId) as MetadataEntry
+                    keyName = "MediaDependant"
+                    endpoint = "metadata/"
+                    break
+                case "aio-web":
+                    keyName = "_AIOWEB"
+                    endpoint = "engagement/"
+                    break
+                default:
+                    alert(`${editedObject} saving is not implemented yet`)
+                    return
+            }
+
+            let newObj: Record<string, any> = {}
+            for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
+                let key = row.firstElementChild?.textContent || ""
+                //invalid key
+                if (editedObject === "entry" && key === "Tags") continue
+
+                let valueEl = row.firstElementChild?.nextElementSibling
+                if (!valueEl) continue
+                let value = valueEl?.textContent || ""
+                if (key == "") continue
+
+                let valueType = valueEl.getAttribute("data-type")
+                if (valueType === 'bigint') {
+                    newObj[key] = BigInt(value)
+                } else if (valueType === 'number') {
+                    newObj[key] = Number(value)
+                } else {
+                    newObj[key] = value
+                }
+            }
+
+            if (keyName && keyName !== "_AIOWEB")
+                into[keyName] = JSON.stringify(newObj)
+            else if (keyName === "_AIOWEB") {
+                let user = findUserEntryById(item.ItemId)
+                let extra = JSON.parse(user.Extra || "{}")
+                extra["AIOWeb"] = newObj
+                user.Extra = JSON.stringify(extra)
+                into = user
+                updateInfo2({
+                    [String(item.ItemId)]: { user }
+                })
+            }
+            else into = newObj
+
+            if (editedObject === "entry") {
+                into["Tags"] = findInfoEntryById(into["ItemId"]).Tags
+            }
+
+            const strId = String(item.ItemId)
+            api_setItem(endpoint, into as UserEntry)
+                .then(res => res?.text())
+                .then(console.log)
+                .catch(console.error)
+            if (editedObject === "user-extra" || editedObject === "user") {
+                updateInfo2({
+                    [strId]: { user: into as UserEntry }
+                })
+            } else if (editedObject === "entry") {
+                updateInfo2({
+                    [strId]: { info: into as InfoEntry }
+                })
+            } else if (probablyMetaEntry(into)) {
+                updateInfo2({
+                    [strId]: { meta: into as MetadataEntry }
+                })
+            }
+        }),
+        newobjectfield: this.displayEntryAction(async (item, root) => {
+            const name = await promptUI("Field name")
+            if (!name) return
+
+            const obj: any = getCurrentObjectInObjEditor(item.ItemId, root)
+            if (name in obj) return
+
+            obj[name] = ""
+
+            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+            updateObjectTbl(obj, objectTbl, false)
+        }),
+        selectnewchild: this.displayEntryAction(item => {
+            selectItemUI().then(id => {
+                if (!id) {
+                    alert("Could not set child")
+                    return
+                }
+                api_setParent(id, item.ItemId).then(() => {
+                    let info = findInfoEntryById(id)
+                    if (!info) {
+                        alert("could not find child id")
+                        return
+                    }
+                    info.ParentId = item.ItemId
+                    updateInfo2({
+                        [String(item.ItemId)]: { info: item },
+                        [String(id)]: { info }
+                    })
+                })
+            })
+        }),
+        editstyles: this.displayEntryAction((item, root, elem) => {
+            const styleEditor = root.getElementById("style-editor")
+            if (!styleEditor) return
+            styleEditor.hidden = !styleEditor.hidden
+            styleEditor.onchange = util_debounce(() => {
+                this.de_actions["save"](elem)
+                alert("saved styles")
+            }, 3000)
+        }),
+        edittemplate: this.displayEntryAction((item, root, elem) => {
+            const templEditor = root.getElementById("template-editor")
+            if (!templEditor) return
+
+            templEditor.hidden = !templEditor.hidden
+        }),
+        previewtemplate: this.displayEntryAction(function(item, root) {
+            const templEditor = root.getElementById("template-editor")
+            if (!templEditor || !(templEditor instanceof this.win.HTMLTextAreaElement)) return
+
+            const preview = this.parent.ownerDocument.open(location.toString(), "_blank", "popup=true")
+            if (!preview) return
+
+            preview.onload = () => {
+                preview.document.body.innerHTML = ""
+                preview.document.title = `${item.En_Title} PREVIEW`
+                renderDisplayItem.call(this, item.ItemId, templEditor.value)
+            }
+
+            templEditor.onkeyup = () => {
+                preview.document.body.innerHTML = ""
+                renderDisplayItem.call(this, item.ItemId, templEditor.value)
+            }
+        }),
+        copyto: this.displayEntryAction(async (item) => {
+            let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
+            if (id === null) return
+            let idInt = BigInt(id)
+
+            api_copyUserInfo(item.ItemId, idInt)
+                .then(res => res?.text())
+                .then(console.log)
+        }),
+        setviewcount: this.displayEntryAction(async (item) => {
+            let count = await promptNumber("New view count", 'Not a number, view count')
+            if (count === null) return
+
+            authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
+                .then(res => res?.text())
+                .then(alert)
+                .then(() => {
+                    let user = findUserEntryById(item.ItemId)
+                    if (!user) {
+                        refreshInfo(getUidUI()).then(() => {
+                            refreshDisplayItem.call(this, item.ItemId)
+                        })
+                    } else {
+                        user.ViewCount = Number(count)
+                        updateInfo2({
+                            [String(item.ItemId)]: { user }
+                        })
+                    }
+                })
+                .catch(console.error)
+        }),
+        setprogress: this.displayEntryAction(async (item, root) => {
+            let newEp = await promptUI("Current position")
+            if (!newEp) return
+
+            await api_setPos(item.ItemId, String(newEp))
+            const user = findUserEntryById(item.ItemId) as UserEntry
+            user.CurrentPosition = String(newEp)
+            updateInfo2({
+                [String(item.ItemId)]: { user }
+            })
+        }),
+        setrating: this.displayEntryAction(async (item) => {
+            let user = findUserEntryById(item.ItemId)
+            if (!user) {
+                alert("Failed to get current rating")
+                return
+            }
+            let newRating = await promptUI("New rating")
+            if (!newRating || isNaN(Number(newRating))) {
+                return
+            }
+
+            api_setRating(item.ItemId, newRating)
+                .then(async () => {
+                    let user = findUserEntryById(item.ItemId)
+                    await loadUserEvents(item.Uid)
+                    user.UserRating = Number(newRating)
+                    updateInfo2({
+                        [String(item.ItemId)]: { user, events: findUserEventsById(item.ItemId) }
+                    })
+                })
+                .catch(console.error)
+            api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0)
+                .then(() => {
+                    _reloadEvents(item.ItemId)
+                })
+                .catch(console.error)
+        }),
+    } as const
+    displayQueue: InfoEntry[]
+    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+        super(parent || "#entry-output", win)
+        this.win.document.getElementById("entry-output")?.classList.add("open")
+        this.displayQueue = []
+    }
+
+    add(entry: InfoEntry) {
+        return renderDisplayItem.call(this, entry.ItemId)
+    }
+
+    sub(entry: InfoEntry) {
+        removeDisplayItem.call(this, entry.ItemId)
+    }
+
+    chwin(win: Window & typeof globalThis) {
+        if(win === window) {
+            this.win.close()
+        }
+        let newOutput = win.document.getElementById("entry-output")
+        this.win = win
+        if (newOutput) {
+            this.parent = newOutput
+            if (newOutput instanceof HTMLElement) {
+                newOutput.addEventListener("scroll", (e) => {
+                    if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
+
+                    if (this.displayQueue.length)
+                        //@ts-ignore
+                        renderDisplayItem(this.displayQueue.shift()?.ItemId)
+                })
+            }
+        }
+    }
+
+    refresh(id: bigint) {
+        let el = this.parent.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+        //only refresh if the item is on screen
+        if (el)
+            refreshDisplayItem.call(this, id)
+    }
+
+    addList(entry: InfoEntry[]) {
+        (async () => {
+            for (let i = 0; i < entry.length; i++) {
+                if ("scheduler" in window && i % 20 === 0 && i !== 0) {
+                    //@ts-ignore
+                    await window.scheduler.yield()
+                } else if (i > 5 && !("scheduler" in window)) {
+                    this.displayQueue.push(entry[i])
+                } else {
+                    renderDisplayItem.call(this, entry[i].ItemId)
+                }
+            }
+        })()
+    }
+
+    subList(entry: InfoEntry[]) {
+        const itemIdsToRemove = entry.map(v => v.ItemId)
+        this.displayQueue = this.displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
+
+        for (let item of entry) {
+            removeDisplayItem.call(this, item.ItemId)
+        }
+    }
+
+    putSelectedInCollection() {
+        const selected = globalsNewUi.selectedEntries
+        promptUI("Id of collection").then(collectionName => {
+            if (!collectionName) return
+
+            let waiting = []
+            for (let item of selected) {
+                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
+            }
+            Promise.all(waiting).then(res => {
+                for (let r of res) {
+                    console.log(r?.status)
+                }
+            })
+        })
+    }
+
+    addTagsToSelected() {
+        promptUI("tags (, seperated)").then(tags => {
+            if (!tags) return
+            const tagsList = tags.split(",")
+            //FIXME: tags do not update immediately
+            for (let item of globalsNewUi.selectedEntries) {
+                item.Tags = item.Tags.concat(tagsList)
+                api_addEntryTags(item.ItemId, tagsList)
+            }
+        })
+    }
+
+    put(html: string | HTMLElement | ShadowRoot) {
+        if (typeof html === 'string') {
+            return
+        }
+        this.parent.append(html)
+    }
+
+    clearSelected() {
+        this.displayQueue.length = 0
+        // displayEntryIntersected.clear()
+        for (let child of this.parent.querySelectorAll("display-entry")) {
+            const itemId = child.getAttribute("data-item-id")
+            if (!itemId) continue
+            removeDisplayItem.call(this, BigInt(itemId))
+        }
+    }
+
+    clear() {
+        for (let child of this.parent.querySelectorAll(":not(display-entry)")) {
+            child.remove()
+        }
+    }
+}
 
 async function itemIdentification(form: HTMLFormElement) {
     closeModalUI("item-identification-form", form.getRootNode() as ShadowRoot)
@@ -124,8 +555,8 @@ function saveItemChanges(root: ShadowRoot, itemId: bigint) {
     })
 }
 
-function changeDisplayItemData(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: HTMLElement) {
-    updateDisplayEntryContents(item, user, meta, events, el.shadowRoot as ShadowRoot)
+function changeDisplayItemData(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: HTMLElement) {
+    updateDisplayEntryContents.call(this, item, user, meta, events, el.shadowRoot as ShadowRoot)
     el.setAttribute("data-item-id", String(item.ItemId))
 }
 
@@ -185,109 +616,6 @@ function de_newevent(form: HTMLFormElement) {
             form.parentElement?.hidePopover()
         })
         .catch(alert)
-}
-
-const modeDisplayEntry: DisplayMode = {
-    add(entry, parent?: HTMLElement | DocumentFragment) {
-        return renderDisplayItem(entry.ItemId, parent)
-    },
-
-    sub(entry) {
-        removeDisplayItem(entry.ItemId)
-    },
-
-    chwin(win) {
-        let newOutput = win.document.getElementById("entry-output")
-        if (newOutput) {
-            displayItems = newOutput
-            newOutput.addEventListener("scroll", (e) => {
-                if (displayItems.scrollHeight - displayItems.scrollTop > innerHeight + 1000) return
-
-                if (displayQueue.length)
-                    renderDisplayItem(displayQueue.shift()?.ItemId)
-            })
-        }
-    },
-
-    refresh(id) {
-        let el = displayItems.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
-        //only refresh if the item is on screen
-        if (el)
-            refreshDisplayItem(id)
-    },
-
-    addList(entry) {
-        (async () => {
-            for (let i = 0; i < entry.length; i++) {
-                if ("scheduler" in mode_curWin && i % 20 === 0 && i !== 0) {
-                    await scheduler.yield()
-                } else if (i > 5 && !("scheduler" in window)) {
-                    displayQueue.push(entry[i])
-                } else {
-                    renderDisplayItem(entry[i].ItemId)
-                }
-            }
-        })()
-    },
-
-    subList(entry) {
-        const itemIdsToRemove = entry.map(v => v.ItemId)
-        displayQueue = displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
-
-        for (let item of entry) {
-            removeDisplayItem(item.ItemId)
-        }
-    },
-
-    putSelectedInCollection() {
-        const selected = globalsNewUi.selectedEntries
-        promptUI("Id of collection").then(collectionName => {
-            if (!collectionName) return
-
-            let waiting = []
-            for (let item of selected) {
-                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
-            }
-            Promise.all(waiting).then(res => {
-                for (let r of res) {
-                    console.log(r?.status)
-                }
-            })
-        })
-    },
-
-    addTagsToSelected() {
-        promptUI("tags (, seperated)").then(tags => {
-            if (!tags) return
-            const tagsList = tags.split(",")
-            //FIXME: tags do not update immediately
-            for (let item of globalsNewUi.selectedEntries) {
-                item.Tags = item.Tags.concat(tagsList)
-                api_addEntryTags(item.ItemId, tagsList)
-            }
-        })
-    },
-
-    put(html: string | HTMLElement | ShadowRoot) {
-        if (typeof html === 'string') {
-            return
-        }
-        displayItems.append(html)
-    },
-
-    clearSelected() {
-        displayQueue.length = 0
-        // displayEntryIntersected.clear()
-        for (let child of displayItems.querySelectorAll("display-entry")) {
-            removeDisplayItem(BigInt(child.getAttribute("data-item-id")))
-        }
-    },
-
-    clear() {
-        for (let child of displayItems.querySelectorAll(":not(display-entry)")) {
-            child.remove()
-        }
-    }
 }
 
 function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
@@ -456,9 +784,9 @@ function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
     costEl.innerText = String(items_calculateCost(itemId, self, children, copies, recursive))
 }
 
-function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
+function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const eventsTbl = el.getElementById("user-actions")
-    if (!eventsTbl || !(eventsTbl instanceof mode_curWin.HTMLTableElement)) return
+    if (!eventsTbl || !(eventsTbl instanceof this.win.HTMLTableElement)) return
 
     const { self, children, copies, recursive } = whatToInclude(el)
 
@@ -506,7 +834,7 @@ function updateEventsDisplay(el: ShadowRoot, itemId: bigint) {
     eventsTbl.innerHTML = html
 }
 
-function createRelationButtons(elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
+function createRelationButtons(this: DisplayMode, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
     relationships = relationships.sort((a, b) => {
@@ -556,7 +884,7 @@ function createRelationButtons(elementParent: HTMLElement, relationGenerator: Ge
                     updateInfo2({
                         [String(child.ItemId)]: { info: child.info }
                     })
-                    refreshDisplayItem(thisId)
+                    refreshDisplayItem.call(this, thisId)
                 })
             }
         })
@@ -642,7 +970,7 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
 /**
  * @description updates all put-data elements with their respective contents
  */
-function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot) {
+function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot) {
     //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
     for (let elem of root.querySelectorAll("[put-data]")) {
         let keys = elem.getAttribute("put-data")?.split(",")
@@ -697,7 +1025,8 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         //@ts-ignore
         //use on_ instead of addEventListener because if the entry is refreshed, it will add multiple event listeners
         actionEl[`on${event}`] = e => {
-            let actionFn = de_actions[actionEl.getAttribute("entry-action") as keyof typeof de_actions];
+            //@ts-ignore
+            let actionFn = this.de_actions[actionEl.getAttribute("entry-action") as keyof typeof de_actions];
             if (actionFn)
                 actionFn(e.target as HTMLElement)
         }
@@ -749,54 +1078,54 @@ function updateBasicDisplayEntryContents(item: InfoEntry, user: UserEntry, meta:
         }
     }
 
-    if(ENABLE_UNSAFE)
-    for (let elem of root.querySelectorAll("script")) {
-        let script = elem.textContent
-        if (!script) continue
+    if (ENABLE_UNSAFE)
+        for (let elem of root.querySelectorAll("script")) {
+            let script = elem.textContent
+            if (!script) continue
 
-        let res: string | Type
+            let res: string | Type
 
-        if (elem.getAttribute("type") === "application/x-aiol") {
-            let symbols = new CalcVarTable()
-            symbols.set("root", new Elem(root as unknown as HTMLElement))
-            symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
-            symbols.set("this", new EntryTy(item))
-            res = parseExpression(script, symbols)
-        } else {
-            let old = XMLHttpRequest
-            //@ts-ignore
-            window.XMLHttpRequest = null
-            let oldFetch = fetch
-            window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
-                if (!confirm(`A request is about to be made to ${path}, is this ok?`)) {
-                    return await oldFetch("/")
+            if (elem.getAttribute("type") === "application/x-aiol") {
+                let symbols = new CalcVarTable()
+                symbols.set("root", new Elem(root as unknown as HTMLElement))
+                symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
+                symbols.set("this", new EntryTy(item))
+                res = parseExpression(script, symbols)
+            } else {
+                let old = XMLHttpRequest
+                //@ts-ignore
+                window.XMLHttpRequest = null
+                let oldFetch = fetch
+                window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
+                    if (!confirm(`A request is about to be made to ${path}, is this ok?`)) {
+                        return await oldFetch("/")
+                    }
+                    return await oldFetch(path, opts)
                 }
-                return await oldFetch(path, opts)
+                res = new Function("root", "results", script).bind(item)(root, globalsNewUi.results.map(v => v.info), item)
+                window.XMLHttpRequest = old
+                window.fetch = oldFetch
             }
-            res = new Function("root", "results", script).bind(item)(root, globalsNewUi.results.map(v => v.info), item)
-            window.XMLHttpRequest = old
-            window.fetch = oldFetch
-        }
-        let outputId = elem.getAttribute("data-output")
-        if (outputId) {
-            let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
-            if (outputEl) {
-                outputEl.innerHTML = ""
-                renderVal(res, outputEl)
+            let outputId = elem.getAttribute("data-output")
+            if (outputId) {
+                let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
+                if (outputEl) {
+                    outputEl.innerHTML = ""
+                    renderVal(res, outputEl)
+                }
             }
         }
-    }
 }
 
 /**
  * @description updates special-case legacy elements
  */
-async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
 
-    updateBasicDisplayEntryContents(item, user, meta, el)
+    updateBasicDisplayEntryContents.call(this, item, user, meta, el)
 
     const displayEntryTitle = el.getElementById("main-title")
     const displayEntryNativeTitle = el.getElementById("official-native-title")
@@ -857,7 +1186,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //type selector
     const typeSelector = el.getElementById("type-selector")
-    if (typeSelector && (typeSelector instanceof mode_curWin.HTMLSelectElement)) {
+    if (typeSelector && (typeSelector instanceof this.win.HTMLSelectElement)) {
         fillTypeSelectionUI(typeSelector).then(() => {
             typeSelector.value = item.Type
         })
@@ -865,7 +1194,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
 
     //format selector
     const formatSelector = el.getElementById("format-selector")
-    if (formatSelector && (formatSelector instanceof mode_curWin.HTMLSelectElement)) {
+    if (formatSelector && (formatSelector instanceof this.win.HTMLSelectElement)) {
         fillFormatSelectionUI(formatSelector).then(() => {
             if (items_isDigitized(item.Format)) {
                 formatSelector.value = String(item.Format - DIGI_MOD)
@@ -881,7 +1210,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     const digitized = el.getElementById("format-digitized")
-    if (digitized && (digitized instanceof mode_curWin.HTMLInputElement)) {
+    if (digitized && (digitized instanceof this.win.HTMLInputElement)) {
         digitized.checked = items_isDigitized(item.Format)
     }
 
@@ -914,13 +1243,13 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
             del.innerText = "🗑"
             del.classList.add("delete")
 
-            del.onclick = function() {
+            del.onclick = () => {
                 api_deleteEntryTags(item.ItemId, [tag])
                     .then(res => {
                         if (res?.status !== 200) return ""
                         res.text().then(() => {
                             item.Tags = item.Tags.filter((t: string) => t != tag)
-                            changeDisplayItemData(item, user, meta, events, el.host as HTMLElement)
+                            changeDisplayItemData.call(this, item, user, meta, events, el.host as HTMLElement)
                         })
                     })
                     .catch(console.error)
@@ -980,7 +1309,7 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
     }
 
     //Thumbnail
-    if (imgEl && imgEl instanceof mode_curWin.HTMLImageElement) {
+    if (imgEl && imgEl instanceof this.win.HTMLImageElement) {
         //@ts-ignore
         imgEl.alt = meta.Title || item.En_Title
         //@ts-ignore
@@ -1081,19 +1410,19 @@ async function updateDisplayEntryContents(item: InfoEntry, user: UserEntry, meta
         if (!relationshipEl) continue
 
         relationshipEl.innerHTML = ""
-        createRelationButtons(relationshipEl, relationship[1](item.ItemId), relationship[0])
+        createRelationButtons.call(this, relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
 
     //Events
-    updateEventsDisplay(el, user.ItemId)
+    updateEventsDisplay.call(this, el, user.ItemId)
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {
     return open(`/ui/display.html?item-id=${itemId}`, target, popup ? "popup=true" : undefined)
 }
 
-function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragment = displayItems, template?: string): HTMLElement {
+function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string): HTMLElement {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot as ShadowRoot
     if (!root) return el
@@ -1110,7 +1439,7 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
 
     if (!item || !user || !meta || !events) return el
 
-    parent.append(el)
+    this.parent.append(el)
 
     api_listArtStyles().then(as => {
         for (let a in as) {
@@ -1171,9 +1500,9 @@ function renderDisplayItem(itemId: bigint, parent: HTMLElement | DocumentFragmen
     for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-recusively-in-cost"]) {
         const el = root.getElementById(input)
         if (!el) continue
-        el.onchange = function() {
+        el.onchange = () => {
             updateCostDisplay(root, item.ItemId)
-            updateEventsDisplay(root, item.ItemId)
+            updateEventsDisplay.call(this, root, item.ItemId)
         }
     }
 
@@ -1198,8 +1527,10 @@ height: 100%;
 <body>
     ${parent.outerHTML}
 </body>`)
+            //@ts-ignore
             let watcher: CloseWatcher | null = null
             if ("CloseWatcher" in window) {
+                //@ts-ignore
                 watcher = new win.CloseWatcher
                 watcher.onclose = () => {
                     parent.classList.remove("none")
@@ -1207,6 +1538,7 @@ height: 100%;
                     watcher.destroy()
                 }
             }
+            //@ts-ignore
             win.document.body.querySelector("button.popout").onclick = () => {
                 win.close()
                 parent.classList.remove("none")
@@ -1254,7 +1586,7 @@ height: 100%;
     let extra = getUserExtra(user, "styles")
 
     let styleEditor = root.getElementById("style-editor")
-    if (styleEditor && styleEditor instanceof mode_curWin.HTMLTextAreaElement) {
+    if (styleEditor && styleEditor instanceof this.win.HTMLTextAreaElement) {
         (styleEditor as HTMLTextAreaElement).value = extra || ""
         styleEditor.addEventListener("change", e => {
             const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
@@ -1262,14 +1594,14 @@ height: 100%;
         })
     }
     let templEditor = root.getElementById("template-editor")
-    if (templEditor && templEditor instanceof mode_curWin.HTMLTextAreaElement) {
+    if (templEditor && templEditor instanceof this.win.HTMLTextAreaElement) {
         (templEditor as HTMLTextAreaElement).value = getUserExtra(user, "template") || ""
     }
 
     let newChildButton = root.getElementById("new-child")
     if (newChildButton) {
         newChildButton.addEventListener("click", e => {
-            const newEntryDialog = displayItems.ownerDocument.getElementById("new-entry") as HTMLDialogElement
+            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry") as HTMLDialogElement
             const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -1279,7 +1611,7 @@ height: 100%;
     let newCopyButton = root.getElementById("new-copy")
     if (newCopyButton) {
         newCopyButton.addEventListener("click", e => {
-            const newEntryDialog = displayItems.ownerDocument.getElementById("new-entry") as HTMLDialogElement
+            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry") as HTMLDialogElement
             const parentIdInput = newEntryDialog.querySelector(`[name="copyOf"]`) as HTMLInputElement
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -1355,7 +1687,7 @@ height: 100%;
 
     const newTag = root.getElementById("create-tag")
     if (newTag) {
-        newTag.onclick = async function() {
+        newTag.onclick = async () => {
             const name = await promptUI("Tag name (, seperated)")
             if (!name) return
             let names = name.split(",")
@@ -1363,7 +1695,7 @@ height: 100%;
             api_addEntryTags(item.ItemId, name.split(","))
                 .then(res => {
                     if (res?.status !== 200) return ""
-                    res.text().then(() => changeDisplayItemData(item, user, meta, events, el))
+                    res.text().then(() => changeDisplayItemData.call(this, item, user, meta, events, el))
                 })
                 .catch(console.error)
         }
@@ -1382,19 +1714,19 @@ height: 100%;
         }
     }
 
-    changeDisplayItemData(item, user, meta, events, el)
+    changeDisplayItemData.call(this, item, user, meta, events, el)
     return el
 }
 
-function removeDisplayItem(itemId: bigint) {
+function removeDisplayItem(this: DisplayMode, itemId: bigint) {
     // displayEntryIntersected.delete(String(itemId))
-    const el = displayItems.querySelector(`[data-item-id="${itemId}"]`)
+    const el = this.parent.querySelector(`[data-item-id="${itemId}"]`)
     if (!el) return
     el.remove()
 }
 
-function refreshDisplayItem(itemId: bigint) {
-    let el = displayItems.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
+function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
+    let el = this.parent.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
     if (!info) return
 
@@ -1403,9 +1735,9 @@ function refreshDisplayItem(itemId: bigint) {
         let events = findUserEventsById(itemId)
         let meta = findMetadataById(itemId)
         if (!info || !user || !events || !meta) return
-        changeDisplayItemData(info, user, meta, events, el)
+        changeDisplayItemData.call(this, info, user, meta, events, el)
     } else {
-        renderDisplayItem(itemId)
+        renderDisplayItem.call(this, itemId)
     }
 }
 
@@ -1418,23 +1750,13 @@ function getIdFromDisplayElement(element: HTMLElement) {
     return BigInt(String(host.getAttribute("data-item-id")))
 }
 
-function displayEntryAction(func: (item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
-    return function(elem: HTMLElement) {
-        let id = getIdFromDisplayElement(elem)
-        let item;
-        (item = findInfoEntryById(id)) && func(item, elem.getRootNode() as ShadowRoot, elem)
-    }
-}
-
-function _fetchLocationBackup(itemId: bigint) {
-    const listing = displayItems.ownerDocument.getElementById("items-listing")
-
+function _fetchLocationBackup(this: DisplayMode, itemId: bigint) {
     const item = findInfoEntryById(itemId) as InfoEntry
 
     let provider = item.Type === "Show" ? "sonarr" : "radarr"
     alert(`Using ${provider} to find location`)
 
-    const popover = displayItems.ownerDocument.getElementById("items-listing") as HTMLDivElement
+    const popover = this.parent.ownerDocument.getElementById("items-listing") as HTMLDivElement
 
     async function onfetchLocation(res: Response | null) {
         if (!res) {
@@ -1491,7 +1813,7 @@ function _fetchLocationBackup(itemId: bigint) {
     })
 }
 
-function _fetchLocation(itemId: bigint) {
+function _fetchLocation(this: DisplayMode, itemId: bigint) {
     api_fetchLocation(itemId, getUidUI())
         .then(async (res) => {
             if (res == null) {
@@ -1504,7 +1826,7 @@ function _fetchLocation(itemId: bigint) {
             if (res.status !== 200) {
                 alert("Failed to get location, loading possible options")
                 if (newLocation.includes("could not")) {
-                    _fetchLocationBackup(itemId)
+                    _fetchLocationBackup.call(this, itemId)
                 }
                 return
             }
@@ -1519,7 +1841,7 @@ function _fetchLocation(itemId: bigint) {
         })
 }
 
-function copyThis(item: InfoEntry) {
+function copyThis(this: DisplayMode, item: InfoEntry) {
     const user = findUserEntryById(item.ItemId) as UserEntry
     const meta = findMetadataById(item.ItemId) as MetadataEntry
     const events = findUserEventsById(item.ItemId) as UserEvent[]
@@ -1579,322 +1901,13 @@ function copyThis(item: InfoEntry) {
                     eventCopy.ItemId = itemCopy.ItemId
                     globalsNewUi.entries[String(itemCopy.ItemId)].events.push(eventCopy)
                 }
-                selectItem(itemCopy, mode)
+                selectItem(itemCopy, true, this)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
             })
             .catch(console.error)
     })
 }
 
-const de_actions = {
-    delete: displayEntryAction(item => deleteEntryUI(item)),
-    refresh: displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
-    fetchlocation: displayEntryAction((item) => _fetchLocation(item.ItemId)),
-    save: displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
-    close: displayEntryAction(item => deselectItem(item)),
-    copythis: displayEntryAction(item => copyThis(item)),
-    setdigitization: displayEntryAction((item, _, target) => {
-        if (!target || !(target instanceof HTMLInputElement)) return
-        if (target.checked) {
-            item.Format |= DIGI_MOD
-        } else if (items_isDigitized(item.Format)) {
-            item.Format -= DIGI_MOD
-        }
-        api_setItem("", item).then(() => {
-            updateInfo2({
-                [String(item.ItemId)]: {
-                    info: item
-                }
-            })
-        })
-    }),
-    toggle: displayEntryAction((item, root, elem) => {
-        let id = elem.getAttribute("elem-id")
-        if (!id) return
-        let toShow = root.getElementById(id)
-        if (!toShow) return
-        if (toShow instanceof mode_curWin.HTMLDialogElement) {
-            if (toShow.open) {
-                toShow.close()
-            } else {
-                toShow.showModal()
-            }
-        } else {
-            toShow.hidden = !toShow.hidden
-        }
-    }),
-    setformat: displayEntryAction((item, _, target) => {
-        if (!("value" in target)) return
-        api_listFormats().then(formats => {
-            if (!Object.keys(formats).includes(String(target.value))) return
-            item.Format = Number(target.value)
-            api_setItem("", item)
-                .catch(console.error)
-                .then(alert.bind(window, `Switched format to: ${formats[Number(target.value)]}`))
-            updateInfo2({
-                [String(item.ItemId)]: {
-                    info: item
-                }
-            })
-        })
-    }),
-    settype: displayEntryAction((item, _, target) => {
-        if (!("value" in target)) return
-        api_listTypes().then(types => {
-            if (!types.includes(target.value as EntryType)) return
-            item.Type = target.value as EntryType
-            api_setItem("", item)
-                .catch(console.error)
-                .then(alert.bind(window, `Switched type to: ${target.value}`))
-            updateInfo2({
-                [String(item.ItemId)]: {
-                    info: item
-                }
-            })
-        })
-    }),
-    //TODO: this function is a disaster, each edited object should probably get its own save function
-    saveobject: displayEntryAction((item, root) => {
-        const tbl = root.getElementById("display-info-object-tbl")
-
-        const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
-
-        let into: Record<string, any> = {}
-        let keyName
-        let endpoint: Parameters<typeof api_setItem>["0"] = ""
-        switch (editedObject) {
-            case "meta":
-                endpoint = "metadata/"
-                break
-            case "entry":
-                endpoint = ""
-                break
-            case "user":
-                endpoint = "engagement/"
-                break
-            case "user-extra":
-                into = findUserEntryById(item.ItemId) as UserEntry
-                keyName = "Extra"
-                endpoint = "engagement/"
-                break
-            case "meta-datapoints":
-                into = findMetadataById(item.ItemId) as MetadataEntry
-                keyName = "Datapoints"
-                endpoint = "metadata/"
-                break
-            case "meta-media-dependant":
-                into = findMetadataById(item.ItemId) as MetadataEntry
-                keyName = "MediaDependant"
-                endpoint = "metadata/"
-                break
-            case "aio-web":
-                keyName = "_AIOWEB"
-                endpoint = "engagement/"
-                break
-            default:
-                alert(`${editedObject} saving is not implemented yet`)
-                return
-        }
-
-        let newObj: Record<string, any> = {}
-        for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
-            let key = row.firstElementChild?.textContent || ""
-            //invalid key
-            if (editedObject === "entry" && key === "Tags") continue
-
-            let valueEl = row.firstElementChild?.nextElementSibling
-            if (!valueEl) continue
-            let value = valueEl?.textContent || ""
-            if (key == "") continue
-
-            let valueType = valueEl.getAttribute("data-type")
-            if (valueType === 'bigint') {
-                newObj[key] = BigInt(value)
-            } else if (valueType === 'number') {
-                newObj[key] = Number(value)
-            } else {
-                newObj[key] = value
-            }
-        }
-
-        if (keyName && keyName !== "_AIOWEB")
-            into[keyName] = JSON.stringify(newObj)
-        else if (keyName === "_AIOWEB") {
-            let user = findUserEntryById(item.ItemId)
-            let extra = JSON.parse(user.Extra || "{}")
-            extra["AIOWeb"] = newObj
-            user.Extra = JSON.stringify(extra)
-            into = user
-            updateInfo2({
-                [String(item.ItemId)]: { user }
-            })
-        }
-        else into = newObj
-
-        if (editedObject === "entry") {
-            into["Tags"] = findInfoEntryById(into["ItemId"]).Tags
-        }
-
-        const strId = String(item.ItemId)
-        api_setItem(endpoint, into as UserEntry)
-            .then(res => res?.text())
-            .then(console.log)
-            .catch(console.error)
-        if (editedObject === "user-extra" || editedObject === "user") {
-            updateInfo2({
-                [strId]: { user: into as UserEntry }
-            })
-        } else if (editedObject === "entry") {
-            updateInfo2({
-                [strId]: { info: into as InfoEntry }
-            })
-        } else if (probablyMetaEntry(into)) {
-            updateInfo2({
-                [strId]: { meta: into as MetadataEntry }
-            })
-        }
-    }),
-    newobjectfield: displayEntryAction(async (item, root) => {
-        const name = await promptUI("Field name")
-        if (!name) return
-
-        const obj: any = getCurrentObjectInObjEditor(item.ItemId, root)
-        if (name in obj) return
-
-        obj[name] = ""
-
-        const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
-        updateObjectTbl(obj, objectTbl, false)
-    }),
-    selectnewchild: displayEntryAction(item => {
-        selectItemUI().then(id => {
-            if (!id) {
-                alert("Could not set child")
-                return
-            }
-            api_setParent(id, item.ItemId).then(() => {
-                let info = findInfoEntryById(id)
-                if (!info) {
-                    alert("could not find child id")
-                    return
-                }
-                info.ParentId = item.ItemId
-                updateInfo2({
-                    [String(item.ItemId)]: { info: item },
-                    [String(id)]: { info }
-                })
-            })
-        })
-    }),
-    editstyles: displayEntryAction((item, root, elem) => {
-        const styleEditor = root.getElementById("style-editor")
-        if (!styleEditor) return
-        styleEditor.hidden = !styleEditor.hidden
-        styleEditor.onchange = util_debounce(() => {
-            de_actions["save"](elem)
-            alert("saved styles")
-        }, 3000)
-    }),
-    edittemplate: displayEntryAction((item, root, elem) => {
-        const templEditor = root.getElementById("template-editor")
-        if (!templEditor) return
-
-        templEditor.hidden = !templEditor.hidden
-    }),
-    previewtemplate: displayEntryAction(function(item, root) {
-        const templEditor = root.getElementById("template-editor")
-        if (!templEditor || !(templEditor instanceof mode_curWin.HTMLTextAreaElement)) return
-
-        const preview = displayItems.ownerDocument.open(location.toString(), "_blank", "popup=true")
-        if (!preview) return
-
-        preview.onload = () => {
-            preview.document.body.innerHTML = ""
-            preview.document.title = `${item.En_Title} PREVIEW`
-            renderDisplayItem(item.ItemId, preview.document.body, templEditor.value)
-        }
-
-        templEditor.onkeyup = function() {
-            preview.document.body.innerHTML = ""
-            renderDisplayItem(item.ItemId, preview.document.body, templEditor.value)
-        }
-    }),
-    copyto: displayEntryAction(async (item) => {
-        let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
-        if (id === null) return
-        let idInt = BigInt(id)
-
-        api_copyUserInfo(item.ItemId, idInt)
-            .then(res => res?.text())
-            .then(console.log)
-    }),
-    setviewcount: displayEntryAction(async (item) => {
-        let count = await promptNumber("New view count", 'Not a number, view count')
-        if (count === null) return
-
-        authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
-            .then(res => res?.text())
-            .then(alert)
-            .then(() => {
-                let user = findUserEntryById(item.ItemId)
-                if (!user) {
-                    refreshInfo(getUidUI()).then(() => {
-                        refreshDisplayItem(item.ItemId)
-                    })
-                } else {
-                    user.ViewCount = Number(count)
-                    updateInfo2({
-                        [String(item.ItemId)]: { user }
-                    })
-                }
-            })
-            .catch(console.error)
-    }),
-    setprogress: displayEntryAction(async (item, root) => {
-        let newEp = await promptUI("Current position")
-        if (!newEp) return
-
-        await api_setPos(item.ItemId, String(newEp))
-        const user = findUserEntryById(item.ItemId) as UserEntry
-        user.CurrentPosition = String(newEp)
-        updateInfo2({
-            [String(item.ItemId)]: { user }
-        })
-    }),
-    setrating: displayEntryAction(async (item) => {
-        let user = findUserEntryById(item.ItemId)
-        if (!user) {
-            alert("Failed to get current rating")
-            return
-        }
-        let newRating = await promptUI("New rating")
-        if (!newRating || isNaN(Number(newRating))) {
-            return
-        }
-
-        api_setRating(item.ItemId, newRating)
-            .then(async () => {
-                let user = findUserEntryById(item.ItemId)
-                await loadUserEvents(item.Uid)
-                user.UserRating = Number(newRating)
-                updateInfo2({
-                    [String(item.ItemId)]: { user, events: findUserEventsById(item.ItemId) }
-                })
-            })
-            .catch(console.error)
-        api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0)
-            .then(() => {
-                _reloadEvents(item.ItemId)
-            })
-            .catch(console.error)
-    }),
-} as const
-
-//backwards compat {{{
-const displayEntryEditTemplate = de_actions["edittemplate"]
-const displayEntryEditStyles = de_actions["editstyles"]
-const displayEntrySave = de_actions["save"]
-// }}}
 
 async function deleteEventByEventId(eventId: number) {
     const uid = getUidUI()

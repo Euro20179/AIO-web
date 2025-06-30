@@ -2179,7 +2179,8 @@ class CalcVarTable {
                 return new Str("NOT AN ENTRY")
             }
             aio_setentry(entry.jsValue).then(success => {
-                if (!success && mode.put) {
+                const mode = mode_getFirstModeInWindow(window)
+                if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
                 }
             })
@@ -2193,7 +2194,8 @@ class CalcVarTable {
 
             aio_setmeta(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if (!success && mode.put) {
+                const mode = mode_getFirstModeInWindow(window)
+                if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 }
             })
@@ -2207,7 +2209,8 @@ class CalcVarTable {
             }
             aio_setuser(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                if (!success && mode.put) {
+                const mode = mode_getFirstModeInWindow(window)
+                if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 }
             })

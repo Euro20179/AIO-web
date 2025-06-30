@@ -584,7 +584,9 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
+    //@ts-ignore
     const parentId = form.querySelector("[name=\"parentId\"]").value
+    //@ts-ignore
     const copyOfId = form.querySelector("[name=\"copyOf\"]").value
     if (parentId !== "0") {
         queryString += `&parentId=${parentId}`

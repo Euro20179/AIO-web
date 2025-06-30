@@ -95,6 +95,7 @@ function defaultMetadata(id: bigint): MetadataEntry {
         Native_Title: "",
         Title: "",
         Provider: "",
+        Genres: "",
         ProviderID: ""
     }
 }
@@ -310,7 +311,7 @@ async function main() {
 
     loadLibraries()
 
-    const mode = urlParams.get("mode") || "calc-output"
+    const mode = urlParams.get("mode") || "entry-output"
     mode_setMode(mode)
 
     const initialSearch = (

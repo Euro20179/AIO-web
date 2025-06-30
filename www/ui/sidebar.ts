@@ -42,6 +42,7 @@ addEventListener("resize", () => {
 })
 
 function focusNthSidebarItem(n: number) {
+    //@ts-ignore
     sidebarItems.querySelector(`:nth-child(${n})`)?.focus()
 }
 

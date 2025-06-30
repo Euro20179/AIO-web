@@ -1,5 +1,5 @@
 
-class CalcMode extends DisplayMode {
+class CalcMode extends Mode {
     expressionInput: HTMLTextAreaElement
 
     constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
@@ -37,7 +37,9 @@ class CalcMode extends DisplayMode {
     }
 
     clearSelected() {
-        this.parent.innerHTML = ""
+        while (this.parent.children.length) {
+            this.parent.removeChild(this.parent.children[0])
+        }
     }
 
     refresh(id: bigint) {
@@ -92,9 +94,7 @@ class CalcMode extends DisplayMode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        if (win === window) {
-            this.win.close()
-        }
+        this.win.close()
         this.win = win
         this.parent = win.document.getElementById("calc-items") as HTMLDivElement
         this.expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
@@ -170,7 +170,7 @@ function sortCalcDisplay(this: CalcMode) {
         let exprB = /**@type {string}*/(b.getAttribute("data-expression-output"))
         return Number(exprB) - Number(exprA)
     })
-    this.parent.innerHTML = ""
+    this.clearSelected()
     for (let elem of elements) {
         this.parent.append(elem)
     }
