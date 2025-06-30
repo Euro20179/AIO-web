@@ -2,7 +2,7 @@ class DisplayMode extends Mode {
     NAME = "entry-output"
 
     displayQueue: InfoEntry[]
-    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#entry-output", win)
         this.win.document.getElementById("entry-output")?.classList.add("open")
         this.displayQueue = []

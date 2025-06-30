@@ -49,6 +49,7 @@ class GalleryMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
+        this.win.close()
         this.win = win
         this.parent = win.document.getElementById("gallery-items") as HTMLDivElement
     }

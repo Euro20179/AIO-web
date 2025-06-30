@@ -140,7 +140,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "graph-output": GraphMode,
         "calc-output": CalcMode,
         "gallery-output": GalleryMode,
-        "script-output": modeScripting,
+        "script-output": ScriptMode,
         "event-output": modeEvents
     }
     //@ts-ignore

@@ -1,67 +1,83 @@
-let run = document.getElementById("script-execute") as HTMLButtonElement
-let scriptBox = document.getElementById("script") as HTMLTextAreaElement
-let scriptOutput = document.getElementById("script-execute-output") as HTMLDivElement
 
-const modeScripting: DisplayMode = {
-    add(entry, parent: HTMLElement | DocumentFragment = scriptOutput) {
-        if (mode !== modeScripting) return scriptOutput
-        const e = renderDisplayItem(entry.ItemId, parent)
+class ScriptMode extends Mode {
+    run: HTMLButtonElement
+    scriptBox: HTMLTextAreaElement
+    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+        super(parent || "#script-execute-output", win)
+        this.run = document.getElementById("script-execute") as HTMLButtonElement
+        this.scriptBox = document.getElementById("script") as HTMLTextAreaElement
+        this.win.document.getElementById("script-output")?.classList.add("open")
+        this.run.onclick = execute.bind(this)
+    }
+    close() {
+        this.win.document.getElementById("script-output")?.classList.remove("open")
+    }
+    add(entry: InfoEntry) {
+        const d = new DisplayMode(this.parent, this.win)
+        const e = d.add(entry)
         e.style.display = "block"
         return e
-    },
-    sub(entry) {
-        if (mode !== modeScripting) return
-        scriptOutput.querySelector(`[data-item-id="${entry.ItemId}"]`)?.remove()
-    },
-    addList(entries) {
-        if (mode !== modeScripting) return
+    }
+    sub(entry: InfoEntry) {
+        this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)?.remove()
+    }
+    addList(entries: InfoEntry[]) {
         for (let e of entries) {
             this.sub(e)
         }
-    },
-    subList(entries) {
-        if (mode !== modeScripting) return
+    }
+    subList(entries: InfoEntry[]) {
         for (let e of entries) {
             this.sub(e)
         }
-    },
+    }
 
     clear() {
         clearItems()
-        scriptOutput.innerHTML = ""
-    },
+        if (this.parent instanceof HTMLElement) {
+            this.parent.innerHTML = ""
+        } else
+            while (this.parent.children.length) {
+                this.parent.children[0].remove()
+            }
+    }
 
     clearSelected() {
-        for(let elem of scriptOutput.querySelectorAll(`[data-item-id]`)) {
+        for (let elem of this.parent.querySelectorAll(`[data-item-id]`)) {
             elem.remove()
         }
-    },
+    }
 
-    chwin(win) {
-        run = win.document.getElementById("script-execute") as HTMLButtonElement
-        scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
-        scriptOutput = win.document.getElementById("script-execute-output") as HTMLDivElement
-        run.onclick = execute
-    },
+    chwin(win: Window & typeof globalThis) {
+        this.win.close()
+        this.run = win.document.getElementById("script-execute") as HTMLButtonElement
+        this.scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
+        this.parent = win.document.getElementById("script-execute-output") as HTMLDivElement
+        this.run.onclick = execute
+    }
 
     put(html: string | HTMLElement | ShadowRoot) {
         if (typeof html === 'string') {
-            scriptOutput.innerHTML += html
+            if (this.parent instanceof DocumentFragment) {
+                this.parent.append(html)
+            } else {
+                this.parent.innerHTML += html
+            }
         } else {
-            scriptOutput.append(html)
+            this.parent.append(html)
         }
-    },
+    }
 }
 
-function execute() {
-    let script = scriptBox.value
+function execute(this: ScriptMode) {
+    let script = this.scriptBox.value
 
     let tbl = new CalcVarTable()
     tbl.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
 
     //@ts-ignore
     if (document.getElementById("script-execute-output-clear")?.checked) {
-        modeScripting.clear()
+        this.clear()
     }
 
     //@ts-ignore
@@ -79,10 +95,8 @@ function execute() {
 
     const value = parseExpression(script, tbl)
     if (value instanceof Elem) {
-        scriptOutput.append(value.el)
+        this.parent.append(value.el)
     } else {
-        scriptOutput.append(value.jsStr())
+        this.parent.append(value.jsStr())
     }
 }
-
-run.onclick = execute
