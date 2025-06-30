@@ -137,7 +137,7 @@ function clearItems(updateStats: boolean = true) {
 function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const modes = {
         "entry-output": DisplayMode,
-        "graph-output": modeGraphView,
+        "graph-output": GraphMode,
         "calc-output": CalcMode,
         "gallery-output": modeGallery,
         "script-output": modeScripting,

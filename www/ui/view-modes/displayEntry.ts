@@ -1,5 +1,13 @@
 class DisplayMode extends Mode {
     NAME = "entry-output"
+
+    displayQueue: InfoEntry[]
+    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+        super(parent || "#entry-output", win)
+        this.win.document.getElementById("entry-output")?.classList.add("open")
+        this.displayQueue = []
+    }
+
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
         return function(this: DisplayMode, elem: HTMLElement) {
             let id = getIdFromDisplayElement(elem)
@@ -318,13 +326,6 @@ class DisplayMode extends Mode {
                 .catch(console.error)
         }),
     } as const
-    displayQueue: InfoEntry[]
-    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
-        super(parent || "#entry-output", win)
-        this.win.document.getElementById("entry-output")?.classList.add("open")
-        this.displayQueue = []
-    }
-
     add(entry: InfoEntry) {
         return renderDisplayItem.call(this, entry.ItemId)
     }

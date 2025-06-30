@@ -1,7 +1,5 @@
-let graph_curWin: Window = window
-
-function getCtx2(id: string): CanvasRenderingContext2D {
-    const canv = graph_curWin.document.getElementById(id) as HTMLCanvasElement
+function getCtx2(this: GraphMode, id: string): CanvasRenderingContext2D {
+    const canv = this.win.document.getElementById(id) as HTMLCanvasElement
     return canv.getContext("2d") as CanvasRenderingContext2D
 }
 
@@ -26,7 +24,7 @@ const _charts: Record<string, any> = {}
 
 const _chartsToRun: any[] = []
 
-function ChartManager(name: string, mkChart: (entries: InfoEntry[]) => Promise<any>) {
+function ChartManager(this: GraphMode, name: string, mkChart: (entries: InfoEntry[]) => Promise<any>) {
     _charts[name] = null
     _chartsToRun.push(async function(entries: InfoEntry[]) {
         let chrt = _charts[name]
@@ -149,7 +147,7 @@ function mkBarChart(ctx: CanvasRenderingContext2D, x: any[], y: any[], labelText
     })
 }
 
-function chartAddChart() {
+function chartAddChart(this: GraphMode) {
     const form = document.getElementById("add-chart") as HTMLFormElement
     const data = new FormData(form)
     const yForm = data.get("y-formula")
@@ -161,9 +159,9 @@ function chartAddChart() {
     canv.id = name
     canvPar.append(canv)
 
-    graph_curWin.document.getElementById("graph-output")?.querySelector("div")?.append(canvPar)
+    this.win.document.getElementById("graph-output")?.querySelector("div")?.append(canvPar)
 
-     ChartManager(name, async entries => {
+    ChartManager.call(this, name, async entries => {
         let y = []
         let x = []
         const yExpr = yForm?.toString() || "0"
@@ -175,7 +173,7 @@ function chartAddChart() {
 
         x = x.sort()
 
-        return mkXTypeChart(getCtx2(name), x, y, name)
+        return mkXTypeChart(getCtx2.call(this, name), x, y, name)
     })(ui_selected())
 }
 
@@ -263,7 +261,7 @@ function organizeDataByExpr(entries: InfoEntry[]): Record<string, InfoEntry[]> {
     return group
 }
 
-async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[][]]> {
+async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[string[], InfoEntry[][]]> {
     let groupBy = groupBySelect.value
 
     const groupings: Record<string, (i: InfoEntry) => any> = {
@@ -326,10 +324,8 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
     }
 
 
-    let sortBy = graph_curWin.document.getElementsByName("sort-by")[0] as HTMLInputElement
-
     //filling in years messes up the sorting, idk why
-    if (sortBy.value == "") {
+    if (sortBy == "") {
         //this is the cutoff year because this is when jaws came out and changed how movies were produced
         const cutoffYear = 1975
         if (groupBy === "Year") {
@@ -347,7 +343,7 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
 
     let x = Object.keys(data)
     let y = Object.values(data)
-    if (sortBy.value == "rating") {
+    if (sortBy == "rating") {
         let sorted = Object.entries(data).sort((a, b) => {
             let aRating = a[1].reduce((p, c) => {
                 let user = findUserEntryById(c.ItemId)
@@ -362,7 +358,7 @@ async function organizeData(entries: InfoEntry[]): Promise<[string[], InfoEntry[
         })
         x = sorted.map(v => v[0])
         y = sorted.map(v => v[1])
-    } else if (sortBy.value === "cost") {
+    } else if (sortBy === "cost") {
         let sorted = Object.entries(data).sort((a, b) => {
             let aCost = a[1].reduce((p, c) => {
                 return p + (c?.PurchasePrice || 0)
@@ -391,118 +387,6 @@ function sortXY(x: string[], y: any[]) {
     return [x, y]
 }
 
-const watchTimeByYear = ChartManager("watch-time-by-year", async (entries) => {
-    let [years, data] = await organizeData(entries)
-
-    let watchTimes = data
-        .map(v => {
-            return v.map(i => {
-                let watchCount = globalsNewUi.entries[String(i.ItemId)].user.ViewCount
-                let thisMeta = globalsNewUi.entries[String(i.ItemId)].meta
-                let watchTime = getWatchTime(watchCount, thisMeta)
-                return watchTime / 60
-            }).reduce((p, c) => p + c, 0)
-        });
-
-    return mkXTypeChart(getCtx2("watch-time-by-year"), years, watchTimes, "Watch time")
-})
-
-const adjRatingByYear = ChartManager("adj-rating-by-year", async (entries) => {
-    let [years, data] = await organizeData(entries)
-
-    let items = data
-    let totalItems = 0
-    let totalRating = 0
-    for (let item of items) {
-        totalItems += item.length
-        totalRating += item.reduce((p, c) => p + globalsNewUi.entries[String(c.ItemId)].user.UserRating, 0)
-    }
-    let avgItems = totalItems / items.length
-    let generalAvgRating = totalRating / totalItems
-    const ratings = data
-        .map(v => {
-            let ratings = v.map(i => {
-                let thisUser = globalsNewUi.entries[String(i.ItemId)].user
-                return thisUser.UserRating
-            })
-            let totalRating = ratings
-                .reduce((p, c) => (p + c), 0)
-
-            let avgRating = totalRating / v.length
-            // let min = Math.min(...ratings)
-
-            return (avgRating - generalAvgRating) + (v.length - avgItems)
-
-            // return (avgRating + v.length / (Math.log10(avgItems) / avgItems)) + min
-        })
-
-    return mkXTypeChart(getCtx2("adj-rating-by-year"), years, ratings, 'adj ratings')
-})
-
-const costByFormat = ChartManager("cost-by-format", async (entries) => {
-    entries = entries.filter(v => v.PurchasePrice > 0)
-    let [labels, data] = await organizeData(entries)
-    let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
-
-    return mkXTypeChart(getCtx2("cost-by-format"), labels, totals, "Cost by")
-})
-
-const ratingByYear = ChartManager("rating-by-year", async (entries) => {
-    const rbyCtx = getCtx2("rating-by-year")
-    let [years, data] = await organizeData(entries)
-    const ratings = data
-        .map(v => v
-            .map(i => {
-                let thisUser = globalsNewUi.entries[String(i.ItemId)].user
-                return thisUser.UserRating
-            })
-            .reduce((p, c, i) => (p * i + c) / (i + 1), 0)
-        )
-
-    return mkXTypeChart(rbyCtx, years, ratings, 'ratings')
-})
-
-const generalRating = ChartManager("general-rating-by-year", async (entries) => {
-    let [years, data] = await organizeData(entries)
-    const ratings = data.map(v => {
-        return v.map(i => {
-            let meta = findMetadataById(i.ItemId)
-            let rating = meta?.Rating
-            let max = meta?.RatingMax
-            if (rating && max) {
-                return (rating / max) * 100
-            }
-            return 0
-        }).reduce((p, c, i) => (p * i + c) / (i + 1), 0)
-    })
-    return mkXTypeChart(getCtx2("general-rating-by-year"), years, ratings, "general ratings")
-})
-
-const ratingDisparityGraph = ChartManager("rating-disparity-graph", async (entries) => {
-    let [years, data] = await organizeData(entries)
-    const disparity = data.map(v => {
-        return v.map(i => {
-            let meta = findMetadataById(i.ItemId)
-            let user = findUserEntryById(i.ItemId)
-            let rating = meta?.Rating
-            let max = meta?.RatingMax
-            if (rating && max) {
-                let general = (rating / max) * 100
-                return (user?.UserRating || 0) - general
-            }
-            return user?.UserRating || 0
-        }).reduce((p, c) => p + c, 0)
-    })
-    return mkXTypeChart(getCtx2("rating-disparity-graph"), years, disparity, "Rating disparity")
-})
-
-const byc = ChartManager("by-year", async (entries) => {
-    const ctx = getCtx2("by-year")
-    let [years, data] = await organizeData(entries)
-    const counts = data.map(v => v.length)
-
-    return mkXTypeChart(ctx, years, counts, '#items')
-})
 
 function makeGraphs(entries: InfoEntry[]) {
     for (const chart of _chartsToRun) {
@@ -534,31 +418,169 @@ function destroyCharts() {
     }
 }
 
-const modeGraphView: DisplayMode = {
-    add(entry) {
-        makeGraphs(globalsNewUi.selectedEntries)
-        return graph_curWin.document.getElementById("graph-output") as HTMLElement
-    },
+class GraphMode extends Mode {
+    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+        super(parent || "#graph-output", win)
+        this.win.document.getElementById("graph-output")?.classList.add("open")
 
-    sub(entry) {
-        makeGraphs(globalsNewUi.selectedEntries)
-    },
+        const addChart = this.win.document.getElementById("add-chart")
 
-    addList(entries) {
-        makeGraphs(globalsNewUi.selectedEntries)
-    },
+        if (addChart)
+            addChart.onsubmit = () => {
+                chartAddChart.call(this)
+            }
 
-    subList(entries) {
+        ChartManager.call(this, "watch-time-by-year", async (entries) => {
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [years, data] = await organizeData(entries, sortBy.value)
+
+            let watchTimes = data
+                .map(v => {
+                    return v.map(i => {
+                        let watchCount = globalsNewUi.entries[String(i.ItemId)].user.ViewCount
+                        let thisMeta = globalsNewUi.entries[String(i.ItemId)].meta
+                        let watchTime = getWatchTime(watchCount, thisMeta)
+                        return watchTime / 60
+                    }).reduce((p, c) => p + c, 0)
+                });
+
+            return mkXTypeChart(getCtx2.call(this, "watch-time-by-year"), years, watchTimes, "Watch time")
+        })
+
+        ChartManager.call(this, "adj-rating-by-year", async (entries) => {
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [years, data] = await organizeData(entries, sortBy.value)
+
+            let items = data
+            let totalItems = 0
+            let totalRating = 0
+            for (let item of items) {
+                totalItems += item.length
+                totalRating += item.reduce((p, c) => p + globalsNewUi.entries[String(c.ItemId)].user.UserRating, 0)
+            }
+            let avgItems = totalItems / items.length
+            let generalAvgRating = totalRating / totalItems
+            const ratings = data
+                .map(v => {
+                    let ratings = v.map(i => {
+                        let thisUser = globalsNewUi.entries[String(i.ItemId)].user
+                        return thisUser.UserRating
+                    })
+                    let totalRating = ratings
+                        .reduce((p, c) => (p + c), 0)
+
+                    let avgRating = totalRating / v.length
+                    // let min = Math.min(...ratings)
+
+                    return (avgRating - generalAvgRating) + (v.length - avgItems)
+
+                    // return (avgRating + v.length / (Math.log10(avgItems) / avgItems)) + min
+                })
+
+            return mkXTypeChart(getCtx2.call(this, "adj-rating-by-year"), years, ratings, 'adj ratings')
+        })
+
+        ChartManager.call(this, "cost-by-format", async (entries) => {
+            entries = entries.filter(v => v.PurchasePrice > 0)
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [labels, data] = await organizeData(entries, sortBy.value)
+            let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
+
+            return mkXTypeChart(getCtx2.call(this, "cost-by-format"), labels, totals, "Cost by")
+        })
+
+        ChartManager.call(this, "rating-by-year", async (entries) => {
+            const rbyCtx = getCtx2.call(this, "rating-by-year")
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [years, data] = await organizeData(entries, sortBy.value)
+            const ratings = data
+                .map(v => v
+                    .map(i => {
+                        let thisUser = globalsNewUi.entries[String(i.ItemId)].user
+                        return thisUser.UserRating
+                    })
+                    .reduce((p, c, i) => (p * i + c) / (i + 1), 0)
+                )
+
+            return mkXTypeChart(rbyCtx, years, ratings, 'ratings')
+        })
+
+        ChartManager.call(this, "general-rating-by-year", async (entries) => {
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [years, data] = await organizeData(entries, sortBy.value)
+            const ratings = data.map(v => {
+                return v.map(i => {
+                    let meta = findMetadataById(i.ItemId)
+                    let rating = meta?.Rating
+                    let max = meta?.RatingMax
+                    if (rating && max) {
+                        return (rating / max) * 100
+                    }
+                    return 0
+                }).reduce((p, c, i) => (p * i + c) / (i + 1), 0)
+            })
+            return mkXTypeChart(getCtx2.call(this, "general-rating-by-year"), years, ratings, "general ratings")
+        })
+
+        ChartManager.call(this, "rating-disparity-graph", async (entries) => {
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            let [years, data] = await organizeData(entries, sortBy.value)
+            const disparity = data.map(v => {
+                return v.map(i => {
+                    let meta = findMetadataById(i.ItemId)
+                    let user = findUserEntryById(i.ItemId)
+                    let rating = meta?.Rating
+                    let max = meta?.RatingMax
+                    if (rating && max) {
+                        let general = (rating / max) * 100
+                        return (user?.UserRating || 0) - general
+                    }
+                    return user?.UserRating || 0
+                }).reduce((p, c) => p + c, 0)
+            })
+            return mkXTypeChart(getCtx2.call(this, "rating-disparity-graph"), years, disparity, "Rating disparity")
+        })
+
+        ChartManager.call(this, "by-year", async (entries) => {
+            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+            const ctx = getCtx2.call(this, "by-year")
+            let [years, data] = await organizeData(entries, sortBy.value)
+            const counts = data.map(v => v.length)
+
+            return mkXTypeChart(ctx, years, counts, '#items')
+        })
+    }
+
+    close() {
+        this.win.document.getElementById("graph-output")?.classList.remove("open")
+    }
+
+    add(entry: InfoEntry) {
+        makeGraphs(globalsNewUi.selectedEntries)
+        return this.win.document.getElementById("graph-output") as HTMLElement
+    }
+
+    sub(entry: InfoEntry) {
+        makeGraphs(globalsNewUi.selectedEntries)
+    }
+
+    addList(entries: InfoEntry[]) {
+        makeGraphs(globalsNewUi.selectedEntries)
+    }
+
+    subList(entries: InfoEntry[]) {
         destroyCharts()
-    },
+    }
 
     clearSelected() {
         destroyCharts()
-    },
+    }
 
-    chwin(win) {
+    chwin(win: Window & typeof globalThis) {
+        this.win.close()
+
         destroyCharts()
-        graph_curWin = win
+        this.win = win
         groupBySelect = win.document.getElementById("group-by") as HTMLSelectElement
         typeSelection = win.document.getElementById("chart-type") as HTMLSelectElement
 
