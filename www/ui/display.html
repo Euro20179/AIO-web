@@ -53,6 +53,7 @@
 <script src="/ui/globals.js"></script>
 <script src="/ui/sidebar.js"></script>
 <script src="/ui/settings.js"></script>
+<script src="/ui/view-modes/modes.js"></script>
 <script src="/ui/view-modes/displayEntry.js"></script>
 <script src="/ui/ui.js"></script>
 <script>
@@ -83,7 +84,8 @@
         }
         items_addItem({meta, events, info, user})
         items_setResults([BigInt(id)])
-        renderDisplayItem(meta.ItemId, document.body)
+        const m = new DisplayMode(document.body)
+        renderDisplayItem.call(m, meta.ItemId)
     })
 </script>
 

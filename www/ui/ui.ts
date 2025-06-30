@@ -7,20 +7,23 @@ document.getElementById("view-toggle")?.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 
-const viewAllElem = document.getElementById("view-all") as HTMLInputElement
-viewAllElem.addEventListener("change", e => {
-    resetStatsUI()
-    if (!viewAllElem.checked) {
-        clearItems(false)
-    } else {
-        clearItems()
-        for (let mode of openViewModes) {
-            selectItemList(getFilteredResultsUI(), true, mode)
+const viewAllElem = document.getElementById("view-all")
+
+if (viewAllElem instanceof HTMLInputElement)
+    viewAllElem.addEventListener("change", e => {
+        resetStatsUI()
+        if (!viewAllElem.checked) {
+            clearItems(false)
+        } else {
+            clearItems()
+            for (let mode of openViewModes) {
+                selectItemList(getFilteredResultsUI(), true, mode)
+            }
         }
-    }
-})
+    })
 
 const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
+if(newWindow)
 newWindow.onclick = function() {
     let urlParams = new URLSearchParams(location.search)
     urlParams.set("display", "true")
