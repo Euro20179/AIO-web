@@ -298,6 +298,8 @@ async function main() {
 
     //if the user is logged in, do ui startup script for their user and their user only
     if (localStorage.getItem("userUID") && getUserAuth() && !urlParams.has("no-startup")) {
+        //prevents error with embeded credentials
+        location.hash ||= "#"
         const settings = await getSettings(Number(localStorage.getItem("userUID")))
         doUIStartupScript(settings.UIStartupScript, settings.StartupLang)
     }
