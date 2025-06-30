@@ -13,7 +13,7 @@ class Mode {
             throw new Error("default view (window) is null")
         }
     }
-    add(entry: InfoEntry, parent?: HTMLElement | DocumentFragment): HTMLElement { return document.createElement("div") }
+    add(entry: InfoEntry): HTMLElement { return document.createElement("div") }
     sub(entry: InfoEntry): any { }
     addList(entry: InfoEntry[]): any { }
     subList(entry: InfoEntry[]): any { }
@@ -27,9 +27,6 @@ class Mode {
 }
 
 let openViewModes: Mode[] = []
-// const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting, modeEvents]
-// const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output", "event-output"]
-//
 
 function mode_getFirstModeInWindow(win: Window) {
     for(let mode of openViewModes) {
@@ -141,7 +138,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "calc-output": CalcMode,
         "gallery-output": GalleryMode,
         "script-output": ScriptMode,
-        "event-output": modeEvents
+        "event-output": EventMode
     }
     //@ts-ignore
     const newMode = modes[name]

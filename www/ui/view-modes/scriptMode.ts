@@ -53,7 +53,7 @@ class ScriptMode extends Mode {
         this.run = win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
         this.parent = win.document.getElementById("script-execute-output") as HTMLDivElement
-        this.run.onclick = execute
+        this.run.onclick = execute.bind(this)
     }
 
     put(html: string | HTMLElement | ShadowRoot) {

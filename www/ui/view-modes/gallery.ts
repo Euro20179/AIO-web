@@ -55,5 +55,6 @@ class GalleryMode extends Mode {
     }
     close() {
         this.win.document.getElementById("gallery-output")?.classList.remove("open")
+        this.clearSelected()
     }
 }

@@ -64,83 +64,104 @@ class OrderedEvents {
     }
 }
 
-let eventOutput = document.getElementById("event-output-table") as HTMLTableElement
-let eventFilter = document.getElementById("event-filter") as HTMLInputElement
-
 //instead of literally removing elements we dont want form eventOrder,
 //keep track of the ones we dont want then dont render those
 //this is because if we remove from eventOrder, we can't add them back
-const excludedEvents: UserEvent[] = []
-const eventOrder = new OrderedEvents()
 
-function _reRenderEventTable() {
-    _filterEvents(eventFilter.value)
-    let header = eventOutput.firstElementChild as HTMLTableRowElement
-    let rest = eventOrder.buildElementLists(excludedEvents)
-    eventOutput.replaceChildren(header, ...rest)
-}
 
-function _filterEvents(script: string) {
-    excludedEvents.length = 0
+class EventMode extends Mode {
+    eventFilter: HTMLInputElement
+    excludedEvents: UserEvent[]
+    eventOrder: OrderedEvents
 
-    for (let event of eventOrder.list()) {
-        let tbl = makeSymbolsTableFromObj(event)
-        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
-            let is = event.Event === status
-            tbl.set(status.toLowerCase(), new Num(Number(is)))
+    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+        super(parent || "#event-output-table", win)
+        this.win.document.getElementById("event-output")?.classList.add("open")
+        this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
+
+        this.eventFilter.onchange = () => {
+            if (this.eventFilter.value === "") return
+
+            this._reRenderEventTable()
         }
-        let res = parseExpression(script, tbl)
-        if (!res.truthy()) {
-            excludedEvents.push(event)
+
+        this.excludedEvents = []
+
+        this.eventOrder = new OrderedEvents()
+    }
+
+    _filterEvents(script: string) {
+        this.excludedEvents.length = 0
+
+        for (let event of this.eventOrder.list()) {
+            let tbl = makeSymbolsTableFromObj(event)
+            for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+                let is = event.Event === status
+                tbl.set(status.toLowerCase(), new Num(Number(is)))
+            }
+            let res = parseExpression(script, tbl)
+            if (!res.truthy()) {
+                this.excludedEvents.push(event)
+            }
         }
     }
-}
+    _reRenderEventTable() {
+        if (this.eventFilter.value) {
+            this._filterEvents(this.eventFilter.value)
+        } else {
+            this.excludedEvents.length = 0
+        }
+        let header = this.parent.firstElementChild as HTMLTableRowElement
+        let rest = this.eventOrder.buildElementLists(this.excludedEvents)
+        this.parent.replaceChildren(header, ...rest)
+    }
 
-eventFilter.onchange = function() {
-    if (eventFilter.value === "") return
 
-    _reRenderEventTable()
-}
+    close() {
+        this.win.document.getElementById("event-output")?.classList.remove("open")
+        this.clearSelected()
+    }
 
-const modeEvents: DisplayMode = {
-    add(entry, parent) {
-        eventOrder.addList(...findUserEventsById(entry.ItemId))
-        _reRenderEventTable()
+    add(entry: InfoEntry) {
+        this.eventOrder.addList(...findUserEventsById(entry.ItemId))
+        this._reRenderEventTable()
         return document.createElement("div")
-    },
+    }
 
-    addList(entry) {
+    addList(entry: InfoEntry[]) {
         for (let e of entry) {
-            eventOrder.addList(...findUserEventsById(e.ItemId))
+            this.eventOrder.addList(...findUserEventsById(e.ItemId))
         }
-        _reRenderEventTable()
-    },
+        this._reRenderEventTable()
+    }
 
-    sub(entry) {
-        eventOrder.removeList(...findUserEventsById(entry.ItemId))
-        _reRenderEventTable()
-    },
+    sub(entry: InfoEntry) {
+        this.eventOrder.removeList(...findUserEventsById(entry.ItemId))
+        this._reRenderEventTable()
+    }
 
-    subList(entry) {
+    subList(entry: InfoEntry[]) {
         for (let e of entry) {
-            eventOrder.removeList(...findUserEventsById(e.ItemId))
+            this.eventOrder.removeList(...findUserEventsById(e.ItemId))
         }
-        _reRenderEventTable()
-    },
+        this._reRenderEventTable()
+    }
 
-    chwin(win) {
-        eventOutput = win.document.getElementById("event-output-table") as HTMLTableElement
-        eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
-        eventFilter.onchange = function() {
-            if (eventFilter.value === "") return
+    chwin(win: Window & typeof globalThis) {
+        this.win.close()
+        this.win = win
+        this.parent = win.document.getElementById("event-output-table") as HTMLTableElement
+        this.eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
+        this.eventFilter.onchange = () => {
+            if (this.eventFilter.value === "") return
 
-            _reRenderEventTable()
+            this._reRenderEventTable()
         }
 
-    },
+    }
 
     clearSelected() {
-        eventOrder.clear()
-        _reRenderEventTable()
-    },
+        this.eventOrder.clear()
+        this._reRenderEventTable()
+    }
 }
