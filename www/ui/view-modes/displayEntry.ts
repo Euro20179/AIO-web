@@ -6,6 +6,16 @@ class DisplayMode extends Mode {
         super(parent || "#entry-output", win)
         this.win.document.getElementById("entry-output")?.classList.add("open")
         this.displayQueue = []
+
+        if (this.parent instanceof HTMLElement) {
+            this.parent.addEventListener("scroll", (e) => {
+                //@ts-ignore
+                if (this.parent.scrollHeight - this.parent.scrollTop > innerHeight + 1000) return
+
+                if (this.displayQueue.length)
+                    renderDisplayItem.call(this, this.displayQueue.shift()?.ItemId)
+            })
+        }
     }
 
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
@@ -335,7 +345,7 @@ class DisplayMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        if(win === window) {
+        if (win === window) {
             this.win.close()
         }
         let newOutput = win.document.getElementById("entry-output")
@@ -347,8 +357,7 @@ class DisplayMode extends Mode {
                     if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
 
                     if (this.displayQueue.length)
-                        //@ts-ignore
-                        renderDisplayItem(this.displayQueue.shift()?.ItemId)
+                        renderDisplayItem.call(this, this.displayQueue.shift()?.ItemId)
                 })
             }
         }
