@@ -70,6 +70,8 @@ class OrderedEvents {
 
 
 class EventMode extends Mode {
+    NAME = "event-output"
+
     eventFilter: HTMLInputElement
     excludedEvents: UserEvent[]
     eventOrder: OrderedEvents

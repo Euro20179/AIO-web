@@ -419,6 +419,7 @@ function destroyCharts() {
 }
 
 class GraphMode extends Mode {
+    NAME = "graph-output"
     constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
         super(parent || "#graph-output", win)
         this.win.document.getElementById("graph-output")?.classList.add("open")

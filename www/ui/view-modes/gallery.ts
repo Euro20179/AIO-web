@@ -12,6 +12,7 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 }
 
 class GalleryMode extends Mode {
+    NAME = "gallery-output"
     constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
         super(parent || "#gallery-items", win)
         this.win.document.getElementById("gallery-output")?.classList.add("open")

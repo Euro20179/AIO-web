@@ -1,5 +1,6 @@
 
 class ScriptMode extends Mode {
+    NAME = "script-output"
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
