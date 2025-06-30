@@ -235,10 +235,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
         }
 
         refreshSidebarItem(BigInt(id))
-        if (mode.refresh) {
-            mode.refresh(BigInt(id))
-        }
-
+        mode_refreshItem(BigInt(id))
 
         const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
         if (parent && globalsNewUi.entries[String(parent)]) {
@@ -274,20 +271,20 @@ async function refreshInfo(uid: number) {
 
 async function main() {
     const urlParams = new URLSearchParams(document.location.search)
+
     if (urlParams.has("display")) {
         setDisplayModeUI(true)
     } else if (urlParams.has("catalog")) {
         openCatalogModeUI()
     }
 
+
     const onrender = () => {
         //just in case
         removeEventListener("aio-items-rendered", onrender)
         items_refreshMetadata(uid).then(() => {
-            if (mode.refresh && globalsNewUi.selectedEntries.length) {
-                for (let item of globalsNewUi.selectedEntries) {
-                    mode.refresh(item.ItemId)
-                }
+            for (let item of globalsNewUi.selectedEntries) {
+                mode_refreshItem(item.ItemId)
             }
 
             const ev = new CustomEvent("aio-metadata-loaded")
@@ -313,6 +310,9 @@ async function main() {
 
     loadLibraries()
 
+    const mode = urlParams.get("mode") || "calc-output"
+    mode_setMode(mode)
+
     const initialSearch = (
         urlParams.has("item-id")
             ? urlParams.get("item-id")!.split(",")
@@ -323,7 +323,7 @@ async function main() {
 
     const searchInput = document.querySelector("[name=\"search-query\"]") as HTMLInputElement
 
-    mode_setMode(curModeName)
+    // mode_setMode(curModeName)
 
     const uid = getUidUI()
 
@@ -345,10 +345,8 @@ async function main() {
 
     //do this second because events can get really large, and having to wait for it could take a while
     loadUserEvents(uid).then(() => {
-        if (mode.refresh && globalsNewUi.selectedEntries.length) {
-            for (let item of globalsNewUi.selectedEntries) {
-                mode.refresh(item.ItemId)
-            }
+        for (let item of globalsNewUi.selectedEntries) {
+            mode_refreshItem(item.ItemId)
         }
     })
 }

@@ -232,7 +232,7 @@
                         this mode is rather dangerous, prefer scripting mode instead</p>
                     <div class="flex row">
                         <textarea id="calc-expression" style="flex-grow: 1" placeholer="expression"></textarea>
-                        <button onclick="sortCalcDisplay()">Sort</button>
+                        <button onclick="sortCalcDisplay()" id="calc-sorter">Sort</button>
                     </div>
                     <div id="calc-items"></div>
                 </div>
@@ -309,9 +309,6 @@
         </div>
     </div>
 
-    <script>
-        location.hash ||= "entry-output"
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/config.js"></script>
     <script src="/js/items.js"></script>
@@ -323,13 +320,13 @@
     <script src="/ui/globals.js"></script>
     <script src="/ui/sidebar.js"></script>
     <script src="/ui/settings.js"></script>
+    <script src="/ui/view-modes/modes.js"></script>
     <script src="/ui/view-modes/graph.js"></script>
     <script src="/ui/view-modes/displayEntry.js"></script>
     <script src="/ui/view-modes/calc.js"></script>
     <script src="/ui/view-modes/gallery.js"></script>
     <script src="/ui/view-modes/scriptMode.js"></script>
     <script src="/ui/view-modes/event-mode.js"></script>
-    <script src="/ui/view-modes/modes.js"></script>
     <script src="/ui/ui.js"></script>
     <!-- defer because document needs to load first -->
     <script src="/ui/index.js" defer></script>

@@ -586,10 +586,10 @@ async function newEntryUI(form: HTMLFormElement) {
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
     const parentId = form.querySelector("[name=\"parentId\"]").value
     const copyOfId = form.querySelector("[name=\"copyOf\"]").value
-    if(parentId !== "0") {
+    if (parentId !== "0") {
         queryString += `&parentId=${parentId}`
     }
-    if(copyOfId !== "0") {
+    if (copyOfId !== "0") {
         queryString += `&copyOf=${copyOfId}`
     }
     console.log(parentId, copyOfId, queryString)
@@ -794,8 +794,8 @@ async function signinUI(reason: string): Promise<string> {
             let password = data.get("password")
             loginPopover.close()
 
-            api_username2UID(username!.toString()).then(uid =>  {
-                if(uid < 1) return
+            api_username2UID(username!.toString()).then(uid => {
+                if (uid < 1) return
                 storeUserUID(String(uid))
             })
 
@@ -969,16 +969,29 @@ function openCatalogModeUI() {
         catalogWin.addEventListener("beforeunload", (e) => {
             closeCatalogModeUI()
         })
-        mode_chwin(catalogWin as Window & typeof globalThis)
+        const thisMode = mode_getFirstModeInWindow(window)
+        if (thisMode) {
+            mode_chwin(catalogWin as Window & typeof globalThis, thisMode)
+        }
         mainUI.classList.add("catalog-mode")
         toggleUI("viewing-area", "none")
     }
 }
 
 function closeCatalogModeUI() {
-    mode_chwin(window)
+    if(!catalogWin) {
+        console.warn("Catalog window is not open")
+        return
+    }
+    const thisMode = mode_getFirstModeInWindow(catalogWin)
+    if (thisMode) {
+        mode_chwin(window, thisMode)
+    }
     let mainUI = document.getElementById("main-ui")
-    if (!mainUI) return
+    if (!mainUI) {
+        console.warn("could not find main ui")
+        return
+    }
     mainUI.classList.remove("catalog-mode")
     toggleUI("viewing-area", "")
     catalogWin = null
@@ -1004,11 +1017,11 @@ function doUIStartupScript(script: string, lang: StartupLang) {
 function formatToSymbolUI(format: number) {
     const custom = settings_get("custom_item_formats")
     let out = ""
-    if(items_isDigitized(format)) {
+    if (items_isDigitized(format)) {
         format -= DIGI_MOD
         out = "+d"
     }
-    if(format in custom) {
+    if (format in custom) {
         return custom[format] + out
     }
     return items_formatToSymbol(format) + out

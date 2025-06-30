@@ -1,4 +1,3 @@
-@layer general, utility, components;
 
 @layer general {
 
@@ -76,11 +75,11 @@
         #gallery-output,
         #event-output,
         #script-output) {
-        &:target {
+        &.open {
             display: inherit;
         }
 
-        &:not(:target) {
+        &:not(.open) {
             display: none;
         }
     }
@@ -319,7 +318,7 @@
         display: flex;
     }
 
-    :has(#graph-output:target, #gallery-output:target) {
+    :has(#graph-output.open, #gallery-output.open) {
         #selected-item-actions {
             display: none;
         }
@@ -330,7 +329,7 @@
         container-type: size;
         grid-area: main;
 
-        &:not(:has(:where(display-entry, #calc-output:target, #gallery-output:target, #graph-output:target, #event-output:target))) {
+        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open))) {
             #error-output {
                 display: unset;
             }
@@ -355,7 +354,7 @@
         }
     }
 
-    #calc-output:target {
+    #calc-output.open {
         width: 100%;
         height: 100%;
 
@@ -387,7 +386,7 @@
         }
     }
 
-    #graph-output:target>div {
+    #graph-output.open>div {
         display: grid;
         grid-template-columns: 1fr 1fr;
         width: 100%;
@@ -399,7 +398,7 @@
     }
 
 
-    #entry-output:target {
+    #entry-output.open {
         --grid-size: 50%;
 
         --gap-size: 10px;

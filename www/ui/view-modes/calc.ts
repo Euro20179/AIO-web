@@ -1,46 +1,59 @@
-let calcItems = document.getElementById("calc-items") as HTMLDivElement
-let expressionInput = document.getElementById("calc-expression") as HTMLTextAreaElement
-expressionInput.onchange = _updateEachCalcItem
 
-const modeCalc: DisplayMode = {
-    add(entry, parent?: HTMLElement | DocumentFragment) {
-        return renderCalcItem(entry, parent)
-    },
+class CalcMode extends DisplayMode {
+    expressionInput: HTMLTextAreaElement
 
-    sub(entry) {
-        removecCalcItem(entry)
-    },
+    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+        super(parent || "#calc-items", win)
+        this.win.document.getElementById("calc-output")?.classList.add("open")
 
-    addList(entry) {
+        this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement
+        this.expressionInput.onchange = _updateEachCalcItem.bind(this)
+        const sortButton = this.parent.querySelector(`#calc-sorter`)
+        sortButton?.addEventListener("click", sortCalcDisplay.bind(this))
+    }
+
+    close() {
+        this.win.document.getElementById("calc-output")?.classList.remove("open")
+    }
+
+    add(entry: InfoEntry): HTMLElement {
+        return renderCalcItem.call(this, entry)
+    }
+
+    sub(entry: InfoEntry) {
+        removeCalcItem.call(this, entry)
+    }
+
+    addList(entry: InfoEntry[]) {
         for (let item of entry) {
-            renderCalcItem(item)
+            renderCalcItem.call(this, item)
         }
-    },
+    }
 
-    subList(entry) {
+    subList(entry: InfoEntry[]) {
         for (let item of entry) {
-            removecCalcItem(item)
+            removeCalcItem.call(this, item)
         }
-    },
+    }
 
     clearSelected() {
-        calcItems.innerHTML = ""
-    },
+        this.parent.innerHTML = ""
+    }
 
-    refresh(id) {
-        const el = calcItems.ownerDocument.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
+    refresh(id: bigint) {
+        const el = this.win.document.querySelector(`[data-item-id="${id}"]`) as HTMLElement | null
         if (!el) return
         //PROBLEM: if something within the user's code causes calc to get updated
         //an infinite cycle will occure because
         //run user's code -> updateInfo -> calc updates -> run user's code
         //SOLUTION:
         //DO NOT UPDATE EXPRESSION
-        refreshCalcItem(findInfoEntryById(id), el)
-    },
+        refreshCalcItem.call(this, findInfoEntryById(id), el)
+    }
 
     *_getValidEntries() {
         const selected = Object.groupBy(globalsNewUi.selectedEntries, item => String(item.ItemId))
-        let elems = calcItems.querySelectorAll(`[data-item-id]`)
+        let elems = this.parent.querySelectorAll(`[data-item-id]`)
 
         for (let elem of elems) {
             let val = Number(elem.getAttribute("data-expression-output"))
@@ -50,7 +63,7 @@ const modeCalc: DisplayMode = {
 
             yield selected[id][0]
         }
-    },
+    }
 
     putSelectedInCollection() {
         promptUI("Id of collection").then(collectionName => {
@@ -66,7 +79,7 @@ const modeCalc: DisplayMode = {
                 }
             })
         })
-    },
+    }
 
     addTagsToSelected() {
         promptUI("tags (, seperated)").then(tags => {
@@ -76,25 +89,29 @@ const modeCalc: DisplayMode = {
                 api_addEntryTags(item.ItemId, tagsList)
             }
         })
-    },
+    }
 
-    chwin(win) {
-        calcItems = win.document.getElementById("calc-items") as HTMLDivElement
-        expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
-        expressionInput.onchange = _updateEachCalcItem
-    },
+    chwin(win: Window & typeof globalThis) {
+        if (win === window) {
+            this.win.close()
+        }
+        this.win = win
+        this.parent = win.document.getElementById("calc-items") as HTMLDivElement
+        this.expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
+        this.expressionInput.onchange = _updateEachCalcItem.bind(this)
+    }
 }
 
-function _updateEachCalcItem() {
+function _updateEachCalcItem(this: CalcMode) {
     for (let entry of globalsNewUi.selectedEntries) {
-        let val = updateExpressionOutput(entry)
-        let el = calcItems.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        let val = updateExpressionOutput.call(this, entry)
+        let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
         el?.setAttribute("data-expression-output", val.jsStr())
     }
 }
 
-function updateExpressionOutput(item: InfoEntry) {
-    let expr = expressionInput.value
+function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
+    let expr = this.expressionInput.value
 
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
@@ -109,12 +126,12 @@ function updateExpressionOutput(item: InfoEntry) {
     return val
 }
 
-function removecCalcItem(item: InfoEntry) {
-    let el = calcItems.querySelector(`[data-item-id="${item.ItemId}"]`)
+function removeCalcItem(this: CalcMode, item: InfoEntry) {
+    let el = this.parent.querySelector(`[data-item-id="${item.ItemId}"]`)
     el?.remove()
 }
 
-function refreshCalcItem(item: InfoEntry, el: HTMLElement, updateExpr = false) {
+function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement, updateExpr = false) {
     let root = el.shadowRoot
     if (!root) return el
 
@@ -123,7 +140,7 @@ function refreshCalcItem(item: InfoEntry, el: HTMLElement, updateExpr = false) {
     let meta = findMetadataById(item.ItemId)
 
     if (updateExpr) {
-        let val = updateExpressionOutput(item)
+        let val = updateExpressionOutput.call(this, item)
         el.setAttribute("data-expression-output", String(val.jsStr()))
     }
 
@@ -139,22 +156,22 @@ function refreshCalcItem(item: InfoEntry, el: HTMLElement, updateExpr = false) {
     return el
 }
 
-function renderCalcItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = calcItems): HTMLElement {
+function renderCalcItem(this: CalcMode, item: InfoEntry): HTMLElement {
     let el = document.createElement("calc-entry")
-    refreshCalcItem(item, el, true)
-    parent.append(el)
+    refreshCalcItem.call(this, item, el, true)
+    this.parent.append(el)
     return el
 }
 
-function sortCalcDisplay() {
-    let elements = [...calcItems.querySelectorAll(`[data-item-id]`)]
+function sortCalcDisplay(this: CalcMode) {
+    let elements = [...this.parent.querySelectorAll(`[data-item-id]`)]
     elements.sort((a, b) => {
         let exprA = /**@type {string}*/(a.getAttribute("data-expression-output"))
         let exprB = /**@type {string}*/(b.getAttribute("data-expression-output"))
         return Number(exprB) - Number(exprA)
     })
-    calcItems.innerHTML = ""
+    this.parent.innerHTML = ""
     for (let elem of elements) {
-        calcItems.append(elem)
+        this.parent.append(elem)
     }
 }

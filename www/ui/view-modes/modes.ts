@@ -1,16 +1,41 @@
+class DisplayMode {
+    parent: HTMLElement
+    win: Window & typeof globalThis
+    //using string will querySelector on the (win || window)'s document
+    constructor(parent: HTMLElement | string, win?: Window & typeof globalThis) {
+        this.parent = parent instanceof HTMLElement
+            ? parent
+            : (win || window).document.querySelector(parent) as HTMLElement
+        //@ts-ignore
+        this.win = win || this.parent.ownerDocument.defaultView
+        if (this.win === null) {
+            throw new Error("default view (window) is null")
+        }
+    }
+    add(entry: InfoEntry, parent?: HTMLElement | DocumentFragment): HTMLElement { return document.createElement("div") }
+    sub(entry: InfoEntry): any { }
+    addList(entry: InfoEntry[]): any { }
+    subList(entry: InfoEntry[]): any { }
+    chwin?(win: Window): any { }
+    refresh?(id: bigint): any { }
+    putSelectedInCollection?(): any { }
+    addTagsToSelected?(): any { }
+    put?(html: string | HTMLElement | ShadowRoot): any { }
+    close(): any { }
+    clearSelected(): any { }
+}
 
-type DisplayMode = {
-    add: (entry: InfoEntry, parent?: HTMLElement | DocumentFragment) => HTMLElement
-    sub: (entry: InfoEntry) => any
-    addList: (entry: InfoEntry[]) => any
-    subList: (entry: InfoEntry[]) => any
-    chwin?: (win: Window) => any,
-    refresh?: (id: bigint) => any
-    putSelectedInCollection?: () => any
-    addTagsToSelected?: () => any
-    put?: (html: string | HTMLElement | ShadowRoot) => any
-    clearSelected: () => any
-    [key: string]: any
+let openViewModes: DisplayMode[] = []
+// const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting, modeEvents]
+// const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output", "event-output"]
+//
+
+function mode_getFirstModeInWindow(win: Window) {
+    for(let mode of openViewModes) {
+        if(mode.win === win) {
+            return mode
+        }
+    }
 }
 
 function mode_isSelected(id: bigint) {
@@ -22,29 +47,16 @@ function mode_isSelected(id: bigint) {
     return false
 }
 
-const modes = [modeDisplayEntry, modeGraphView, modeCalc, modeGallery, modeScripting, modeEvents]
-const modeOutputIds = ["entry-output", "graph-output", "calc-output", "gallery-output", "script-output", "event-output"]
-
-let idx = modeOutputIds.indexOf(location.hash.slice(1))
-let curModeName = modeOutputIds[idx]
-
-let mode = modes[idx]
-
-let mode_curWin = window
-
-function mode_chwin(newWin: Window & typeof globalThis) {
+function mode_chwin(newWin: Window & typeof globalThis, mode: DisplayMode) {
     if (newWin === window) {
-        mode_curWin.close()
-        mode_curWin = window
         if (mode.chwin) {
             mode.chwin(window)
             let selected = globalsNewUi.selectedEntries
             clearItems()
-            selectItemList(selected, mode)
+            selectItemList(selected, true, mode)
         }
     }
-    else if (mode.chwin) {
-        mode_curWin = newWin
+    else {
         newWin.addEventListener("DOMContentLoaded", () => {
             let selected = globalsNewUi.selectedEntries
             clearItems()
@@ -52,78 +64,103 @@ function mode_chwin(newWin: Window & typeof globalThis) {
             mode.chwin?.(newWin)
             newWin.addEventListener("aio-items-rendered", () => {
                 clearItems()
-                selectItemList(selected, mode)
+                selectItemList(selected, true, mode)
             })
         })
     }
 }
 
-function selectItem(item: InfoEntry, mode: DisplayMode, updateStats: boolean = true, parent?: HTMLElement | DocumentFragment): HTMLElement {
+function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: DisplayMode): HTMLElement[] {
     globalsNewUi.selectedEntries.push(item)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
-    return mode.add(item, parent)
+    if (mode)
+        return [mode.add(item)]
+    else {
+        const elems = []
+        for (const mode of openViewModes) {
+            elems.push(mode.add(item))
+        }
+        return elems
+    }
+}
+
+function mode_refreshItem(item: bigint) {
+    for (const mode of openViewModes) {
+        if (mode.refresh) {
+            mode.refresh(item)
+        }
+    }
 }
 
 function deselectItem(item: InfoEntry, updateStats: boolean = true) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(a => a.ItemId !== item.ItemId)
     updateStats && changeResultStatsWithItemUI(item, -1)
-    mode.sub(item)
+    for (let mode of openViewModes) {
+        mode.sub(item)
+    }
 }
 
-function selectItemList(itemList: InfoEntry[], mode: DisplayMode, updateStats: boolean = true) {
+function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: DisplayMode) {
     globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
     updateStats && changeResultStatsWithItemListUI(itemList)
-    if(itemList.length)
+    if (itemList.length)
         updatePageInfoWithItemUI(itemList[0])
-    mode.addList(itemList)
+    if (mode) {
+        mode.addList(itemList)
+    } else {
+        for (let mode of openViewModes) {
+            mode.addList(itemList)
+        }
+    }
 }
 
 function toggleItem(item: InfoEntry, updateStats: boolean = true) {
     if (globalsNewUi.selectedEntries.find(a => a.ItemId === item.ItemId)) {
         deselectItem(item, updateStats)
     } else {
-        selectItem(item, mode, updateStats)
+        selectItem(item, updateStats)
     }
 }
 
 function clearItems(updateStats: boolean = true) {
     globalsNewUi.selectedEntries = []
-    mode.clearSelected()
+    for (const mode of openViewModes) {
+        mode.clearSelected()
+    }
     updateStats && resetStatsUI()
 }
 
-function putSelectedToCollection() {
-    if (mode.putSelectedInCollection) {
-        mode.putSelectedInCollection()
-    } else {
-        alert("This mode does not support putting items into a collection")
-    }
-}
-
-function addTagsToSelected() {
-    if (mode.addTagsToSelected) {
-        mode.addTagsToSelected()
-    } else {
-        alert("This mode does not support adding tags to selected items")
-    }
-}
-
 function mode_setMode(name: string) {
-    mode.subList(globalsNewUi.selectedEntries)
-
-
-    let curModeIdx = modeOutputIds.indexOf(name)
-
-    mode = modes[curModeIdx]
-    mode_curWin.location.hash = name
-    if(mode.chwin) {
-        mode.chwin(mode_curWin)
+    for (const mode of openViewModes) {
+        mode.subList(globalsNewUi.selectedEntries)
     }
 
-    mode.addList(globalsNewUi.selectedEntries)
+    const modes = {
+        "entry-output": modeDisplayEntry,
+        "graph-output": modeGraphView,
+        "calc-output": CalcMode,
+        "gallery-output": modeGallery,
+        "script-output": modeScripting,
+        "event-output": modeEvents
+    }
+    const newMode = modes[name]
+    try {
+        let newModes = []
+        for (const mode of openViewModes) {
+            if (mode.win === window) {
+                mode.close()
+            } else {
+                newModes.push(mode)
+            }
+        }
+        openViewModes = newModes
+        const m = new newMode(null, window)
+        openViewModes.push(m)
+        m.addList(globalsNewUi.selectedEntries)
+    } catch (err) {
+    }
 
-    curModeName = name
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement
     toggle.value = name
 }
@@ -139,6 +176,8 @@ viewAllElem.addEventListener("change", e => {
         clearItems(false)
     } else {
         clearItems()
-        selectItemList(getFilteredResultsUI(), mode)
+        for (let mode of openViewModes) {
+            selectItemList(getFilteredResultsUI(), mode)
+        }
     }
 })
