@@ -3,6 +3,40 @@
  * with client-side inputs
 */
 
+document.getElementById("view-toggle")?.addEventListener("change", e => {
+    mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
+})
+
+const viewAllElem = document.getElementById("view-all") as HTMLInputElement
+viewAllElem.addEventListener("change", e => {
+    resetStatsUI()
+    if (!viewAllElem.checked) {
+        clearItems(false)
+    } else {
+        clearItems()
+        for (let mode of openViewModes) {
+            selectItemList(getFilteredResultsUI(), true, mode)
+        }
+    }
+})
+
+const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
+newWindow.onclick = function() {
+    let urlParams = new URLSearchParams(location.search)
+    urlParams.set("display", "true")
+    urlParams.set("no-select", "true")
+    urlParams.set("no-startup", "true")
+    urlParams.set("no-mode", "true")
+    const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
+    const win = open(newURL, "_blank", "popup=true")
+    if (!win) return
+    const mode = mode_getFirstModeInWindow(window)
+    if (!mode) return
+    win.onload = () => {
+        mode_setMode(mode.NAME, win as Window & typeof globalThis)
+    }
+}
+
 function setError(text: string) {
     const errorOut = currentDocument().getElementById("error")
     if (text == "") {
@@ -981,7 +1015,7 @@ function openCatalogModeUI() {
 }
 
 function closeCatalogModeUI() {
-    if(!catalogWin) {
+    if (!catalogWin) {
         console.warn("Catalog window is not open")
         return
     }

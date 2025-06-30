@@ -1,4 +1,5 @@
 class DisplayMode extends Mode {
+    NAME = "entry-output"
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
         return function(this: DisplayMode, elem: HTMLElement) {
             let id = getIdFromDisplayElement(elem)
@@ -9,6 +10,9 @@ class DisplayMode extends Mode {
 
     close() {
         this.win.document.getElementById("entry-output")?.classList.remove("open")
+        this.displayQueue = []
+        this.clear()
+        this.clearSelected()
     }
 
     de_actions = {

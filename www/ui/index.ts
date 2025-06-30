@@ -311,8 +311,12 @@ async function main() {
 
     loadLibraries()
 
-    const mode = urlParams.get("mode") || "entry-output"
-    mode_setMode(mode)
+    let toggle = document.getElementById("view-toggle") as HTMLSelectElement
+
+    if (!urlParams.get("no-mode")) {
+        const mode = urlParams.get("mode") || toggle.value || "entry-output"
+        mode_setMode(mode)
+    }
 
     const initialSearch = (
         urlParams.has("item-id")

@@ -1,4 +1,5 @@
 class Mode {
+    NAME: string = "Mode"
     parent: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
     //using string will querySelector on the (win || window)'s document
@@ -63,6 +64,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
             globalsNewUi.selectedEntries = selected
             mode.chwin?.(newWin)
             newWin.addEventListener("aio-items-rendered", () => {
+                newWin.mode_setMode(mode.NAME)
                 clearItems()
                 selectItemList(selected, true, mode)
             })
@@ -131,11 +133,8 @@ function clearItems(updateStats: boolean = true) {
     updateStats && resetStatsUI()
 }
 
-function mode_setMode(name: string) {
-    for (const mode of openViewModes) {
-        mode.subList(globalsNewUi.selectedEntries)
-    }
-
+//this should ONLY operate within the user specified or current window otherwise it makes no sense
+function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const modes = {
         "entry-output": DisplayMode,
         "graph-output": modeGraphView,
@@ -149,14 +148,14 @@ function mode_setMode(name: string) {
     try {
         let newModes = []
         for (const mode of openViewModes) {
-            if (mode.win === window) {
+            if (mode.win === win) {
                 mode.close()
             } else {
                 newModes.push(mode)
             }
         }
         openViewModes = newModes
-        const m = new newMode(null, window)
+        const m = new newMode(null, win)
         openViewModes.push(m)
         m.addList(globalsNewUi.selectedEntries)
     } catch (err) {
@@ -166,19 +165,3 @@ function mode_setMode(name: string) {
     toggle.value = name
 }
 
-document.getElementById("view-toggle")?.addEventListener("change", e => {
-    mode_setMode((e.target as HTMLSelectElement).value)
-})
-
-const viewAllElem = document.getElementById("view-all") as HTMLInputElement
-viewAllElem.addEventListener("change", e => {
-    resetStatsUI()
-    if (!viewAllElem.checked) {
-        clearItems(false)
-    } else {
-        clearItems()
-        for (let mode of openViewModes) {
-            selectItemList(getFilteredResultsUI(), true, mode)
-        }
-    }
-})

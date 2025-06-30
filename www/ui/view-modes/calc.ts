@@ -1,5 +1,6 @@
 
 class CalcMode extends Mode {
+    NAME = "calc-output"
     expressionInput: HTMLTextAreaElement
 
     constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
@@ -14,6 +15,7 @@ class CalcMode extends Mode {
 
     close() {
         this.win.document.getElementById("calc-output")?.classList.remove("open")
+        this.clearSelected()
     }
 
     add(entry: InfoEntry): HTMLElement {
