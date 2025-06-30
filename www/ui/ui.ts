@@ -30,7 +30,7 @@ newWindow.onclick = function() {
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     const win = open(newURL, "_blank", "popup=true")
     if (!win) return
-    const mode = mode_getFirstModeInWindow(window)
+    const mode = mode_getFirstModeInWindow(catalogWin || window)
     if (!mode) return
     win.onload = () => {
         mode_setMode(mode.NAME, win as Window & typeof globalThis)
