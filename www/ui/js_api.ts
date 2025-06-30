@@ -35,7 +35,7 @@ function ua_setfavicon(path: string) {
 function util_debounce(cb: Function, timeout: number) {
     let to: number | undefined
     return function() {
-        if(to) {
+        if (to) {
             clearTimeout(to)
         }
         to = setTimeout(cb, timeout)
@@ -132,10 +132,10 @@ function ui_search(query: string, cb?: (results: items_Entry[]) => any): number 
  * @returns 0 on success, 1 if mode is invalid
  */
 function ui_setmode(modeName: string): number {
-    if (!modeOutputIds.includes(modeName)) {
-        return 1
-        // return new Str("Invalid mode")
-    }
+    // if (!modeOutputIds.includes(modeName)) {
+    //     return 1
+    //     // return new Str("Invalid mode")
+    // }
     mode_setMode(modeName)
     return 0
 }
@@ -199,7 +199,7 @@ function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
         deselectItem(entry)
         return 0
     } else {
-        selectItem(entry, mode)
+        selectItem(entry)
         return 1
     }
 }
@@ -220,7 +220,7 @@ function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | 
         return 1
     }
 
-    return selectItem(entry, mode)
+    return selectItem(entry)[0]
 }
 
 /**
@@ -258,7 +258,9 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     let frag = document.createDocumentFragment()
 
-    return selectItem(entry, mode, false, frag)
+    const m = new DisplayMode(frag)
+
+    return selectItem(entry, false, m)[0]
 }
 
 /**
@@ -275,11 +277,14 @@ function ui_clear(): number {
  * @returns 0 on success, 1 if mode doesn't support clearing
  */
 function ui_modeclear(): number {
-    if("clear" in mode) {
-        mode.clear()
-        return 0
+    let valid = 1
+    for (let mode of openViewModes) {
+        if ("clear" in mode) {
+            mode.clear()
+            valid = 0
+        }
     }
-    return 1
+    return valid
 }
 
 /**
@@ -342,11 +347,13 @@ function ui_selected(): InfoEntry[] {
  * @returns Empty string on success, 1 if mode doesn't support putting content
  */
 function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
-    if(!mode.put) {
-        return 1
-    }
-    for(let h of html) {
-        mode.put(h)
+    for (let mode of openViewModes) {
+        if (!mode.put) {
+            continue
+        }
+        for (let h of html) {
+            mode.put(h)
+        }
     }
     return ""
 }
@@ -376,7 +383,7 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
 function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)): number {
     const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
     let opt = sortBySelector.querySelector(`option[value="${name}"]`) as HTMLOptionElement | null
-    if(!(opt instanceof HTMLOptionElement)) {
+    if (!(opt instanceof HTMLOptionElement)) {
         opt = document.createElement("option") as HTMLOptionElement
     }
     items_addSort(name, sortFN)
@@ -395,7 +402,7 @@ function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => numbe
  */
 function ui_delsort(name: string) {
     let opt = sortBySelector.querySelector(`option[value="${name}"]`)
-    if(!opt) return 1
+    if (!opt) return 1
     opt.remove()
     items_delSort(name)
 }
@@ -501,7 +508,7 @@ async function aio_setuser(user: UserEntry): Promise<boolean> {
  */
 async function aio_delete(item: bigint) {
     const res = await api_deleteEntry(item)
-    if(!res || res.status !== 200) {
+    if (!res || res.status !== 200) {
         return 1
     }
     removeSidebarItem(findInfoEntryById(item))

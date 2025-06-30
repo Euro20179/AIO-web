@@ -1,9 +1,9 @@
 class DisplayMode {
-    parent: HTMLElement
+    parent: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
     //using string will querySelector on the (win || window)'s document
-    constructor(parent: HTMLElement | string, win?: Window & typeof globalThis) {
-        this.parent = parent instanceof HTMLElement
+    constructor(parent: HTMLElement | DocumentFragment | string, win?: Window & typeof globalThis) {
+        this.parent = parent instanceof HTMLElement || parent instanceof DocumentFragment
             ? parent
             : (win || window).document.querySelector(parent) as HTMLElement
         //@ts-ignore
