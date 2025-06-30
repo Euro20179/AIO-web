@@ -139,7 +139,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "entry-output": DisplayMode,
         "graph-output": GraphMode,
         "calc-output": CalcMode,
-        "gallery-output": modeGallery,
+        "gallery-output": GalleryMode,
         "script-output": modeScripting,
         "event-output": modeEvents
     }

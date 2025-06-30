@@ -1,6 +1,4 @@
-let galleryItems = document.getElementById("gallery-items") as HTMLDivElement
-
-function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment = galleryItems) {
+function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment) {
     let el = new Image()
     let meta = findMetadataById(item.ItemId)
     if (meta?.Thumbnail) {
@@ -13,39 +11,48 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     return el
 }
 
-function removeGalleryItem(entry: InfoEntry) {
-    let el = galleryItems.querySelector(`[data-item-id="${entry.ItemId}"]`)
-    el?.remove()
-}
+class GalleryMode extends Mode {
+    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+        super(parent || "#gallery-items", win)
+        this.win.document.getElementById("gallery-output")?.classList.add("open")
+    }
 
-const modeGallery: DisplayMode = {
-    add(entry, parent?: HTMLElement | DocumentFragment) {
-        return renderGalleryItem(entry, parent)
-    },
+    removeGalleryItem(entry: InfoEntry) {
+        let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        el?.remove()
+    }
 
-    sub(entry) {
-        removeGalleryItem(entry)
-    },
+    add(entry: InfoEntry) {
+        return renderGalleryItem(entry, this.parent)
+    }
 
-    addList(entry) {
+    sub(entry: InfoEntry) {
+        this.removeGalleryItem(entry)
+    }
+
+    addList(entry: InfoEntry[]) {
         for (let item of entry) {
-            renderGalleryItem(item)
+            renderGalleryItem(item, this.parent)
         }
-    },
+    }
 
-    subList(entry) {
+    subList(entry: InfoEntry[]) {
         for (let item of entry) {
-            removeGalleryItem(item)
+            this.removeGalleryItem(item)
         }
-    },
+    }
 
     clearSelected() {
-        for (let child of galleryItems.querySelectorAll(`[data-item-id]`)) {
+        for (let child of this.parent.querySelectorAll(`[data-item-id]`)) {
             child.remove()
         }
-    },
+    }
 
-    chwin(win) {
-        galleryItems = win.document.getElementById("gallery-items") as HTMLDivElement
-    },
+    chwin(win: Window & typeof globalThis) {
+        this.win = win
+        this.parent = win.document.getElementById("gallery-items") as HTMLDivElement
+    }
+    close() {
+        this.win.document.getElementById("gallery-output")?.classList.remove("open")
+    }
 }
