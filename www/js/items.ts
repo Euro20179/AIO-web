@@ -78,6 +78,7 @@ type InfoEntry = {
     CopyOf: bigint
     Library: bigint
     Uid: number
+    Requires: bigint
 
     Tags: string[]
 }

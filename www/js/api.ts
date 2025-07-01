@@ -94,6 +94,7 @@ function _api_mkStrItemId(jsonl: string) {
         .replace(/"ParentId":\s*(\d+),/, "\"ParentId\": \"$1\",")
         .replace(/"CopyOf":\s*(\d+)(,)?/, "\"CopyOf\": \"$1\"$2")
         .replace(/"Library":\s*(\d+)(,)?/, "\"Library\": \"$1\"$2")
+        .replace(/"Requires":\s*(\d+)(,)?/, "\"Requires\": \"$1\"$2")
 }
 
 function _api_mkIntItemId(jsonl: string) {
@@ -102,6 +103,7 @@ function _api_mkIntItemId(jsonl: string) {
         .replace(/"ParentId":"(\d+)",/, "\"ParentId\": $1,")
         .replace(/"CopyOf":"(\d+)"(,)?/, "\"CopyOf\": $1$2")
         .replace(/"Library":"(\d+)"(,)?/, "\"Library\": $1$2")
+        .replace(/"Requires":"(\d+)"(,)?/, "\"Requires\": $1$2")
 }
 
 function _api_parseJsonL(jsonl: string) {
@@ -313,6 +315,7 @@ type NewEntryParams = {
     type: EntryType,
     format: number,
     price?: number,
+    requires?: bigint,
     "is-digital"?: boolean,
     "is-anime"?: boolean,
     "art-style"?: number,

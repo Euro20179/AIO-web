@@ -113,6 +113,11 @@
                     <input type="button" value="0" title="copy of id" name="copyOf"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </div>
+                <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
+                    <span>Requires</span>
+                    <input type="button" value="0" title="prerequiset for this show" name="requires"
+                        onclick="replaceValueWithSelectedItemIdUI(this)">
+                </div>
             </div>
             <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode())">
         </form>

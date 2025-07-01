@@ -620,18 +620,30 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["libraryId"]
     }
 
+    if(validEntries["requires"] && validEntries["requires"] == "0") {
+        delete validEntries["requires"]
+    }
+
+    if(validEntries["copyOf"] && validEntries["copyOf"] == "0") {
+        delete validEntries["copyOf"]
+    }
+
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
     //@ts-ignore
     const parentId = form.querySelector("[name=\"parentId\"]").value
     //@ts-ignore
     const copyOfId = form.querySelector("[name=\"copyOf\"]").value
+    //@ts-ignore
+    const requires = form.querySelector("[name=\"requires\"]").value
     if (parentId !== "0") {
         queryString += `&parentId=${parentId}`
     }
     if (copyOfId !== "0") {
         queryString += `&copyOf=${copyOfId}`
     }
-    console.log(parentId, copyOfId, queryString)
+    if(requires !== "0") {
+        queryString += `&requires=${requires}`
+    }
 
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 

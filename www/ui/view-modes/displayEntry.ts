@@ -1870,6 +1870,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         libraryId: item.Library || undefined,
         copyOf: item.ItemId,
         parentId: item.ParentId || undefined,
+        requires: item.Requires || undefined,
         tags: item.Collection,
         location: item.Location,
         "user-notes": user.Notes,
