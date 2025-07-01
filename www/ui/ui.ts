@@ -600,7 +600,7 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let artStyle = 0
 
-    const styles = ['is-anime-art', 'is-cartoon', 'is-handrawn', 'is-digital-art', 'is-cgi', 'is-live-action']
+    const styles = ['is-anime-art', 'is-cartoon', 'is-handrawn', 'is-digital-art', 'is-cgi', 'is-live-action', 'is-2d', 'is-3d']
     for (let i = 0; i < styles.length; i++) {
         let style = styles[i]
         if (data.get(style)) {

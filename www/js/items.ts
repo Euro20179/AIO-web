@@ -22,8 +22,10 @@ const AS_HANDRAWN = 4
 const AS_DIGITAL = 8
 const AS_CGI = 16
 const AS_LIVE_ACTION = 32
+const AS_2D = 64
+const AS_3D = 128
 
-type ASName = "Anime" | "Cartoon" | "Handrawn" | "Digital" | "CGI" | "Liveaction"
+type ASName = "Anime" | "Cartoon" | "Handrawn" | "Digital" | "CGI" | "Liveaction" | "2D" | "3D"
 
 type ArtStyle = typeof AS_ANIME
     | typeof AS_CARTOON
@@ -761,9 +763,14 @@ function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
         case "CGI":
             item.ArtStyle |= AS_CGI
             break
-
         case "Liveaction":
             item.ArtStyle |= AS_LIVE_ACTION
+            break
+        case "2D":
+            item.ArtStyle |= AS_2D
+            break
+        case "3D":
+            item.ArtStyle |= AS_3D
             break
     }
     return item
