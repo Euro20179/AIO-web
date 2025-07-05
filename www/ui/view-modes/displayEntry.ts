@@ -1438,28 +1438,23 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //Required items
     const requiredItemsEl = el.getElementById("required-items")
     if (requiredItemsEl && item.Requires !== 0n) {
-        requiredItemsEl.innerHTML = ""
         const requiredItem = findInfoEntryById(item.Requires)
         let meta = findMetadataById(requiredItem.ItemId)
-        let el: HTMLElement
-        if (meta?.Thumbnail) {
-            el = document.createElement("img")
+        let el = requiredItemsEl.querySelector("#required-item") as HTMLElement
+        if (el instanceof HTMLImageElement) {
             formatToName(requiredItem.Format).then(name => {
                 el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
             })
-            //@ts-ignore
             el.src = fixThumbnailURL(meta.Thumbnail)
+            el.alt = requiredItem.En_Title || requiredItem.Native_Title
         } else {
-            el = document.createElement("button")
             formatToName(requiredItem.Format).then(name => {
                 el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
             })
-            el.textContent = requiredItem.En_Title
+            el.innerText = requiredItem.En_Title || requiredItem.Native_Title
         }
         el.onclick = () => toggleItem(requiredItem)
         requiredItemsEl.appendChild(el)
-    } else if (requiredItemsEl) {
-        requiredItemsEl.style.display = "none"
     }
 
     //Events
