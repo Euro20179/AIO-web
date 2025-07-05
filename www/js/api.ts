@@ -107,7 +107,7 @@ function _api_mkIntItemId(jsonl: string) {
 }
 
 function _api_parseJsonL(jsonl: string) {
-    const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library"]
+    const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library", "Requires"]
     try {
         return JSON.parse(jsonl, (key, v) => {
             return bigIntProperties.includes(key) ? BigInt(v) : v

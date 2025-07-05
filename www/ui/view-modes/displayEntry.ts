@@ -12,8 +12,12 @@ class DisplayMode extends Mode {
                 //@ts-ignore
                 if (this.parent.scrollHeight - this.parent.scrollTop > innerHeight + 1000) return
 
-                if (this.displayQueue.length)
-                    renderDisplayItem.call(this, this.displayQueue.shift()?.ItemId)
+                if (this.displayQueue.length) {
+                    const item = this.displayQueue.shift()
+                    if (item?.ItemId) {
+                        renderDisplayItem.call(this, item.ItemId)
+                    }
+                }
             })
         }
     }
@@ -356,8 +360,12 @@ class DisplayMode extends Mode {
                 newOutput.addEventListener("scroll", (e) => {
                     if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
 
-                    if (this.displayQueue.length)
-                        renderDisplayItem.call(this, this.displayQueue.shift()?.ItemId)
+                    if (this.displayQueue.length) {
+                        const item = this.displayQueue.shift()
+                        if (item?.ItemId) {
+                            renderDisplayItem.call(this, item.ItemId)
+                        }
+                    }
                 })
             }
         }
@@ -1427,6 +1435,32 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         createRelationButtons.call(this, relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
+    //Required items
+    const requiredItemsEl = el.getElementById("required-items")
+    if (requiredItemsEl && item.Requires !== 0n) {
+        requiredItemsEl.innerHTML = ""
+        const requiredItem = findInfoEntryById(item.Requires)
+        let meta = findMetadataById(requiredItem.ItemId)
+        let el: HTMLElement
+        if (meta?.Thumbnail) {
+            el = document.createElement("img")
+            formatToName(requiredItem.Format).then(name => {
+                el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
+            })
+            //@ts-ignore
+            el.src = fixThumbnailURL(meta.Thumbnail)
+        } else {
+            el = document.createElement("button")
+            formatToName(requiredItem.Format).then(name => {
+                el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
+            })
+            el.textContent = requiredItem.En_Title
+        }
+        el.onclick = () => toggleItem(requiredItem)
+        requiredItemsEl.appendChild(el)
+    } else if (requiredItemsEl) {
+        requiredItemsEl.style.display = "none"
+    }
 
     //Events
     updateEventsDisplay.call(this, el, user.ItemId)

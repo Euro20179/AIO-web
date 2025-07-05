@@ -879,7 +879,13 @@
     <!-- <div id="relationship-display"> -->
     <hr>
 
-    <div class="flex row wrap">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <section id="required-section">
+            <h4 class="center">Required</h4>
+            <div id="required-items" class="flex wrap">
+                <img id="required-item">
+            </div>
+        </section>
         <section class="descendants" id="descendants-section">
             <div>
                 <h4 class="center">Children</h4>

@@ -319,6 +319,22 @@
         width: auto;
     }
 
+    #required-section {
+        &:has(#required-items:not(:empty)) {
+            display: block;
+        }
+        &:has(#required-items:empty) {
+            display: none;
+        }
+
+        #required-items {
+            justify-content: center;
+        }
+
+        img {
+            cursor: pointer;
+        }
+    }
 
     :is(#description, #notes) {
         overflow: auto auto;
@@ -347,7 +363,6 @@
         }
 
         justify-self: center;
-        padding: 0;
     }
 
 
