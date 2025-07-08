@@ -180,7 +180,7 @@ statistics[0].resetable = false
 
 document.addEventListener("keydown", e => {
 
-    if (e.key === "ArrowUp" || e.key === "ArrowDown" && (e.shiftKey || e.ctrlKey)) {
+    if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
             focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
         } else focusNextSidebarItem(e.key === "ArrowUp")
