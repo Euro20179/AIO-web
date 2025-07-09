@@ -1413,10 +1413,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     el.host.setAttribute("data-user-status", user.Status)
 
-    const lengthInNumber = mediaDependant[`${type}-episodes`] || mediaDependant[`${type}-volumes`]
+    const lengthInNumber = mediaDependant[`${type}-episodes`] || mediaDependant[`${type}-volumes`] || mediaDependant[`${type}-chapters`] || mediaDependant[`${type}-page-count`] || 0
 
-    if (progressEl && "max" in progressEl && "value" in progressEl && lengthInNumber && user.Status === "Viewing") {
-        progressEl.max = lengthInNumber
+    if (progressEl && "max" in progressEl && "value" in progressEl && user.Status === "Viewing") {
+        progressEl.max = lengthInNumber || 1
 
         progressEl.value = userPos || 0
 
