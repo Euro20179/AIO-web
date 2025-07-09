@@ -656,31 +656,18 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl(text).next().value
 
-    //FIXME: should only load new item's events
-    Promise.all([
-        api_getEntryMetadata(json.ItemId, getUidUI()),
-        api_loadList<UserEvent>("engagement/list-events", getUidUI())
-    ]).then(res => {
-        let [x, y] = res
-        let meta, events
-        if (x === null || probablyMetaEntry(x)) {
-            if (x === null) {
-                alert("Failed to load new item metadata, please reload")
-            }
-            meta = x || genericMetadata(json.ItemId)
-            events = y
-        } else {
-            events = y
-            meta = x
+    api_getEntryAll(json.ItemId, json.Uid).then(async res => {
+        if(res === null) {
+            console.error("failed to get entry data")
+            return
         }
-
-        events = events.filter(v => v.ItemId === json.ItemId)
+        let { meta, events, user, info} = res
 
         items_addItem({
             meta,
-            user: genericUserEntry(json.ItemId),
-            events: [],
-            info: json
+            user,
+            events,
+            info
         })
 
         ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)

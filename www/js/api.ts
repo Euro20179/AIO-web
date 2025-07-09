@@ -277,7 +277,7 @@ async function api_queryV3(searchString: string, uid: number, orderby: string = 
         case "item-id":
             orderby = "entryInfo.itemId"
             break
-            //in case the order by doesnt exist on the server
+        //in case the order by doesnt exist on the server
         default:
             orderby = ""
     }
@@ -422,6 +422,21 @@ async function api_getEntryMetadata(itemId: bigint, uid: number) {
     return api_deserializeJsonl(await res.text()).next().value as MetadataEntry
 }
 
+async function api_getEntryAll(itemId: bigint, uid: number) {
+    let res = await fetch(`${apiPath}/get-all-for-entry?id=${itemId}&uid=${uid}`)
+    if (res.status !== 200) {
+        return null
+    }
+    const text = await res.text()
+    const [user, meta, info, ...events] = text.split("\n")
+    return {
+        user: api_deserializeJsonl<UserEntry>(user).next().value,
+        meta: api_deserializeJsonl<MetadataEntry>(meta).next().value,
+        info: api_deserializeJsonl<InfoEntry>(info).next().value,
+        events: [...api_deserializeJsonl<UserEvent>(events)].filter(Boolean),
+    }
+}
+
 async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
     let qs = `?uid=${uid}&id=${itemId}`
     if (provider) {
@@ -458,6 +473,7 @@ async function api_listAccounts() {
     const users = (await res.text()).split("\n").filter(Boolean)
     return users
 }
+
 
 async function api_authorized(auth: string): Promise<false | number> {
     let res = await fetch(`${AIO}/account/authorized`, {
