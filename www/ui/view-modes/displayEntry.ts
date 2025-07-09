@@ -1689,6 +1689,7 @@ height: 100%;
 
     if (notesEditBox && "value" in notesEditBox) {
         notesEditBox.onchange = () => {
+            const user = findUserEntryById(item.ItemId)
             user.Notes = String(notesEditBox.value)
 
             const userStringified = api_serializeEntry(user)
