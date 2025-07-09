@@ -311,7 +311,11 @@ function items_getAllMeta() {
 async function items_refreshUserEntries(uid: number) {
     let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
     for (let item of items) {
-        globalsNewUi.entries[String(item.ItemId)].user = item
+        try {
+            globalsNewUi.entries[String(item.ItemId)].user = item
+        } catch (err) {
+            console.error(`${item.ItemId} is an orphaned user entry`)
+        }
     }
 }
 
@@ -531,7 +535,7 @@ function typeToSymbol(type: string): string {
 */
 function items_formatToSymbol(format: number): string {
     let out = ""
-    if(items_isDigitized(format)) {
+    if (items_isDigitized(format)) {
         format -= DIGI_MOD
         out = "+d"
     }
