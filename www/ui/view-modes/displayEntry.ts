@@ -240,6 +240,9 @@ class DisplayMode extends Mode {
         editstyles: this.displayEntryAction((item, root, elem) => {
             const styleEditor = root.getElementById("style-editor")
             if (!styleEditor) return
+            if ("value" in styleEditor) {
+                styleEditor.value = getUserExtra(findUserEntryById(item.ItemId), "styles")
+            }
             styleEditor.hidden = !styleEditor.hidden
             styleEditor.onchange = util_debounce(() => {
                 this.de_actions["save"](elem)
@@ -1513,6 +1516,9 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
     if (currentEditedObj && "value" in currentEditedObj) {
         currentEditedObj.onchange = function() {
             const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+            //these may or may not load in time by the time we get to this closure
+            user = findUserEntryById(item.ItemId)
+            meta = findMetadataById(item.ItemId)
             switch (currentEditedObj.value) {
                 case "user-extra":
                     updateObjectTbl(JSON.parse(user.Extra), objectTbl)
