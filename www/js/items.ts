@@ -86,6 +86,7 @@ type InfoEntry = {
 }
 
 type UserEntry = {
+    Uid: number,
     ItemId: bigint
     Status: UserStatus
     ViewCount: number
@@ -97,6 +98,7 @@ type UserEntry = {
 }
 
 type MetadataEntry = {
+    Uid: number,
     ItemId: bigint
     Rating: number
     RatingMax: number
@@ -122,8 +124,8 @@ class items_Entry {
 
     constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
         this.info = typeof info === 'bigint' ? genericInfo(info, 0) : info
-        this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId)
-        this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId)
+        this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
+        this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.events = events || []
     }
 
@@ -179,7 +181,7 @@ async function loadMetadataById(id: bigint, uid = 0): Promise<MetadataEntry> {
     let m = await api_getEntryMetadata(id, uid)
     if (m === null) {
         alert(`Failed to load metadata for id: ${id}`)
-        return globalsNewUi.entries[String(id)].meta = genericMetadata(id)
+        return globalsNewUi.entries[String(id)].meta = genericMetadata(id, uid)
     }
     return globalsNewUi.entries[String(id)].meta = m
 }
@@ -200,7 +202,7 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
 */
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.meta || genericMetadata(id)
+    return globalsNewUi.entries[String(id)]?.meta || genericMetadata(id, 0)
 }
 
 /**
@@ -211,7 +213,7 @@ function findMetadataById(id: bigint): MetadataEntry {
 */
 function findUserEntryById(id: bigint): UserEntry {
     console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.user || genericUserEntry(id)
+    return globalsNewUi.entries[String(id)]?.user || genericUserEntry(id, 0)
 }
 
 /**
@@ -251,14 +253,16 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         En_Title: "",
         CopyOf: 0n,
         Library: 0n,
+        Requires: 0n,
 
         Tags: []
     }
 }
 
 
-function genericMetadata(itemId: bigint): MetadataEntry {
+function genericMetadata(itemId: bigint, uid: number): MetadataEntry {
     return {
+        Uid: uid,
         ItemId: itemId,
         Rating: 0,
         RatingMax: 0,
@@ -270,12 +274,14 @@ function genericMetadata(itemId: bigint): MetadataEntry {
         Title: "",
         Native_Title: "",
         Provider: "",
-        ProviderID: ""
+        ProviderID: "",
+        Genres: "",
     }
 }
 
-function genericUserEntry(itemId: bigint): UserEntry {
+function genericUserEntry(itemId: bigint, uid: number): UserEntry {
     return {
+        Uid: uid,
         ItemId: itemId,
         Status: "",
         ViewCount: 0,
