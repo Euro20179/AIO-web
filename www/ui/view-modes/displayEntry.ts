@@ -1269,12 +1269,13 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             del.classList.add("delete")
 
             del.onclick = () => {
-                api_deleteEntryTags(item.ItemId, [tag])
+                const info = findInfoEntryById(item.ItemId)
+                api_deleteEntryTags(info.ItemId, [tag])
                     .then(res => {
                         if (res?.status !== 200) return ""
                         res.text().then(() => {
-                            item.Tags = item.Tags.filter((t: string) => t != tag)
-                            changeDisplayItemData.call(this, item, user, meta, events, el.host as HTMLElement)
+                            info.Tags = info.Tags.filter((t: string) => t != tag)
+                            changeDisplayItemData.call(this, info, user, meta, events, el.host as HTMLElement)
                         })
                     })
                     .catch(console.error)
@@ -1383,6 +1384,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && (viewCount || user.Minutes)) {
+        const user = findUserEntryById(item.ItemId)
         let mins = user.Minutes
             || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0)
 
@@ -1492,19 +1494,20 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
             const cb = root.getElementById(`is-${as[a]}`)
             if (!cb || !(cb instanceof HTMLInputElement)) continue
             cb.onchange = (e) => {
+                const itemNew = findInfoEntryById(item.ItemId)
                 const cb = e.target as HTMLInputElement
                 const name = cb.getAttribute("id")?.slice(3) as ASName
                 if (cb.checked) {
-                    items_setArtStyle(item, name)
+                    items_setArtStyle(itemNew, name)
                 } else {
-                    items_unsetArtStyle(item, name)
+                    items_unsetArtStyle(itemNew, name)
                 }
 
-                api_setItem("", item).then(() => {
+                api_setItem("", itemNew).then(() => {
                     alert(cb.checked ? `${name} set` : `${name} unset`)
                     updateInfo2({
-                        [String(item.ItemId)]: {
-                            info: item
+                        [String(itemNew.ItemId)]: {
+                            info: itemNew
                         }
                     })
                 })
@@ -1741,11 +1744,12 @@ height: 100%;
             const name = await promptUI("Tag name (, seperated)")
             if (!name) return
             let names = name.split(",")
-            item.Tags = item.Tags?.concat(names) || names
-            api_addEntryTags(item.ItemId, name.split(","))
+            const info = findInfoEntryById(item.ItemId)
+            info.Tags = info.Tags?.concat(names) || names
+            api_addEntryTags(info.ItemId, name.split(","))
                 .then(res => {
                     if (res?.status !== 200) return ""
-                    res.text().then(() => changeDisplayItemData.call(this, item, user, meta, events, el))
+                    res.text().then(() => changeDisplayItemData.call(this, info, user, meta, events, el))
                 })
                 .catch(console.error)
         }
@@ -1754,11 +1758,12 @@ height: 100%;
     const locationEl = root.getElementById("location-link")
     if (locationEl && 'value' in locationEl) {
         locationEl.onchange = async () => {
-            item.Location = String(locationEl.value)
-            await api_setItem("", item)
+            const info = findInfoEntryById(item.ItemId)
+            info.Location = String(locationEl.value)
+            await api_setItem("", info)
             updateInfo2({
-                [String(item.ItemId)]: {
-                    info: item
+                [String(info.ItemId)]: {
+                    info: info
                 }
             })
         }
