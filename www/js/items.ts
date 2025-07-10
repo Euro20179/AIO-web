@@ -511,6 +511,7 @@ function typeToSymbol(type: string): string {
         "Movie": "📽",
         "MovieShort": "⏯",
         "Book": "📚︎",
+        "ShortStory": "S📚︎",
         "Manga": "本",
         "Game": "🎮︎",
         "Song": "♫",

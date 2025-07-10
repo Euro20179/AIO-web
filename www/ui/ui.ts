@@ -913,6 +913,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null
         "Song": "General",
         "Book": "Reading",
         "Manga": "Reading",
+        "ShortStory": "Reading",
         "Game": "Activity",
         "BoardGame": "Activity",
         "Collection": "Meta",
