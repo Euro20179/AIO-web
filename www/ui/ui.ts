@@ -912,6 +912,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null
         "Picture": "General",
         "Song": "Music",
         "Albumn": "Music",
+        "Soundtrack": "Music",
         "Book": "Reading",
         "Manga": "Reading",
         "ShortStory": "Reading",

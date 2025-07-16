@@ -55,7 +55,8 @@ type EntryType = "Show" |
     "Picture" |
     "Meme" |
     "Library" |
-    "Albumn"
+    "Albumn" |
+    "Soundtrack"
 
 type UserEvent = {
     EventId: number
@@ -522,6 +523,7 @@ function typeToSymbol(type: string): string {
         "Meme": "🃏",
         "Video": "📼",
         "Albumn": "A♫",
+        "Soundtrack": "📺︎♫",
         "Unowned": "X",
     }
     if (type in conversion) {
