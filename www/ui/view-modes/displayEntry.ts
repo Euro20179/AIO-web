@@ -1414,6 +1414,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
 
+    //TODO:
+    //for each [P]x[/y] in userPos create a progress element
+    //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
+    //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
+    //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
+    //"," is optional
     let userPos = parseInt(user.CurrentPosition)
 
     el.host.setAttribute("data-user-status", user.Status)
