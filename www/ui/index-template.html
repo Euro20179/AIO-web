@@ -136,7 +136,7 @@
                 <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form">
-                    <a href="/usage#searching" id="help-link">?</a>
+                        <a onclick="location = `/settings.html?uid=${getUidUI()}`" id="help-link">⚙</a>
                     <input type="search" name="search-query" placeholder="search query">
                     <div class="grid">
                         <select name="sort-by" title="sort by">
