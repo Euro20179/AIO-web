@@ -18,7 +18,8 @@ const settings = {
          * 11: " 1"
          * 12: ""
          */
-    } as Record<number, string>
+    } as Record<number, string>,
+    location_generator: "" as `${string}{}${string}` | ((info: InfoEntry) => string)
 } as const
 
 type Settings = typeof settings

@@ -23,22 +23,22 @@ if (viewAllElem instanceof HTMLInputElement)
     })
 
 const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
-if(newWindow)
-newWindow.onclick = function() {
-    let urlParams = new URLSearchParams(location.search)
-    urlParams.set("display", "true")
-    urlParams.set("no-select", "true")
-    urlParams.set("no-startup", "true")
-    urlParams.set("no-mode", "true")
-    const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
-    const win = open(newURL, "_blank", "popup=true")
-    if (!win) return
-    const mode = mode_getFirstModeInWindow(catalogWin || window)
-    if (!mode) return
-    win.onload = () => {
-        mode_setMode(mode.NAME, win as Window & typeof globalThis)
+if (newWindow)
+    newWindow.onclick = function() {
+        let urlParams = new URLSearchParams(location.search)
+        urlParams.set("display", "true")
+        urlParams.set("no-select", "true")
+        urlParams.set("no-startup", "true")
+        urlParams.set("no-mode", "true")
+        const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
+        const win = open(newURL, "_blank", "popup=true")
+        if (!win) return
+        const mode = mode_getFirstModeInWindow(catalogWin || window)
+        if (!mode) return
+        win.onload = () => {
+            mode_setMode(mode.NAME, win as Window & typeof globalThis)
+        }
     }
-}
 
 function setError(text: string) {
     const errorOut = currentDocument().getElementById("error")
@@ -620,11 +620,11 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["libraryId"]
     }
 
-    if(validEntries["requires"] && validEntries["requires"] == "0") {
+    if (validEntries["requires"] && validEntries["requires"] == "0") {
         delete validEntries["requires"]
     }
 
-    if(validEntries["copyOf"] && validEntries["copyOf"] == "0") {
+    if (validEntries["copyOf"] && validEntries["copyOf"] == "0") {
         delete validEntries["copyOf"]
     }
 
@@ -641,7 +641,7 @@ async function newEntryUI(form: HTMLFormElement) {
     if (copyOfId !== "0") {
         queryString += `&copyOf=${copyOfId}`
     }
-    if(requires !== "0") {
+    if (requires !== "0") {
         queryString += `&requires=${requires}`
     }
 
@@ -657,11 +657,11 @@ async function newEntryUI(form: HTMLFormElement) {
     let json = api_deserializeJsonl(text).next().value
 
     api_getEntryAll(json.ItemId, json.Uid).then(async res => {
-        if(res === null) {
+        if (res === null) {
             console.error("failed to get entry data")
             return
         }
-        let { meta, events, user, info} = res
+        let { meta, events, user, info } = res
 
         items_addItem({
             meta,
@@ -679,6 +679,16 @@ async function newEntryUI(form: HTMLFormElement) {
 
 const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
 if (newItemForm) {
+    const title = newItemForm.querySelector('[name="title"]') as HTMLInputElement
+    newItemForm.oninput = function() {
+        const location = newItemForm.querySelector('[name="location"]') as HTMLInputElement
+        if(typeof settings.location_generator === 'string') {
+            location.value = settings.location_generator.replaceAll("{}", title.value)
+        } else if(typeof settings.location_generator === 'function') {
+            const info = new FormData(newItemForm)
+            location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()))
+        }
+    }
     newItemForm.onsubmit = function() {
         newEntryUI(newItemForm)
     }
