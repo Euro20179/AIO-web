@@ -84,6 +84,10 @@
         }
     }
 
+    #gallery-output {
+        width: 100%;
+    }
+
     #sidebar-form {
         position: relative;
     }
@@ -96,8 +100,10 @@
         margin: 0 1ch;
     }
 
-    #gallery-items img {
-        width: 200px;
+    #gallery-items {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
     }
 
     #view-all {

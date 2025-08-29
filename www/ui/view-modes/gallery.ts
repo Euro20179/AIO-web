@@ -1,14 +1,31 @@
 function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment) {
-    let el = new Image()
+    const entry = document.createElement("gallery-entry")
+    const root = entry.shadowRoot
+    if(!root) {
+        alert("Could not add gallery item, gallery-entry has no shadowroot")
+        return
+    }
+
+    entry.setAttribute("data-item-id", String(item.ItemId))
+
     let meta = findMetadataById(item.ItemId)
     if (meta?.Thumbnail) {
-        el.src = fixThumbnailURL(meta.Thumbnail)
-    }
-    el.title = item.En_Title
-    el.setAttribute("data-item-id", String(item.ItemId))
+        const thumb = fixThumbnailURL(meta.Thumbnail)
 
-    parent.appendChild(el)
-    return el
+        const thumbImg = root.querySelector("#thumbnail") as HTMLImageElement
+        thumbImg.src = thumb
+    }
+
+    const title = item.En_Title || meta.Title || item.Native_Title || meta.Native_Title
+    const titleE = root.querySelector("#title") as HTMLElement
+    titleE.append(title)
+
+    const rating = findUserEntryById(item.ItemId).UserRating
+    const ratingE = root.querySelector("#rating") as HTMLSpanElement
+    ratingE.append(String(rating))
+
+    parent.appendChild(entry)
+    return entry
 }
 
 class GalleryMode extends Mode {

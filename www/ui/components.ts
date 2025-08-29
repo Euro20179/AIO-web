@@ -102,3 +102,15 @@ customElements.define("calc-entry", class extends HTMLElement {
         el.innerHTML = nv
     }
 })
+
+customElements.define("gallery-entry", class extends HTMLElement {
+    root: ShadowRoot
+    constructor() {
+        super()
+        let template = document.getElementById("gallery-entry") as HTMLTemplateElement
+        let content = template.content.cloneNode(true)
+        let root = this.attachShadow({mode: "open"})
+        root.appendChild(content)
+        this.root = root
+    }
+})
