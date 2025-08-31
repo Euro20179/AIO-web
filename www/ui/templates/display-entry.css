@@ -296,12 +296,7 @@
         margin-top: var(--small-gap);
     }
 
-    #relationship-display {
-        flex-wrap: wrap;
-    }
-
-    #descriptors>section,
-    #relationship-display>section {
+    #descriptors>section {
         border: 5px solid var(--secondary);
         border-radius: calc(var(--border-roundness) * 5);
         flex-grow: 1;
@@ -314,8 +309,13 @@
         overflow: auto;
     }
 
+    #relationship-display {
+        flex-wrap: wrap;
+    }
+
     #relationship-display>section {
         margin: var(--small-gap) 0;
+
         width: auto;
     }
 
