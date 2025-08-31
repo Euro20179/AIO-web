@@ -289,6 +289,14 @@
         vertical-align: middle;
     }
 
+    #item-interaction-menu {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 1rem;
+
+        padding: 0
+    }
+
     #descriptors {
         display: flex;
         gap: 2cqi;
