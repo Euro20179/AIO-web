@@ -13,8 +13,6 @@ const librarySelector = document.getElementById("library-selector") as HTMLSelec
 const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
 const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
 
-
-
 const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
     let [k, ...val] = v.trim().split("=")
     let valAll = val.join("=")
@@ -29,7 +27,7 @@ if (cookies['uid']) {
     storeUserUID(cookies['uid'])
 }
 
-viewToggle.addEventListener("change", e => {
+viewToggle?.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 

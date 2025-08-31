@@ -265,12 +265,12 @@ class DisplayMode extends Mode {
             preview.onload = () => {
                 preview.document.body.innerHTML = ""
                 preview.document.title = `${item.En_Title} PREVIEW`
-                renderDisplayItem.call(this, item.ItemId, templEditor.value)
+                preview.document.body.replaceChildren(renderDisplayItem.call(this, item.ItemId, templEditor.value))
             }
 
             templEditor.onkeyup = () => {
                 preview.document.body.innerHTML = ""
-                renderDisplayItem.call(this, item.ItemId, templEditor.value)
+                preview.document.body.replaceChildren(renderDisplayItem.call(this, item.ItemId, templEditor.value))
             }
         }),
         copyto: this.displayEntryAction(async (item) => {

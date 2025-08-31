@@ -7,7 +7,7 @@ function alert(text: string) {
     const el = document.createElement("div")
     el.classList.add("notification")
     el.innerText = text
-    notificationsArea.append(el)
+    notificationsArea?.append(el)
     el.onclick = el.remove.bind(el)
     setTimeout(el.remove.bind(el), 15000)
 }
