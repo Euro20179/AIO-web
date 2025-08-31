@@ -187,6 +187,9 @@
             #sidebar {
                 width: 100vw;
             }
+            #sidebar-items {
+                display: grid;
+            }
         }
 
         &.display-mode {
@@ -503,7 +506,6 @@
 
         @container body (width < 800px) {
             display: flex;
-            grid-column: 1 / -1;
             flex-direction: row;
             min-width: fit-content;
             min-height: fit-content;
