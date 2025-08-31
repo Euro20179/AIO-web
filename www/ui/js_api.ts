@@ -22,8 +22,11 @@ function ua_download(data: string, name: string, ft: string): number {
 function ua_setfavicon(path: string) {
     let link = (document.querySelector("link[rel=\"shortcut icon\"]") || document.createElement("link")) as HTMLLinkElement
     link.setAttribute("rel", "shortcut icon")
-    link.href = path
-    document.head.append(link)
+    //prevent unecessary fetching
+    if (link.href !== path) {
+        link.href = path
+        document.head.append(link)
+    }
 }
 
 /**
