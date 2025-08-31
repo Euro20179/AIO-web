@@ -292,7 +292,7 @@
     #item-interaction-menu {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-        gap: 1rem;
+        gap: calc(var(--small-gap) / 2);
 
         padding: 0
     }
