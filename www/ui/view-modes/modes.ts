@@ -74,6 +74,37 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
     }
 }
 
+async function refreshInfo(uid: number) {
+    await Promise.all([
+        loadLibraries(),
+        loadInfoEntries(),
+    ])
+    return Promise.all([
+        loadUserEvents(uid),
+        items_refreshMetadata(uid)
+    ])
+}
+
+async function loadLibraries() {
+    await items_loadLibraries(getUidUI())
+    updateLibraryDropdown()
+}
+
+async function loadInfoEntries() {
+    setError("Loading items")
+
+    await items_refreshInfoEntries(getUidUI())
+
+    setError("")
+
+    items_refreshUserEntries(getUidUI()).then(() => {
+        updateInfo2(items_getAllEntries())
+    })
+
+    return items_getAllEntries()
+}
+
+
 function mode_getFirstModeInWindow(win: Window) {
     for(let mode of openViewModes) {
         if(mode.win === win) {

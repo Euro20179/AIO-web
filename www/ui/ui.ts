@@ -3,6 +3,18 @@
  * with client-side inputs
 */
 
+const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
+const viewToggle = document.getElementById("view-toggle") as HTMLSelectElement
+const viewAllElem = document.getElementById("view-all")
+const statsOutput = document.getElementById("result-stats") as HTMLElement
+const itemFilter = document.getElementById("item-filter") as HTMLInputElement
+const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
+const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
+const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
+const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+
+
+
 const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
     let [k, ...val] = v.trim().split("=")
     let valAll = val.join("=")
@@ -17,15 +29,28 @@ if (cookies['uid']) {
     storeUserUID(cookies['uid'])
 }
 
-document.getElementById("view-toggle")?.addEventListener("change", e => {
+viewToggle.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 
-const viewAllElem = document.getElementById("view-all")
+if(librarySelector)
+librarySelector.onchange = function() {
+    let val = librarySelector.value
+    items_setCurrentLibrary(BigInt(val))
 
-const statsOutput = document.getElementById("result-stats") as HTMLElement
+    loadSearchUI()
+}
 
-const itemFilter = document.getElementById("item-filter") as HTMLInputElement
+if(userSelector)
+userSelector.onchange = function() {
+    refreshInfo(getUidUI()).then(() => loadSearchUI())
+}
+
+if(sortBySelector)
+sortBySelector.onchange = function() {
+    sortEntriesUI()
+}
+
 if (itemFilter) {
     itemFilter.oninput = function() {
         renderSidebar(getFilteredResultsUI(), true)
@@ -45,7 +70,6 @@ if (viewAllElem instanceof HTMLInputElement)
         }
     })
 
-const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
 if (newWindow)
     newWindow.onclick = function() {
         let urlParams = new URLSearchParams(location.search)
@@ -210,13 +234,12 @@ document.addEventListener("keydown", e => {
             break
         }
         case "A": {
-            viewAllElem.click()
+            viewAllElem && viewAllElem.click()
             e.preventDefault()
             break
         }
         case "m": {
             e.preventDefault()
-            let viewToggle = document.getElementById("view-toggle") as HTMLSelectElement
             viewToggle.focus()
             break
         }
@@ -585,6 +608,115 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
             }
         })
     })
+}
+
+function updateLibraryDropdown() {
+    librarySelector.innerHTML = '<option value="0">Library</option>'
+    const libraries = items_getLibraries()
+    for (let i in libraries) {
+        let item = libraries[i]
+        const opt = document.createElement("option")
+        opt.value = String(item["ItemId"])
+        opt.innerText = item["En_Title"]
+        librarySelector.append(opt)
+    }
+    newEntryLibrarySelector.innerHTML = librarySelector.innerHTML
+}
+
+/**
+ * pulls out relevant filters for the client
+ * has the side effect of modifying search-query, removing any parts deemed filters for the client
+ * eg: \[start:end\]
+ */
+function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilters {
+    // let start = 0
+    // let end = -1
+
+    let search = searchForm.get("search-query") as string
+    let inBracket = 0
+    let filterStartPos = -1
+    for (let i = 0; i < search.length; i++) {
+        if (search[i] === "{") inBracket++
+        else if (search[i] === "}") inBracket--
+        if (i > 2 && search[i - 1] == "-" && search[i] == ">" && inBracket <= 0) {
+            filterStartPos = i - 1
+            break
+        }
+    }
+    let filters: string[] = []
+    if (filterStartPos > -1) {
+        filters = search.slice(filterStartPos).split("->").map(v => v.trim())
+        search = search.slice(0, filterStartPos)
+    }
+
+    let sortBy = searchForm.get("sort-by") as string
+
+    return {
+        filterRules: filters,
+        newSearch: search,
+        sortBy,
+    }
+}
+
+function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSearchFilters) {
+
+    entries = entries.filter(v => v.Library === items_getCurrentLibrary())
+
+    if (filters.sortBy.startsWith("-aiow")) {
+        entries = sortEntries(entries, filters.sortBy)
+    }
+
+    for (let filter of filters.filterRules) {
+        filter = filter.trim()
+        if (filter.startsWith("is")) {
+            let ty = filter.split("is")[1]?.trim()
+            if (!ty) continue
+            ty = ty.replace(/(\w)(\S*)/g, (_, $1, $2) => {
+                return $1.toUpperCase() + $2
+            })
+            entries = entries.filter(v => v.Type == ty)
+        }
+
+        let slicematch = filter.match(/\[(\d*):(-?\d*)\]/)
+        if (slicematch) {
+            let start = +slicematch[1]
+            let end = +slicematch[2]
+            entries = entries.slice(start, end)
+        }
+
+        if (filter.startsWith("/") && filter.endsWith("/")) {
+            let re = new RegExp(filter.slice(1, filter.length - 1))
+            entries = entries.filter(v => v.En_Title.match(re))
+        } else if (filter == "shuffle" || filter == "shuf") {
+            entries = entries.sort(() => Math.random() - Math.random())
+        } else if (filter.startsWith("head")) {
+            const n = filter.slice("head".length).trim() || 1
+            entries = entries.slice(0, Number(n))
+        } else if (filter.startsWith("tail")) {
+            const n = filter.slice("tail".length).trim() || 1
+            entries = entries.slice(entries.length - Number(n))
+        } else if (filter.startsWith("sort")) {
+            let type = filter.slice("sort".length).trim() || "a"
+            const reversed = type.startsWith("-") ? -1 : 1
+            if (reversed == -1) type = type.slice(1)
+            switch (type[0]) {
+                case "a":
+                    entries.sort((a, b) => (a.En_Title > b.En_Title ? 1 : -1) * reversed)
+                    break;
+            }
+        } else if (filter === "!child") {
+            entries = entries.filter(v => v.ParentId === 0n)
+        } else if (filter === "!copy") {
+            entries = entries.filter(v => v.CopyOf === 0n)
+        }
+    }
+
+    // if (filters.end < 0) {
+    //     filters.end += entries.length + 1
+    // }
+    return entries
+    //
+    // return entries.slice(filters.start, filters.end)
 }
 
 /**
@@ -1000,6 +1132,9 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     }
 }
 
+/**
+ * @description keeps track of the window being used to display the information selected by view-toggle
+ */
 let catalogWin: Window | null = null
 
 function isCatalogModeUI() {

@@ -1,3 +1,7 @@
+/**
+ * @requires api.ts
+ */
+
 const DIGI_MOD = 0x1000
 
 type GlobalsNewUi = {
