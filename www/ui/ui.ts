@@ -51,7 +51,22 @@ sortBySelector.onchange = function() {
 
 if (itemFilter) {
     itemFilter.oninput = function() {
-        renderSidebar(getFilteredResultsUI(), true)
+        const filtered = getFilteredResultsUI().map(v => v.ItemId)
+        //remove items that dont match
+        for(let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
+            const id = sidebarE.getAttribute("data-entry-id") as string
+            if(!filtered.includes(BigInt(id))) {
+                sidebarE.remove()
+            }
+        }
+
+        //add items that DO match
+        for(let item of filtered) {
+            renderSidebarItem(findInfoEntryById(item))
+        }
+
+        //reapply sort
+        sortEntriesUI()
     }
 }
 
