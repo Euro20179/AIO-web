@@ -28,20 +28,6 @@
     function getAIOWeb(user) {
         return JSON.parse(user.Extra).AIOWeb || {}
     }
-
-    function getUserExtra(user, prop) {
-        try {
-            return getAIOWeb(user)[prop] || null
-        }
-        catch (err) {
-            console.error(err)
-            return null
-        }
-    }
-
-    function setUserExtra() {
-    }
-
 </script>
 <script src="/config.js"></script>
 <script src="/js/items.js"></script>

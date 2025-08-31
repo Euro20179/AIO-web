@@ -1,18 +1,3 @@
-function fillElement(root: HTMLElement | ShadowRoot, selector: string, text: string, fillmode: "append" | "innerhtml" | `attribute=${string}` = "append") {
-    let elem = /**@type {HTMLElement}*/(root.querySelector(selector))
-    if (!elem) {
-        return
-    }
-    if (fillmode === "append") {
-        elem.textContent = text
-    } else if (fillmode.match(/attribute=.+/)) {
-        let attribute = fillmode.split("=")[1]
-        elem.setAttribute(attribute, text)
-    } else {
-        elem.innerHTML = text
-    }
-}
-
 function applyUserRating(rating: number, root: HTMLElement) {
 
     const tierSettings = settings_get("tiers")
