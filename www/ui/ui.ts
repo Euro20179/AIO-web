@@ -94,6 +94,21 @@ function setError(text: string) {
     }
 }
 
+function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
+    const internalSortName = items_addSort(name, cb)
+    let group = sortBySelector.querySelector(`optgroup[label="${category}"]`)
+    if(!group) {
+        group = document.createElement("optgroup")
+        group.setAttribute("label", category)
+        sortBySelector.appendChild(group)
+    }
+
+    const opt = document.createElement("option")
+    opt.value = internalSortName
+    opt.innerText = name
+    group.append(opt)
+}
+
 function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
     into.setItem.bind(into)("userAuth", auth)
 }

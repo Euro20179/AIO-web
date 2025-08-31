@@ -543,8 +543,9 @@ sorts.set("-aiow-numeric-title", (a, b) => {
     * @param {string} name - the name of the sort
     * @param {((a: InfoEntry, b: InfoEntry) => number} sortFN - the function that does the sorting
 */
-function items_addSort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)) {
+function items_addSort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number), category = "custom") {
     sorts.set(`-aiow-${name}`, sortFN)
+    return `-aiow-${name}`
 }
 
 /**
