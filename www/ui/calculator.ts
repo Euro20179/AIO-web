@@ -1616,11 +1616,8 @@ class CalcVarTable {
             const s = id.jsStr()
             if (s === "s-rand") {
                 return finder(s)
-                // return new Obj(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)])
             } else if (s === "a-rand") {
-                // const v = Object.values(globalsNewUi.entries)
                 return finder(s)
-                // return new Obj(v[Math.floor(Math.random() * v.length)])
             }
 
             const jsId = id.toNum().jsValue
@@ -1651,11 +1648,11 @@ class CalcVarTable {
         this.symbols.set("getall", new Func((of) => {
             let v = of.jsStr()
             if (v === "entry" || v === "info") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.info)))
+                return new Arr(Object.values(items_getAllEntries()).map(v => new EntryTy(v.info)))
             } else if (v === "user") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.user)))
+                return new Arr(Object.values(items_getAllEntries()).map(v => new EntryTy(v.user)))
             } else if (v === "meta") {
-                return new Arr(Object.values(globalsNewUi.entries).map(v => new EntryTy(v.meta)))
+                return new Arr(Object.values(items_getAllEntries()).map(v => new EntryTy(v.meta)))
             }
             return new Arr([])
         }))
@@ -1708,9 +1705,10 @@ class CalcVarTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new EntryTy(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info)
+                        const results = items_getResults()
+                        return new EntryTy(results[Math.floor(Math.random() * results.length)].info)
                     case "a-rand":
-                        const v = Object.values(globalsNewUi.entries)
+                        const v = Object.values(items_getAllEntries())
                         return new EntryTy(v[Math.floor(Math.random() * v.length)].info)
                     default:
                         return new EntryTy(findInfoEntryById(i) as InfoEntry)
@@ -1722,9 +1720,10 @@ class CalcVarTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new EntryTy(findMetadataById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].info.ItemId) as MetadataEntry)
+                        const results = items_getResults()
+                        return new EntryTy(findMetadataById(results[Math.floor(Math.random() * results.length)].info.ItemId) as MetadataEntry)
                     case "a-rand":
-                        const v = Object.values(globalsNewUi.entries)
+                        const v = Object.values(items_getAllEntries())
                         return new EntryTy(findMetadataById(v[Math.floor(Math.random() * v.length)].info.ItemId) as MetadataEntry)
                     default:
                         return new EntryTy(findMetadataById(i) as MetadataEntry)
@@ -1736,9 +1735,10 @@ class CalcVarTable {
             return findByid(id, i => {
                 switch (i) {
                     case "s-rand":
-                        return new EntryTy(findUserEntryById(globalsNewUi.results[Math.floor(Math.random() * globalsNewUi.results.length)].ItemId) as UserEntry)
+                        const results = items_getResults()
+                        return new EntryTy(findUserEntryById(results[Math.floor(Math.random() * results.length)].ItemId) as UserEntry)
                     case "a-rand":
-                        const v = Object.values(globalsNewUi.entries)
+                        const v = Object.values(items_getAllEntries())
                         return new EntryTy(findUserEntryById(v[Math.floor(Math.random() * v.length)].ItemId) as UserEntry)
                     default:
                         return new EntryTy(findUserEntryById(i) as UserEntry)

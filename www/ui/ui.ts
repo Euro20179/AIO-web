@@ -3,11 +3,34 @@
  * with client-side inputs
 */
 
+const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
+    let [k, ...val] = v.trim().split("=")
+    let valAll = val.join("=")
+    return [k, valAll]
+}))
+
+if (cookies['login']) {
+    setUserAuth(cookies['login'])
+    setUIDUI(cookies['uid'])
+}
+if (cookies['uid']) {
+    storeUserUID(cookies['uid'])
+}
+
 document.getElementById("view-toggle")?.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 
 const viewAllElem = document.getElementById("view-all")
+
+const statsOutput = document.getElementById("result-stats") as HTMLElement
+
+const itemFilter = document.getElementById("item-filter") as HTMLInputElement
+if (itemFilter) {
+    itemFilter.oninput = function() {
+        renderSidebar(getFilteredResultsUI(), true)
+    }
+}
 
 if (viewAllElem instanceof HTMLInputElement)
     viewAllElem.addEventListener("change", e => {
@@ -79,19 +102,10 @@ function getCSSProp(name: string, fallback: string) {
     return s.getPropertyValue(name) || fallback
 }
 
-const statsOutput = document.getElementById("result-stats") as HTMLElement
-
-const itemFilter = document.getElementById("item-filter") as HTMLInputElement
-if (itemFilter) {
-    itemFilter.oninput = function() {
-        renderSidebar(getFilteredResultsUI(), true)
-    }
-}
-
-function getFilteredResultsUI(list = globalsNewUi.results): InfoEntry[] {
+function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let newArr = []
     const search = itemFilter.value.toLowerCase()
-    for (let item of list) {
+    for (let item of list || items_getResults()) {
         for (let str of [item.info.En_Title, item.info.Native_Title, item.meta.Title, item.meta.Native_Title]) {
             if (str.toLowerCase().includes(search)) {
                 newArr.push(item.info)
@@ -100,20 +114,6 @@ function getFilteredResultsUI(list = globalsNewUi.results): InfoEntry[] {
         }
     }
     return newArr
-}
-
-const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
-    let [k, ...val] = v.trim().split("=")
-    let valAll = val.join("=")
-    return [k, valAll]
-}))
-
-if (cookies['login']) {
-    setUserAuth(cookies['login'])
-    setUIDUI(cookies['uid'])
-}
-if (cookies['uid']) {
-    storeUserUID(cookies['uid'])
 }
 
 
@@ -288,7 +288,7 @@ const userScripts = new Map<string, UserScript>
 function runUserScriptUI(name: string) {
     const script = userScripts.get(name)
     if (!script) return
-    script.exec(globalsNewUi.selectedEntries, globalsNewUi.results.map(v => v.info))
+    script.exec(items_getSelected(), items_getResults().map(v => v.info))
     closeModalUI("script-select")
 }
 
@@ -447,7 +447,7 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
  * Sorts entries, and reorders the sidebar based on the selected sort in the sort-by selector
  */
 function sortEntriesUI() {
-    let newEntries = sortEntries(globalsNewUi.results.map(v => v.info), sortBySelector.value)
+    let newEntries = sortEntries(items_getResults().map(v => v.info), sortBySelector.value)
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
     clearItems()
@@ -793,7 +793,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
     }
 
     if (!container) {
-        let cpy = { ...globalsNewUi.entries }
+        let cpy = { ...items_getAllEntries() }
         container = fillItemListingUI(cpy, true)
     }
 

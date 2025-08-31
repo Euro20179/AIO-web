@@ -8,7 +8,7 @@ const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") a
 const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
 librarySelector.onchange = function() {
     let val = librarySelector.value
-    globalsNewUi.viewingLibrary = BigInt(val)
+    items_setCurrentLibrary(BigInt(val))
 
     loadSearchUI()
 }
@@ -53,8 +53,9 @@ function setUserExtra(user: UserEntry, prop: string, value: string) {
 
 function updateLibraryDropdown() {
     librarySelector.innerHTML = '<option value="0">Library</option>'
-    for (let i in globalsNewUi.libraries) {
-        let item = globalsNewUi.libraries[i]
+    const libraries = items_getLibraries()
+    for (let i in libraries) {
+        let item = libraries[i]
         const opt = document.createElement("option")
         opt.value = String(item["ItemId"])
         opt.innerText = item["En_Title"]
@@ -76,30 +77,11 @@ async function loadInfoEntries() {
     setError("")
 
     items_refreshUserEntries(getUidUI()).then(() => {
-        updateInfo2(globalsNewUi.entries)
+        updateInfo2(items_getAllEntries())
     })
 
-    return globalsNewUi.entries
+    return items_getAllEntries()
 }
-
-function defaultMetadata(id: bigint): MetadataEntry {
-    return {
-        ItemId: id,
-        Rating: 0,
-        RatingMax: 0,
-        Description: "",
-        ReleaseYear: 0,
-        Thumbnail: "",
-        MediaDependant: "{}",
-        Datapoints: "{}",
-        Native_Title: "",
-        Title: "",
-        Provider: "",
-        Genres: "",
-        ProviderID: ""
-    }
-}
-
 
 /**
  * pulls out relevant filters for the client
@@ -138,7 +120,7 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
 
 function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSearchFilters) {
 
-    entries = entries.filter(v => v.Library === globalsNewUi.viewingLibrary)
+    entries = entries.filter(v => v.Library === items_getCurrentLibrary())
 
     if (filters.sortBy.startsWith("-aiow")) {
         entries = sortEntries(entries, filters.sortBy)
@@ -202,62 +184,6 @@ function normalizeRating(rating: number, maxRating: number) {
     return rating / maxRating * 100
 }
 
-function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry }>>, del: boolean = false) {
-    let updatedLibraries = false
-    for (let id in toUpdate) {
-        if (del) {
-            delete globalsNewUi.entries[id]
-            continue
-        }
-
-        const { user, events, meta, info } = toUpdate[id]
-
-        if (info?.Type === "Library") {
-            if (del)
-                delete globalsNewUi.libraries[id]
-            else
-                globalsNewUi.libraries[id] = info
-
-            updatedLibraries = true
-        }
-
-
-        if (user) {
-            globalsNewUi.entries[id].user = user
-        }
-        if (events) {
-            globalsNewUi.entries[id].events = events
-        }
-        if (meta) {
-            globalsNewUi.entries[id].meta = meta
-        }
-        if (info) {
-            globalsNewUi.entries[id].info = info
-        }
-
-        refreshSidebarItem(BigInt(id))
-        mode_refreshItem(BigInt(id))
-
-        const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
-        if (parent && globalsNewUi.entries[String(parent)]) {
-            //if the parent is this, or itself, just dont update
-            if (![BigInt(id), parent].includes(globalsNewUi.entries[String(parent)].info.ParentId)) {
-                updateInfo2({
-                    [String(parent)]: {
-                        info: findInfoEntryById(parent),
-                        user: findUserEntryById(parent),
-                        events: findUserEventsById(parent),
-                        meta: findMetadataById(parent)
-                    }
-                })
-            }
-        }
-    }
-
-    if (updatedLibraries) {
-        updateLibraryDropdown()
-    }
-}
 
 async function refreshInfo(uid: number) {
     await Promise.all([
@@ -284,7 +210,7 @@ async function main() {
         //just in case
         removeEventListener("aio-items-rendered", onrender)
         items_refreshMetadata(uid).then(() => {
-            for (let item of globalsNewUi.selectedEntries) {
+            for (let item of items_getSelected()) {
                 mode_refreshItem(item.ItemId)
             }
 
@@ -343,7 +269,7 @@ async function main() {
             dispatchEvent(new CustomEvent("aio-items-rendered"))
         })
     } else {
-        let entries = Object.values(globalsNewUi.entries).map(v => v.info)
+        let entries = Object.values(items_getAllEntries()).map(v => v.info)
         entries = sortEntries(entries, sortBySelector.value)
         items_setResults(entries.map(v => v.ItemId))
         renderSidebar(getFilteredResultsUI(), true)
@@ -352,7 +278,7 @@ async function main() {
 
     //do this second because events can get really large, and having to wait for it could take a while
     loadUserEvents(uid).then(() => {
-        for (let item of globalsNewUi.selectedEntries) {
+        for (let item of items_getSelected()) {
             mode_refreshItem(item.ItemId)
         }
     })
@@ -365,7 +291,7 @@ async function remote2LocalThumbService() {
     if (servicing) return
 
     servicing = true
-    for (let item of globalsNewUi.results) {
+    for (let item of items_getResults()) {
         let metadata = item.meta
         let thumbnail = metadata.Thumbnail
 

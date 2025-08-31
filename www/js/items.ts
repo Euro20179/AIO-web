@@ -140,6 +140,25 @@ class items_Entry {
     }
 }
 
+function items_setCurrentLibrary(id: bigint) {
+    globalsNewUi.viewingLibrary = id
+}
+
+function items_getCurrentLibrary(): bigint {
+    return globalsNewUi.viewingLibrary
+}
+
+function items_getLibraries(): Record<string, InfoEntry> {
+    return globalsNewUi.libraries
+}
+
+function items_setLibrary(info: InfoEntry) {
+    globalsNewUi.libraries[String(info.ItemId)] = info
+}
+function items_deleteLibrary(id: string) {
+    delete globalsNewUi.libraries[id]
+}
+
 /**
  * Sets the global results list
  * @param {bigint[]} items - the item ids to set as the reults
@@ -149,6 +168,30 @@ function items_setResults(items: bigint[]) {
     for (let id of items) {
         globalsNewUi.results.push(globalsNewUi.entries[String(id)])
     }
+}
+
+function items_getResults(): items_Entry[] {
+    return globalsNewUi.results
+}
+
+function items_getSelected(): InfoEntry[] {
+    return globalsNewUi.selectedEntries
+}
+
+function items_clearSelected() {
+    globalsNewUi.selectedEntries = []
+}
+
+function items_selectById(id: bigint): void {
+    globalsNewUi.selectedEntries.push(globalsNewUi.entries[String(id)].info)
+}
+
+function items_setSelected(items: InfoEntry[]) {
+    globalsNewUi.selectedEntries = items
+}
+
+function items_deselectById(id: bigint) {
+    globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(v => v.ItemId !== id)
 }
 
 /**
@@ -165,6 +208,18 @@ function items_setEntries(items: InfoEntry[]) {
             stashed.info = item
         }
     }
+}
+
+function items_updateEntryById(id: string, { user, events, meta, info}: Partial<{
+    user: UserEntry,
+    events: UserEvent[],
+    meta: MetadataEntry,
+    info: InfoEntry
+}>) {
+    user && (globalsNewUi.entries[id].user = user)
+    events && (globalsNewUi.entries[id].events = events)
+    meta && (globalsNewUi.entries[id].meta = meta)
+    info && (globalsNewUi.entries[id].info = info)
 }
 
 function items_delEntry(item: bigint) {
@@ -194,6 +249,10 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
         return await loadMetadataById(id)
     }
     return m
+}
+
+function items_getAllEntries() {
+    return globalsNewUi.entries
 }
 
 /**

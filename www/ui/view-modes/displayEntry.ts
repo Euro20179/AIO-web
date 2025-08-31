@@ -406,7 +406,7 @@ class DisplayMode extends Mode {
     }
 
     putSelectedInCollection() {
-        const selected = globalsNewUi.selectedEntries
+        const selected = items_getSelected()
         promptUI("Id of collection").then(collectionName => {
             if (!collectionName) return
 
@@ -427,7 +427,7 @@ class DisplayMode extends Mode {
             if (!tags) return
             const tagsList = tags.split(",")
             //FIXME: tags do not update immediately
-            for (let item of globalsNewUi.selectedEntries) {
+            for (let item of items_getSelected()) {
                 item.Tags = item.Tags.concat(tagsList)
                 api_addEntryTags(item.ItemId, tagsList)
             }
@@ -1113,7 +1113,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
             if (elem.getAttribute("type") === "application/x-aiol") {
                 let symbols = new CalcVarTable()
                 symbols.set("root", new Elem(root as unknown as HTMLElement))
-                symbols.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
+                symbols.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
                 symbols.set("this", new EntryTy(item))
                 res = parseExpression(script, symbols)
             } else {
@@ -1127,7 +1127,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
                     }
                     return await oldFetch(path, opts)
                 }
-                res = new Function("root", "results", script).bind(item)(root, globalsNewUi.results.map(v => v.info), item)
+                res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
                 window.XMLHttpRequest = old
                 window.fetch = oldFetch
             }
@@ -1955,13 +1955,13 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
                     }
                 }
                 alert(`Coppied: ${item.En_Title}`)
-                globalsNewUi.entries[String(itemCopy.ItemId)].info = itemCopy
-                globalsNewUi.entries[String(itemCopy.ItemId)].user = userCopy
-                globalsNewUi.entries[String(itemCopy.ItemId)].meta = metaCopy
+                items_getAllEntries()[String(itemCopy.ItemId)].info = itemCopy
+                items_getAllEntries()[String(itemCopy.ItemId)].user = userCopy
+                items_getAllEntries()[String(itemCopy.ItemId)].meta = metaCopy
                 for (let event of events) {
                     let eventCopy = { ...event }
                     eventCopy.ItemId = itemCopy.ItemId
-                    globalsNewUi.entries[String(itemCopy.ItemId)].events.push(eventCopy)
+                    items_getAllEntries()[String(itemCopy.ItemId)].events.push(eventCopy)
                 }
                 selectItem(itemCopy, true, this)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
@@ -1990,7 +1990,7 @@ function _reloadEvents(itemId: bigint) {
     loadUserEvents(getUidUI())
         .then(() => {
             updateInfo2({
-                [String(itemId)]: globalsNewUi.entries[String(itemId)]
+                [String(itemId)]: items_getAllEntries()[String(itemId)]
             })
         })
 }
@@ -2005,7 +2005,7 @@ function deleteEventForItemId(itemId: bigint, ts: number, after: number, before:
             loadUserEvents(getUidUI())
                 .then(() => {
                     updateInfo2({
-                        [String(itemId)]: globalsNewUi.entries[String(itemId)]
+                        [String(itemId)]: items_getAllEntries()[String(itemId)]
                     })
                 })
         )

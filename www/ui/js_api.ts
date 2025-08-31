@@ -120,7 +120,7 @@ function ui_search(query: string, cb?: (results: items_Entry[]) => any): number 
     (form.querySelector('[name="search-query"]') as HTMLInputElement).value = query
 
     loadSearchUI().then(() => {
-        cb?.(globalsNewUi.results)
+        cb?.(items_getResults())
     }).catch(console.error)
 
     return 0
@@ -319,7 +319,7 @@ function ui_getuid(): number {
  * @returns 0 on success
  */
 function ui_setresults(results: InfoEntry[]): number {
-    globalsNewUi.results = results.map(v => globalsNewUi.entries[String(v.ItemId)])
+    items_setResults(results.map(v => v.ItemId))
     renderSidebar(results)
     return 0
 }
@@ -329,7 +329,7 @@ function ui_setresults(results: InfoEntry[]): number {
  * @returns Array of InfoEntry objects
  */
 function ui_getresults(): InfoEntry[] {
-    return globalsNewUi.results.map(v => v.info)
+    return items_getResults().map(v => v.info)
 }
 
 /**
@@ -337,7 +337,7 @@ function ui_getresults(): InfoEntry[] {
  * @returns Array of InfoEntry objects
  */
 function ui_selected(): InfoEntry[] {
-    return globalsNewUi.selectedEntries
+    return items_getSelected()
 }
 
 /**

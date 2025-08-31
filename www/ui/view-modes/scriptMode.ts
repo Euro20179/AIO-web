@@ -74,7 +74,7 @@ function execute(this: ScriptMode) {
     let script = this.scriptBox.value
 
     let tbl = new CalcVarTable()
-    tbl.set("results", new Arr(globalsNewUi.results.map(v => new EntryTy(v.info))))
+    tbl.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
 
     //@ts-ignore
     if (document.getElementById("script-execute-output-clear")?.checked) {

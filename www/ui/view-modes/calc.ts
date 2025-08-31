@@ -56,7 +56,7 @@ class CalcMode extends Mode {
     }
 
     *_getValidEntries() {
-        const selected = Object.groupBy(globalsNewUi.selectedEntries, item => String(item.ItemId))
+        const selected = Object.groupBy(items_getSelected(), item => String(item.ItemId))
         let elems = this.parent.querySelectorAll(`[data-item-id]`)
 
         for (let elem of elems) {
@@ -105,7 +105,7 @@ class CalcMode extends Mode {
 }
 
 function _updateEachCalcItem(this: CalcMode) {
-    for (let entry of globalsNewUi.selectedEntries) {
+    for (let entry of items_getSelected()) {
         let val = updateExpressionOutput.call(this, entry)
         let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
         el?.setAttribute("data-expression-output", val.jsStr())

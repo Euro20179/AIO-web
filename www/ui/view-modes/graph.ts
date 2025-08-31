@@ -265,9 +265,9 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
     let groupBy = groupBySelect.value
 
     const groupings: Record<string, (i: InfoEntry) => any> = {
-        "Year": i => globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear,
+        "Year": i => items_getAllEntries()[String(i.ItemId)].meta.ReleaseYear,
         "Decade": i => {
-            const year = String(globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear)
+            const year = String(items_getAllEntries()[String(i.ItemId)].meta.ReleaseYear)
             if (year == "0") {
                 return "0"
             }
@@ -276,7 +276,7 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
             return `${century}${decade}0s`
         },
         "Century": i => {
-            const year = String(globalsNewUi.entries[String(i.ItemId)].meta.ReleaseYear)
+            const year = String(items_getAllEntries()[String(i.ItemId)].meta.ReleaseYear)
             if (year == "0") {
                 return "0"
             }
@@ -285,8 +285,8 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
         },
         "Type": i => i.Type,
         "Format": i => api_formatsCache()[i.Format] || "N/A",
-        "Status": i => globalsNewUi.entries[String(i.ItemId)].user.Status,
-        "View-count": i => globalsNewUi.entries[String(i.ItemId)].user.ViewCount,
+        "Status": i => items_getAllEntries()[String(i.ItemId)].user.Status,
+        "View-count": i => items_getAllEntries()[String(i.ItemId)].user.ViewCount,
         "Is-anime": i => (i.ArtStyle & 1) == 1,
         "Item-name": i => i.En_Title
     }
@@ -402,11 +402,11 @@ function makeGraphs(entries: InfoEntry[]) {
 }
 
 groupByInput.onchange = function() {
-    makeGraphs(globalsNewUi.selectedEntries)
+    makeGraphs(items_getSelected())
 }
 
 groupBySelect.onchange = typeSelection.onchange = function() {
-    makeGraphs(globalsNewUi.selectedEntries)
+    makeGraphs(items_getSelected())
 }
 
 function destroyCharts() {
@@ -438,8 +438,8 @@ class GraphMode extends Mode {
             let watchTimes = data
                 .map(v => {
                     return v.map(i => {
-                        let watchCount = globalsNewUi.entries[String(i.ItemId)].user.ViewCount
-                        let thisMeta = globalsNewUi.entries[String(i.ItemId)].meta
+                        let watchCount = items_getAllEntries()[String(i.ItemId)].user.ViewCount
+                        let thisMeta = items_getAllEntries()[String(i.ItemId)].meta
                         let watchTime = getWatchTime(watchCount, thisMeta)
                         return watchTime / 60
                     }).reduce((p, c) => p + c, 0)
@@ -457,14 +457,14 @@ class GraphMode extends Mode {
             let totalRating = 0
             for (let item of items) {
                 totalItems += item.length
-                totalRating += item.reduce((p, c) => p + globalsNewUi.entries[String(c.ItemId)].user.UserRating, 0)
+                totalRating += item.reduce((p, c) => p + items_getAllEntries()[String(c.ItemId)].user.UserRating, 0)
             }
             let avgItems = totalItems / items.length
             let generalAvgRating = totalRating / totalItems
             const ratings = data
                 .map(v => {
                     let ratings = v.map(i => {
-                        let thisUser = globalsNewUi.entries[String(i.ItemId)].user
+                        let thisUser = items_getAllEntries()[String(i.ItemId)].user
                         return thisUser.UserRating
                     })
                     let totalRating = ratings
@@ -497,7 +497,7 @@ class GraphMode extends Mode {
             const ratings = data
                 .map(v => v
                     .map(i => {
-                        let thisUser = globalsNewUi.entries[String(i.ItemId)].user
+                        let thisUser = items_getAllEntries()[String(i.ItemId)].user
                         return thisUser.UserRating
                     })
                     .reduce((p, c, i) => (p * i + c) / (i + 1), 0)
@@ -557,16 +557,16 @@ class GraphMode extends Mode {
     }
 
     add(entry: InfoEntry) {
-        makeGraphs(globalsNewUi.selectedEntries)
+        makeGraphs(items_getSelected())
         return this.win.document.getElementById("graph-output") as HTMLElement
     }
 
     sub(entry: InfoEntry) {
-        makeGraphs(globalsNewUi.selectedEntries)
+        makeGraphs(items_getSelected())
     }
 
     addList(entries: InfoEntry[]) {
-        makeGraphs(globalsNewUi.selectedEntries)
+        makeGraphs(items_getSelected())
     }
 
     subList(entries: InfoEntry[]) {
@@ -587,12 +587,12 @@ class GraphMode extends Mode {
 
         groupByInput = win.document.getElementById("group-by-expr") as HTMLInputElement
         groupByInput.onchange = function() {
-            makeGraphs(globalsNewUi.selectedEntries)
+            makeGraphs(items_getSelected())
         }
 
         groupBySelect.onchange = typeSelection.onchange = function() {
-            makeGraphs(globalsNewUi.selectedEntries)
+            makeGraphs(items_getSelected())
         }
-        makeGraphs(globalsNewUi.selectedEntries)
+        makeGraphs(items_getSelected())
     }
 }

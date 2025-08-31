@@ -28,6 +28,52 @@ class Mode {
 
 let openViewModes: Mode[] = []
 
+function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry }>>, del: boolean = false) {
+    let updatedLibraries = false
+    for (let id in toUpdate) {
+        if (del) {
+            delete items_getAllEntries()[id]
+            continue
+        }
+
+        const { user, events, meta, info } = toUpdate[id]
+
+        if (info?.Type === "Library") {
+            if (del)
+                delete items_getLibraries()[id]
+            else
+                items_setLibrary(info)
+
+            updatedLibraries = true
+        }
+
+
+        items_updateEntryById(id, { user, events, meta, info })
+
+        refreshSidebarItem(BigInt(id))
+        mode_refreshItem(BigInt(id))
+
+        const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
+        if (parent && items_getAllEntries()[String(parent)]) {
+            //if the parent is this, or itself, just dont update
+            if (![BigInt(id), parent].includes(items_getAllEntries()[String(parent)].info.ParentId)) {
+                updateInfo2({
+                    [String(parent)]: {
+                        info: findInfoEntryById(parent),
+                        user: findUserEntryById(parent),
+                        events: findUserEventsById(parent),
+                        meta: findMetadataById(parent)
+                    }
+                })
+            }
+        }
+    }
+
+    if (updatedLibraries) {
+        updateLibraryDropdown()
+    }
+}
+
 function mode_getFirstModeInWindow(win: Window) {
     for(let mode of openViewModes) {
         if(mode.win === win) {
@@ -37,7 +83,7 @@ function mode_getFirstModeInWindow(win: Window) {
 }
 
 function mode_isSelected(id: bigint) {
-    for (let item of globalsNewUi.selectedEntries) {
+    for (let item of items_getSelected()) {
         if (item.ItemId === id) {
             return true
         }
@@ -49,16 +95,16 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
     if (newWin === window) {
         if (mode.chwin) {
             mode.chwin(window)
-            let selected = globalsNewUi.selectedEntries
+            let selected = items_getSelected()
             clearItems()
             selectItemList(selected, true, mode)
         }
     }
     else {
         newWin.addEventListener("DOMContentLoaded", () => {
-            let selected = globalsNewUi.selectedEntries
+            let selected = items_getSelected()
             clearItems()
-            globalsNewUi.selectedEntries = selected
+            items_setSelected(selected)
             mode.chwin?.(newWin)
             newWin.addEventListener("aio-items-rendered", () => {
                 newWin.mode_setMode(mode.NAME)
@@ -70,7 +116,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
 }
 
 function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
-    globalsNewUi.selectedEntries.push(item)
+    items_selectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
     if (mode)
@@ -93,7 +139,7 @@ function mode_refreshItem(item: bigint) {
 }
 
 function deselectItem(item: InfoEntry, updateStats: boolean = true) {
-    globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(a => a.ItemId !== item.ItemId)
+    items_deselectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item, -1)
     for (let mode of openViewModes) {
         mode.sub(item)
@@ -101,7 +147,7 @@ function deselectItem(item: InfoEntry, updateStats: boolean = true) {
 }
 
 function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
-    globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.concat(itemList)
+    items_setSelected(items_getSelected().concat(itemList))
     updateStats && changeResultStatsWithItemListUI(itemList)
     if (itemList.length)
         updatePageInfoWithItemUI(itemList[0])
@@ -115,7 +161,7 @@ function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode
 }
 
 function toggleItem(item: InfoEntry, updateStats: boolean = true) {
-    if (globalsNewUi.selectedEntries.find(a => a.ItemId === item.ItemId)) {
+    if (items_getSelected().find(a => a.ItemId === item.ItemId)) {
         deselectItem(item, updateStats)
     } else {
         selectItem(item, updateStats)
@@ -123,7 +169,7 @@ function toggleItem(item: InfoEntry, updateStats: boolean = true) {
 }
 
 function clearItems(updateStats: boolean = true) {
-    globalsNewUi.selectedEntries = []
+    items_clearSelected()
     for (const mode of openViewModes) {
         mode.clearSelected()
     }
@@ -154,7 +200,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         openViewModes = newModes
         const m = new newMode(null, win)
         openViewModes.push(m)
-        m.addList(globalsNewUi.selectedEntries)
+        m.addList(items_getSelected())
     } catch (err) {
     }
 
