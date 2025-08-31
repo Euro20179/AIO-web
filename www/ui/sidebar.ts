@@ -41,6 +41,12 @@ addEventListener("resize", () => {
     }, 200)
 })
 
+//@ts-ignore
+addEventListener("modes.update-item", (e: CustomEvent) => {
+    const id = e.detail
+    refreshSidebarItem(BigInt(id))
+})
+
 function focusNthSidebarItem(n: number) {
     //@ts-ignore
     sidebarItems.querySelector(`:nth-child(${n})`)?.focus()

@@ -6,23 +6,8 @@
  * such as retrieving and setting entries
  */
 
+//for format
 const DIGI_MOD = 0x1000
-
-type GlobalsNewUi = {
-    entries: Record<string, items_Entry>
-    results: items_Entry[]
-    selectedEntries: InfoEntry[]
-    libraries: Record<string, InfoEntry>
-    viewingLibrary: bigint
-}
-
-let globalsNewUi: GlobalsNewUi = {
-    entries: {},
-    results: [],
-    selectedEntries: [],
-    libraries: {},
-    viewingLibrary: 0n,
-}
 
 const AS_ANIME = 1
 const AS_CARTOON = 2
@@ -125,6 +110,22 @@ type MetadataEntry = {
 }
 
 
+type GlobalsNewUi = {
+    entries: Record<string, items_Entry>
+    results: items_Entry[]
+    selectedEntries: InfoEntry[]
+    libraries: Record<string, InfoEntry>
+    viewingLibrary: bigint
+}
+
+let _globalsNewUi: GlobalsNewUi = {
+    entries: {},
+    results: [],
+    selectedEntries: [],
+    libraries: {},
+    viewingLibrary: 0n,
+}
+
 class items_Entry {
     user: UserEntry
     meta: MetadataEntry
@@ -149,22 +150,22 @@ class items_Entry {
 }
 
 function items_setCurrentLibrary(id: bigint) {
-    globalsNewUi.viewingLibrary = id
+    _globalsNewUi.viewingLibrary = id
 }
 
 function items_getCurrentLibrary(): bigint {
-    return globalsNewUi.viewingLibrary
+    return _globalsNewUi.viewingLibrary
 }
 
 function items_getLibraries(): Record<string, InfoEntry> {
-    return globalsNewUi.libraries
+    return _globalsNewUi.libraries
 }
 
 function items_setLibrary(info: InfoEntry) {
-    globalsNewUi.libraries[String(info.ItemId)] = info
+    _globalsNewUi.libraries[String(info.ItemId)] = info
 }
 function items_deleteLibrary(id: string) {
-    delete globalsNewUi.libraries[id]
+    delete _globalsNewUi.libraries[id]
 }
 
 /**
@@ -172,34 +173,34 @@ function items_deleteLibrary(id: string) {
  * @param {bigint[]} items - the item ids to set as the reults
 */
 function items_setResults(items: bigint[]) {
-    globalsNewUi.results = []
+    _globalsNewUi.results = []
     for (let id of items) {
-        globalsNewUi.results.push(globalsNewUi.entries[String(id)])
+        _globalsNewUi.results.push(_globalsNewUi.entries[String(id)])
     }
 }
 
 function items_getResults(): items_Entry[] {
-    return globalsNewUi.results
+    return _globalsNewUi.results
 }
 
 function items_getSelected(): InfoEntry[] {
-    return globalsNewUi.selectedEntries
+    return _globalsNewUi.selectedEntries
 }
 
 function items_clearSelected() {
-    globalsNewUi.selectedEntries = []
+    _globalsNewUi.selectedEntries = []
 }
 
 function items_selectById(id: bigint): void {
-    globalsNewUi.selectedEntries.push(globalsNewUi.entries[String(id)].info)
+    _globalsNewUi.selectedEntries.push(_globalsNewUi.entries[String(id)].info)
 }
 
 function items_setSelected(items: InfoEntry[]) {
-    globalsNewUi.selectedEntries = items
+    _globalsNewUi.selectedEntries = items
 }
 
 function items_deselectById(id: bigint) {
-    globalsNewUi.selectedEntries = globalsNewUi.selectedEntries.filter(v => v.ItemId !== id)
+    _globalsNewUi.selectedEntries = _globalsNewUi.selectedEntries.filter(v => v.ItemId !== id)
 }
 
 /**
@@ -208,9 +209,9 @@ function items_deselectById(id: bigint) {
 */
 function items_setEntries(items: InfoEntry[]) {
     for (let item of items) {
-        let stashed = globalsNewUi.entries[String(item.ItemId)]
+        let stashed = _globalsNewUi.entries[String(item.ItemId)]
         if (!stashed) {
-            globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item, findUserEntryById(item.ItemId), findMetadataById(item.ItemId), findUserEventsById(item.ItemId))
+            _globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item, findUserEntryById(item.ItemId), findMetadataById(item.ItemId), findUserEventsById(item.ItemId))
         }
         else {
             stashed.info = item
@@ -224,14 +225,14 @@ function items_updateEntryById(id: string, { user, events, meta, info}: Partial<
     meta: MetadataEntry,
     info: InfoEntry
 }>) {
-    user && (globalsNewUi.entries[id].user = user)
-    events && (globalsNewUi.entries[id].events = events)
-    meta && (globalsNewUi.entries[id].meta = meta)
-    info && (globalsNewUi.entries[id].info = info)
+    user && (_globalsNewUi.entries[id].user = user)
+    events && (_globalsNewUi.entries[id].events = events)
+    meta && (_globalsNewUi.entries[id].meta = meta)
+    info && (_globalsNewUi.entries[id].info = info)
 }
 
 function items_delEntry(item: bigint) {
-    delete globalsNewUi.entries[String(item)]
+    delete _globalsNewUi.entries[String(item)]
 }
 
 /**
@@ -239,16 +240,16 @@ function items_delEntry(item: bigint) {
  * @param item - the item to add
 */
 function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry }) {
-    globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
+    _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
 }
 
 async function loadMetadataById(id: bigint, uid = 0): Promise<MetadataEntry> {
     let m = await api_getEntryMetadata(id, uid)
     if (m === null) {
         alert(`Failed to load metadata for id: ${id}`)
-        return globalsNewUi.entries[String(id)].meta = genericMetadata(id, uid)
+        return _globalsNewUi.entries[String(id)].meta = genericMetadata(id, uid)
     }
-    return globalsNewUi.entries[String(id)].meta = m
+    return _globalsNewUi.entries[String(id)].meta = m
 }
 
 async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
@@ -260,7 +261,7 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
 }
 
 function items_getAllEntries() {
-    return globalsNewUi.entries
+    return _globalsNewUi.entries
 }
 
 /**
@@ -270,8 +271,8 @@ function items_getAllEntries() {
     * @returns {MetadataEntry}
 */
 function findMetadataById(id: bigint): MetadataEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.meta || genericMetadata(id, 0)
+    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
+    return _globalsNewUi.entries[String(id)]?.meta || genericMetadata(id, 0)
 }
 
 /**
@@ -281,8 +282,8 @@ function findMetadataById(id: bigint): MetadataEntry {
     * @returns {UserEntry}
 */
 function findUserEntryById(id: bigint): UserEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.user || genericUserEntry(id, 0)
+    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
+    return _globalsNewUi.entries[String(id)]?.user || genericUserEntry(id, 0)
 }
 
 /**
@@ -292,8 +293,8 @@ function findUserEntryById(id: bigint): UserEntry {
     * @returns {UserEvent[]}
 */
 function findUserEventsById(id: bigint): UserEvent[] {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.events || []
+    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
+    return _globalsNewUi.entries[String(id)]?.events || []
 }
 
 /**
@@ -303,8 +304,8 @@ function findUserEventsById(id: bigint): UserEvent[] {
     * @returns {InfoEntry}
 */
 function findInfoEntryById(id: bigint): InfoEntry {
-    console.assert(globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
-    return globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
+    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
+    return _globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
 }
 
 function genericInfo(itemId: bigint, uid: number): InfoEntry {
@@ -368,8 +369,8 @@ function genericUserEntry(itemId: bigint, uid: number): UserEntry {
 */
 function items_getAllMeta() {
     let meta: Record<string, MetadataEntry> = {}
-    for (let key in globalsNewUi.entries) {
-        meta[key] = globalsNewUi.entries[key].meta
+    for (let key in _globalsNewUi.entries) {
+        meta[key] = _globalsNewUi.entries[key].meta
     }
     return meta
 }
@@ -381,7 +382,7 @@ async function items_refreshUserEntries(uid: number) {
     let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
     for (let item of items) {
         try {
-            globalsNewUi.entries[String(item.ItemId)].user = item
+            _globalsNewUi.entries[String(item.ItemId)].user = item
         } catch (err) {
             console.error(`${item.ItemId} is an orphaned user entry`)
         }
@@ -395,9 +396,9 @@ async function items_refreshInfoEntries(uid: number) {
     let items = await api_loadList<InfoEntry>("list-entries", uid)
 
     for (let item of items) {
-        let stashed = globalsNewUi.entries[String(item.ItemId)]
+        let stashed = _globalsNewUi.entries[String(item.ItemId)]
         if (!stashed) {
-            globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item)
+            _globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item)
         }
         else {
             stashed.info = item
@@ -413,7 +414,7 @@ async function items_loadLibraries(uid: number) {
     const items = await api_queryV3(`type = 'Library' . entryInfo.uid = ${uid}`, uid)
 
     for (let item of items) {
-        globalsNewUi.libraries[String(item["ItemId"])] = item
+        _globalsNewUi.libraries[String(item["ItemId"])] = item
     }
 }
 
@@ -423,18 +424,18 @@ async function items_loadLibraries(uid: number) {
 async function items_refreshMetadata(uid: number) {
     let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)
     for (let item of items) {
-        globalsNewUi.entries[String(item.ItemId)].meta = item
+        _globalsNewUi.entries[String(item.ItemId)].meta = item
     }
 }
 
 function* findDescendants(itemId: bigint) {
-    let entries = Object.values(globalsNewUi.entries)
+    let entries = Object.values(_globalsNewUi.entries)
     yield* entries.values()
         .filter(v => v.info.ParentId === itemId)
 }
 
 function* findCopies(itemId: bigint) {
-    let entries = Object.values(globalsNewUi.entries)
+    let entries = Object.values(_globalsNewUi.entries)
     yield* entries.values()
         .filter(v => v.info.CopyOf === itemId)
 }
@@ -442,11 +443,11 @@ function* findCopies(itemId: bigint) {
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
-    for (let entry in globalsNewUi.entries) {
+    for (let entry in _globalsNewUi.entries) {
         //we must loop through all entries because :
         //if an item had an event, but now has 0 events, if we loop through the new events, it will never hit that item that now has no events
         //therefore it will never be updated
-        globalsNewUi.entries[entry].events = grouped[entry] || []
+        _globalsNewUi.entries[entry].events = grouped[entry] || []
     }
 }
 

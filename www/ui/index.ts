@@ -13,7 +13,6 @@ async function main() {
         openCatalogModeUI()
     }
 
-
     const onrender = () => {
         //just in case
         removeEventListener("aio-items-rendered", onrender)

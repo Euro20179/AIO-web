@@ -32,7 +32,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
     let updatedLibraries = false
     for (let id in toUpdate) {
         if (del) {
-            delete items_getAllEntries()[id]
+            items_delEntry(BigInt(id))
             continue
         }
 
@@ -47,10 +47,12 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
             updatedLibraries = true
         }
 
+        dispatchEvent(new CustomEvent("modes.update-item", {
+            detail: id
+        }))
 
         items_updateEntryById(id, { user, events, meta, info })
 
-        refreshSidebarItem(BigInt(id))
         mode_refreshItem(BigInt(id))
 
         const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
