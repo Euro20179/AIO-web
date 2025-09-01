@@ -176,6 +176,18 @@ function updateSidebarThumbnail(id: bigint, src: string) {
     img.src = fixThumbnailURL(src)
 }
 
+async function renderSidebarItemList(items: InfoEntry[], sidebarParent: HTMLElement | DocumentFragment = sidebarItems, options?: {
+    below?: string,
+    renderImg?: boolean
+}) {
+    for(let i = 0; i < items.length; i++) {
+        if(i !== 0 && i % 20 == 0 && "scheduler" in window) {
+            await scheduler.yield()
+        }
+        renderSidebarItem(items[i], sidebarParent, options)
+    }
+}
+
 /**
   * @description below is an itemid that the item gets rendered below
 */
