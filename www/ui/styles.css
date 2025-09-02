@@ -104,7 +104,7 @@
 
             #month-nav {
                 display: grid;
-                grid-template-columns: 1fr 40ch 1fr;
+                grid-template-columns: 1fr max(20cqi, 200px) 1fr;
                 justify-content: center;
                 gap: 2ch;
 
