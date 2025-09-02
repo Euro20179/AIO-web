@@ -84,10 +84,6 @@ class CalendarMode extends Mode {
             monthName.innerHTML = `${start.toLocaleString('default', { month: "long" })} ${start.getFullYear()}`
         const dayElements: HTMLElement[] = []
 
-        for (let i = 0; i < start.getDay(); i++) {
-            dayElements.push(document.createElement("div"))
-        }
-
         const tz = Intl.DateTimeFormat().resolvedOptions()
         const fakeEventStartDay: UserEvent = {
             ItemId: 0n,
@@ -128,7 +124,16 @@ class CalendarMode extends Mode {
             monthGrid.removeChild(monthGrid.firstElementChild)
         }
 
-        for (let day = 1; day < 31; day++) {
+        const month2dayCount = (month: number, year: number) => {
+            return new Date(year, month, 0).getDate()
+        }
+
+        console.log(start.getDay())
+        for (let i = 0; i < start.getDay(); i++) {
+            monthGrid.appendChild(document.createElement("div"))
+        }
+
+        for (let day = 1; day <= month2dayCount(start.getMonth() + 1, start.getFullYear()); day++) {
             const d = document.createElement("div")
             d.classList.add("day")
             d.setAttribute("data-day", String(day))
