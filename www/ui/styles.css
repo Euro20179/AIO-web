@@ -30,6 +30,15 @@
 
         -moz-appearance: revert;
     }
+
+    table {
+        border-collapse: collapse;
+
+        td,
+        th {
+            border: 1px solid var(--secondary);
+        }
+    }
 }
 
 @layer utility {
@@ -99,14 +108,20 @@
         }
 
         &[data-mode="month"] #month-display {
-            display: revert;
+            display: grid;
             width: 100cqi;
+            overflow: auto;
+
+            grid-template-areas: "month stats calendar";
+            grid-template-columns: 1fr 10fr;
+            grid-template-rows: 1fr 10fr;
 
             #month-nav {
                 display: grid;
                 grid-template-columns: 1fr max(20cqi, 200px) 1fr;
                 justify-content: center;
                 gap: 2ch;
+                grid-column: 1 / -1;
 
                 button {
                     width: fit-content;
@@ -124,6 +139,12 @@
 
                 #month-name {
                     justify-self: center;
+                }
+            }
+
+            #month-stats {
+                #total-events::before {
+                    content: "Event total: "
                 }
             }
 
@@ -414,7 +435,7 @@
         container-type: size;
         grid-area: main;
 
-        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open))) {
+        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open, #calendar-output.open))) {
             #error-output {
                 display: unset;
             }

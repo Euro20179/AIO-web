@@ -774,9 +774,9 @@ function items_eventTimeEstimate(event: UserEvent) {
  * @returns 1 if left occured BEFORE right
  */
 let options: Intl.ResolvedDateTimeFormatOptions | null = null
-function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
-    let l = items_eventTimeEstimate(left)
-    let r = items_eventTimeEstimate(right)
+function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): -1 | 0 | 1 {
+    let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
+    let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
     if ("Temporal" in window) {
         if (!options) {
             options = Intl.DateTimeFormat().resolvedOptions()
@@ -945,3 +945,14 @@ function getUserExtra(user: UserEntry, prop: string) {
     }
 }
 
+
+function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end: number): Generator<UserEvent> {
+    for(let item of items) {
+        const events = findUserEventsById(item.ItemId)
+        for(let ev of events) {
+            if(items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end) >= 0) {
+                yield ev
+            }
+        }
+    }
+}

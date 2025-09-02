@@ -105,22 +105,24 @@ class CalendarMode extends Mode {
             After: 0,
         }
 
+        //the true total number of events
+        let yearEvents = items_getEventsWithinTimeRange(this.selectedItems, new Date(start.getFullYear(), 0, 0).getTime(), new Date(start.getFullYear(), 12, 31, 11, 59, 59).getTime())
+        const totalYearEvents = yearEvents.toArray().length
+
         //events within the month
         //(finding valid events each day is COSTLY)
-        let validEvents: UserEvent[] = []
-        for (let item of this.selectedItems) {
-            const events = findUserEventsById(item.ItemId)
+        let validEvents: UserEvent[] = [
+            ...items_getEventsWithinTimeRange(
+                this.selectedItems,
+                (new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0)).getTime(),
+                (new Date(start.getFullYear(), start.getMonth(), 31, 23, 59, 59)).getTime()
+            )
+        ]
 
-            for (let ev of events) {
-                if (items_compareEventTiming(ev, fakeEventStartDay) <= 0 && items_compareEventTiming(ev, fakeEventEndDay) >=0) {
-                    validEvents.push(ev)
-                }
-            }
-        }
         //plus finding the valid events now, lets us sort it once and only once
         validEvents = validEvents.sort((a, b) => items_compareEventTiming(b, a))
 
-        while(monthGrid.firstElementChild) {
+        while (monthGrid.firstElementChild) {
             monthGrid.removeChild(monthGrid.firstElementChild)
         }
 
@@ -128,7 +130,6 @@ class CalendarMode extends Mode {
             return new Date(year, month, 0).getDate()
         }
 
-        console.log(start.getDay())
         for (let i = 0; i < start.getDay(); i++) {
             monthGrid.appendChild(document.createElement("div"))
         }
@@ -141,11 +142,28 @@ class CalendarMode extends Mode {
             monthGrid.appendChild(d)
         }
 
-        for(let ev of validEvents) {
+        const monthStats = {
+            eventCounts: {} as Record<string, number>,
+            totalEvents: 0
+        }
+
+        const eventTotalsTable = this.parent.querySelector("#event-totals")
+        while (eventTotalsTable?.firstElementChild) {
+            eventTotalsTable.removeChild(eventTotalsTable.firstElementChild)
+        }
+
+        for (let ev of validEvents) {
             let day = (new Date(ev.Timestamp || ev.Before || ev.After)).getDate()
             const d = monthGrid.querySelector(`[data-day="${day}"]`)
             //it's possible that the event may be invalid (validity assumes a month has 31 days)
-            if(!d) continue
+            if (!d) continue
+
+            monthStats.totalEvents++
+            if (monthStats.eventCounts[ev.Event]) {
+                monthStats.eventCounts[ev.Event] += 1
+            } else {
+                monthStats.eventCounts[ev.Event] = 1
+            }
 
             const item = findInfoEntryById(ev.ItemId)
 
@@ -155,6 +173,22 @@ class CalendarMode extends Mode {
             eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
             eventMarker.title = items_eventTSText(ev)
             d.appendChild(eventMarker)
+        }
+
+        const totalEvents = this.parent.querySelector("#total-events")
+        if (totalEvents && totalEvents instanceof this.win.HTMLElement) {
+            totalEvents.innerHTML = `${monthStats.totalEvents}<BR>(${(monthStats.totalEvents / totalYearEvents * 100).toFixed(2)}% of year)`
+        }
+
+        if (eventTotalsTable) {
+            const sorted = Object.entries(monthStats.eventCounts).sort((a, b) => b[1] - a[1])
+            for (let [event, count] of sorted) {
+                eventTotalsTable.innerHTML += `<tr>
+    <td>${event}</td>
+    <td>${count}</td>
+    <td>${(count / monthStats.totalEvents * 100).toFixed(2)}</td>
+</tr>`
+            }
         }
     }
 
