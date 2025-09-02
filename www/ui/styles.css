@@ -96,6 +96,8 @@
     }
 
     #calendar-output {
+        --months-width: 80cqi;
+
         width: 100cqi;
         height: 100cqb;
 
@@ -112,16 +114,17 @@
             width: 100cqi;
             overflow: auto;
 
-            grid-template-areas: "month stats calendar";
-            grid-template-columns: 1fr 10fr;
+            grid-template-areas: "nav stats" "calendar stats";
+            grid-template-columns: 1fr 20cqi;
             grid-template-rows: 1fr 10fr;
 
             #month-nav {
+                grid-area: nav;
+
                 display: flex;
                 justify-content: center;
                 justify-items: center;
                 gap: 2ch;
-                grid-column: 1 / -1;
 
                 label {
                     text-align: center;
@@ -148,12 +151,22 @@
             }
 
             #month-stats {
+                grid-area: stats;
+
+                position: sticky;
+                right: 0;
+
+                /*otherwise does not scroll to show all events*/
+                height: 100cqb;
+                
                 #total-events::before {
                     content: "Event total: "
                 }
             }
 
             #months {
+                grid-area: calendar;
+
                 display: flex;
                 flex-direction: column;
                 > .month-grid {
