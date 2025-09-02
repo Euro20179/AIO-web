@@ -44,6 +44,12 @@ class DisplayMode extends Mode {
         save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
         close: this.displayEntryAction(item => deselectItem(item)),
         copythis: this.displayEntryAction(item => copyThis.call(this, item)),
+        setthumbnail: this.displayEntryAction((item, _, target) => {
+            const fileUpload = target.getRootNode().getElementById("thumbnail-file-upload")
+            if (!fileUpload || !("value" in fileUpload)) return
+
+            fileUpload.click()
+        }),
         setdigitization: this.displayEntryAction((item, _, target) => {
             if (!target || !(target instanceof HTMLInputElement)) return
             if (target.checked) {
@@ -746,7 +752,6 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
     }
 
 
-    let imgEl = shadowRoot.getElementById("thumbnail")
     const fileUpload = shadowRoot.getElementById("thumbnail-file-upload")
 
     if (fileUpload instanceof HTMLInputElement && "files" in fileUpload) {
@@ -771,14 +776,6 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                         })
                     })
             }
-        }
-    }
-
-    if (imgEl) {
-        imgEl.onclick = function(_) {
-            if (!fileUpload || !("value" in fileUpload)) return
-
-            fileUpload.click()
         }
     }
 }

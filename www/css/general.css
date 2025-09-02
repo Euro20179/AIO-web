@@ -37,14 +37,20 @@
 
         border-style: solid;
         background: var(--input-background);
+
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
 
-        &:focus{
+        &:focus {
             outline: none;
             border: 3px solid var(--green);
         }
+    }
+    [role="button"]:focus {
+            outline: none;
+            border: 3px solid var(--green);
+            cursor: pointer;
     }
 
     select {
@@ -160,6 +166,18 @@
 
     .margin-center {
         margin: 0 auto;
+    }
+
+    .styleless-button {
+        background: unset;
+        border: unset;
+        font: inherit;
+        padding: unset;
+
+        &:focus {
+            outline: none;
+            border: 3px solid var(--green);
+        }
     }
 
     .bad {

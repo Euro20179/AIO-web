@@ -201,6 +201,8 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     let user = findUserEntryById(item.ItemId)
     if (!user || !meta || !elem.shadowRoot) return elem
 
+    elem.shadowRoot.querySelector("figure")?.setAttribute("aria-label", `${item.En_Title || item.Native_Title} thumbnail`)
+
     if (options?.below) {
         const renderBelow = sidebarParent.querySelector(`[data-entry-id="${options.below}"]`) as HTMLElement
         renderBelow?.insertAdjacentElement("afterend", elem)

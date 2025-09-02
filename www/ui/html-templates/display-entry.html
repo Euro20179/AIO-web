@@ -774,12 +774,15 @@
             </div>
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
             <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
-                <span class="rating" id="user-rating" entry-action="setrating" title="your rating">??</span>
+                <button class="rating styleless-button" id="user-rating" entry-action="setrating"
+                    title="your rating">??</button>
                 <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
-                <span class="cost" id="cost"></span>
+                <button class="cost styleless-button" id="cost"></button>
             </div>
         </hgroup>
-        <img src="" alt="" class="thumbnail" id="thumbnail">
+        <button class="styleless-button" entry-action="setthumbnail">
+            <img src="" alt="" class="thumbnail" id="thumbnail">
+        </button>
         <table class="media-info" id="media-info"></table>
         <input id="location-link" placeholder="item location"
             oncontextmenu="if(event.ctrlKey) { open(this.value, '_blank'); } else {this.select()} event.preventDefault()">
@@ -807,8 +810,8 @@
                     Event</button>
             </div>
             <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-                <p id="view-count" class="view-count center" style="margin-top: 0;" entry-action="setviewcount"
-                    put-data="ViewCount"></p>
+                <button id="view-count" class="view-count center styleless-button" style="margin-top: 0; width: 100%; display: block;" entry-action="setviewcount"
+                    put-data="ViewCount"></button>
                 <figure class="entry-progress">
                     <div class="viewing relative">
                         <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0"

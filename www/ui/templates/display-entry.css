@@ -126,13 +126,13 @@
         overflow: auto auto;
     }
 
-    #thumbnail {
-        border: 1px solid var(--blue);
+    :has(> #thumbnail) {
         align-self: center;
+        width: fit-content;
 
-        max-width: min(20cqw, 300px);
-
-        cursor: pointer;
+        #thumbnail {
+            max-width: min(20cqw, 300px);
+        }
     }
 
     #cost-calculation-modifiers {
@@ -331,6 +331,7 @@
         &:has(#required-items:not(:empty)) {
             display: block;
         }
+
         &:has(#required-items:empty) {
             display: none;
         }
