@@ -112,7 +112,8 @@
             width: 100cqi;
             overflow: auto;
 
-            grid-template-areas: "month calendar";
+            grid-template-areas: "month stats calendar";
+            grid-template-columns: 1fr 10fr;
             grid-template-rows: 1fr 10fr;
 
             #month-nav {
@@ -146,10 +147,15 @@
                 }
             }
 
+            #month-stats {
+                #total-events::before {
+                    content: "Event total: "
+                }
+            }
+
             #months {
                 display: flex;
                 flex-direction: column;
-                width: 100cqi;
                 > .month-grid {
                     border: 1px solid currentColor;
                 }

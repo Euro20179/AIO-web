@@ -184,6 +184,27 @@ class CalendarMode extends Mode {
                 months.firstElementChild.remove()
             }
 
+            const stats = {
+                total: 0,
+                eventStats: {} as Record<string, number>
+            }
+
+            let validEvents: UserEvent[] = [
+                ...items_getEventsWithinTimeRange(
+                    this.selectedItems,
+                    this.selectedTime[0].getTime(),
+                    this.selectedTime[1].getTime(),
+                )
+            ]
+            for(let event of validEvents) {
+                stats.total++
+                if(stats.eventStats[event.Event]) {
+                    stats.eventStats[event.Event] += 1
+                } else {
+                    stats.eventStats[event.Event] = 1
+                }
+            }
+
             if (this.selectedTime[0].getFullYear() == this.selectedTime[1].getFullYear() && this.selectedTime[0].getMonth() === this.selectedTime[1].getMonth()) {
                 for (let child of this._renderMonth(this.selectedTime[0], this.selectedTime[1]))
                     months.appendChild(child)
@@ -203,6 +224,20 @@ class CalendarMode extends Mode {
                         months.appendChild(child)
                     }
                 }
+            }
+
+            const statsTbl = output.querySelector("#event-totals")
+            const totalEvents = output.querySelector("#total-events")
+            if(totalEvents)
+                totalEvents.innerText = stats.total
+            if(statsTbl)
+            for(let [event, count] of Object.entries(stats.eventStats).sort((a, b) => b[1] - a[1])) {
+                statsTbl.innerHTML += `
+<tr>
+    <td>${event}</td>
+    <td>${count}</td>
+    <td>${(count / stats.total * 100).toFixed(2)}</td>
+</tr>`
             }
         }
     }
