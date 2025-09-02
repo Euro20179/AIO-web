@@ -83,7 +83,6 @@ class CalendarMode extends Mode {
         if (monthName)
             monthName.innerHTML = `${start.toLocaleString('default', { month: "long" })} ${start.getFullYear()}`
         const dayElements: HTMLElement[] = []
-        let finishedEvents: number[] = []
 
         for (let i = 0; i < start.getDay(); i++) {
             dayElements.push(document.createElement("div"))
@@ -125,54 +124,33 @@ class CalendarMode extends Mode {
         //plus finding the valid events now, lets us sort it once and only once
         validEvents = validEvents.sort((a, b) => items_compareEventTiming(b, a))
 
+        while(monthGrid.firstElementChild) {
+            monthGrid.removeChild(monthGrid.firstElementChild)
+        }
+
         for (let day = 1; day < 31; day++) {
-            finishedEvents = []
-
-            const curDay = new Date(start.getFullYear(), start.getMonth(), day)
-            if (curDay.getMonth() !== start.getMonth()) break
-
             const d = document.createElement("div")
             d.classList.add("day")
+            d.setAttribute("data-day", String(day))
             d.append(String(day))
-
-            const fakeEventStartDay: UserEvent = {
-                ItemId: 0n,
-                EventId: 0,
-                Event: "_AIOW_CALENDAR_COMP_EVENT",
-                Timestamp: (new Date(start.getFullYear(), start.getMonth(), day, 0, 0, 0)).getTime(),
-                TimeZone: tz.timeZone,
-                Before: 0,
-                After: 0,
-            }
-
-            const fakeEventEndDay: UserEvent = {
-                ItemId: 0n,
-                EventId: 0,
-                Event: "_AIOW_CALENDAR_COMP_EVENT",
-                Timestamp: (new Date(start.getFullYear(), start.getMonth(), day, 23, 59, 59)).getTime(),
-                TimeZone: tz.timeZone,
-                Before: 0,
-                After: 0,
-            }
-
-            for (let ev of validEvents) {
-                const item = findInfoEntryById(ev.ItemId)
-                if (finishedEvents.includes(ev.EventId)) continue
-
-                if (items_compareEventTiming(ev, fakeEventStartDay) <= 0 && items_compareEventTiming(ev, fakeEventEndDay) >= 0) {
-                    const eventMarker = document.createElement("span")
-                    eventMarker.classList.add("event-marker")
-                    eventMarker.setAttribute("data-event", ev.Event)
-                    eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
-                    eventMarker.title = items_eventTSText(ev)
-                    d.appendChild(eventMarker)
-                }
-                finishedEvents.push(ev.EventId)
-                // console.log(ev)
-            }
-            dayElements.push(d)
+            monthGrid.appendChild(d)
         }
-        monthGrid.replaceChildren(...dayElements)
+
+        for(let ev of validEvents) {
+            let day = (new Date(ev.Timestamp || ev.Before || ev.After)).getDate()
+            const d = monthGrid.querySelector(`[data-day="${day}"]`)
+            //it's possible that the event may be invalid (validity assumes a month has 31 days)
+            if(!d) continue
+
+            const item = findInfoEntryById(ev.ItemId)
+
+            const eventMarker = document.createElement("span")
+            eventMarker.classList.add("event-marker")
+            eventMarker.setAttribute("data-event", ev.Event)
+            eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
+            eventMarker.title = items_eventTSText(ev)
+            d.appendChild(eventMarker)
+        }
     }
 
     _render() {
