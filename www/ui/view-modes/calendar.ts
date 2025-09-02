@@ -56,12 +56,14 @@ class CalendarMode extends Mode {
         })
 
         this.parent.querySelector("#time-start")?.addEventListener("change", e => {
-            this._setStart(new Date(e.target.value))
+            const d = new Date(e.target.value)
+            this._setStart(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()))
             this._render()
         })
 
         this.parent.querySelector("#time-end")?.addEventListener("change", e => {
-            this._setEnd(new Date(e.target.value))
+            const d = new Date(e.target.value)
+            this._setEnd(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()))
             this._render()
         })
 
@@ -132,7 +134,7 @@ class CalendarMode extends Mode {
             monthGrid.appendChild(document.createElement("div"))
         }
 
-        let startDate = this.selectedTime[0].getDate()
+        let startDate = start.getDate()
         for (let i = 1; i < startDate; i++) {
             monthGrid.appendChild(document.createElement("div"))
         }
