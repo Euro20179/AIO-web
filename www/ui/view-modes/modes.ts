@@ -78,8 +78,8 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
 
 async function refreshInfo(uid: number) {
     await Promise.all([
-        loadLibraries(),
-        loadInfoEntries(),
+        loadLibraries(uid),
+        loadInfoEntries(uid),
     ])
     return Promise.all([
         loadUserEvents(uid),
@@ -87,19 +87,19 @@ async function refreshInfo(uid: number) {
     ])
 }
 
-async function loadLibraries() {
-    await items_loadLibraries(getUidUI())
+async function loadLibraries(uid: number) {
+    await items_loadLibraries(uid)
     updateLibraryDropdown()
 }
 
-async function loadInfoEntries() {
+async function loadInfoEntries(uid: number) {
     setError("Loading items")
 
-    await items_refreshInfoEntries(getUidUI())
+    await items_refreshInfoEntries(uid)
 
     setError("")
 
-    items_refreshUserEntries(getUidUI()).then(() => {
+    items_refreshUserEntries(uid).then(() => {
         updateInfo2(items_getAllEntries())
     })
 

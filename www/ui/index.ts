@@ -40,11 +40,10 @@ async function main() {
 
     fillFormatSelectionUI()
     fillTypeSelectionUI()
-    fillUserSelectionUI().then(() => {
-        setUIDFromHeuristicsUI()
-    })
+    await fillUserSelectionUI()
+    setUIDFromHeuristicsUI()
 
-    loadLibraries()
+    loadLibraries(getUidUI())
 
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement
 
@@ -68,7 +67,7 @@ async function main() {
     const uid = getUidUI()
 
     //must happen synchronously to make item render properly
-    await loadInfoEntries()
+    await loadInfoEntries(uid)
 
 
     if (initialSearch || searchInput.value) {
