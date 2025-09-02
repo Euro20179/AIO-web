@@ -143,12 +143,15 @@
                     .event-marker {
                         &[data-event="Viewing"] {
                             background: var(--blue);
+                            color: var(--main);
                         }
                         &[data-event="Finished"] {
                             background: var(--green);
+                            color: var(--main);
                         }
                         &[data-event="Dropped"] {
                             background: var(--red);
+                            color: var(--main);
                         }
                     }
                 }
