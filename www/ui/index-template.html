@@ -136,7 +136,7 @@
                 <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form">
-                        <a href="javascript:(() => open(`/settings.html?uid=${getUidUI()}`))()" id="help-link">⚙</a>
+                    <a href="javascript:(() => open(`/settings.html?uid=${getUidUI()}`))()" id="help-link">⚙</a>
                     <input type="search" name="search-query" placeholder="search query">
                     <div class="grid">
                         <select name="sort-by" title="sort by">
@@ -179,6 +179,7 @@
                     <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%;'>
                         <option value="entry-output">Normal mode</option>
                         <option value="graph-output">Graph mode</option>
+                        <option value="calendar-output">Calendar mode</option>
                         <option value="event-output">Event mode</option>
                         <option value="calc-output">Calc mode</option>
                         <option value="gallery-output">Gallery mode</option>
@@ -222,6 +223,18 @@
                 </div>
 
                 <div id="entry-output" class="overflow">
+                </div>
+
+                <div id="calendar-output" class="overflow">
+                    <canvas id="cal-canvas"></canvas>
+                    <div id="month-display">
+                        <nav id="month-nav">
+                            <button id="month-prev">&lt;</button>
+                            <h2 id="month-name"></h2>
+                            <button id="month-next">&gt;</button>
+                        </nav>
+                        <div id="month-grid"></div>
+                    </div>
                 </div>
 
                 <div id="event-output" class="overflow">
@@ -333,6 +346,7 @@
     <script src="/ui/sidebar.js"></script>
     <script src="/ui/settings.js"></script>
     <script src="/ui/view-modes/modes.js"></script>
+    <script src="/ui/view-modes/calendar.js"></script>
     <script src="/ui/view-modes/graph.js"></script>
     <script src="/ui/view-modes/displayEntry.js"></script>
     <script src="/ui/view-modes/calc.js"></script>

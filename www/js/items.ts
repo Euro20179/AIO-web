@@ -773,12 +773,16 @@ function items_eventTimeEstimate(event: UserEvent) {
  * @returns 0 if they occured at the same time
  * @returns 1 if left occured BEFORE right
  */
+let options:  Intl.ResolvedDateTimeFormatOptions | null = null
 function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
     let l = items_eventTimeEstimate(left)
     let r = items_eventTimeEstimate(right)
     if ("Temporal" in window) {
-        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, left.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
-        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, right.TimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)
+        if(!options) {
+            options = Intl.DateTimeFormat().resolvedOptions()
+        }
+        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, left.TimeZone || options.timeZone)
+        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, right.TimeZone || options.timeZone)
         return Temporal.ZonedDateTime.compare(leftTime, rightTime)
     }
     if (l == r) {

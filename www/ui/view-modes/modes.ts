@@ -217,7 +217,8 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "calc-output": CalcMode,
         "gallery-output": GalleryMode,
         "script-output": ScriptMode,
-        "event-output": EventMode
+        "event-output": EventMode,
+        "calendar-output": CalendarMode,
     }
     //@ts-ignore
     const newMode = modes[name]
