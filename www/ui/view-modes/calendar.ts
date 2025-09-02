@@ -54,12 +54,12 @@ class CalendarMode extends Mode {
 
     set mode(value: "day" | "month") {
         this.#mode = value
-        if(this.parent instanceof HTMLElement)
+        if (this.parent instanceof HTMLElement)
             this.parent.setAttribute("data-mode", this.mode)
     }
 
     onResize() {
-        this.canv.width =  this.canv.parentElement?.clientWidth
+        this.canv.width = this.canv.parentElement?.clientWidth
         this.canv.height = this.canv.parentElement?.clientHeight
     }
 
@@ -74,26 +74,62 @@ class CalendarMode extends Mode {
 
     _renderMonth() {
         const output = this.parent.querySelector("#month-display") as HTMLElement | null
-        if(!output) return
+        if (!output) return
 
         const monthGrid = output.querySelector("#month-grid") as HTMLElement
         const monthName = output.querySelector("#month-name")
 
         const start = new Date(this.selectedTime[0].getFullYear(), this.selectedTime[0].getMonth(), 1)
-        if(monthName)
+        if (monthName)
             monthName.innerHTML = `${start.toLocaleString('default', { month: "long" })} ${start.getFullYear()}`
         const dayElements: HTMLElement[] = []
         let finishedEvents: number[] = []
 
-        for(let i = 0; i < start.getDay(); i++) {
+        for (let i = 0; i < start.getDay(); i++) {
             dayElements.push(document.createElement("div"))
         }
 
-        for(let day = 1; day < 31; day++) {
+        const tz = Intl.DateTimeFormat().resolvedOptions()
+        const fakeEventStartDay: UserEvent = {
+            ItemId: 0n,
+            EventId: 0,
+            Event: "_AIOW_CALENDAR_COMP_EVENT",
+            Timestamp: (new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0)).getTime(),
+            TimeZone: tz.timeZone,
+            Before: 0,
+            After: 0,
+        }
+
+        const fakeEventEndDay: UserEvent = {
+            ItemId: 0n,
+            EventId: 0,
+            Event: "_AIOW_CALENDAR_COMP_EVENT",
+            Timestamp: (new Date(start.getFullYear(), start.getMonth(), 31, 23, 59, 59)).getTime(),
+            TimeZone: tz.timeZone,
+            Before: 0,
+            After: 0,
+        }
+
+        //events within the month
+        //(finding valid events each day is COSTLY)
+        let validEvents: UserEvent[] = []
+        for (let item of this.selectedItems) {
+            const events = findUserEventsById(item.ItemId)
+
+            for (let ev of events) {
+                if (items_compareEventTiming(ev, fakeEventStartDay) <= 0 && items_compareEventTiming(ev, fakeEventEndDay) >=0) {
+                    validEvents.push(ev)
+                }
+            }
+        }
+        //plus finding the valid events now, lets us sort it once and only once
+        validEvents = validEvents.sort((a, b) => items_compareEventTiming(b, a))
+
+        for (let day = 1; day < 31; day++) {
             finishedEvents = []
 
             const curDay = new Date(start.getFullYear(), start.getMonth(), day)
-            if(curDay.getMonth() !== start.getMonth()) break
+            if (curDay.getMonth() !== start.getMonth()) break
 
             const d = document.createElement("div")
             d.classList.add("day")
@@ -104,7 +140,7 @@ class CalendarMode extends Mode {
                 EventId: 0,
                 Event: "_AIOW_CALENDAR_COMP_EVENT",
                 Timestamp: (new Date(start.getFullYear(), start.getMonth(), day, 0, 0, 0)).getTime(),
-                TimeZone: "",
+                TimeZone: tz.timeZone,
                 Before: 0,
                 After: 0,
             }
@@ -114,26 +150,25 @@ class CalendarMode extends Mode {
                 EventId: 0,
                 Event: "_AIOW_CALENDAR_COMP_EVENT",
                 Timestamp: (new Date(start.getFullYear(), start.getMonth(), day, 23, 59, 59)).getTime(),
-                TimeZone: "+00:00",
+                TimeZone: tz.timeZone,
                 Before: 0,
                 After: 0,
             }
 
-            for(let item of this.selectedItems) {
-                const events = findUserEventsById(item.ItemId)
-                for(let ev of events) {
-                    if(finishedEvents.includes(ev.EventId)) continue
+            for (let ev of validEvents) {
+                const item = findInfoEntryById(ev.ItemId)
+                if (finishedEvents.includes(ev.EventId)) continue
 
-                    if(items_compareEventTiming(ev, fakeEventStartDay) >= 0 && items_compareEventTiming(ev, fakeEventEndDay) <= 0) {
-                        const eventMarker = document.createElement("span")
-                        eventMarker.classList.add("event-marker")
-                        eventMarker.setAttribute("data-event", ev.Event)
-                        eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
-                        d.appendChild(eventMarker)
-                    }
-                    finishedEvents.push(ev.EventId)
-                    // console.log(ev)
+                if (items_compareEventTiming(ev, fakeEventStartDay) <= 0 && items_compareEventTiming(ev, fakeEventEndDay) >= 0) {
+                    const eventMarker = document.createElement("span")
+                    eventMarker.classList.add("event-marker")
+                    eventMarker.setAttribute("data-event", ev.Event)
+                    eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
+                    eventMarker.title = items_eventTSText(ev)
+                    d.appendChild(eventMarker)
                 }
+                finishedEvents.push(ev.EventId)
+                // console.log(ev)
             }
             dayElements.push(d)
         }
@@ -141,7 +176,7 @@ class CalendarMode extends Mode {
     }
 
     _render() {
-        if(this.mode === "day") {
+        if (this.mode === "day") {
             this._renderDay()
         } else {
             this._renderMonth()

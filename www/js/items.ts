@@ -219,7 +219,7 @@ function items_setEntries(items: InfoEntry[]) {
     }
 }
 
-function items_updateEntryById(id: string, { user, events, meta, info}: Partial<{
+function items_updateEntryById(id: string, { user, events, meta, info }: Partial<{
     user: UserEntry,
     events: UserEvent[],
     meta: MetadataEntry,
@@ -773,22 +773,48 @@ function items_eventTimeEstimate(event: UserEvent) {
  * @returns 0 if they occured at the same time
  * @returns 1 if left occured BEFORE right
  */
-let options:  Intl.ResolvedDateTimeFormatOptions | null = null
+let options: Intl.ResolvedDateTimeFormatOptions | null = null
 function items_compareEventTiming(left: UserEvent, right: UserEvent): -1 | 0 | 1 {
     let l = items_eventTimeEstimate(left)
     let r = items_eventTimeEstimate(right)
     if ("Temporal" in window) {
-        if(!options) {
+        if (!options) {
             options = Intl.DateTimeFormat().resolvedOptions()
         }
         let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, left.TimeZone || options.timeZone)
         let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, right.TimeZone || options.timeZone)
-        return Temporal.ZonedDateTime.compare(leftTime, rightTime)
+        return Temporal.ZonedDateTime.compare(rightTime, leftTime)
     }
     if (l == r) {
         return 0
     }
     return l > r ? -1 : 1
+}
+
+function items_eventTSText(event: UserEvent) {
+    let ts = event.Timestamp
+    const afterts = event.After
+    const beforets = event.Before
+    const timeZone = event.TimeZone || "UTC"
+    let text = ""
+    const mktime = (timestamp: number) => {
+        let date = new Date(timestamp)
+        let time = date.toLocaleTimeString("en", { timeZone: event.TimeZone })
+        return timeZone ? `${time} (${event.TimeZone})` : String(time)
+    }
+    if (afterts) {
+        text += mktime(afterts) + " < "
+    }
+
+    text += ts
+        ? mktime(ts)
+        : " ? " //if there is no exact timestamp, put a ? in the middle of afterts and beforets
+
+    if (beforets) {
+        text += " < " + mktime(beforets)
+    }
+
+    return text
 }
 
 function items_eventTSHTML(event: UserEvent) {
@@ -800,8 +826,8 @@ function items_eventTSHTML(event: UserEvent) {
 
     const mktime = (timestamp: number) => {
         let date = new Date(timestamp)
-        let time = date.toLocaleTimeString("en")
-        let dd = date.toLocaleDateString("en")
+        let time = date.toLocaleTimeString("en", { timeZone: event.TimeZone })
+        let dd = date.toLocaleDateString("en", { timeZone: event.TimeZone })
         return `<time title="${time} (${timeZone})" datetime="${date.toISOString()}">${dd}</time>`
     }
 
