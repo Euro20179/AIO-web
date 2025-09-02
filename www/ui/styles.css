@@ -112,16 +112,24 @@
             width: 100cqi;
             overflow: auto;
 
-            grid-template-areas: "month stats calendar";
-            grid-template-columns: 1fr 10fr;
+            grid-template-areas: "month calendar";
             grid-template-rows: 1fr 10fr;
 
             #month-nav {
-                display: grid;
-                grid-template-columns: 1fr max(20cqi, 200px) 1fr;
+                display: flex;
                 justify-content: center;
+                justify-items: center;
                 gap: 2ch;
                 grid-column: 1 / -1;
+
+                label {
+                    text-align: center;
+                    align-self: center;
+                }
+                input {
+                    height: fit-content;
+                    align-self: center;
+                }
 
                 button {
                     width: fit-content;
@@ -136,19 +144,22 @@
                         justify-self: left;
                     }
                 }
+            }
 
-                #month-name {
-                    justify-self: center;
+            #months {
+                display: flex;
+                flex-direction: column;
+                width: 100cqi;
+                > .month-grid {
+                    border: 1px solid currentColor;
+                }
+
+                .month-label {
+                    text-align: center;
                 }
             }
 
-            #month-stats {
-                #total-events::before {
-                    content: "Event total: "
-                }
-            }
-
-            #month-grid {
+            .month-grid {
                 display: grid;
                 grid-template-columns: repeat(7, 1fr);
                 width: 100%;

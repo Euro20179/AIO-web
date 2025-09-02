@@ -229,25 +229,13 @@
                     <canvas id="cal-canvas"></canvas>
                     <div id="month-display">
                         <nav id="month-nav">
+                            <label for="time-start">start <input id="time-start" type="date"></label>
                             <button id="month-prev">&lt;</button>
-                            <h2 id="month-name"></h2>
                             <button id="month-next">&gt;</button>
+                            <label for="time-end">end <input id="time-end" type="date"></label>
                         </nav>
-                        <span id="month-stats">
-                                <span id="total-events"></span>
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th>Event</th>
-                                        <th>Count</th>
-                                        <th>%</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody id="event-totals">
-                                    </tbody>
-                                </table>
-                        </span>
-                        <div id="month-grid"></div>
+                        <div id="months">
+                        </div>
                     </div>
                 </div>
 
