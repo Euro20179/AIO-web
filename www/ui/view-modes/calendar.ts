@@ -82,28 +82,6 @@ class CalendarMode extends Mode {
         const start = new Date(this.selectedTime[0].getFullYear(), this.selectedTime[0].getMonth(), 1)
         if (monthName)
             monthName.innerHTML = `${start.toLocaleString('default', { month: "long" })} ${start.getFullYear()}`
-        const dayElements: HTMLElement[] = []
-
-        const tz = Intl.DateTimeFormat().resolvedOptions()
-        const fakeEventStartDay: UserEvent = {
-            ItemId: 0n,
-            EventId: 0,
-            Event: "_AIOW_CALENDAR_COMP_EVENT",
-            Timestamp: (new Date(start.getFullYear(), start.getMonth(), 1, 0, 0, 0)).getTime(),
-            TimeZone: tz.timeZone,
-            Before: 0,
-            After: 0,
-        }
-
-        const fakeEventEndDay: UserEvent = {
-            ItemId: 0n,
-            EventId: 0,
-            Event: "_AIOW_CALENDAR_COMP_EVENT",
-            Timestamp: (new Date(start.getFullYear(), start.getMonth(), 31, 23, 59, 59)).getTime(),
-            TimeZone: tz.timeZone,
-            Before: 0,
-            After: 0,
-        }
 
         //the true total number of events
         let yearEvents = items_getEventsWithinTimeRange(this.selectedItems, new Date(start.getFullYear(), 0, 0).getTime(), new Date(start.getFullYear(), 12, 31, 11, 59, 59).getTime())
