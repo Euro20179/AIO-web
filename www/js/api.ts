@@ -370,7 +370,6 @@ async function api_createEntry(params: NewEntryParams) {
     return await authorizedRequest(`${apiPath}/add-entry${qs}`)
 }
 
-
 async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response | null> {
     let userAuth = getUserAuth() || ""
     options ||= {}
@@ -379,7 +378,10 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
         try {
             userAuth = await signinUI(options?.["signin-reason"] || "")
         } catch (err) {
-            return null
+            console.warn("signinUI is undefined, falling back to shitty solution")
+            const username = prompt("username")
+            const password = prompt("password")
+            setUserAuth(userAuth = btoa(`${username}:${password}`))
         }
     }
     //@ts-ignore
