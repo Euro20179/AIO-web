@@ -3,6 +3,22 @@ let _api_as_cache: { [key: number]: string } = {}
 
 let _api_types_cache: EntryType[] = []
 
+function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
+    into.setItem.bind(into)("userAuth", auth)
+}
+
+function getUserAuth(from: { getItem(key: string): string | null } = localStorage) {
+    return from.getItem.bind(from)("userAuth")
+}
+
+function storeUserUID(id: string) {
+    localStorage.setItem("userUID", id)
+}
+
+function getUserUID() {
+    return localStorage.getItem("userUID")
+}
+
 function probablyUserItem(item: object): item is UserEntry {
     for (let key of [
         "ItemId",
@@ -362,7 +378,6 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     if (userAuth == "") {
         try {
             userAuth = await signinUI(options?.["signin-reason"] || "")
-            setUserAuth(userAuth)
         } catch (err) {
             return null
         }

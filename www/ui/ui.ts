@@ -120,18 +120,6 @@ function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEn
     group.append(opt)
 }
 
-function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
-    into.setItem.bind(into)("userAuth", auth)
-}
-
-function getUserAuth(from: { getItem(key: string): string | null } = localStorage) {
-    return from.getItem.bind(from)("userAuth")
-}
-
-function storeUserUID(id: string) {
-    localStorage.setItem("userUID", id)
-}
-
 function currentDocument() {
     return catalogWin?.document || document
 }
@@ -1003,7 +991,9 @@ async function signinUI(reason: string): Promise<string> {
                 storeUserUID(String(uid))
             })
 
-            res(btoa(`${username}:${password}`))
+            const b64 = btoa(`${username}:${password}`)
+            setUserAuth(b64)
+            res(b64)
         }
     })
 }

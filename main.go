@@ -91,7 +91,13 @@ func root(w http.ResponseWriter, req *http.Request) {
 			b64 = auth[len("Basic "):]
 		}
 
-		w.Header().Set("Location", fmt.Sprintf("/ui?%s", req.URL.RawQuery))
+		path := "/ui"
+		if req.URL.Query().Has("location") {
+			path = req.URL.Query().Get("location")
+		} else if req.URL.RawQuery != "" {
+			path += fmt.Sprintf("?%s", req.URL.RawQuery)
+		}
+		w.Header().Set("Location", path)
 		if b64 != "" {
 			uid, status, err := ckAuth(b64)
 			if status == 200 {

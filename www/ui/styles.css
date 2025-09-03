@@ -223,7 +223,13 @@
         display: block;
         align-content: center;
         cursor: pointer;
-        margin: 0 1ch;
+    }
+
+    #login-link {
+        display: block;
+        align-content: center;
+
+        margin-right: 1ch;
     }
 
     #gallery-items {
