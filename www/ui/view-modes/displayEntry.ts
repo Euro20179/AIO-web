@@ -1256,45 +1256,44 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const tagsRoot = el.getElementById("tags")
     if (tagsRoot) {
         tagsRoot.innerHTML = ""
-        for (let tag of item.Tags || []) {
-            tag = tag.trim()
-            if (!tag) continue
-            const outer = document.createElement("div")
+        const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
+        if (tagTempl)
+            for (let tag of item.Tags || []) {
+                tag = tag.trim()
+                if (!tag) continue
 
-            const del = document.createElement("button")
-            del.innerText = "🗑"
-            del.classList.add("delete")
+                const copy = tagTempl.content.cloneNode(true) as HTMLElement
+                const del = copy.querySelector("#delete-tag") as HTMLElement
 
-            del.onclick = () => {
-                const info = findInfoEntryById(item.ItemId)
-                api_deleteEntryTags(info.ItemId, [tag])
-                    .then(res => {
-                        if (res?.status !== 200) return ""
-                        res.text().then(() => {
-                            info.Tags = info.Tags.filter((t: string) => t != tag)
-                            changeDisplayItemData.call(this, info, user, meta, events, el.host as HTMLElement)
+                //TODO: make this and the btn.onclick a generic de_action
+                //also put copy through updateBasicDisplayEntryContents that way
+                //the tag template can be fully declarative
+                del && (del.onclick = () => {
+                    const info = findInfoEntryById(item.ItemId)
+                    api_deleteEntryTags(info.ItemId, [tag])
+                        .then(res => {
+                            if (res?.status !== 200) return ""
+                            res.text().then(() => {
+                                info.Tags = info.Tags.filter((t: string) => t != tag)
+                                changeDisplayItemData.call(this, info, user, meta, events, el.host as HTMLElement)
+                            })
                         })
-                    })
-                    .catch(console.error)
-            }
-
-            outer.append(del)
-
-            const btn = document.createElement("button")
-            btn.classList.add("tag")
-            btn.innerText = tag
-            outer.append(btn)
-
-            btn.onclick = function(e) {
-                let btn = e.target as HTMLButtonElement
-                let tag = btn.innerText
-                mkSearchUI({
-                    ["search-query"]: `#tag:${tag}`
+                        .catch(console.error)
                 })
-            }
 
-            tagsRoot?.append(outer)
-        }
+                const btn = copy.querySelector("#tag-name") as HTMLElement
+                btn.innerText = tag
+
+                btn.onclick = function(e) {
+                    let btn = e.target as HTMLButtonElement
+                    let tag = btn.innerText
+                    mkSearchUI({
+                        ["search-query"]: `#tag:${tag}`
+                    })
+                }
+
+                tagsRoot?.append(copy)
+            }
     }
 
     //type icon
