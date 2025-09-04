@@ -105,6 +105,37 @@ function setError(text: string) {
     }
 }
 
+async function refreshInfo(uid: number) {
+    await Promise.all([
+        loadLibraries(uid),
+        loadInfoEntries(uid),
+    ])
+    return Promise.all([
+        loadUserEvents(uid),
+        items_refreshMetadata(uid)
+    ])
+}
+
+async function loadLibraries(uid: number) {
+    await items_loadLibraries(uid)
+    updateLibraryDropdown()
+}
+
+async function loadInfoEntries(uid: number) {
+    setError("Loading items")
+
+    await items_refreshInfoEntries(uid)
+
+    setError("")
+
+    items_refreshUserEntries(uid).then(() => {
+        updateInfo2(items_getAllEntries())
+    })
+
+    return items_getAllEntries()
+}
+
+
 function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
     const internalSortName = items_addSort(name, cb)
     let group = sortBySelector.querySelector(`optgroup[label="${category}"]`)

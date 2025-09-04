@@ -87,25 +87,6 @@ async function refreshInfo(uid: number) {
     ])
 }
 
-async function loadLibraries(uid: number) {
-    await items_loadLibraries(uid)
-    updateLibraryDropdown()
-}
-
-async function loadInfoEntries(uid: number) {
-    setError("Loading items")
-
-    await items_refreshInfoEntries(uid)
-
-    setError("")
-
-    items_refreshUserEntries(uid).then(() => {
-        updateInfo2(items_getAllEntries())
-    })
-
-    return items_getAllEntries()
-}
-
 
 function mode_getFirstModeInWindow(win: Window) {
     for(let mode of openViewModes) {
