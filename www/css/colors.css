@@ -78,7 +78,7 @@
     @supports (color: rgb(calc(sign(1)) 0 0)) {
         /*oklch doesnt work for some reason*/
         --secondary: lch(from var(--main) calc(l + (sign(abs(l - 100) - 50) * 20)) c calc(h));
-        --text-color: hsl(from var(--main) h s calc(l + (sign(abs(l - 100) - 50)) * 90));
+        --text-color: hsl(from var(--main) h s calc((sign(abs(l - 100) - 30)) * 90));
     }
 
     --error: var(--red);
