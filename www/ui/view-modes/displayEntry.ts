@@ -458,7 +458,8 @@ class DisplayMode extends Mode {
     }
 
     clear() {
-        for (let child of this.parent.querySelectorAll(":not(display-entry)")) {
+        for (let child of this.parent.childNodes) {
+            if(child.nodeName === 'DISPLAY-ENTRY') continue
             child.remove()
         }
     }
