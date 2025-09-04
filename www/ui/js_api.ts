@@ -46,6 +46,18 @@ function util_debounce(cb: Function, timeout: number) {
 }
 
 /**
+ * sets a css property on document and if catalogWin is open, also that document
+ * @param {string} property the css property to set
+ * @param {string} value the value to set property to
+ */
+function ui_setcss(property: string, value: string): void {
+    document.documentElement.style.setProperty(property, value)
+    if(catalogWin) {
+        catalogWin.document.documentElement.style.setProperty(property, value)
+    }
+}
+
+/**
  * Shows a prompt dialog to the user
  * @param {string} prompt - The prompt message to display
  * @param {string} [_default] - Optional default value for the prompt
