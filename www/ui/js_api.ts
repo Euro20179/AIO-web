@@ -304,6 +304,14 @@ function ui_modeclear(): number {
 }
 
 /**
+ * runs ui_clear() and ui_modeclear() to clear all items, and nodes put by ui_put()
+ * @returns an array of the results from ui_clear(), and ui_modeclear()
+ */
+function ui_clearall(): [number, number] {
+    return [ui_clear(), ui_modeclear()]
+}
+
+/**
  * Sets the user ID in the UI
  * Side effects:
  * - sets the uid select element to the new uid
