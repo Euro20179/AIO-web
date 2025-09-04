@@ -40,10 +40,6 @@
     article {
         padding: var(--small-gap);
     }
-
-    :host(display-entry) {
-        --small-gap: 2ex;
-    }
 }
 
 @layer util {
@@ -70,7 +66,7 @@
     :host(display-entry) {
         flex-grow: 1;
         /*-10px just incase*/
-        min-width: calc(50cqw - var(--gap-size) - 10px);
+        min-width: calc(50cqw - var(--small-gap) - 10px);
 
         overflow: auto auto;
 
@@ -104,7 +100,7 @@
         grid-auto-flow: row;
 
         float: left;
-        gap: 20px;
+        gap: calc(var(--small-gap) / 2);
 
         margin: 0.4em 0 0 0.4em;
 
@@ -224,7 +220,7 @@
     }
 
     #event-table-area {
-        gap: 10px;
+        gap: calc(var(--small-gap) / 2);
         overflow: auto auto;
         max-height: 30cqb;
     }
@@ -244,7 +240,7 @@
     #actions {
         justify-content: center;
 
-        --gap-size: 20px;
+        --gap-size: calc(var(--small-gap) / 2);
 
         /*There are a couple of flexboxes within here to group thigns together*/
         &.flex,

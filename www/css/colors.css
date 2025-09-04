@@ -88,6 +88,8 @@
     --input-border-color: currentColor;
     --border-roundness: var(--input-border-roundness);
 
+    --small-gap: 2ex;
+
     --scrollbar-bar-color: var(--blue);
     --scrollbar-gutter-color: var(--secondary);
 

@@ -124,7 +124,7 @@
                 display: flex;
                 justify-content: center;
                 justify-items: center;
-                gap: 2ch;
+                gap: var(--small-gap);
 
                 label {
                     text-align: center;
@@ -189,7 +189,7 @@
 
                     display: flex;
                     flex-direction: column;
-                    gap: 1cap;
+                    gap: var(--small-gap);
 
                     .event-marker {
                         &[data-event="Viewing"] {
@@ -291,7 +291,7 @@
 
         display: grid;
 
-        gap: 1cqi;
+        gap: var(--small-gap);
 
         @container body (width >=800px) {
             grid-template-areas:
@@ -337,7 +337,7 @@
     #new-item-form {
         display: flex;
         flex-direction: column;
-        gap: 1cap;
+        gap: var(--small-gap);
         margin: 0 20%;
     }
 
@@ -434,7 +434,7 @@
     #result-stats {
 
         display: flex;
-        gap: 10px;
+        gap: calc(var(--small-gap) / 5);
 
         *:not(:last-child) {
             padding-right: 10px;
@@ -543,9 +543,7 @@
     #entry-output.open {
         --grid-size: 50%;
 
-        --gap-size: 10px;
-
-        gap: var(--gap-size);
+        gap: calc(var(--small-gap) / 5);
 
         height: 100%;
         overflow: auto auto;
