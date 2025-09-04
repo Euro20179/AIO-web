@@ -441,9 +441,9 @@ class DisplayMode extends Mode {
     }
 
     put(html: string | HTMLElement | ShadowRoot) {
-        if (typeof html === 'string') {
-            return
-        }
+        // if (typeof html === 'string') {
+        //     return
+        // }
         this.parent.append(html)
     }
 
