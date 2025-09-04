@@ -256,7 +256,7 @@ document.addEventListener("keydown", e => {
             break
         }
         case "p": {
-            openModalUI("script-select")
+            selectScriptUI()
             e.preventDefault()
             break
         }

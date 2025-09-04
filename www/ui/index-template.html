@@ -134,12 +134,15 @@
         <div id="main-ui" class="overflow">
             <nav id="search-area" aria-label="search and information">
 
-                <div class="flex" style="gap: 1ch;">
+                <div class="flex">
                     <div class="grid row">
                         <button onclick="signinUI()" id="login-link" style="block-size: 100%; inline-size: 100%;">login</button>
                         <button onclick="setUserAuth('')" style="block-size: 100%; inline-size: 100%;">logout</button>
                     </div>
-                    <a href="javascript:(() => open(`/settings.html?uid=${getUidUI()}`))()" id="help-link">⚙</a>
+                    <div class="grid row">
+                        <a href="javascript:(() => open(`/settings.html?uid=${getUidUI()}`))()" id="help-link">⚙</a>
+                        <button onclick="openModalUI('script-select')">run</button>
+                    </div>
 
                     <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
                 </div>
