@@ -31,32 +31,32 @@ viewToggle?.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 
-if(librarySelector)
-librarySelector.onchange = function() {
-    let val = librarySelector.value
-    items_setCurrentLibrary(BigInt(val))
+if (librarySelector)
+    librarySelector.onchange = function() {
+        let val = librarySelector.value
+        items_setCurrentLibrary(BigInt(val))
 
-    loadSearchUI()
-}
+        loadSearchUI()
+    }
 
-if(userSelector)
-userSelector.onchange = function() {
-    refreshInfo(getUidUI()).then(() => loadSearchUI())
-}
+if (userSelector)
+    userSelector.onchange = function() {
+        refreshInfo(getUidUI()).then(() => loadSearchUI())
+    }
 
-if(sortBySelector)
-sortBySelector.onchange = function() {
-    sortEntriesUI()
-}
+if (sortBySelector)
+    sortBySelector.onchange = function() {
+        sortEntriesUI()
+    }
 
 if (itemFilter) {
     itemFilter.oninput = function() {
         const filtered = getFilteredResultsUI()
         const ids = filtered.map(v => v.ItemId)
         //remove items that dont match
-        for(let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
+        for (let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
             const id = sidebarE.getAttribute("data-entry-id") as string
-            if(!ids.includes(BigInt(id))) {
+            if (!ids.includes(BigInt(id))) {
                 sidebarE.remove()
             }
         }
@@ -108,7 +108,7 @@ function setError(text: string) {
 function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
     const internalSortName = items_addSort(name, cb)
     let group = sortBySelector.querySelector(`optgroup[label="${category}"]`)
-    if(!group) {
+    if (!group) {
         group = document.createElement("optgroup")
         group.setAttribute("label", category)
         sortBySelector.appendChild(group)
@@ -343,10 +343,12 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     par.id = `user-script-${name}`
     const title = document.createElement("h3")
     const d = document.createElement("p")
+    const run = document.createElement("button")
+    run.append("run")
     d.innerHTML = desc
-    par.replaceChildren(title, d)
+    par.replaceChildren(title, d, run)
     title.innerText = name
-    title.onclick = () => runUserScriptUI(name)
+    run.onclick = () => runUserScriptUI(name)
     scriptSelect.append(par)
     userScripts.set(name, new UserScript(onrun, desc))
 }
@@ -826,9 +828,9 @@ if (newItemForm) {
     const title = newItemForm.querySelector('[name="title"]') as HTMLInputElement
     newItemForm.oninput = function() {
         const location = newItemForm.querySelector('[name="location"]') as HTMLInputElement
-        if(typeof settings.location_generator === 'string') {
+        if (typeof settings.location_generator === 'string') {
             location.value = settings.location_generator.replaceAll("{}", title.value)
-        } else if(typeof settings.location_generator === 'function') {
+        } else if (typeof settings.location_generator === 'function') {
             const info = new FormData(newItemForm)
             location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()))
         }
