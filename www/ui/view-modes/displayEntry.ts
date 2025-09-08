@@ -275,6 +275,7 @@ class DisplayMode extends Mode {
                 const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
                 el?.replaceWith(renderDisplayItem.call(this, item.ItemId, templEditor.value))
             }
+            
 
             templEditor.onkeyup = () => {
                 const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
@@ -1117,19 +1118,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
                 symbols.set("this", new EntryTy(item))
                 res = parseExpression(script, symbols)
             } else {
-                let old = XMLHttpRequest
-                //@ts-ignore
-                window.XMLHttpRequest = null
-                let oldFetch = fetch
-                window.fetch = async function(path: URL | RequestInfo, opts?: RequestInit) {
-                    if (!confirm(`A request is about to be made to ${path}, is this ok?`)) {
-                        return await oldFetch("/")
-                    }
-                    return await oldFetch(path, opts)
-                }
                 res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
-                window.XMLHttpRequest = old
-                window.fetch = oldFetch
             }
             let outputId = elem.getAttribute("data-output")
             if (outputId) {
