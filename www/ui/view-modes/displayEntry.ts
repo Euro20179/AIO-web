@@ -1104,7 +1104,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
         }
     }
 
-    if (ENABLE_UNSAFE)
+    if (settings_get("enable_unsafe"))
         for (let elem of root.querySelectorAll("script")) {
             let script = elem.textContent
             if (!script) continue

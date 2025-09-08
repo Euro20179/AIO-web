@@ -19,7 +19,8 @@ const settings = {
          * 12: ""
          */
     } as Record<number, string>,
-    location_generator: "" as `${string}{}${string}` | ((info: InfoEntry) => string)
+    location_generator: "" as `${string}{}${string}` | ((info: InfoEntry) => string),
+    enable_unsafe: ENABLE_UNSAFE
 } as const
 
 type Settings = typeof settings
