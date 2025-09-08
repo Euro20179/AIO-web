@@ -1118,7 +1118,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
                 symbols.set("this", new EntryTy(item))
                 res = parseExpression(script, symbols)
             } else {
-                res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
+                res = new this.win.Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
             }
             let outputId = elem.getAttribute("data-output")
             if (outputId) {
