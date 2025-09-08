@@ -272,14 +272,14 @@ class DisplayMode extends Mode {
 
             preview.onload = () => {
                 preview.document.title = `${item.En_Title} PREVIEW`
-                const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
-                el?.replaceWith(renderDisplayItem.call(this, item.ItemId, templEditor.value))
+                //this tells the new window that this is the template to use for this item no matter what
+                preview.self.GLOBAL_TEMPLATE = {[`${item.ItemId}`]: templEditor.value}
             }
-            
 
             templEditor.onkeyup = () => {
-                const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
-                el?.replaceWith(renderDisplayItem.call(this, item.ItemId, templEditor.value))
+                preview.self.GLOBAL_TEMPLATE = {[`${item.ItemId}`]: templEditor.value}
+                preview.self.deselectItem(item, false)
+                preview.self.selectItem(item, false)
             }
         }),
         copyto: this.displayEntryAction(async (item) => {
@@ -1471,8 +1471,14 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
     let user = findUserEntryById(itemId) as UserEntry
 
+    //use the dumbest hack imaginable to allow the previewtemplate function to force the window it opens to do the rendering
+    //that hack being setting a global variable called GLOBAL_TEMPLATE which is the template to use
+    console.log(self.GLOBAL_TEMPLATE)
+    if(self.GLOBAL_TEMPLATE && String(itemId) in self.GLOBAL_TEMPLATE) {
+        template = self.GLOBAL_TEMPLATE[String(itemId)]
+    }
     if (template || (user && (template = getUserExtra(user, "template")?.trim()))) {
-        (root.getElementById("root") as HTMLDivElement).innerHTML = template
+        (root.getElementById("root") as HTMLDivElement).innerHTML =  template
     }
 
     let meta = findMetadataById(itemId)

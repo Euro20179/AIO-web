@@ -2133,7 +2133,7 @@ class CalcVarTable {
         }))
 
         this.symbols.set("search", new Func((query, cb) => {
-            api_queryV3(query.jsStr(), getUidUI()).then(entries => {
+            api_queryV3(query.jsStr(), ui_getuid()).then(entries => {
                 let es = new Arr(entries.map(v => new EntryTy(v)))
                 cb?.call([es])
             }).catch(console.error)
@@ -2179,7 +2179,7 @@ class CalcVarTable {
                 return new Str("NOT AN ENTRY")
             }
             aio_setentry(entry.jsValue).then(success => {
-                const mode = mode_getFirstModeInWindow(window)
+                const mode = mode_getFirstModeInWindow(currentDocument().defaultView || window)
                 if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${entry.jsValue.En_Title}`)
                 }
@@ -2194,7 +2194,7 @@ class CalcVarTable {
 
             aio_setmeta(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                const mode = mode_getFirstModeInWindow(window)
+                const mode = mode_getFirstModeInWindow(currentDocument().defaultView || window)
                 if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${info.En_Title}'s metadata`)
                 }
@@ -2209,7 +2209,7 @@ class CalcVarTable {
             }
             aio_setuser(entry.jsValue).then(success => {
                 let info = findInfoEntryById(entry.jsValue.ItemId) as InfoEntry
-                const mode = mode_getFirstModeInWindow(window)
+                const mode = mode_getFirstModeInWindow(currentDocument().defaultView || window)
                 if (mode && !success && mode.put) {
                     mode.put(`Failed to update: ${info.En_Title}'s user entry`)
                 }
