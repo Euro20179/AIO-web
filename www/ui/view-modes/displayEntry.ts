@@ -265,18 +265,20 @@ class DisplayMode extends Mode {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor || !(templEditor instanceof this.win.HTMLTextAreaElement)) return
 
-            const preview = this.parent.ownerDocument.open(location.toString(), "_blank", "popup=true")
+            const urlParams = new URLSearchParams(location.search)
+            urlParams.set("item-id", String(item.ItemId))
+            const preview = this.parent.ownerDocument.open(location.pathname + "?" + urlParams.toString(), "_blank", "popup=true")
             if (!preview) return
 
             preview.onload = () => {
-                preview.document.body.innerHTML = ""
                 preview.document.title = `${item.En_Title} PREVIEW`
-                preview.document.body.replaceChildren(renderDisplayItem.call(this, item.ItemId, templEditor.value))
+                const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
+                el?.replaceWith(renderDisplayItem.call(this, item.ItemId, templEditor.value))
             }
 
             templEditor.onkeyup = () => {
-                preview.document.body.innerHTML = ""
-                preview.document.body.replaceChildren(renderDisplayItem.call(this, item.ItemId, templEditor.value))
+                const el = preview.document.body.querySelector(`[data-item-id="${item.ItemId}"]`)
+                el?.replaceWith(renderDisplayItem.call(this, item.ItemId, templEditor.value))
             }
         }),
         copyto: this.displayEntryAction(async (item) => {
