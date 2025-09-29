@@ -338,6 +338,7 @@
 
         img {
             cursor: pointer;
+            height: max(15cqb, 100px);
         }
     }
 
