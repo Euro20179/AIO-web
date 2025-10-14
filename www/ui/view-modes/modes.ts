@@ -76,17 +76,6 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
     }
 }
 
-async function refreshInfo(uid: number) {
-    await Promise.all([
-        loadLibraries(uid),
-        loadInfoEntries(uid),
-    ])
-    return Promise.all([
-        loadUserEvents(uid),
-        items_refreshMetadata(uid)
-    ])
-}
-
 
 function mode_getFirstModeInWindow(win: Window) {
     for(let mode of openViewModes) {

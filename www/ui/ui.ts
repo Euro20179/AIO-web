@@ -31,40 +31,35 @@ viewToggle?.addEventListener("change", e => {
     mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
 })
 
-if (librarySelector)
-    librarySelector.onchange = function() {
-        let val = librarySelector.value
-        items_setCurrentLibrary(BigInt(val))
+librarySelector?.addEventListener("change", function() {
+    let val = librarySelector.value
+    items_setCurrentLibrary(BigInt(val))
 
-        loadSearchUI()
-    }
+    loadSearchUI()
+})
 
-if (userSelector)
-    userSelector.onchange = function() {
-        refreshInfo(getUidUI()).then(() => loadSearchUI())
-    }
+userSelector?.addEventListener("change", function() {
+    refreshInfo(getUidUI()).then(() => loadSearchUI())
+})
 
-if (sortBySelector)
-    sortBySelector.onchange = function() {
-        sortEntriesUI()
-    }
+sortBySelector?.addEventListener("change", function() {
+    sortEntriesUI()
+})
 
-if (itemFilter) {
-    itemFilter.oninput = function() {
-        const filtered = getFilteredResultsUI()
-        const ids = filtered.map(v => v.ItemId)
-        //remove items that dont match
-        for (let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
-            const id = sidebarE.getAttribute("data-entry-id") as string
-            if (!ids.includes(BigInt(id))) {
-                sidebarE.remove()
-            }
+itemFilter?.addEventListener("input", function() {
+    const filtered = getFilteredResultsUI()
+    const ids = filtered.map(v => v.ItemId)
+    //remove items that dont match
+    for (let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
+        const id = sidebarE.getAttribute("data-entry-id") as string
+        if (!ids.includes(BigInt(id))) {
+            sidebarE.remove()
         }
-
-        //add items that DO match            reapply sort
-        renderSidebarItemList(filtered).then(sortEntriesUI)
     }
-}
+
+    //add items that DO match            reapply sort
+    renderSidebarItemList(filtered).then(sortEntriesUI)
+})
 
 if (viewAllElem instanceof HTMLInputElement)
     viewAllElem.addEventListener("change", e => {
