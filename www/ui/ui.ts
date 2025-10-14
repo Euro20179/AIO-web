@@ -990,7 +990,14 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 
 async function signinUI(reason: string): Promise<string> {
     const loginPopover = currentDocument().getElementById("login") as HTMLDialogElement
-    (loginPopover.querySelector("#login-reason") as HTMLParagraphElement)!.innerText = reason || ""
+    if(!loginPopover) {
+        throw new Error("Could not create login screen")
+    }
+
+    const loginReasonEl = loginPopover.querySelector("#login-reason")
+    if(loginReasonEl instanceof HTMLElement) {
+        loginReasonEl.innerText = reason
+    }
 
     //if the popover is already open, something already called this function for the user to sign in
     if (loginPopover.open) {

@@ -1,110 +1,112 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <script src="/config.js"></script>
-        <meta charset="UTF-8" />
-        <title>Home</title>
-        <link rel="stylesheet" href="/css/colors.css" />
-        <link rel="stylesheet" href="/css/general.css" />
-        <link rel="manifest" href="/manifest.json" />
-        <style>
-            body {
-                font-family: sans-serif;
-            }
 
-            #users-output {
+<head>
+    <script src="/config.js"></script>
+    <script src="/ui/api.js"></script>
+    <script src="/ui/ui.js"></script>
+    <meta charset="UTF-8" />
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/colors.css" />
+    <link rel="stylesheet" href="/css/general.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        #users-output {
+            display: flex;
+            flex-direction: column;
+
+            margin-top: 5ch;
+
+            align-items: center;
+            gap: 30px;
+
+            div {
                 display: flex;
                 flex-direction: column;
+                width: 100%;
 
-                margin-top: 5ch;
-
-                align-items: center;
-                gap: 30px;
-
-                div {
-                    display: flex;
-                    flex-direction: column;
+                a {
+                    font-size: 1.2em;
+                    color: var(--link-color);
                     width: 100%;
+                    cursor: pointer;
+                    text-transform: capitalize;
+                }
 
-                    a {
-                        font-size: 1.2em;
-                        color: var(--link-color);
-                        width: 100%;
-                        cursor: pointer;
-                        text-transform: capitalize;
-                    }
-
-                    a::after {
-                        content: "'s media";
-                    }
+                a::after {
+                    content: "'s media";
                 }
             }
-        </style>
-    </head>
+        }
+    </style>
+</head>
 
-    <body>
-        <h2 class="">Welcome</h2>
-        <a href="/create-account.html" class="block"
-            ><button style="padding: 5px">Create account</button></a
-        >
+<body>
+    <h2 class="">Welcome</h2>
+    <div style="display: flex; flex-direction: row;">
+        <button onclick="signinUI()">Login</button>
+        <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
+        <a href="/create-account.html" class="block"><button style="padding: 5px">Create account</button></a>
+    </div>
 
-        <p>
-            Welcome to the AIO LIMAS, basic usage information can be found
-            <a href="/usage">here</a>.
-        </p>
+    <p>
+        Welcome to the AIO LIMAS, basic usage information can be found
+        <a href="/usage">here</a>.
+    </p>
 
-        <h2 class="">Users</h2>
+    <h2 class="">Users</h2>
 
-        <div id="users-output"></div>
+    <div id="users-output"></div>
 
-        <dialog id="login" popover>
-            <h3 class="center">Login</h3>
-            <form
-                action="javascript:void(0)"
-                class="flex column"
-                style="align-content: center"
-            >
-                <input type="text" placeholder="username" name="username" />
-                <input type="password" placeholder="password" name="password" />
-                <input type="submit" value="login" />
-            </form>
-        </dialog>
+    <dialog id="login" popover>
+        <h3 class="center">Login</h3>
+        <form action="javascript:void(0)" class="flex column" style="align-content: center">
+            <input type="text" placeholder="username" name="username" />
+            <input type="password" placeholder="password" name="password" />
+            <input type="submit" value="login" />
+        </form>
+    </dialog>
 
-        <script src="/js/api.js"></script>
-        <script>
-            const params = new URLSearchParams(document.location.search);
-            const uid = params.get("uid");
-            if (uid) {
-                window.location = `/ui/?uid=${uid}`;
-            }
+    <script src="/js/api.js"></script>
+    <script>
+        const params = new URLSearchParams(document.location.search);
+        const uid = params.get("uid");
+        if (uid) {
+            window.location = `/ui/?uid=${uid}`;
+        }
 
-            function deleteaccount(uid) {
-                authorizedRequest(`${AIO}/account/delete?uid=${uid}`, {
-                    method: "DELETE",
+        function deleteaccount(uid) {
+            authorizedRequest(`${AIO}/account/delete?uid=${uid}`, {
+                method: "DELETE",
+            })
+                .then((res) => {
+                    if (res.status !== 200) {
+                        return "Failed to delete account";
+                    }
+                    return res.text();
                 })
-                    .then((res) => {
-                        if (res.status !== 200) {
-                            return "Failed to delete account";
-                        }
-                        return res.text();
-                    })
-                    .then((text) => {
-                        alert(text);
-                    });
-            }
-
-            fetch(`${AIO}/account/list`)
-                .then((res) => res.text())
-                .then((users) => {
-                    const usersOutput = document.getElementById("users-output");
-                    users.split("\n").forEach((user) => {
-                        if (!user) return;
-
-                        const [id, name] = user.split(":");
-                        const html = `<div style="display: flex; gap: 2ch; flex-direction: row; justify-content: left;"><a href="/ui?uid=${id}">${name}</a> <button onclick="deleteaccount(${id})">delete</button></div>`;
-                        usersOutput.innerHTML += html;
-                    });
+                .then((text) => {
+                    alert(text);
                 });
-        </script>
-    </body>
+        }
+
+        fetch(`${AIO}/account/list`)
+            .then((res) => res.text())
+            .then((users) => {
+                const usersOutput = document.getElementById("users-output");
+                users.split("\n").forEach((user) => {
+                    if (!user) return;
+
+                    const [id, name] = user.split(":");
+                    const html = `<div style="display: flex; gap: 2ch; flex-direction: row; justify-content: left;"><a href="/ui?uid=${id}">${name}</a> <button onclick="deleteaccount(${id})">delete</button></div>`;
+                    usersOutput.innerHTML += html;
+                });
+            });
+    </script>
+</body>
+
 </html>
