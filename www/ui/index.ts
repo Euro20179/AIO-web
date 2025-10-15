@@ -92,6 +92,8 @@ async function main() {
 
 main()
 
+addUserScriptUI("Remote -> local thumbnail", remote2LocalThumbService, "Converts remote (non-data uri) thumbnails to thumbnails hosted on the aio server")
+
 let servicing = false
 async function remote2LocalThumbService() {
     if (servicing) return
