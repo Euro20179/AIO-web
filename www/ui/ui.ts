@@ -40,6 +40,7 @@ librarySelector?.addEventListener("change", function() {
 
 userSelector?.addEventListener("change", function() {
     refreshInfo(getUidUI()).then(() => loadSearchUI())
+    fillRecommendedListUI(null, getUidUI())
 })
 
 sortBySelector?.addEventListener("change", function() {
@@ -1082,6 +1083,21 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = 
     }
 
     formatSelector.replaceChildren(...Object.values(optGroups))
+}
+
+async function fillRecommendedListUI(list: HTMLDataListElement | null = null, uid: number) {
+    list ||= currentDocument().querySelector("datalist#recommended-by")
+    if(!list) {
+        console.error("Could not find a recommended-by list to fill")
+        return
+    }
+
+    const recommenders = await api_list_recommenders(uid)
+    for(let r of recommenders) {
+        const opt = document.createElement("option")
+        opt.value = r
+        list.appendChild(opt)
+    }
 }
 
 async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null) {

@@ -505,3 +505,14 @@ async function api_authorized(auth: string): Promise<false | number> {
     let text = await res.text()
     return Number(text)
 }
+
+async function api_list_recommenders(uid: number): Promise<string[]> {
+    let res = await fetch(`${apiPath}/recommenders?uid=${encodeURIComponent(uid)}`)
+    if (res.status !== 200) {
+        res.text().then(console.error)
+        return []
+    }
+
+    let r = await res.text()
+    return r.split("\x1F")
+}

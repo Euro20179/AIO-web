@@ -43,6 +43,7 @@ async function main() {
     await fillUserSelectionUI()
     setUIDFromHeuristicsUI()
 
+    fillRecommendedListUI(null, getUidUI())
     loadLibraries(getUidUI())
 
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement
