@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/css/general.css">
+<style>
+dt {
+    font-style: italic;
+}
+p {
+    max-width: 80ch;
+}
+</style>
+<h1>Display Entry Help</h1>
+<p>
+    The display entries are a beast, this document aims to document as much of
+    the functionality of them as possible
+
+<h2>Template</h2>
+<p>
+    Each entry can have it's own display entry template, which is simply some
+    html that says where information goes, and specifies certain actions.
+
+<h3>Generic Attributes</h3>
+<p>
+    Elements may have any of the following attributes
+<dl>
+    <dt>put-data
+    <dd>
+        <p>
+            Data from either Info, Meta, or User to put into this element.
+        <p>
+            You may either put the full name, eg: <code>info.En_Title</code> or the
+            shorthand, <code>En_Title</code>. If the shorthand is used, it will try to
+            guess which of the 3 structs to pull it from.
+    </dd>
+
+    <dt>put-data-fallback
+    <dd>Used to specify what text or html is shown when put-data is falsey ("" or 0).
+
+    <dt>put-data-mode
+    <dd>
+        <p>
+            Can only be set to <code>html</code>.
+        <p>
+            If set, render the data from <code>put-data[-fallback]</code> as html.
+        <p>
+            Otherwise, render as plain text
+    </dd>
+
+    <dt>entry-action
+    <dd>Preform an action from a predefined list of <a href="#actions">actions</a></dd>
+
+    <dt>entry-action-trigger
+    <dd>A js event, default is <code>click</code></dd>
+
+    <dt>put-tbl
+    <dd>
+        Put an entire table of information, valid tables are
+        <ul>
+            <li>user.Extra or Extra
+            <li>meta.Datapoints or Datapoints
+            <li>meta.MediaDependant or MediaDependant
+            <li>info
+            <li>user
+            <li>meta
+        </ul>
+    </dd>
+</dl>
+
+<h3>Script Tags</h3>
+<p> <code>&lt;script></code> tags only run if the user has
+    <code>enable_usafe</code> set. <p> A template may contain js script tags or
+    <code>type="application/x-aiol"</code> script tags, which use <a
+        href="/usage/aiol.html">aiol</a> as the language.
+
+<p> Also see the <a href="/usage/js_api_docs.html">js api docs</a> for the
+    available functions in js script tags.
+
+
+<h3>Special Ids</h3>
+<p>
+    Special ids will be filled with specific data in a specific format. In
+    addition my goal is to <em><strong>never</strong></em> remove any special
+    id as to keep backwards compatibility with old templates. However, the
+    default template may not use all special ids.
+<dl>
+    <dt>main-title
+    <dd>
+        <p>
+            The following attributes will be set:
+        <dl>
+            <dt>data-type-icon
+            <dd>An icon representing the type of the entry
+
+            <dt>data-owner
+            <dd>The username of the owner of the entry
+
+            <dt>data-format-icon
+            <dd>An icon representing the format of the entry
+
+            <dt>data-format-name
+            <dd>The name of the format of the entry
+        </dl>
+        <p>
+            The innerText will be set to <code>meta.Title || item.En_Title</code>
+        <p>
+            Lastly the <code>title</code> attribute will be set to
+            <code>item.En_Title</code>, if <code>meta.Title</code> AND
+            <code>item.En_Title</code> are set. <code>title</code> is supposed to
+            show the name the user gave, if the display title is the metadata title.
+    </dd>
+
+    <dt>official-native-title
+    <dd>
+        <p>
+            The innerText will be set to <code>meta.Native_Title ||
+                item.Native_Title</code>.
+        <p>
+            The <code>title</code> attribute is also set in a similar way to how
+            the title attribute is set on the <code>main-title</code> element.
+    </dd>
+
+    <dt>thumbnail
+    <dd><p>If it is an instance of <code>HTMLImageElement</code>:
+        <p>The alt will be set to <code>meta.Title || item.En_Title</code>,<br>
+            the src will be set to <code>meta.Thunmbnail</code>
+    </dd>
+
+    <dt>notes
+    <dd><p>The innerHTML will be set to a parsed version of <code>user.Notes</code>.
+        <p>The syntax for notes is phpbb syntax
+    </dd>
+
+    <dt>user-rating
+    <dd><p>The innerHTML gets set to <code>user.UserRating || "Unrated"</code>, and the
+        class gets set to <code>X-tier</code>. Where X is determined based on
+        the users <code>tiers</code> settings.
+    </dd>
+
+    <dt>audience-rating
+    <dd><p>if <code>meta.Rating</code> is not 0, the innerHTML gets set to
+        <code>meta.Rating</code>. The class is set similarly to <code>user-rating</code> but uses the normalized rating as input.
+        <p>
+            The normalized rating is calcualted as <code>meta.Rating / meta.RatingMax * 100</code>
+        <p>if <code>meta.Rating</code> is 0, the innerHTML gets set to <code>Unrated</code>
+    </dd>
+
+    <dt>view-count
+    <dd><p>if <code>user.ViewCount</code> or <code>user.Minutes</code> do not equal 0 then
+        <ol>
+            <li>let <var>minutes</var> = <code>user.Minutes || viewCount * (mediaDependant[Show-length] || mediaDependant[Movie-length] || 0)</code>
+            <li>The <code>title</code> attribute gets set to <var>minutes</var> " minutes"
+            <li>If <code>allow-minutes-extra</code> is in this entry's user[Extra], and <var>minutes</var> &gt; <code>0</code>, it gets updated to the calculated minutes
+            <li>The <code>data-time-spent</code> attribute gets set to a rounded version of <var>minutes</var>
+            <li>The inner text is set to <code>user.ViewCount</code>
+        </ol>
+    </dd>
+
+    <dt>entry-progressbar
+    <dd><p>If this element contains the attributes <code>max</code> and <code>value</code>,
+        and <code>user.Status</code> is Viewing:
+        <ol>
+            <li>let <var>length</var> = <code>mediaDependant[{type}-episodes] || mediaDependant[{type}-volumes] || mediaDependant[{type}-chapters] || mediaDependant[{type}-page-count] || 0</code>
+            <li>set <code>max</code> to <code><var>length</var> || 1</code>
+            <li>set <code>value</code> to <code>user.CurrentPosition || 0</code>
+        </ol>
+    </dd>
+
+    <dt>entry-progressbar-position-label
+    <dd>
+        <ol>
+        <li>let <var>length</var> = <code>mediaDependant[{type}-episodes] || mediaDependant[{type}-volumes] || mediaDependant[{type}-chapters] || mediaDependant[{type}-page-count] || 0</code>
+        <li>The innerText gets set to <code>user.CurrentPosition/<var>length</var></code>
+        <li>The <code>title</code> attribute gets set to <code>parseInt(user.CurrentPosition) / parseInt(<var>length</var>))</code>
+    </dd>
+
+    <dt>media-info
+    <dd>Fill a table with each item from <code>meta.MediaDependant</code>
+
+    <dt>custom-styles
+    <dd>The innerText gets set to <code>user[Extra][styles]</code></dd>
+
+    <dt>location-link
+    <dd>if the element has a <code>value</code> attribute, and
+        <code>item.Location</code> is not empty, set the value to
+        <code>item.Location</code>
+    </dd>
+
+    <dt>tz-selector
+    <dd>If the element is an instance of <code>HTMLSelectElement</code>,
+        set the value to the user's timezone</dd>
+
+    <dt>type-selector
+    <dd>If the element is an instance of <code>HTMLSelectElement</code>,
+        fill it with options, one for each entry type, and set the value to
+        <code>item.Type</code>
+    </dd>
+
+    <dt>format-selector
+    <dd>Similar to <code>type-selector</code>,
+        however works on Formats instead of Types</dd>
+
+    <dt>notes-edit-box
+    <dd>If the element has a <code>value</code> attribute,
+        set the value to <code>user.Notes</code>
+    </dd>
+
+    <dt>on-format
+    <dd>I dont know why this is called <code>on-format</code>,
+        It sets the innerHTML to a symbol representing the entry's format.</dd>
+
+    <dt>format-digitized
+    <dd>If the element is an instance of <code>HTMLInputElement</code>,
+        make it a checked box if the item is digitized</dd>
+
+    <dt>genres
+    <dd>For each genre, create a clickable button that when clicked,
+        searches for items of that genre.</dd>
+
+    <dt>tags
+    <dd>Similar to <code>genres</code>, but works on tags instead
+        
+    <dt>required-items
+    <dd>If this entry contains a requirement, put that requirement here.
+        When clicked open it.</dd>
+
+    <dt>is-{art-style}</dt>
+    <dd>For each art style, if the entry is of that art style,
+        and if <code>is-{art-style}</code> is an instance of <code>HTMLInputElement</code>:
+        make it a checked box.</dd>
+</dl>
