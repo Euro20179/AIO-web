@@ -37,7 +37,7 @@ class DisplayMode extends Mode {
         this.clearSelected()
     }
 
-    de_actions = {
+    de_actions = { //{{{
         delete: this.displayEntryAction(item => deleteEntryUI(item)),
         refresh: this.displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
         fetchlocation: this.displayEntryAction((item) => _fetchLocation.call(this, item.ItemId)),
@@ -351,7 +351,8 @@ class DisplayMode extends Mode {
                 })
                 .catch(console.error)
         }),
-    } as const
+    } as const //}}}
+
     add(entry: InfoEntry) {
         return renderDisplayItem.call(this, entry.ItemId)
     }
@@ -1153,10 +1154,15 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const mediaInfoTbl = el.getElementById("media-info")
     const customStyles = el.getElementById("custom-styles")
     const locationEl = el.getElementById("location-link")
-
-    const artStylesBox = el.getElementById("art-selectors")
-
+    const tzEl = el.getElementById("tz-selector")
+    const typeSelector = el.getElementById("type-selector")
+    const formatSelector = el.getElementById("format-selector")
     const notesEditBox = el.getElementById("notes-edit-box")
+    const onFormat = el.getElementById("on-format")
+    const digitized = el.getElementById("format-digitized")
+    const genresRoot = el.getElementById("genres")
+    const tagsRoot = el.getElementById("tags")
+    const requiredItemsEl = el.getElementById("required-items")
 
     //object editor table
     const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
@@ -1169,7 +1175,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     updateCostDisplay(el, item.ItemId)
 
     //Set the user's default timezone in the tz selector
-    const tzEl = el.getElementById("tz-selector")
     if (tzEl && tzEl instanceof HTMLSelectElement) {
         tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone
     }
@@ -1199,7 +1204,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //type selector
-    const typeSelector = el.getElementById("type-selector")
     if (typeSelector && (typeSelector instanceof this.win.HTMLSelectElement)) {
         fillTypeSelectionUI(typeSelector).then(() => {
             typeSelector.value = item.Type
@@ -1207,7 +1211,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //format selector
-    const formatSelector = el.getElementById("format-selector")
     if (formatSelector && (formatSelector instanceof this.win.HTMLSelectElement)) {
         fillFormatSelectionUI(formatSelector).then(() => {
             if (items_isDigitized(item.Format)) {
@@ -1218,17 +1221,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         })
     }
 
-    const onFormat = el.getElementById("on-format")
     if (onFormat && !(await formatToName(item.Format)).startsWith("UNOWNED")) {
         onFormat.innerHTML = formatToSymbolUI(item.Format)
     }
 
-    const digitized = el.getElementById("format-digitized")
     if (digitized && (digitized instanceof this.win.HTMLInputElement)) {
         digitized.checked = items_isDigitized(item.Format)
     }
 
-    const genresRoot = el.getElementById("genres")
     if (genresRoot) {
         const genres = JSON.parse(meta.Genres || "[]")
         const children = []
@@ -1245,7 +1245,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //tags
-    const tagsRoot = el.getElementById("tags")
     if (tagsRoot) {
         tagsRoot.innerHTML = ""
         const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
@@ -1412,7 +1411,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     el.host.setAttribute("data-user-status", user.Status)
 
-    const lengthInNumber = mediaDependant[`${type}-episodes`] || mediaDependant[`${type}-volumes`] || mediaDependant[`${type}-chapters`] || mediaDependant[`${type}-page-count`] || 0
+    const lengthInNumber =
+        mediaDependant[`${type}-episodes`]
+        || mediaDependant[`${type}-volumes`]
+        || mediaDependant[`${type}-chapters`]
+        || mediaDependant[`${type}-page-count`]
+        || 0
 
     if (progressEl && "max" in progressEl && "value" in progressEl && user.Status === "Viewing") {
         progressEl.max = lengthInNumber || 1
@@ -1435,7 +1439,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //Required items
-    const requiredItemsEl = el.getElementById("required-items")
     if (requiredItemsEl && item.Requires !== 0n) {
         const requiredItem = findInfoEntryById(item.Requires)
         let meta = findMetadataById(requiredItem.ItemId)
@@ -1473,10 +1476,12 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
     //use the dumbest hack imaginable to allow the previewtemplate function to force the window it opens to do the rendering
     //that hack being setting a global variable called GLOBAL_TEMPLATE which is the template to use
-    console.log(self.GLOBAL_TEMPLATE)
+    //@ts-ignore
     if(self.GLOBAL_TEMPLATE && String(itemId) in self.GLOBAL_TEMPLATE) {
+        //@ts-ignore
         template = self.GLOBAL_TEMPLATE[String(itemId)]
     }
+
     if (template || (user && (template = getUserExtra(user, "template")?.trim()))) {
         (root.getElementById("root") as HTMLDivElement).innerHTML =  template
     }

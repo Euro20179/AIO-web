@@ -859,11 +859,8 @@ if (newItemForm) {
             location.value = settings.location_generator.replaceAll("{}", title.value)
         } else if (typeof settings.location_generator === 'function') {
             const info = new FormData(newItemForm)
-            location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()))
+            location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
         }
-    }
-    newItemForm.onsubmit = function() {
-        newEntryUI(newItemForm)
     }
 }
 
