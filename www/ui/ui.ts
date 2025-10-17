@@ -1089,6 +1089,8 @@ async function fillRecommendedListUI(list: HTMLDataListElement | null = null, ui
         return
     }
 
+    list.innerHTML = ""
+
     const recommenders = await api_list_recommenders(uid)
     for(let r of recommenders) {
         const opt = document.createElement("option")
