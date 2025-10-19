@@ -23,10 +23,10 @@ class DisplayMode extends Mode {
     }
 
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
-        return function(this: DisplayMode, elem: HTMLElement) {
-            let id = getIdFromDisplayElement(elem)
+        return function(this: DisplayMode, target: HTMLElement) {
+            let id = getIdFromDisplayElement(target)
             let item;
-            (item = findInfoEntryById(id)) && func.call(this, item, elem.getRootNode() as ShadowRoot, elem)
+            (item = findInfoEntryById(id)) && func.call(this, item, target.getRootNode() as ShadowRoot, target)
         }.bind(this)
     }
 
@@ -44,6 +44,112 @@ class DisplayMode extends Mode {
         save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
         close: this.displayEntryAction(item => deselectItem(item)),
         copythis: this.displayEntryAction(item => copyThis.call(this, item)),
+        addchild: this.displayEntryAction((item, _, target) => {
+            if (!("value" in target)) {
+                throw new Error("add child button has no value")
+            }
+
+            let childId = BigInt(String(target.value))
+            let info = findInfoEntryById(childId)
+            info.ParentId = item.ItemId
+            api_setParent(childId, item.ItemId).then(() => {
+                updateInfo2({
+                    [String(item.ItemId)]: { info: item },
+                    [String(target.value)]: { info }
+                })
+            })
+        }),
+        newchild: this.displayEntryAction((item) => {
+            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry")
+            if (!(newEntryDialog instanceof HTMLDialogElement)) { throw new Error("new-entry is not a dialog") }
+            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`)
+            if (!(parentIdInput instanceof HTMLInputElement)) { throw new Error("Parent id input is not an input element") }
+
+            parentIdInput.value = String(item.ItemId)
+            newEntryDialog.showModal()
+        }),
+        newcopy: this.displayEntryAction((item) => {
+            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry")
+            if (!(newEntryDialog instanceof HTMLDialogElement)) { throw new Error("new-entry is not a dialog") }
+            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`)
+            if (!(parentIdInput instanceof HTMLInputElement)) { throw new Error("Parent id input is not an input element") }
+
+            parentIdInput.value = String(item.ItemId)
+            newEntryDialog.showModal()
+        }),
+        updatecustomstyles: this.displayEntryAction((item, root, target) => {
+            const customStyles = root.getElementById("custom-styles")
+            if (!(customStyles instanceof HTMLStyleElement)) {
+                throw new Error("custom-styles must be a style element in order to update it")
+            }
+
+            if (!("value" in target)) { throw new Error("style editor must have a value attribute") }
+
+            customStyles.innerText = String(target.value)
+
+        }),
+        updatestatus: this.displayEntryAction((item, _, target) => {
+            if (!(target instanceof HTMLSelectElement)) return
+
+            updateStatusUI(item.ItemId, target.value as UserStatus)
+        }),
+        togglerelationinclude: this.displayEntryAction((item, root) => {
+            updateCostDisplay.call(this, root, item.ItemId)
+            updateEventsDisplay.call(this, root, item.ItemId)
+        }),
+        setobjtable: this.displayEntryAction((item, root, target) => {
+            if (!(target instanceof HTMLInputElement)) {
+                throw new Error("hi")
+            }
+
+            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+            console.log(objectTbl)
+            const user = findUserEntryById(item.ItemId)
+            const meta = findMetadataById(item.ItemId)
+            switch (target.value) {
+                case "user-extra":
+                    updateObjectTbl(JSON.parse(user.Extra), objectTbl)
+                    break
+                case "meta-datapoints":
+                    updateObjectTbl(JSON.parse(meta.Datapoints), objectTbl)
+                    break
+                case "meta-media-dependant":
+                    updateObjectTbl(JSON.parse(meta.MediaDependant), objectTbl)
+                    break
+                case "aio-web":
+                    updateObjectTbl(getAIOWeb(user), objectTbl)
+                    break
+                case "user":
+                    updateObjectTbl(user, objectTbl)
+                    break
+                case "meta":
+                    updateObjectTbl(meta, objectTbl)
+                    break
+                case "entry":
+                    updateObjectTbl(item, objectTbl)
+                    break
+
+            }
+        }),
+        toggleartstyle: this.displayEntryAction((item, _, target) => {
+            if (!("checked" in target)) return
+
+            const as = target.id.slice(3) as ASName
+            if (target.checked) {
+                items_setArtStyle(item, as as ASName)
+            } else {
+                items_unsetArtStyle(item, as)
+            }
+
+            api_setItem("", item).then(() => {
+                alert(target.checked ? `${as} set` : `${as} unset`)
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+            })
+        }),
         setthumbnail: this.displayEntryAction((item, _, target) => {
             const fileUpload = target.getRootNode().getElementById("thumbnail-file-upload")
             if (!fileUpload || !("value" in fileUpload)) return
@@ -273,11 +379,11 @@ class DisplayMode extends Mode {
             preview.onload = () => {
                 preview.document.title = `${item.En_Title} PREVIEW`
                 //this tells the new window that this is the template to use for this item no matter what
-                preview.self.GLOBAL_TEMPLATE = {[`${item.ItemId}`]: templEditor.value}
+                preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
             }
 
             templEditor.onkeyup = () => {
-                preview.self.GLOBAL_TEMPLATE = {[`${item.ItemId}`]: templEditor.value}
+                preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
                 preview.self.deselectItem(item, false)
                 preview.self.selectItem(item, false)
             }
@@ -365,23 +471,25 @@ class DisplayMode extends Mode {
         if (win === window) {
             this.win.close()
         }
-        let newOutput = win.document.getElementById("entry-output")
         this.win = win
-        if (newOutput) {
-            this.parent = newOutput
-            if (newOutput instanceof HTMLElement) {
-                newOutput.addEventListener("scroll", (e) => {
-                    if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
 
-                    if (this.displayQueue.length) {
-                        const item = this.displayQueue.shift()
-                        if (item?.ItemId) {
-                            renderDisplayItem.call(this, item.ItemId)
-                        }
-                    }
-                })
+        let newOutput = win.document.getElementById("entry-output")
+        if (!newOutput) return
+
+        this.parent = newOutput
+
+        if (!(newOutput instanceof HTMLElement)) return
+
+        newOutput.addEventListener("scroll", (e) => {
+            if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
+
+            if (this.displayQueue.length) {
+                const item = this.displayQueue.shift()
+                if (item?.ItemId) {
+                    renderDisplayItem.call(this, item.ItemId)
+                }
             }
-        }
+        })
     }
 
     refresh(id: bigint) {
@@ -463,7 +571,7 @@ class DisplayMode extends Mode {
 
     clear() {
         for (let child of this.parent.childNodes) {
-            if(child.nodeName === 'DISPLAY-ENTRY') continue
+            if (child.nodeName === 'DISPLAY-ENTRY') continue
             child.remove()
         }
     }
@@ -799,7 +907,7 @@ function whatToInclude(el: ShadowRoot): { self: boolean, children: boolean, copi
     }
 }
 
-function updateCostDisplay(el: ShadowRoot, itemId: bigint) {
+function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if (!costEl) return
 
@@ -1172,7 +1280,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     updateStatusDisplay(user.Status, el)
 
     //Cost
-    updateCostDisplay(el, item.ItemId)
+    updateCostDisplay.call(this, el, item.ItemId)
 
     //Set the user's default timezone in the tz selector
     if (tzEl && tzEl instanceof HTMLSelectElement) {
@@ -1469,308 +1577,126 @@ function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: b
 
 function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string): HTMLElement {
     let el = document.createElement("display-entry")
-    let root = el.shadowRoot as ShadowRoot
-    if (!root) return el
+    let root = el.shadowRoot
 
-    let user = findUserEntryById(itemId) as UserEntry
+    if (!root) {
+        throw new Error("shadow root is falsey while rendering display item")
+    }
+
+    const
+        user = findUserEntryById(itemId),
+        meta = findMetadataById(itemId),
+        events = findUserEventsById(itemId),
+        item = findInfoEntryById(itemId)
 
     //use the dumbest hack imaginable to allow the previewtemplate function to force the window it opens to do the rendering
     //that hack being setting a global variable called GLOBAL_TEMPLATE which is the template to use
     //@ts-ignore
-    if(self.GLOBAL_TEMPLATE && String(itemId) in self.GLOBAL_TEMPLATE) {
+    if (self.GLOBAL_TEMPLATE && String(itemId) in self.GLOBAL_TEMPLATE) {
         //@ts-ignore
         template = self.GLOBAL_TEMPLATE[String(itemId)]
     }
 
-    if (template || (user && (template = getUserExtra(user, "template")?.trim()))) {
-        (root.getElementById("root") as HTMLDivElement).innerHTML =  template
+    if (template || ((template = getUserExtra(user, "template")?.trim()))) {
+        (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }
 
-    let meta = findMetadataById(itemId)
-    let events = findUserEventsById(itemId)
-    const item = findInfoEntryById(itemId)
-
-    if (!item || !user || !meta || !events) return el
-
     this.parent.append(el)
+
+    const currentEditedObj = root.getElementById("current-edited-object")
+    const statusSelector = root.getElementById("status-selector")
+    const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
+    const styleEditor = root.getElementById("style-editor")
+    const templEditor = root.getElementById("template-editor")
+    const newChildButton = root.getElementById("new-child")
+    const newChildByIdInput = root.getElementById("new-child-by-id")
+    const newCopyButton = root.getElementById("new-copy")
+    const notesEditBox = root.getElementById("notes-edit-box")
+    const cost = root.getElementById("cost")
+    const newTag = root.getElementById("create-tag")
+    const locationEl = root.getElementById("location-link")
+
+    hookActionButtons(root, itemId)
 
     api_listArtStyles().then(as => {
         for (let a in as) {
             const cb = root.getElementById(`is-${as[a]}`)
             if (!cb || !(cb instanceof HTMLInputElement)) continue
-            cb.onchange = (e) => {
-                const itemNew = findInfoEntryById(item.ItemId)
-                const cb = e.target as HTMLInputElement
-                const name = cb.getAttribute("id")?.slice(3) as ASName
-                if (cb.checked) {
-                    items_setArtStyle(itemNew, name)
-                } else {
-                    items_unsetArtStyle(itemNew, name)
-                }
-
-                api_setItem("", itemNew).then(() => {
-                    alert(cb.checked ? `${name} set` : `${name} unset`)
-                    updateInfo2({
-                        [String(itemNew.ItemId)]: {
-                            info: itemNew
-                        }
-                    })
-                })
-            }
+            cb.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.toggleartstyle(e.target)
         }
     })
 
-    const currentEditedObj = root.getElementById("current-edited-object")
     if (currentEditedObj && "value" in currentEditedObj) {
-        currentEditedObj.onchange = function() {
-            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
-            //these may or may not load in time by the time we get to this closure
-            user = findUserEntryById(item.ItemId)
-            meta = findMetadataById(item.ItemId)
-            switch (currentEditedObj.value) {
-                case "user-extra":
-                    updateObjectTbl(JSON.parse(user.Extra), objectTbl)
-                    break
-                case "meta-datapoints":
-                    updateObjectTbl(JSON.parse(meta.Datapoints), objectTbl)
-                    break
-                case "meta-media-dependant":
-                    updateObjectTbl(JSON.parse(meta.MediaDependant), objectTbl)
-                    break
-                case "aio-web":
-                    updateObjectTbl(getAIOWeb(user), objectTbl)
-                    break
-                case "user":
-                    updateObjectTbl(user, objectTbl)
-                    break
-                case "meta":
-                    updateObjectTbl(meta, objectTbl)
-                    break
-                case "entry":
-                    updateObjectTbl(item, objectTbl)
-                    break
-
-            }
-        }
+        currentEditedObj.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.setobjtable(e.target)
     }
 
     for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-recusively-in-cost"]) {
         const el = root.getElementById(input)
         if (!el) continue
-        el.onchange = () => {
-            updateCostDisplay(root, item.ItemId)
-            updateEventsDisplay.call(this, root, item.ItemId)
-        }
+        el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.togglerelationinclude(e.target)
     }
 
     for (let popout of root.querySelectorAll("button.popout") as NodeListOf<HTMLElement>) {
-        const parent = popout.parentElement
-        if (!parent) continue
-        popout.onclick = function() {
-            let win = open("", "_blank", "popup=true")
-            if (!win) return
-            win.document.write(`<!DOCTYPE html>
-<head style='height: 100dvh'>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' href='/css/colors.css'>
-    <link rel='stylesheet' href='/css/general.css'>
-<style>
-body {
-margin: 0;
-height: 100%;
-}
-</style>
-</head>
-<body>
-    ${parent.outerHTML}
-</body>`)
-            //@ts-ignore
-            let watcher: CloseWatcher | null = null
-            if ("CloseWatcher" in window) {
-                //@ts-ignore
-                watcher = new win.CloseWatcher
-                watcher.onclose = () => {
-                    parent.classList.remove("none")
-                    win.close()
-                    watcher.destroy()
-                }
-            }
-            //@ts-ignore
-            win.document.body.querySelector("button.popout").onclick = () => {
-                win.close()
-                parent.classList.remove("none")
-                if (watcher) watcher.destroy()
-            }
-
-            win.onbeforeunload = function() {
-                if (watcher) watcher.destroy()
-                parent.classList.remove("none")
-            }
-            parent.classList.add("none")
-        }
+        popoutUI(popout)
     }
 
-    const statusSelector = root.getElementById("status-selector")
-    statusSelector && (statusSelector.onchange = function(e) {
-        const selector = e.target as HTMLSelectElement
-        const info = findInfoEntryById(item.ItemId) as InfoEntry
-        const user = findUserEntryById(item.ItemId) as UserEntry
-
-        user.Status = selector.value as UserStatus
-        const infoStringified = api_serializeEntry(user)
-        authorizedRequest(`${apiPath}/engagement/set-entry`, {
-            body: infoStringified,
-            method: "POST"
-        })
-            .then(res => {
-                if (!res) {
-                    alert("Could not update status")
-                    return
-                }
-                if (res.status !== 200) {
-                    alert("Failed to update status")
-                    return
-                }
-                res.text().then(() => alert(`Updated status to ${user.Status}`))
-                updateInfo2({
-                    [String(info.ItemId)]: { user },
-                })
-            })
-            .catch(console.error)
+    statusSelector && (statusSelector.onchange = (e) => {
+        e.target instanceof HTMLSelectElement && this.de_actions.updatestatus(e.target)
     });
-
 
     let extra = getUserExtra(user, "styles")
 
-    let styleEditor = root.getElementById("style-editor")
     if (styleEditor && styleEditor instanceof this.win.HTMLTextAreaElement) {
         (styleEditor as HTMLTextAreaElement).value = extra || ""
         styleEditor.addEventListener("change", e => {
-            const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
-            customStyles.innerText = (styleEditor as HTMLTextAreaElement).value
+            e.target instanceof HTMLElement &&
+                this.de_actions.updatecustomstyles(e.target)
         })
     }
-    let templEditor = root.getElementById("template-editor")
+
     if (templEditor && templEditor instanceof this.win.HTMLTextAreaElement) {
         (templEditor as HTMLTextAreaElement).value = getUserExtra(user, "template") || ""
     }
 
-    let newChildButton = root.getElementById("new-child")
     if (newChildButton) {
         newChildButton.addEventListener("click", e => {
-            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry") as HTMLDialogElement
-            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`) as HTMLInputElement
-            parentIdInput.value = String(item.ItemId)
-            newEntryDialog.showModal()
+            this.de_actions.newchild(e.target as HTMLElement)
         })
     }
 
-    let newCopyButton = root.getElementById("new-copy")
     if (newCopyButton) {
         newCopyButton.addEventListener("click", e => {
-            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry") as HTMLDialogElement
-            const parentIdInput = newEntryDialog.querySelector(`[name="copyOf"]`) as HTMLInputElement
-            parentIdInput.value = String(item.ItemId)
-            newEntryDialog.showModal()
+            this.de_actions.newcopy(e.target as HTMLElement)
         })
     }
 
-    const newChildByIdInput = root.getElementById("new-child-by-id")
-
     if (newChildByIdInput && "value" in newChildByIdInput) {
-        newChildByIdInput.onchange = function() {
-            let childId = BigInt(String(newChildByIdInput.value))
-            let info = findInfoEntryById(childId)
-            info.ParentId = item.ItemId
-            api_setParent(childId, item.ItemId).then(() => {
-                updateInfo2({
-                    [String(item.ItemId)]: { info: item },
-                    [String(newChildByIdInput.value)]: { info }
-                })
-            })
+        newChildByIdInput.onchange = e => {
+            e.target instanceof HTMLElement && this.de_actions.addchild(e.target)
         }
     }
-
-    hookActionButtons(root, itemId)
-
-    const notesEditBox = root.getElementById("notes-edit-box")
 
     if (notesEditBox && "value" in notesEditBox) {
         notesEditBox.onchange = () => {
-            const user = findUserEntryById(item.ItemId)
-            user.Notes = String(notesEditBox.value)
-
-            const userStringified = api_serializeEntry(user)
-
-            updateInfo2({
-                [String(item.ItemId)]: { user }
-            })
-
-            authorizedRequest(`${apiPath}/engagement/set-entry`, {
-                body: userStringified,
-                method: "POST",
-                "signin-reason": "save notes"
-            })
-                .then(res => {
-                    if (res?.status === 200) {
-                        alert("Notes saved")
-                    } else {
-                        alert("Failed to save notes")
-                    }
-                })
-                .catch(() => alert("Failed to save notes"))
+            updateNotesUI(item.ItemId, String(notesEditBox.value))
         }
     }
 
-    const cost = root.getElementById("cost")
     if (cost) {
         cost.onclick = async function() {
-            const newPrice = await promptNumber("New cost", "not a number", parseFloat)
-            if (newPrice === null) return
-            let item = findInfoEntryById(itemId)
-            item.PurchasePrice = newPrice as number
-            api_setItem("", item).then(res => {
-                if (res === null || res.status !== 200) {
-                    alert("Failed to set price")
-                    return
-                }
-                updateInfo2({
-                    [String(itemId)]: {
-                        info: item
-                    }
-                })
-            })
+            await updateCostUI(itemId)
         }
     }
 
-    const newTag = root.getElementById("create-tag")
     if (newTag) {
         newTag.onclick = async () => {
-            const name = await promptUI("Tag name (, seperated)")
-            if (!name) return
-            let names = name.split(",")
-            const info = findInfoEntryById(item.ItemId)
-            info.Tags = info.Tags?.concat(names) || names
-            api_addEntryTags(info.ItemId, name.split(","))
-                .then(res => {
-                    if (res?.status !== 200) return ""
-                    res.text().then(() => changeDisplayItemData.call(this, info, user, meta, events, el))
-                })
-                .catch(console.error)
+            await newTagsUI(itemId)
         }
     }
 
-    const locationEl = root.getElementById("location-link")
     if (locationEl && 'value' in locationEl) {
         locationEl.onchange = async () => {
-            const info = findInfoEntryById(item.ItemId)
-            info.Location = String(locationEl.value)
-            await api_setItem("", info)
-            updateInfo2({
-                [String(info.ItemId)]: {
-                    info: info
-                }
-            })
+            await updateLocationUI(itemId, String(locationEl.value))
         }
     }
 

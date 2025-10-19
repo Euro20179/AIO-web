@@ -988,12 +988,12 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 
 async function signinUI(reason: string): Promise<string> {
     const loginPopover = currentDocument().getElementById("login") as HTMLDialogElement
-    if(!loginPopover) {
+    if (!loginPopover) {
         throw new Error("Could not create login screen")
     }
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
-    if(loginReasonEl instanceof HTMLElement) {
+    if (loginReasonEl instanceof HTMLElement) {
         loginReasonEl.innerText = reason
     }
 
@@ -1084,7 +1084,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = 
 
 async function fillRecommendedListUI(list: HTMLDataListElement | null = null, uid: number) {
     list ||= currentDocument().querySelector("datalist#recommended-by")
-    if(!list) {
+    if (!list) {
         console.error("Could not find a recommended-by list to fill")
         return
     }
@@ -1092,7 +1092,7 @@ async function fillRecommendedListUI(list: HTMLDataListElement | null = null, ui
     list.innerHTML = ""
 
     const recommenders = await api_list_recommenders(uid)
-    for(let r of recommenders) {
+    for (let r of recommenders) {
         const opt = document.createElement("option")
         opt.value = r
         list.appendChild(opt)
@@ -1264,7 +1264,10 @@ function doUIStartupScript(script: string, lang: StartupLang) {
     }
 }
 
-function formatToSymbolUI(format: number) {
+/**
+ * Converts a format number to a displayable symbol
+ */
+function formatToSymbolUI(format: number): string {
     const custom = settings_get("custom_item_formats")
     let out = ""
     if (items_isDigitized(format)) {
@@ -1289,4 +1292,180 @@ async function getSettings(uid: number): Promise<UserSettings> {
         return { UIStartupScript: "", StartupLang: "" }
     }
     return await res.json() as UserSettings
+}
+
+/**
+ * Potentially register an element as a popout trigger target that will pop
+ * the parent element into it's own window
+ * This fails if there is no parent element
+ *
+ * WARNING: interactive elements may not work in the popout window
+ */
+function popoutUI(popoutTarget: HTMLElement, event: keyof WindowEventMap = "click") {
+    const parent = popoutTarget.parentElement
+    if (!parent) return
+
+    popoutTarget.onclick = function() {
+        let win = open("", "_blank", "popup=true")
+        if (!win) return
+        win.document.write(`<!DOCTYPE html>
+<head style='height: 100dvh'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='/css/colors.css'>
+    <link rel='stylesheet' href='/css/general.css'>
+<style>
+body {
+margin: 0;
+height: 100%;
+}
+</style>
+</head>
+<body>
+    ${parent.outerHTML}
+</body>`)
+        //@ts-ignore
+        let watcher: CloseWatcher | null = null
+        if ("CloseWatcher" in window) {
+            //@ts-ignore
+            watcher = new win.CloseWatcher
+            watcher.onclose = () => {
+                parent.classList.remove("none")
+                win.close()
+                watcher.destroy()
+            }
+        }
+        //@ts-ignore
+        win.document.body.querySelector("button.popout").onclick = () => {
+            win.close()
+            parent.classList.remove("none")
+            if (watcher) watcher.destroy()
+        }
+
+        win.onbeforeunload = function() {
+            if (watcher) watcher.destroy()
+            parent.classList.remove("none")
+        }
+        parent.classList.add("none")
+    }
+}
+
+async function updateStatusUI(itemId: bigint, status: UserStatus) {
+    const info = findInfoEntryById(itemId) as InfoEntry
+    const user = findUserEntryById(itemId) as UserEntry
+
+    user.Status = status
+
+    const infoStringified = api_serializeEntry(user)
+
+    try {
+        var res = await authorizedRequest(`${apiPath}/engagement/set-entry`, {
+            body: infoStringified,
+            method: "POST"
+        })
+    } catch (err) {
+        console.error(err)
+        return
+    }
+
+    if (!res) {
+        alert("Could not update status")
+        return
+    }
+    if (res.status !== 200) {
+        alert("Failed to update status")
+        return
+    }
+
+    alert(`Updated status to ${user.Status}`)
+    updateInfo2({
+        [String(info.ItemId)]: { user },
+    })
+}
+
+async function updateNotesUI(itemId: bigint, note: string) {
+    const user = findUserEntryById(itemId)
+    user.Notes = note
+
+    const userStringified = api_serializeEntry(user)
+
+    updateInfo2({
+        [String(itemId)]: { user }
+    })
+
+    try {
+        var res = await authorizedRequest(`${apiPath}/engagement/set-entry`, {
+            body: userStringified,
+            method: "POST",
+            "signin-reason": "save notes"
+        })
+    } catch (err) {
+        alert("Failed to save notes")
+        return
+    }
+
+    if (res?.status === 200) {
+        alert("Notes saved")
+    } else {
+        alert("Failed to save notes")
+    }
+}
+
+async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
+    newPrice ||= await promptNumber("New cost", "not a number", parseFloat)
+    if (newPrice === null) return
+
+    let item = findInfoEntryById(itemId)
+    item.PurchasePrice = newPrice as number
+    try {
+        var res = await api_setItem("", item)
+    } catch (err) {
+        alert("Failed to set price")
+        return
+    }
+
+    if (res === null || res.status !== 200) {
+        alert(`Failed to set price, ${await res?.text()}`)
+        return
+    }
+
+    updateInfo2({
+        [String(itemId)]: {
+            info: item
+        }
+    })
+}
+
+async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
+    let newTags = null
+    if (!tags) {
+        newTags = await promptUI("Tag name (, seperated)")
+    }
+    if (!newTags) return
+    tags = newTags.split(",")
+
+    const info = findInfoEntryById(itemId)
+    info.Tags = info.Tags?.concat(tags) || tags
+    try {
+        var res = await api_addEntryTags(info.ItemId, newTags.split(","))
+        if (res?.status !== 200) return ""
+
+        updateInfo2({
+            [String(itemId)]: {
+                info
+            }
+        })
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+async function updateLocationUI(itemId: bigint, location: string) {
+    const info = findInfoEntryById(itemId)
+    info.Location = String(location)
+    await api_setItem("", info)
+    updateInfo2({
+        [String(info.ItemId)]: {
+            info: info
+        }
+    })
 }

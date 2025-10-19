@@ -12,6 +12,9 @@ function alert(text: string) {
     setTimeout(el.remove.bind(el), 15000)
 }
 
+async function promptNumber(text: string, textFail: string, numberConverter: typeof parseInt): Promise<number>
+async function promptNumber(text: string, textFail: string, numberConverter: typeof BigInt): Promise<bigint>
+async function promptNumber(text: string, textFail: string, numberConverter: typeof parseFloat): Promise<number>
 async function promptNumber(text: string, textFail: string, numberConverter: NumberConstructor | BigIntConstructor | ((text: string) => number) = Number): Promise<number | bigint | null> {
     let n = await promptUI(text)
     while (n !== null && n !== "" && isNaN(Number(numberConverter(n)))) {
@@ -62,4 +65,11 @@ function saveEval(script: string) {
     window.XMLHttpRequest = old
     window.fetch = oldFetch
     return res
+}
+
+function assert<T>(condition: T, error: string): true | never{
+    if(!condition) {
+        throw new Error(error)
+    }
+    return true
 }

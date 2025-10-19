@@ -18,7 +18,15 @@ const AS_LIVE_ACTION = 32
 const AS_2D = 64
 const AS_3D = 128
 
-type ASName = "Anime" | "Cartoon" | "Handrawn" | "Digital" | "CGI" | "Liveaction" | "2D" | "3D"
+type ASName = 
+	| "Anime" 
+	| "Cartoon" 
+	| "Handrawn" 
+	| "Digital" 
+	| "CGI" 
+	| "Liveaction" 
+	| "2D" 
+	| "3D"
 
 type ArtStyle = typeof AS_ANIME
     | typeof AS_CARTOON
