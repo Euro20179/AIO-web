@@ -1350,89 +1350,18 @@ height: 100%;
 }
 
 async function updateStatusUI(itemId: bigint, status: UserStatus) {
-    const info = findInfoEntryById(itemId) as InfoEntry
-    const user = findUserEntryById(itemId) as UserEntry
-
-    user.Status = status
-
-    const infoStringified = api_serializeEntry(user)
-
-    try {
-        var res = await authorizedRequest(`${apiPath}/engagement/set-entry`, {
-            body: infoStringified,
-            method: "POST"
-        })
-    } catch (err) {
-        console.error(err)
-        return
-    }
-
-    if (!res) {
-        alert("Could not update status")
-        return
-    }
-    if (res.status !== 200) {
-        alert("Failed to update status")
-        return
-    }
-
-    alert(`Updated status to ${user.Status}`)
-    updateInfo2({
-        [String(info.ItemId)]: { user },
-    })
+    return await setPropUI(findUserEntryById(itemId), "Status", status, "Update status")
 }
 
 async function updateNotesUI(itemId: bigint, note: string) {
-    const user = findUserEntryById(itemId)
-    user.Notes = note
-
-    const userStringified = api_serializeEntry(user)
-
-    updateInfo2({
-        [String(itemId)]: { user }
-    })
-
-    try {
-        var res = await authorizedRequest(`${apiPath}/engagement/set-entry`, {
-            body: userStringified,
-            method: "POST",
-            "signin-reason": "save notes"
-        })
-    } catch (err) {
-        alert("Failed to save notes")
-        return
-    }
-
-    if (res?.status === 200) {
-        alert("Notes saved")
-    } else {
-        alert("Failed to save notes")
-    }
+    return await setPropUI(findUserEntryById(itemId), "Notes", note, "Update notes")
 }
 
 async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
     newPrice ||= await promptNumber("New cost", "not a number", parseFloat)
     if (newPrice === null) return
 
-    let item = findInfoEntryById(itemId)
-    item.PurchasePrice = newPrice as number
-    try {
-        var res = await api_setItem("", item)
-    } catch (err) {
-        alert("Failed to set price")
-        return
-    }
-
-    if (res === null || res.status !== 200) {
-        alert(`Failed to set price, ${await res?.text()}`)
-        return
-    }
-
-    updateInfo2({
-        [String(itemId)]: {
-            info: item
-        }
-    })
+    return await setPropUI(findInfoEntryById(itemId), "PurchasePrice", newPrice, "Update purchase price")
 }
 
 async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
@@ -1443,9 +1372,10 @@ async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
     if (!newTags) return
     tags = newTags.split(",")
 
-    const info = findInfoEntryById(itemId)
-    info.Tags = info.Tags?.concat(tags) || tags
     try {
+        const info = findInfoEntryById(itemId)
+        info.Tags = info.Tags?.concat(tags) || tags
+
         var res = await api_addEntryTags(info.ItemId, newTags.split(","))
         if (res?.status !== 200) return ""
 
@@ -1460,12 +1390,69 @@ async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
 }
 
 async function updateLocationUI(itemId: bigint, location: string) {
-    const info = findInfoEntryById(itemId)
-    info.Location = String(location)
-    await api_setItem("", info)
-    updateInfo2({
-        [String(info.ItemId)]: {
-            info: info
-        }
-    })
+    return await setPropUI(findInfoEntryById(itemId), "Location", location, "update location")
 }
+
+async function updateUserTitleUI(itemId: bigint, newTitle: string): Promise<Response | null> {
+    return await setPropUI(findInfoEntryById(itemId), "En_Title", newTitle, "Update the english title")
+}
+
+/**
+ * Attempts to set a property of a UserEntry, InfoEntry, or MetadataEntry.
+ * If it succeeds, it will update the ui
+ * If not it will alert an error to the user
+ *
+ * @returns {Response}
+ */
+async function setPropUI<N extends keyof UserEntry>(obj: UserEntry, name: N, value: UserEntry[N], actionDisplayName?: string): Promise<Response | null>
+async function setPropUI<N extends keyof MetadataEntry>(obj: MetadataEntry, name: N, value: MetadataEntry[N], actionDisplayName?: string): Promise<Response | null>
+async function setPropUI<N extends keyof InfoEntry>(obj: InfoEntry, name: N, value: InfoEntry[N], actionDisplayName?: string): Promise<Response | null>
+async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N extends keyof T>(obj: T, name: N, value: any, actionDisplayName?: string): Promise<Response | null> {
+    //dont update the actual object until we know we
+    //successfully updated the object on the server, otherwise we have desync
+    const cpy = {...obj}
+    cpy[name] = value
+
+    const ty =
+        probablyMetaEntry(obj)?
+            "meta"
+        : probablyUserItem(obj)?
+            "user"
+        :
+            "info"
+
+    const path =
+        ty === "meta"?
+            "metadata/"
+        : ty === "user"?
+            "engagement/"
+        :
+            ""
+    try {
+        var res = await api_setItem(path, cpy, actionDisplayName)
+    }catch(err) {
+        alert(`Failed to ${actionDisplayName}`)
+        return null
+    }
+
+    if(res?.status !== 200) {
+        alert(`Failed to ${actionDisplayName}, ${await res?.text()}`)
+        return res
+    }
+
+    obj[name] = value
+
+    updateInfo2({
+        [String(obj.ItemId)]:
+            ty === "meta"?
+                { meta: obj as MetadataEntry }
+            : ty === "user"?
+                { user: obj as UserEntry }
+            :
+                { info: obj as InfoEntry }
+    })
+
+    return res
+}
+
+setPropUI(findInfoEntryById(34n), "ItemId", 3n)

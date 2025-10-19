@@ -1605,7 +1605,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
     const currentEditedObj = root.getElementById("current-edited-object")
     const statusSelector = root.getElementById("status-selector")
-    const customStyles = root.getElementById("custom-styles") as HTMLStyleElement
     const styleEditor = root.getElementById("style-editor")
     const templEditor = root.getElementById("template-editor")
     const newChildButton = root.getElementById("new-child")

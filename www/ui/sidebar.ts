@@ -53,7 +53,7 @@ function focusNthSidebarItem(n: number) {
 }
 
 function selectFocusedSidebarItem() {
-    if(document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
+    if (document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
 
     const id = document.activeElement.getAttribute("data-entry-id") as string
     selectItem(findInfoEntryById(BigInt(id)))
@@ -180,8 +180,8 @@ async function renderSidebarItemList(items: InfoEntry[], sidebarParent: HTMLElem
     below?: string,
     renderImg?: boolean
 }) {
-    for(let i = 0; i < items.length; i++) {
-        if(i !== 0 && i % 20 == 0 && "scheduler" in window) {
+    for (let i = 0; i < items.length; i++) {
+        if (i !== 0 && i % 20 == 0 && "scheduler" in window) {
             await scheduler.yield()
         }
         renderSidebarItem(items[i], sidebarParent, options)
@@ -248,12 +248,11 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     })
 
     let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
-    if (title) {
-        title.onchange = function() {
-            if (title.value)
-                api_updateInfoTitle(item.ItemId, title.value)
-        }
-    }
+    title && (
+        title.onchange = (e) =>
+            e.target instanceof HTMLInputElement &&
+            updateUserTitleUI(item.ItemId, e.target.value)
+    )
 
     elem.addEventListener("on-screen-appear", async function(e) {
         let meta = await findMetadataByIdAtAllCosts(item.ItemId)

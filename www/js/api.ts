@@ -467,11 +467,12 @@ async function api_fetchLocation(itemId: bigint, uid: number, provider?: string,
     })
 }
 
-async function api_setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry) {
+async function api_setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry, signinReason?: string) {
     const serialized = api_serializeEntry(item)
     return authorizedRequest(`${apiPath}/${subpath}set-entry`, {
         body: serialized,
         method: "POST",
+        "signin-reason": signinReason
     })
 }
 
