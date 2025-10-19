@@ -1454,5 +1454,3 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
 
     return res
 }
-
-setPropUI(findInfoEntryById(34n), "ItemId", 3n)
