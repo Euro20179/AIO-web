@@ -56,7 +56,7 @@ function selectFocusedSidebarItem() {
     if (document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
 
     const id = document.activeElement.getAttribute("data-entry-id") as string
-    selectItem(findInfoEntryById(BigInt(id)))
+    mode_selectItem(findInfoEntryById(BigInt(id)))
 }
 
 function focusNextSidebarItem(backward: boolean = false) {
@@ -120,12 +120,12 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
 function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
     if (clearSelected) {
-        clearItems()
+        mode_clearItems()
     }
     if (viewAllElem.checked) {
         selectItemList(entries)
     } else {
-        selectItem(entries[0])
+        mode_selectItem(entries[0])
     }
 }
 
@@ -149,8 +149,8 @@ function changeSidebarItemData(id: bigint, el: HTMLElement) {
 }
 
 function sidebarEntryOpenOne(item: InfoEntry) {
-    clearItems()
-    selectItem(item)
+    mode_clearItems()
+    mode_selectItem(item)
 }
 
 /**
@@ -162,11 +162,11 @@ function sidebarSelectNth(n: number) {
     const id = BigInt(el.getAttribute("data-entry-id") || 0)
     if (id == 0n) return
 
-    selectItem(findInfoEntryById(id))
+    mode_selectItem(findInfoEntryById(id))
 }
 
 function sidebarEntryOpenMultiple(item: InfoEntry) {
-    toggleItem(item)
+    mode_toggleItem(item)
 }
 
 function updateSidebarThumbnail(id: bigint, src: string) {

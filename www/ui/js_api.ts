@@ -211,10 +211,10 @@ function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
     }
 
     if (mode_isSelected(jsId)) {
-        deselectItem(entry)
+        mode_deselectItem(entry)
         return 0
     } else {
-        selectItem(entry)
+        mode_selectItem(entry)
         return 1
     }
 }
@@ -235,7 +235,7 @@ function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | 
         return 1
     }
 
-    return selectItem(entry)[0]
+    return mode_selectItem(entry)[0]
 }
 
 /**
@@ -254,7 +254,7 @@ function ui_deselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 
         return 1
     }
 
-    deselectItem(entry)
+    mode_deselectItem(entry)
     return ""
 }
 
@@ -275,7 +275,7 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     const m = new Mode(frag)
 
-    return selectItem(entry, false, m)[0]
+    return mode_selectItem(entry, false, m)[0]
 }
 
 /**
@@ -283,7 +283,7 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
  * @returns 0 on success
  */
 function ui_clear(): number {
-    clearItems()
+    mode_clearItems()
     return 0
 }
 
@@ -537,7 +537,7 @@ async function aio_delete(item: bigint) {
     }
     removeSidebarItem(findInfoEntryById(item))
     items_delEntry(item)
-    clearItems()
+    mode_clearItems()
     sidebarSelectNth(1)
     return 0
 }

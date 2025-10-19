@@ -99,26 +99,26 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
         if (mode.chwin) {
             mode.chwin(window)
             let selected = items_getSelected()
-            clearItems()
-            selectItemList(selected, true, mode)
+            mode_clearItems()
+            mode_selectItemList(selected, true, mode)
         }
     }
     else {
         newWin.addEventListener("DOMContentLoaded", () => {
             let selected = items_getSelected()
-            clearItems()
+            mode_clearItems()
             items_setSelected(selected)
             mode.chwin?.(newWin)
             newWin.addEventListener("aio-items-rendered", () => {
                 newWin.mode_setMode(mode.NAME)
-                clearItems()
-                selectItemList(selected, true, mode)
+                mode_clearItems()
+                mode_selectItemList(selected, true, mode)
             })
         })
     }
 }
 
-function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
+function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
     items_selectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
@@ -132,6 +132,8 @@ function selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): 
         return elems
     }
 }
+//just in case
+const selectItem = mode_selectItem
 
 function mode_refreshItem(item: bigint) {
     for (const mode of openViewModes) {
@@ -141,15 +143,17 @@ function mode_refreshItem(item: bigint) {
     }
 }
 
-function deselectItem(item: InfoEntry, updateStats: boolean = true) {
+function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
     items_deselectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item, -1)
     for (let mode of openViewModes) {
         mode.sub(item)
     }
 }
+//just in case
+const deselectItem = mode_deselectItem
 
-function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
+function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
     items_setSelected(items_getSelected().concat(itemList))
     updateStats && changeResultStatsWithItemListUI(itemList)
     if (itemList.length)
@@ -162,22 +166,35 @@ function selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode
         }
     }
 }
+//just in case
+const selectItemList = mode_selectItemList
 
-function toggleItem(item: InfoEntry, updateStats: boolean = true) {
+function mode_toggleItem(item: InfoEntry, updateStats: boolean = true) {
     if (items_getSelected().find(a => a.ItemId === item.ItemId)) {
-        deselectItem(item, updateStats)
+        mode_deselectItem(item, updateStats)
     } else {
-        selectItem(item, updateStats)
+        mode_selectItem(item, updateStats)
     }
 }
+//just in case
+const toggleItem = mode_toggleItem
 
-function clearItems(updateStats: boolean = true) {
+/**
+ * Clears selected items within a mode
+ * also updates stats
+ *
+ * @see ui_modeclear(), which clears miscellanious nodes from modes
+ */
+function mode_clearItems(updateStats: boolean = true) {
     items_clearSelected()
     for (const mode of openViewModes) {
         mode.clearSelected()
     }
     updateStats && resetStatsUI()
 }
+
+//just in case
+const clearItems = mode_clearItems
 
 //this should ONLY operate within the user specified or current window otherwise it makes no sense
 function mode_setMode(name: string, win: Window & typeof globalThis = window) {

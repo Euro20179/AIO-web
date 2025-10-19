@@ -34,7 +34,7 @@ class ScriptMode extends Mode {
     }
 
     clear() {
-        clearItems()
+        mode_clearItems()
         if (this.parent instanceof HTMLElement) {
             this.parent.innerHTML = ""
         } else

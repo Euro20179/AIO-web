@@ -1995,7 +1995,7 @@ class CalcVarTable {
         }))
 
         this.symbols.set("ui_clear", new Func(() => {
-            return Type.from(clearItems())
+            return Type.from(mode_clearItems())
         }))
 
         this.symbols.set("ui_setuid", new Func((newUid) => {

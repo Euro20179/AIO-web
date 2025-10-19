@@ -42,7 +42,7 @@ class DisplayMode extends Mode {
         refresh: this.displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
         fetchlocation: this.displayEntryAction((item) => _fetchLocation.call(this, item.ItemId)),
         save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
-        close: this.displayEntryAction(item => deselectItem(item)),
+        close: this.displayEntryAction(item => mode_deselectItem(item)),
         copythis: this.displayEntryAction(item => copyThis.call(this, item)),
         addchild: this.displayEntryAction((item, _, target) => {
             if (!("value" in target)) {
@@ -384,8 +384,8 @@ class DisplayMode extends Mode {
 
             templEditor.onkeyup = () => {
                 preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
-                preview.self.deselectItem(item, false)
-                preview.self.selectItem(item, false)
+                preview.self.mode_deselectItem(item, false)
+                preview.self.mode_selectItem(item, false)
             }
         }),
         copyto: this.displayEntryAction(async (item) => {
@@ -991,7 +991,7 @@ function createRelationButtons(this: DisplayMode, elementParent: HTMLElement, re
         }
         elementParent.append(el)
         el.addEventListener("click", (e) => {
-            toggleItem(child.info)
+            mode_toggleItem(child.info)
         })
         el.addEventListener("contextmenu", e => {
             e.preventDefault()
@@ -1563,7 +1563,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             })
             el.innerText = requiredItem.En_Title || requiredItem.Native_Title
         }
-        el.onclick = () => toggleItem(requiredItem)
+        el.onclick = () => mode_toggleItem(requiredItem)
         requiredItemsEl.appendChild(el)
     }
 
@@ -1887,7 +1887,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
                     eventCopy.ItemId = itemCopy.ItemId
                     items_getAllEntries()[String(itemCopy.ItemId)].events.push(eventCopy)
                 }
-                selectItem(itemCopy, true, this)
+                mode_selectItem(itemCopy, true, this)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
             })
             .catch(console.error)

@@ -66,9 +66,9 @@ if (viewAllElem instanceof HTMLInputElement)
     viewAllElem.addEventListener("change", e => {
         resetStatsUI()
         if (!viewAllElem.checked) {
-            clearItems(false)
+            mode_clearItems(false)
         } else {
-            clearItems()
+            mode_clearItems()
             for (let mode of openViewModes) {
                 selectItemList(getFilteredResultsUI(), true, mode)
             }
@@ -248,7 +248,7 @@ document.addEventListener("keydown", e => {
             focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
         } else focusNextSidebarItem(e.key === "ArrowUp")
         if (e.ctrlKey) {
-            if (!e.shiftKey) clearItems()
+            if (!e.shiftKey) mode_clearItems()
             selectFocusedSidebarItem()
         }
         e.preventDefault()
@@ -323,7 +323,7 @@ document.addEventListener("keydown", e => {
         }
     }
     if ("0123456789".includes(e.key)) {
-        clearItems()
+        mode_clearItems()
         sidebarSelectNth(Number(e.key))
         e.preventDefault()
     }
@@ -514,7 +514,7 @@ function sortEntriesUI() {
     let newEntries = sortEntries(items_getResults().map(v => v.info), sortBySelector.value)
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
-    clearItems()
+    mode_clearItems()
     reorderSidebar(getFilteredResultsUI().map(v => v.ItemId))
 }
 
@@ -575,7 +575,7 @@ async function loadSearchUI() {
 
     items_setResults(entries.map(v => v.ItemId))
 
-    clearItems()
+    mode_clearItems()
     if (entries.length === 0) {
         setError("No results")
         return
