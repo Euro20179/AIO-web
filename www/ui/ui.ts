@@ -70,7 +70,7 @@ if (viewAllElem instanceof HTMLInputElement)
         } else {
             mode_clearItems()
             for (let mode of openViewModes) {
-                selectItemList(getFilteredResultsUI(), true, mode)
+                mode_selectItemList(getFilteredResultsUI(), true, mode)
             }
         }
     })
