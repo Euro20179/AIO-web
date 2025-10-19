@@ -282,8 +282,9 @@ document.addEventListener("keydown", e => {
             viewToggle.focus()
             break
         }
+        case "P":
         case "p": {
-            selectScriptUI()
+            openModalUI("script-select")
             e.preventDefault()
             break
         }

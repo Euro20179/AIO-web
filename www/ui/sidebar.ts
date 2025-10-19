@@ -123,7 +123,7 @@ function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
         mode_clearItems()
     }
     if (viewAllElem.checked) {
-        selectItemList(entries)
+        mode_selectItemList(entries)
     } else {
         mode_selectItem(entries[0])
     }
