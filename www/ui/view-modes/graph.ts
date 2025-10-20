@@ -414,6 +414,7 @@ function destroyCharts() {
         let chrt = _charts[chName]
         if (chrt) {
             chrt.destroy()
+            _charts[chName] = null
         }
     }
 }
@@ -423,6 +424,8 @@ class GraphMode extends Mode {
     constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
         super(parent || "#graph-output", win)
         this.win.document.getElementById("graph-output")?.classList.add("open")
+
+        destroyCharts()
 
         const addChart = this.win.document.getElementById("add-chart")
 
