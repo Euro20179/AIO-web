@@ -93,7 +93,7 @@ if (newWindow)
     }
 
 function setError(text: string) {
-    const errorOut = currentDocument().getElementById("error")
+    const errorOut = getElementUI("error", Element)
     if (text == "") {
         errorOut?.removeAttribute("data-error")
     } else {
@@ -250,7 +250,6 @@ let statistics = [
 statistics[0].resetable = false
 
 document.addEventListener("keydown", e => {
-
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
             focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
@@ -266,8 +265,8 @@ document.addEventListener("keydown", e => {
     if (!e.ctrlKey) return
     switch (e.key) {
         case "/": {
-            let form = document.getElementById("sidebar-form") as HTMLFormElement
-            const search = form.querySelector('[name="search-query"]') as HTMLInputElement
+            let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
+            const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, form)
             search?.focus()
             search?.select()
             e.preventDefault()
@@ -372,8 +371,8 @@ function runUserScriptUI(name: string) {
  * @param {string} desc - what the script does
  */
 function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
-    const scriptSelect = document.getElementById("script-select")
-    if (!scriptSelect) return
+    const scriptSelect = getElementOrThrowUI("#script-select", HTMLElement)
+
     const par = document.createElement("div")
     par.classList.add("user-script")
     par.id = `user-script-${name}`
@@ -396,7 +395,8 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
  * @returns {Promise<string | null>} the user's response
  */
 async function promptUI(html?: string, _default?: string): Promise<string | null> {
-    const pEl = currentDocument().getElementById("prompt") as HTMLDialogElement
+    const pEl = getElementOrThrowUI("#prompt", HTMLDialogElement)
+
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
     const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
@@ -417,6 +417,37 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
 }
 
 /**
+ * Gets an element by a query selector that's an instanceof {requiredType}
+ * If such an element is not found, null is returned
+ *
+ * @param selector passed to root.querySelector
+ * @param [requiredType=null] The type the found element must be
+ * @param [root=null] The root document, (default is currentDocument())
+ * @reutrns {Element | null}
+ */
+function getElementUI<T extends typeof Element>(
+    selector: string,
+    requiredType: T | null = null,
+    root: { querySelector(selector: string): Element | null } | null = null
+): InstanceType<T> | null {
+    let el = (root || currentDocument()).querySelector(selector)
+    if(!el || !(el instanceof (requiredType as T))) return null
+    return el as InstanceType<T>
+}
+
+function getElementOrThrowUI<T extends typeof Element>(
+    selector: string,
+    requiredType: T | null = null,
+    root: { querySelector(selector: string): Element | null } | null = null
+): InstanceType<T> {
+    let el = getElementUI(selector, requiredType, root)
+    if (!(el)) {
+        throw new Error(`Element: ${selector} was not found`)
+    }
+    return el
+}
+
+/**
  * Sets all statistics to 0
  */
 function resetStatsUI() {
@@ -431,11 +462,13 @@ function resetStatsUI() {
  * @param {string} modalName - the id of the modal to open
  * @param root - the elemnt which is the parent of the modal to find
  */
-function openModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
-    root ||= catalogWin?.document || document
-    let dialog = root.getElementById(modalName)
-    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
-    dialog.showModal()
+function openModalUI(
+    modalName: string,
+    root?: {
+        querySelector(query: string): HTMLElement | null
+    }
+) {
+    getElementUI(`#${modalName}`, HTMLDialogElement, root)?.showModal()
 }
 
 /**
@@ -443,11 +476,13 @@ function openModalUI(modalName: string, root?: { getElementById(elementId: strin
  * @param {string} modalName - the id of the modal to close
  * @param root - the elemnt which is the parent of the modal to find
  */
-function closeModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
-    root ||= catalogWin?.document || document
-    let dialog = root.getElementById(modalName)
-    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
-    dialog.close()
+function closeModalUI(
+    modalName: string,
+    root?: {
+        querySelector(query: string): HTMLElement | null
+    }
+) {
+    getElementUI(`#${modalName}`, HTMLDialogElement, root)?.close()
 }
 
 /**
@@ -455,15 +490,18 @@ function closeModalUI(modalName: string, root?: { getElementById(elementId: stri
  * @param {string} modalName - the id of the modal to toggle
  * @param root - the elemnt which is the parent of the modal to find
  */
-function toggleModalUI(modalName: string, root?: { getElementById(elementId: string): HTMLElement | null }) {
-    root ||= catalogWin?.document || document
-    let dialog = root.getElementById(modalName)
-    if (!dialog || !(dialog instanceof HTMLDialogElement)) return
-    if (dialog.open) {
-        dialog.close()
-    } else {
-        dialog.showModal()
+function toggleModalUI(
+    modalName: string,
+    root?: {
+        querySelector(query: string): HTMLElement | null
     }
+) {
+    let dialog = getElementUI(`#${modalName}`, HTMLDialogElement, root)
+    if(!dialog) return
+
+    dialog.open
+        ? dialog.close()
+        : dialog.showModal()
 }
 
 function createStatUI(name: string, additive: boolean, calculation: StatCalculator) {
@@ -541,7 +579,7 @@ function getUidUI() {
  * @returns {FormData} the data
  */
 function getSearchDataUI(): FormData {
-    let form = document.getElementById("sidebar-form") as HTMLFormElement
+    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
     let data = new FormData(form)
     return data
 }
@@ -551,10 +589,11 @@ function getSearchDataUI(): FormData {
  * @param {Record<string, string>} params - values to override
  */
 function mkSearchUI(params: Record<string, string>) {
-    let form = document.getElementById("sidebar-form") as HTMLFormElement
+    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
+
     for (let param in params) {
-        let inp = form.querySelector(`[name="${param}"]`) as HTMLInputElement | null
-        if (!inp || inp.tagName !== "INPUT") continue
+        const inp = form.querySelector(`[name="${param}"]`)
+        if(!inp || !("value" in inp)) continue
         inp.value = params[param]
     }
     form.submit()
@@ -570,7 +609,7 @@ function mkSearchUI(params: Record<string, string>) {
  * - if there are no results, sets the error to "No results"
  */
 async function loadSearchUI() {
-    let form = document.getElementById("sidebar-form") as HTMLFormElement
+    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
 
     let formData = new FormData(form)
 
@@ -777,7 +816,6 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
  * @param {HTMLFormElement} form - the form to use for creating an entry
  */
 async function newEntryUI(form: HTMLFormElement) {
-    document.getElementById("new-entry")?.hidePopover()
     const data = new FormData(form)
 
     let artStyle = 0
@@ -888,7 +926,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
 }
 
 function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
-    const itemsFillDiv = currentDocument().getElementById("put-items-to-select") as HTMLDivElement
+    const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
     const container = itemsFillDiv.querySelector("div") || document.createElement("div")
@@ -943,7 +981,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
 
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
-    const popover = currentDocument().getElementById("items-listing") as HTMLDialogElement
+    const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
     if (item === null) {
         input.value = "0"
         return
@@ -960,10 +998,10 @@ type SelectItemOptions = Partial<{
  * lets the user select an item, be sure to use fillItemListingUI first
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
-    const popover = currentDocument().getElementById("items-listing") as HTMLDialogElement
+    const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
 
-    let f = currentDocument().getElementById("items-listing-search") as HTMLFormElement
-    let query = f.querySelector('[name="items-listing-search"]') as HTMLInputElement
+    let f = getElementOrThrowUI("#items-listing-search", HTMLFormElement)
+    let query = getElementOrThrowUI('[name="items-listing-search"]', HTMLInputElement, f)
 
     let { container, onsearch } = options || {}
 
@@ -996,10 +1034,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 }
 
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = currentDocument().getElementById("login") as HTMLDialogElement
-    if (!loginPopover) {
-        throw new Error("Could not create login screen")
-    }
+    const loginPopover = getElementOrThrowUI("#login", HTMLDialogElement)
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
     if (loginReasonEl instanceof HTMLElement) {
@@ -1021,7 +1056,7 @@ async function signinUI(reason: string): Promise<string> {
 
     loginPopover.showModal()
     return await new Promise((res, rej) => {
-        const form = loginPopover.querySelector("form") as HTMLFormElement
+        const form = getElementOrThrowUI("form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             let data = new FormData(form)
             let username = data.get("username")

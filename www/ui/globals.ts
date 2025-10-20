@@ -66,10 +66,3 @@ function saveEval(script: string) {
     window.fetch = oldFetch
     return res
 }
-
-function assert<T>(condition: T, error: string): true | never{
-    if(!condition) {
-        throw new Error(error)
-    }
-    return true
-}
