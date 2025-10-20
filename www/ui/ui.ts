@@ -131,6 +131,14 @@ async function loadInfoEntries(uid: number) {
     return items_getAllEntries()
 }
 
+/**
+ * opens the settings page for {user} or the current user id
+ *
+ * @param {number | null} uid the user id to open settings for
+ */
+function openSettingsUI(uid: number | null = null) {
+    open(`/settings.html?uid=${uid || getUidUI()}`, '_blank')
+}
 
 function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
     const internalSortName = items_addSort(name, cb)

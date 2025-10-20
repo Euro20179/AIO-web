@@ -13,7 +13,6 @@
 <body>
     <datalist id="recommended-by"></datalist>
 
-
     <dialog id="prompt" style="position: relative; height: max(200px, 20%); width: max(50vw, 500px);">
         <button style="position: absolute; top: 2ch; right: 2ch;">X</button>
         <div class="grid" style="grid-auto-rows: 3fr 1fr; height: 100%;">
@@ -149,7 +148,7 @@
 
                 <div class="flex">
                     <div class="grid row">
-                        <a href="javascript:(() => open(`/settings.html?uid=${getUidUI()}`, '_blank'))()" id="help-link">⚙</a>
+                        <a href="javascript:openSettingsUI()" id="help-link">⚙</a>
                         <button onclick="openModalUI('script-select')">run</button>
                     </div>
 
