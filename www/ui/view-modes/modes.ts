@@ -4,9 +4,10 @@ class Mode {
     win: Window & typeof globalThis
     //using string will querySelector on the (win || window)'s document
     constructor(parent: HTMLElement | DocumentFragment | string, win?: Window & typeof globalThis) {
-        this.parent = parent instanceof HTMLElement || parent instanceof DocumentFragment
+        win ||= window
+        this.parent = parent instanceof win.HTMLElement || parent instanceof win.DocumentFragment
             ? parent
-            : (win || window).document.querySelector(parent) as HTMLElement
+            : win.document.querySelector(parent) as HTMLElement
         //@ts-ignore
         this.win = win || this.parent.ownerDocument.defaultView
         if (this.win === null) {

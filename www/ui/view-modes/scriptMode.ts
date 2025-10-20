@@ -5,8 +5,8 @@ class ScriptMode extends Mode {
     scriptBox: HTMLTextAreaElement
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#script-execute-output", win)
-        this.run = document.getElementById("script-execute") as HTMLButtonElement
-        this.scriptBox = document.getElementById("script") as HTMLTextAreaElement
+        this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
+        this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
         this.win.document.getElementById("script-output")?.classList.add("open")
         this.run.onclick = execute.bind(this)
     }
@@ -35,7 +35,7 @@ class ScriptMode extends Mode {
 
     clear() {
         mode_clearItems()
-        if (this.parent instanceof HTMLElement) {
+        if (this.parent instanceof this.win.HTMLElement) {
             this.parent.innerHTML = ""
         } else
             while (this.parent.children.length) {
@@ -76,17 +76,17 @@ function execute(this: ScriptMode) {
     let tbl = new CalcVarTable()
     tbl.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
 
-    if (getElementOrThrowUI("#script-execute-output-clear", this.win.HTMLInputElement, document)?.checked) {
+    if (getElementOrThrowUI("#script-execute-output-clear", this.win.HTMLInputElement, this.win.document)?.checked) {
         this.clear()
     }
 
-    if (getElementOrThrowUI("#script-js-mode", this.win.HTMLInputElement, document)?.checked) {
+    if (getElementOrThrowUI("#script-js-mode", this.win.HTMLInputElement, this.win.document)?.checked) {
         //put the script within a scope so the user can redeclare vars
         script = `{${script}}`
         let b = new Blob([script], { type: "application/javascript" })
         let scriptEl = document.createElement("script")
         scriptEl.src = URL.createObjectURL(b)
-        document.body.append(scriptEl)
+        this.win.document.body.append(scriptEl)
         scriptEl.remove()
         URL.revokeObjectURL(scriptEl.src)
         return
