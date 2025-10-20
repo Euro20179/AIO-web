@@ -76,13 +76,11 @@ function execute(this: ScriptMode) {
     let tbl = new CalcVarTable()
     tbl.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
 
-    //@ts-ignore
-    if (document.getElementById("script-execute-output-clear")?.checked) {
+    if (getElementOrThrowUI("#script-execute-output-clear", this.win.HTMLInputElement, document)?.checked) {
         this.clear()
     }
 
-    //@ts-ignore
-    if (document.getElementById("script-js-mode")?.checked) {
+    if (getElementOrThrowUI("#script-js-mode", this.win.HTMLInputElement, document)?.checked) {
         //put the script within a scope so the user can redeclare vars
         script = `{${script}}`
         let b = new Blob([script], { type: "application/javascript" })

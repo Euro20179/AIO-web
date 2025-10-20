@@ -60,26 +60,22 @@ class DisplayMode extends Mode {
             })
         }),
         newchild: this.displayEntryAction((item) => {
-            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry")
-            if (!(newEntryDialog instanceof HTMLDialogElement)) { throw new Error("new-entry is not a dialog") }
-            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`)
-            if (!(parentIdInput instanceof HTMLInputElement)) { throw new Error("Parent id input is not an input element") }
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
         }),
         newcopy: this.displayEntryAction((item) => {
-            const newEntryDialog = this.parent.ownerDocument.getElementById("new-entry")
-            if (!(newEntryDialog instanceof HTMLDialogElement)) { throw new Error("new-entry is not a dialog") }
-            const parentIdInput = newEntryDialog.querySelector(`[name="parentId"]`)
-            if (!(parentIdInput instanceof HTMLInputElement)) { throw new Error("Parent id input is not an input element") }
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
         }),
         updatecustomstyles: this.displayEntryAction((item, root, target) => {
             const customStyles = root.getElementById("custom-styles")
-            if (!(customStyles instanceof HTMLStyleElement)) {
+            if (!(customStyles instanceof this.win.HTMLStyleElement)) {
                 throw new Error("custom-styles must be a style element in order to update it")
             }
 
@@ -89,7 +85,7 @@ class DisplayMode extends Mode {
 
         }),
         updatestatus: this.displayEntryAction((item, _, target) => {
-            if (!(target instanceof HTMLSelectElement)) return
+            if (!(target instanceof this.win.HTMLSelectElement)) return
 
             updateStatusUI(item.ItemId, target.value as UserStatus)
         }),
@@ -98,12 +94,11 @@ class DisplayMode extends Mode {
             updateEventsDisplay.call(this, root, item.ItemId)
         }),
         setobjtable: this.displayEntryAction((item, root, target) => {
-            if (!(target instanceof HTMLInputElement)) {
+            if (!(target instanceof this.win.HTMLInputElement)) {
                 throw new Error("hi")
             }
 
-            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
-            console.log(objectTbl)
+            const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
             const user = findUserEntryById(item.ItemId)
             const meta = findMetadataById(item.ItemId)
             switch (target.value) {
@@ -157,7 +152,7 @@ class DisplayMode extends Mode {
             fileUpload.click()
         }),
         setdigitization: this.displayEntryAction((item, _, target) => {
-            if (!target || !(target instanceof HTMLInputElement)) return
+            if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
                 item.Format |= DIGI_MOD
             } else if (items_isDigitized(item.Format)) {
@@ -220,7 +215,7 @@ class DisplayMode extends Mode {
         saveobject: this.displayEntryAction((item, root) => {
             const tbl = root.getElementById("display-info-object-tbl")
 
-            const editedObject = (root.getElementById("current-edited-object") as HTMLSelectElement).value
+            const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
             let into: Record<string, any> = {}
             let keyName
@@ -326,7 +321,7 @@ class DisplayMode extends Mode {
 
             obj[name] = ""
 
-            const objectTbl = root.getElementById("display-info-object-tbl") as HTMLTableElement
+            const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
             updateObjectTbl(obj, objectTbl, false)
         }),
         selectnewchild: this.displayEntryAction(item => {
@@ -600,7 +595,7 @@ async function itemIdentification(form: HTMLFormElement) {
 
     switch (queryType) {
         case "by-title":
-            let titleSearchContainer = shadowRoot.getElementById("identify-items") as HTMLDialogElement
+            let titleSearchContainer = getElementOrThrowUI("#identify-items", HTMLDialogElement, shadowRoot)
             finalItemId = await titleIdentification(provider, search, titleSearchContainer) || ""
 
             if (!finalItemId) {
@@ -1431,9 +1426,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Thumbnail
     if (imgEl && imgEl instanceof this.win.HTMLImageElement) {
-        //@ts-ignore
         imgEl.alt = meta.Title || item.En_Title
-        //@ts-ignore
         imgEl.src = fixThumbnailURL(meta.Thumbnail)
     }
 

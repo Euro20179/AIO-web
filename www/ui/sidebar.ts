@@ -48,8 +48,7 @@ addEventListener("modes.update-item", (e: CustomEvent) => {
 })
 
 function focusNthSidebarItem(n: number) {
-    //@ts-ignore
-    sidebarItems.querySelector(`:nth-child(${n})`)?.focus()
+    getElementOrThrowUI(`:nth-child(${n})`, HTMLElement, sidebarItems)?.focus()
 }
 
 function selectFocusedSidebarItem() {

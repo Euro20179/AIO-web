@@ -1378,11 +1378,14 @@ height: 100%;
                 watcher.destroy()
             }
         }
-        //@ts-ignore
-        win.document.body.querySelector("button.popout").onclick = () => {
-            win.close()
-            parent.classList.remove("none")
-            if (watcher) watcher.destroy()
+
+        const closePopout = getElementOrThrowUI("button.popout", HTMLElement, win.document.body)
+        if(closePopout) {
+            closePopout.onclick = () => {
+                win.close()
+                parent.classList.remove("none")
+                if (watcher) watcher.destroy()
+            }
         }
 
         win.onbeforeunload = function() {
