@@ -53,6 +53,58 @@
 }
 
 @layer components {
+    #main-ui {/* {{{ */
+        height: 100%;
+        flex-grow: 1;
+
+        display: grid;
+
+        gap: var(--small-gap);
+
+        @container body (width >=800px) {
+            grid-template-areas:
+                "form form form"
+                "sidebar main main"
+                "sidebar main main";
+            grid-template-columns: max-content 1fr 1fr;
+            grid-template-rows: min-content 1fr 1fr;
+        }
+
+        @container body (width < 800px) {
+            grid-template-rows: min-content min-content 3fr;
+            grid-template-columns: 1fr 1fr 0.5fr;
+            grid-template-areas:
+                "form form form"
+                "sidebar sidebar sidebar"
+                "main main main";
+
+            position: relative;
+        }
+
+        &.catalog-mode {
+            grid-template-areas: "form form form" "sidebar sidebar sidebar" "sidebar sidebar sidebar";
+
+            #sidebar {
+                width: 100vw;
+            }
+
+            #sidebar-items {
+                display: grid;
+            }
+        }
+
+        &.display-mode {
+            display: block;
+
+            > :not(#viewing-area) {
+                display: none;
+            }
+
+            #viewing-area {
+                height: 100%;
+            }
+        }
+    }/* }}} */
 
     .user-script {
         border: 1px solid var(--light-blue);
@@ -95,129 +147,6 @@
         }
     }
 
-    #calendar-output {
-        --months-width: 80cqi;
-
-        width: 100cqi;
-        height: 100cqb;
-
-        &[data-mode="day"] #month-display {
-            display: none;
-        }
-
-        &[data-mode="month"] #cal-canvas {
-            display: none;
-        }
-
-        &[data-mode="month"] #month-display {
-            display: grid;
-            width: 100cqi;
-            overflow: auto;
-
-            grid-template-areas: "nav stats" "calendar stats";
-            grid-template-columns: 1fr 20cqi;
-            grid-template-rows: 1fr 10fr;
-
-            #month-nav {
-                grid-area: nav;
-
-                display: flex;
-                justify-content: center;
-                justify-items: center;
-                gap: var(--small-gap);
-
-                label {
-                    text-align: center;
-                    align-self: center;
-                }
-                input {
-                    height: fit-content;
-                    align-self: center;
-                }
-
-                button {
-                    width: fit-content;
-                    height: fit-content;
-                    align-self: center;
-
-                    &:first-of-type {
-                        justify-self: right;
-                    }
-
-                    &:last-of-type {
-                        justify-self: left;
-                    }
-                }
-            }
-
-            #month-stats {
-                grid-area: stats;
-
-                position: sticky;
-                right: 0;
-
-                /*otherwise does not scroll to show all events*/
-                height: 100cqb;
-                
-                #total-events::before {
-                    content: "Event total: "
-                }
-            }
-
-            #months {
-                grid-area: calendar;
-
-                display: flex;
-                flex-direction: column;
-                > .month-grid {
-                    border: 1px solid currentColor;
-                }
-
-                .month-label {
-                    text-align: center;
-                }
-            }
-
-            .month-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                width: 100%;
-
-                .day {
-                    height: 15cqb;
-                    overflow: auto;
-
-                    display: flex;
-                    flex-direction: column;
-                    gap: var(--small-gap);
-
-                    .event-marker {
-                        &[data-event="Viewing"] {
-                            background: var(--blue);
-                            color: var(--main);
-                        }
-                        &[data-event="Finished"] {
-                            background: var(--green);
-                            color: var(--main);
-                        }
-                        &[data-event="Dropped"] {
-                            background: var(--red);
-                            color: var(--main);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    #gallery-output {
-        width: 100%;
-    }
-
-    #sidebar-form {
-        position: relative;
-    }
-
     #help-link {
         text-align: center;
         display: block;
@@ -230,12 +159,6 @@
         align-content: center;
 
         margin-right: 1ch;
-    }
-
-    #gallery-items {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
 
     #view-all {
@@ -274,59 +197,6 @@
 
         .notification::before {
             content: "Notification\a";
-        }
-    }
-
-    #main-ui.display-mode> :not(#viewing-area) {
-        display: none;
-    }
-
-    .display-mode #viewing-area {
-        height: 100%;
-    }
-
-    #main-ui {
-        height: 100%;
-        flex-grow: 1;
-
-        display: grid;
-
-        gap: var(--small-gap);
-
-        @container body (width >=800px) {
-            grid-template-areas:
-                "form form form"
-                "sidebar main main"
-                "sidebar main main";
-            grid-template-columns: max-content 1fr 1fr;
-            grid-template-rows: min-content 1fr 1fr;
-        }
-
-        @container body (width < 800px) {
-            grid-template-rows: min-content min-content 3fr;
-            grid-template-columns: 1fr 1fr 0.5fr;
-            grid-template-areas:
-                "form form form"
-                "sidebar sidebar sidebar"
-                "main main main";
-
-            position: relative;
-        }
-
-        &.catalog-mode {
-            grid-template-areas: "form form form" "sidebar sidebar sidebar" "sidebar sidebar sidebar";
-
-            #sidebar {
-                width: 100vw;
-            }
-
-            #sidebar-items {
-                display: grid;
-            }
-        }
-
-        &.display-mode {
-            display: block;
         }
     }
 
@@ -496,7 +366,11 @@
         }
     }
 
-    #calc-output.open {
+    #result-info {
+        grid-area: results;
+    }
+
+    #calc-output.open {/* {{{ */
         width: 100%;
         height: 100%;
 
@@ -507,10 +381,9 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(33cqi, 1fr));
         }
-    }
+    }/* }}} */
 
-
-    #graph-output {
+    #graph-output {/* {{{ */
         width: 100%;
         height: 100%;
 
@@ -526,21 +399,20 @@
                 height: fit-content;
             }
         }
-    }
 
-    #graph-output.open>div {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        width: 100%;
-        height: 100%;
+        .open > div {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            height: 100%;
 
-        div {
-            width: 90%;
+            div {
+                width: 90%;
+            }
         }
-    }
+    }/* }}} */
 
-
-    #entry-output.open {
+    #entry-output.open {/* {{{ */
         --grid-size: 50%;
 
         gap: calc(var(--small-gap) / 5);
@@ -570,9 +442,9 @@
                 grid-auto-columns: 100%;
             }
         }
-    }
+    }/* }}} */
 
-    #sidebar {
+    #sidebar {/* {{{ */
         grid-area: sidebar;
         height: 100%;
         width: 200px;
@@ -589,71 +461,65 @@
             width: 100%;
             resize: none;
         }
-    }
 
-    #sidebar-navigation {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        background: var(--main);
+        #sidebar-navigation {/* {{{ */
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--main);
 
-        padding: 5px;
+            padding: 5px;
 
-        display: grid;
-        grid-template-rows: 1fr 1fr;
-        grid-template-columns: 80%;
-        justify-content: center;
-
-        :has(> #view-all) {
-            width: 100%;
-        }
-
-        @container body (width < 800px) {
-            display: flex;
-            justify-content: space-around;
-
-            #item-filter {
-                flex-grow: 1;
-            }
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            grid-template-columns: 80%;
+            justify-content: center;
 
             :has(> #view-all) {
-                flex-grow: 0.2;
-                width: auto;
+                width: 100%;
             }
-        }
-    }
 
-    #sidebar-items {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            @container body (width < 800px) {
+                display: flex;
+                justify-content: space-around;
 
-        min-height: 10dvh;
-        max-height: 83%;
+                #item-filter {
+                    flex-grow: 1;
+                }
 
-        width: 100%;
+                :has(> #view-all) {
+                    flex-grow: 0.2;
+                    width: auto;
+                }
+            }
+        }/* }}} */
+        #sidebar-items {/* {{{ */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 
-        float: left;
+            min-height: 10dvh;
+            max-height: 83%;
 
-        padding: 0;
+            width: 100%;
 
-        @container body (width < 800px) {
-            display: flex;
-            flex-direction: row;
-            min-width: fit-content;
-            min-height: fit-content;
-        }
+            float: left;
 
-        @container body (width >=800px) {
-            height: 100cqb;
-        }
-    }
+            padding: 0;
 
-    #result-info {
-        grid-area: results;
-    }
+            @container body (width < 800px) {
+                display: flex;
+                flex-direction: row;
+                min-width: fit-content;
+                min-height: fit-content;
+            }
 
+            @container body (width >=800px) {
+                height: 100cqb;
+            }
+        }/* }}} */
+    }/* }}} */
 
-    #script-root {
+    #script-root {/* {{{ */
         display: grid;
         grid-template-areas:
             "input run-button"
@@ -684,5 +550,130 @@
             resize: vertical;
             grid-area: input;
         }
-    }
+    }/* }}} */
+
+    #gallery-output {/* {{{ */
+        width: 100%;
+
+        #gallery-items {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }/* }}} */
+
+    #calendar-output {/* {{{ */
+        --months-width: 80cqi;
+
+        width: 100cqi;
+        height: 100cqb;
+
+        &[data-mode="day"] #month-display {
+            display: none;
+        }
+
+        &[data-mode="month"] #cal-canvas {
+            display: none;
+        }
+
+        &[data-mode="month"] #month-display {
+            display: grid;
+            width: 100cqi;
+            overflow: auto;
+
+            grid-template-areas: "nav stats" "calendar stats";
+            grid-template-columns: 1fr 20cqi;
+            grid-template-rows: 1fr 10fr;
+
+            #month-nav {
+                grid-area: nav;
+
+                display: flex;
+                justify-content: center;
+                justify-items: center;
+                gap: var(--small-gap);
+
+                label {
+                    text-align: center;
+                    align-self: center;
+                }
+                input {
+                    height: fit-content;
+                    align-self: center;
+                }
+
+                button {
+                    width: fit-content;
+                    height: fit-content;
+                    align-self: center;
+
+                    &:first-of-type {
+                        justify-self: right;
+                    }
+
+                    &:last-of-type {
+                        justify-self: left;
+                    }
+                }
+            }
+
+            #month-stats {
+                grid-area: stats;
+
+                position: sticky;
+                right: 0;
+
+                /*otherwise does not scroll to show all events*/
+                height: 100cqb;
+                
+                #total-events::before {
+                    content: "Event total: "
+                }
+            }
+
+            #months {
+                grid-area: calendar;
+
+                display: flex;
+                flex-direction: column;
+                > .month-grid {
+                    border: 1px solid currentColor;
+                }
+
+                .month-label {
+                    text-align: center;
+                }
+            }
+
+            .month-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                width: 100%;
+
+                .day {
+                    height: 15cqb;
+                    overflow: auto;
+
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--small-gap);
+
+                    .event-marker {
+                        &[data-event="Viewing"] {
+                            background: var(--blue);
+                            color: var(--main);
+                        }
+                        &[data-event="Finished"] {
+                            background: var(--green);
+                            color: var(--main);
+                        }
+                        &[data-event="Dropped"] {
+                            background: var(--red);
+                            color: var(--main);
+                        }
+                    }
+                }
+            }
+        }
+    }/* }}} */
 }
