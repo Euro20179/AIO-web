@@ -55,7 +55,7 @@
         <h3>New Entry</h3>
         <button onclick="closeModalUI('new-entry')"
             style="position: absolute; height: 2em; top: 5px; right: 5px; aspect-ratio: 1;">X</button>
-        <form id="new-item-form" method="dialog" action="javascript:newEntryUI()">
+        <form id="new-item-form" method="dialog" action="javascript:void(0)">
             <div class="flex wrap" style="width: 100%;">
                 <input type="text" placeholder="title" name="title" required style="flex-grow: 1; max-width: 100%;">
                 <select name="type" title="The type of media" required style="flex-grow: 1;">
@@ -136,7 +136,7 @@
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </div>
             </div>
-            <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode())">
+            <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
         </form>
     </dialog>
 
