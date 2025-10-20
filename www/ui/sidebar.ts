@@ -121,7 +121,7 @@ function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
     if (clearSelected) {
         mode_clearItems()
     }
-    if (viewAllElem.checked) {
+    if (isViewingAllUI()) {
         mode_selectItemList(entries)
     } else {
         mode_selectItem(entries[0])
@@ -181,6 +181,7 @@ async function renderSidebarItemList(items: InfoEntry[], sidebarParent: HTMLElem
 }) {
     for (let i = 0; i < items.length; i++) {
         if (i !== 0 && i % 20 == 0 && "scheduler" in window) {
+            //@ts-ignore
             await scheduler.yield()
         }
         renderSidebarItem(items[i], sidebarParent, options)

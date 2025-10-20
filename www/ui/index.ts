@@ -5,6 +5,23 @@ type ClientSearchFilters = {
 }
 
 async function main() {
+    const sortBySelector = getElementOrThrowUI('[name="sort-by"]', HTMLSelectElement)
+    const recommenders = getElementOrThrowUI("datalist#recommended-by", HTMLDataListElement)
+    startupUI({
+        newWindow: document.getElementById("new-view-window"),
+        viewToggle: getElementOrThrowUI("#view-toggle", HTMLSelectElement),
+        viewAllElem: getElementOrThrowUI("#view-all", HTMLInputElement),
+        statsOutput: document.getElementById("result-stats"),
+        itemFilter: getElementOrThrowUI("#item-filter", HTMLInputElement),
+        newEntryLibrarySelector: getElementOrThrowUI("[name=\"libraryId\"]", HTMLSelectElement),
+        librarySelector: getElementOrThrowUI("#library-selector", HTMLSelectElement),
+        userSelector: getElementOrThrowUI('[name="uid"]', HTMLSelectElement),
+        sortBySelector, 
+        errorOut: document.getElementById("error"),
+        searchForm: getElementOrThrowUI("#sidebar-form", HTMLFormElement),
+        recommenders
+    })
+
     const urlParams = new URLSearchParams(document.location.search)
 
     if (urlParams.has("display")) {
@@ -38,12 +55,12 @@ async function main() {
     }
 
 
-    fillFormatSelectionUI()
-    fillTypeSelectionUI()
-    await fillUserSelectionUI()
+    fillFormatSelectionUI(getElementOrThrowUI('[name="format"]', HTMLSelectElement))
+    fillTypeSelectionUI(getElementOrThrowUI("#new-item-form [name=\"type\"]", HTMLSelectElement))
+    await fillUserSelectionUI(getElementOrThrowUI("[name=\"uid\"]", HTMLSelectElement))
     setUIDFromHeuristicsUI()
 
-    fillRecommendedListUI(null, getUidUI())
+    fillRecommendedListUI(recommenders, getUidUI())
     loadLibraries(getUidUI())
 
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement

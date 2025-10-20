@@ -3,101 +3,151 @@
  * with client-side inputs
 */
 
-const newWindow = document.getElementById("new-view-window") as HTMLButtonElement
-const viewToggle = document.getElementById("view-toggle") as HTMLSelectElement
-const viewAllElem = document.getElementById("view-all")
-const statsOutput = document.getElementById("result-stats") as HTMLElement
-const itemFilter = document.getElementById("item-filter") as HTMLInputElement
-const newEntryLibrarySelector = document.querySelector("[name=\"libraryId\"]") as HTMLSelectElement
-const librarySelector = document.getElementById("library-selector") as HTMLSelectElement
-const userSelector = document.querySelector('[name="uid"]') as HTMLSelectElement
-const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
-
-const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
-    let [k, ...val] = v.trim().split("=")
-    let valAll = val.join("=")
-    return [k, valAll]
-}))
-
-if (cookies['login']) {
-    setUserAuth(cookies['login'])
-    setUIDUI(cookies['uid'])
-}
-if (cookies['uid']) {
-    storeUserUID(cookies['uid'])
+type StartupUIComponents = {
+    newWindow: HTMLElement,
+    viewToggle: HTMLSelectElement,
+    viewAllElem: HTMLInputElement,
+    statsOutput: HTMLElement,
+    itemFilter: HTMLInputElement,
+    newEntryLibrarySelector: HTMLSelectElement,
+    librarySelector: HTMLSelectElement,
+    userSelector: HTMLSelectElement,
+    sortBySelector: HTMLSelectElement,
+    errorOut: HTMLElement,
+    searchForm: HTMLFormElement,
+    recommenders: HTMLDataListElement
 }
 
-viewToggle?.addEventListener("change", e => {
-    mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
-})
 
-librarySelector?.addEventListener("change", function() {
-    let val = librarySelector.value
-    items_setCurrentLibrary(BigInt(val))
+const components: {
+    [k in keyof StartupUIComponents]?: StartupUIComponents[k] | null
+} = {}
 
-    loadSearchUI()
-})
+function startupUI({
+    newWindow,
+    viewToggle,
+    viewAllElem,
+    itemFilter,
+    librarySelector,
+    userSelector,
+    sortBySelector,
+}: typeof components) {
 
-userSelector?.addEventListener("change", function() {
-    refreshInfo(getUidUI()).then(() => loadSearchUI())
-    fillRecommendedListUI(null, getUidUI())
-})
-
-sortBySelector?.addEventListener("change", function() {
-    sortEntriesUI()
-})
-
-itemFilter?.addEventListener("input", function() {
-    const filtered = getFilteredResultsUI()
-    const ids = filtered.map(v => v.ItemId)
-    //remove items that dont match
-    for (let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
-        const id = sidebarE.getAttribute("data-entry-id") as string
-        if (!ids.includes(BigInt(id))) {
-            sidebarE.remove()
-        }
+    for(let key in arguments[0]) {
+        components[key as keyof StartupUIComponents] = arguments[0][key]
     }
 
-    //add items that DO match            reapply sort
-    renderSidebarItemList(filtered).then(sortEntriesUI)
-})
+    if (!(components["itemFilter"] instanceof HTMLInputElement)) {
+        throw new Error("item filter must be an <input>")
+    }
 
-if (viewAllElem instanceof HTMLInputElement)
-    viewAllElem.addEventListener("change", e => {
-        resetStatsUI()
-        if (!viewAllElem.checked) {
-            mode_clearItems(false)
-        } else {
-            mode_clearItems()
-            for (let mode of openViewModes) {
-                mode_selectItemList(getFilteredResultsUI(), true, mode)
-            }
-        }
+    if (!(components["viewToggle"] instanceof HTMLSelectElement)) {
+        throw new Error("view toggle must be a <select>")
+    }
+
+    if (!(components["newEntryLibrarySelector"] instanceof HTMLSelectElement)) {
+        throw new Error("new entry's library selector must be a select element")
+    }
+
+    if (!(components["librarySelector"] instanceof HTMLSelectElement)) {
+        throw new Error("library selector must be a select element")
+    }
+
+    if (!(components["userSelector"] instanceof HTMLSelectElement)) {
+        throw new Error("user uid selector must be a select element")
+    }
+
+    if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
+        throw new Error("sort by selector must be a select element")
+    }
+
+    const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
+        let [k, ...val] = v.trim().split("=")
+        let valAll = val.join("=")
+        return [k, valAll]
+    }))
+
+    if (cookies['login']) {
+        setUserAuth(cookies['login'])
+        setUIDUI(cookies['uid'])
+    }
+
+    if (cookies['uid']) {
+        storeUserUID(cookies['uid'])
+    }
+
+    viewToggle?.addEventListener("change", e => {
+        mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
     })
 
-if (newWindow)
-    newWindow.onclick = function() {
-        let urlParams = new URLSearchParams(location.search)
-        urlParams.set("display", "true")
-        urlParams.set("no-select", "true")
-        urlParams.set("no-startup", "true")
-        urlParams.set("no-mode", "true")
-        const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
-        const win = open(newURL, "_blank", "popup=true")
-        if (!win) return
-        const mode = mode_getFirstModeInWindow(catalogWin || window)
-        if (!mode) return
-        win.onload = () => {
-            mode_setMode(mode.NAME, win as Window & typeof globalThis)
+    librarySelector?.addEventListener("change", function() {
+        let val = librarySelector.value
+        items_setCurrentLibrary(BigInt(val))
+
+        loadSearchUI()
+    })
+
+    userSelector?.addEventListener("change", function() {
+        refreshInfo(getUidUI()).then(() => loadSearchUI())
+        if(components.recommenders)
+            fillRecommendedListUI(components.recommenders, getUidUI())
+    })
+
+    sortBySelector?.addEventListener("change", function() {
+        sortEntriesUI()
+    })
+
+    itemFilter?.addEventListener("input", function() {
+        const filtered = getFilteredResultsUI()
+        const ids = filtered.map(v => v.ItemId)
+        //remove items that dont match
+        for (let sidebarE of sidebarItems.querySelectorAll("sidebar-entry")) {
+            const id = sidebarE.getAttribute("data-entry-id") as string
+            if (!ids.includes(BigInt(id))) {
+                sidebarE.remove()
+            }
         }
-    }
+
+        //add items that DO match            reapply sort
+        renderSidebarItemList(filtered).then(sortEntriesUI)
+    })
+
+    if (viewAllElem instanceof HTMLInputElement)
+        viewAllElem.addEventListener("change", e => {
+            resetStatsUI()
+            if (!viewAllElem.checked) {
+                mode_clearItems(false)
+            } else {
+                mode_clearItems()
+                for (let mode of openViewModes) {
+                    mode_selectItemList(getFilteredResultsUI(), true, mode)
+                }
+            }
+        })
+
+    if (newWindow)
+        newWindow.onclick = function() {
+            let urlParams = new URLSearchParams(location.search)
+            urlParams.set("display", "true")
+            urlParams.set("no-select", "true")
+            urlParams.set("no-startup", "true")
+            urlParams.set("no-mode", "true")
+            const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
+            const win = open(newURL, "_blank", "popup=true")
+            if (!win) return
+            const mode = mode_getFirstModeInWindow(catalogWin || window)
+            if (!mode) return
+            win.onload = () => {
+                mode_setMode(mode.NAME, win as Window & typeof globalThis)
+            }
+        }
+}
 
 function setError(text: string) {
-    const errorOut = getElementUI("error", Element)
     if (text == "") {
-        errorOut?.removeAttribute("data-error")
+        components.errorOut?.removeAttribute("data-error")
     } else {
-        errorOut?.setAttribute("data-error", text)
+        components.errorOut?.setAttribute("data-error", text)
     }
 }
 
@@ -142,11 +192,11 @@ function openSettingsUI(uid: number | null = null) {
 
 function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
     const internalSortName = items_addSort(name, cb)
-    let group = sortBySelector.querySelector(`optgroup[label="${category}"]`)
+    let group = components.sortBySelector?.querySelector(`optgroup[label="${category}"]`)
     if (!group) {
         group = document.createElement("optgroup")
         group.setAttribute("label", category)
-        sortBySelector.appendChild(group)
+        components.sortBySelector?.appendChild(group)
     }
 
     const opt = document.createElement("option")
@@ -175,7 +225,12 @@ function getCSSProp(name: string, fallback: string) {
 
 function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let newArr = []
-    const search = itemFilter.value.toLowerCase()
+    const search = components.itemFilter?.value.toLowerCase()
+
+    if(typeof search !== 'string') {
+        throw new Error("Could not get filtered search")
+    }
+
     for (let item of list || items_getResults()) {
         for (let str of [item.info.En_Title, item.info.Native_Title, item.meta.Title, item.meta.Native_Title]) {
             if (str.toLowerCase().includes(search)) {
@@ -207,7 +262,7 @@ class Statistic {
         this.calculation = calculation
         this.el = document.createElement("entries-statistic")
         this.el.setAttribute("data-stat-name", this.name)
-        statsOutput?.append(this.el)
+        components.statsOutput?.append(this.el)
     }
     set value(v: number) {
         this.#value = v
@@ -265,28 +320,26 @@ document.addEventListener("keydown", e => {
     if (!e.ctrlKey) return
     switch (e.key) {
         case "/": {
-            let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
-            const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, form)
+            const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, components.searchForm)
             search?.focus()
             search?.select()
             e.preventDefault()
             break
         }
         case "?": {
-            itemFilter.focus()
-            itemFilter.select()
-            // document.getElementById("item-filter")?.focus()
+            components.itemFilter?.focus()
+            components.itemFilter?.select()
             e.preventDefault()
             break
         }
         case "A": {
-            viewAllElem && viewAllElem.click()
+            components.viewAllElem && components.viewAllElem.click()
             e.preventDefault()
             break
         }
         case "m": {
             e.preventDefault()
-            viewToggle.focus()
+            components.viewToggle?.focus()
             break
         }
         case "P":
@@ -540,7 +593,7 @@ function changeResultStatsWithItemUI(item: InfoEntry, multiplier: number = 1) {
 }
 
 function deleteResultStatUI(key: string) {
-    let el = statsOutput.querySelector(`[data-stat-name="${key}"]`)
+    let el = components.statsOutput?.querySelector(`[data-stat-name="${key}"]`)
     if (el) {
         el.remove()
         return true
@@ -558,7 +611,11 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
  * Sorts entries, and reorders the sidebar based on the selected sort in the sort-by selector
  */
 function sortEntriesUI() {
-    let newEntries = sortEntries(items_getResults().map(v => v.info), sortBySelector.value)
+    const sortby = components.sortBySelector?.value
+    if(!sortby) {
+        throw new Error("Could not get sort by")
+    }
+    let newEntries = sortEntries(items_getResults().map(v => v.info), sortby)
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
     mode_clearItems()
@@ -579,7 +636,8 @@ function getUidUI() {
  * @returns {FormData} the data
  */
 function getSearchDataUI(): FormData {
-    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
+    let form = components.searchForm
+    if(!form) throw new Error("No search form found")
     let data = new FormData(form)
     return data
 }
@@ -589,7 +647,8 @@ function getSearchDataUI(): FormData {
  * @param {Record<string, string>} params - values to override
  */
 function mkSearchUI(params: Record<string, string>) {
-    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
+    let form = components.searchForm
+    if(!form) throw new Error("No search form found")
 
     for (let param in params) {
         const inp = form.querySelector(`[name="${param}"]`)
@@ -609,7 +668,8 @@ function mkSearchUI(params: Record<string, string>) {
  * - if there are no results, sets the error to "No results"
  */
 async function loadSearchUI() {
-    let form = getElementOrThrowUI("#sidebar-form", HTMLFormElement)
+    let form = components.searchForm
+    if(!form) throw new Error("No search form found")
 
     let formData = new FormData(form)
 
@@ -700,16 +760,17 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
 }
 
 function updateLibraryDropdown() {
-    librarySelector.innerHTML = '<option value="0">Library</option>'
+    components.librarySelector && (components.librarySelector.innerHTML = '<option value="0">Library</option>')
+    components.newEntryLibrarySelector && (components.newEntryLibrarySelector.innerHTML = '<option value="0">Library</option>')
     const libraries = items_getLibraries()
     for (let i in libraries) {
         let item = libraries[i]
         const opt = document.createElement("option")
         opt.value = String(item["ItemId"])
         opt.innerText = item["En_Title"]
-        librarySelector.append(opt)
+        components.librarySelector && components.librarySelector.append(opt)
+        components.newEntryLibrarySelector && components.newEntryLibrarySelector.append(opt.cloneNode(true))
     }
-    newEntryLibrarySelector.innerHTML = librarySelector.innerHTML
 }
 
 /**
@@ -1075,14 +1136,7 @@ async function signinUI(reason: string): Promise<string> {
     })
 }
 
-async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = null) {
-    formatSelector ||= currentDocument().querySelector('[name="format"]') as HTMLSelectElement
-
-    if (formatSelector === null) {
-        console.error("format dropdown could not be found")
-        return
-    }
-
+async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
     const groups = {
         "DIGITAL": "Misc",
         "IMAGE": "Misc",
@@ -1126,13 +1180,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement | null = 
     formatSelector.replaceChildren(...Object.values(optGroups))
 }
 
-async function fillRecommendedListUI(list: HTMLDataListElement | null = null, uid: number) {
-    list ||= currentDocument().querySelector("datalist#recommended-by")
-    if (!list) {
-        console.error("Could not find a recommended-by list to fill")
-        return
-    }
-
+async function fillRecommendedListUI(list: HTMLDataListElement, uid: number) {
     list.innerHTML = ""
 
     const recommenders = await api_list_recommenders(uid)
@@ -1143,14 +1191,7 @@ async function fillRecommendedListUI(list: HTMLDataListElement | null = null, ui
     }
 }
 
-async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null) {
-    typeDropdown ||= currentDocument().querySelector("#new-item-form [name=\"type\"]")
-
-    if (typeDropdown === null) {
-        console.error("type dropdown could not be found")
-        return
-    }
-
+async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
     const groups = {
         "Show": "TV",
         "Movie": "TV",
@@ -1189,13 +1230,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | null = null
     typeDropdown.replaceChildren(...Object.values(optGroups))
 }
 
-async function fillUserSelectionUI() {
-    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
-    if (!uidSelector) {
-        alert("Failed to 💧H Y D R A T E💧 the user selection list, aborting")
-        return
-    }
-
+async function fillUserSelectionUI(selector: HTMLSelectElement) {
     for (let acc of await api_listAccounts()) {
         const opt = document.createElement("option")
         const [id, name] = acc.split(":")
@@ -1204,7 +1239,7 @@ async function fillUserSelectionUI() {
 
         opt.value = id
         opt.innerText = name
-        uidSelector.append(opt)
+        selector.append(opt)
     }
 }
 
@@ -1500,4 +1535,8 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
     })
 
     return res
+}
+
+function isViewingAllUI() {
+    return components.viewAllElem?.checked
 }
