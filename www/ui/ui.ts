@@ -19,6 +19,8 @@ type StartupUIComponents = {
 }
 
 
+let statistics: Statistic[] = []
+
 const components: {
     [k in keyof StartupUIComponents]?: StartupUIComponents[k] | null
 } = {}
@@ -31,6 +33,7 @@ function startupUI({
     librarySelector,
     userSelector,
     sortBySelector,
+    statsOutput
 }: typeof components) {
 
     for(let key in arguments[0]) {
@@ -59,6 +62,14 @@ function startupUI({
 
     if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
         throw new Error("sort by selector must be a select element")
+    }
+
+    if(statsOutput) {
+        statistics.push(new Statistic("results", false, () => getFilteredResultsUI().length))
+        statistics.push(new Statistic("count", true, (_, mult) => 1 * mult))
+        statistics.push(new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult))
+
+        statistics[0].resetable = false
     }
 
     const cookies = Object.fromEntries(document.cookie.split(";").map(v => {
@@ -295,14 +306,6 @@ class Statistic {
         }
     }
 }
-
-let statistics = [
-    new Statistic("results", false, () => getFilteredResultsUI().length),
-    new Statistic("count", true, (_, mult) => 1 * mult),
-    new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult)
-]
-
-statistics[0].resetable = false
 
 document.addEventListener("keydown", e => {
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
