@@ -172,6 +172,16 @@ p {
         <li>The <code>title</code> attribute gets set to <code>parseInt(user.CurrentPosition) / parseInt(<var>length</var>))</code>
     </dd>
 
+    <dt>multiple-progress
+    <dd>
+        <p>
+        For each sement of <code>user.CurrentPosition</code>,
+        create a progress element and associated caption that displays that segment.
+        Eg: <code>3 S4</code> will create 2 progresses, 1 for the episode, 1 for the season
+        <p>
+        Each progress gets appended to the element with <code>multiple-progress</code>
+    </dd>
+
     <dt>media-info
     <dd>Fill a table with each item from <code>meta.MediaDependant</code>
 

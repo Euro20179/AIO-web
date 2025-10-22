@@ -414,7 +414,7 @@
         content: " times (" attr(data-time-spent, "Unknown") " hours)"
     }
 
-    #entry-progressbar {
+    #entry-progressbar, .entry-progressbar {
         justify-self: center;
         margin: 0;
 
@@ -423,7 +423,7 @@
         appearance: none;
     }
 
-    #entry-progressbar-position-label {
+    #entry-progressbar-position-label, .entry-progressbar-position-label {
         position: absolute;
         right: 0;
 
@@ -445,7 +445,9 @@
     }
 
     #entry-progressbar[max]::-moz-progress-bar,
-    #entry-progressbar[max]::-webkit-progress-bar {
+    #entry-progressbar[max]::-webkit-progress-bar,
+    .entry-progressbar[max]::-moz-progress-bar,
+    .entry-progressbar[max]::-webkit-progress-bar{
         background: var(--green);
     }
 

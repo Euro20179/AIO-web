@@ -1254,6 +1254,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const viewCountEl = el.getElementById('view-count')
     const progressEl = el.getElementById("entry-progressbar")
     const captionEl = el.getElementById("entry-progressbar-position-label")
+    const multipleProgressEl = el.getElementById("multiple-progress")
     const mediaInfoTbl = el.getElementById("media-info")
     const customStyles = el.getElementById("custom-styles")
     const locationEl = el.getElementById("location-link")
@@ -1501,13 +1502,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         mkGenericTbl(mediaInfoTbl, modifiedKeys)
     }
 
-
-    //TODO:
-    //for each [P]x[/y] in userPos create a progress element
-    //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
-    //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
-    //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
-    //"," is optional
     let userPos = parseInt(user.CurrentPosition)
 
     el.host.setAttribute("data-user-status", user.Status)
@@ -1523,11 +1517,65 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         progressEl.max = lengthInNumber || 1
 
         progressEl.value = userPos || 0
-
     }
     if (captionEl) {
         captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
         captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber) * 1000) / 10}%`
+    }
+
+    if (multipleProgressEl && /(Re)?Viewing/.test(user.Status)) {
+        multipleProgressEl.innerHTML = ""
+        //TODO:
+        //for each [P]x[/y] in userPos create a progress element
+        //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
+        //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
+        //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
+        //"," is optional
+        const parts =
+            user.CurrentPosition.split(/,\s*|\s+/)
+                .map(v => v.trim())
+                .map(v => v.match(/(.)?(\d+)(?:\/(\d+))?/))
+
+        for(let part of parts) {
+            if(!part) continue
+            let label = part[1]
+
+            let max =
+                //if there's no label, and no total is given
+                //use the mediaDependant determined length
+                !label && part[3] === undefined
+                ? lengthInNumber
+                : (part[3] || "0") //part[3] could be empty string
+
+            let container = document.createElement("figure")
+            container.style.position = "relative"
+            container.style.margin = "0"
+
+            let p = document.createElement("progress")
+            p.max = parseFloat(max)
+            p.value = parseFloat(part[2])
+            p.classList.add("entry-progressbar")
+            p.onclick = e => {
+                if (!(e.target instanceof this.win.HTMLElement)) throw new Error("progress bar is not an element?")
+                this.de_actions.setprogress(e.target)
+            }
+
+            let c = document.createElement("figcaption")
+            c.style.position = "absolute"
+            c.innerText = `${label || ""}${part[2]}`
+            if(parseInt(max)) {
+                c.innerText += `/${max}`
+            }
+
+            //percentage
+            c.title = `${Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10}%`
+            c.classList.add("entry-progressbar-position-label")
+
+            container.append(p)
+            container.append(c)
+
+            multipleProgressEl.append(container)
+        }
     }
 
     //relation elements
