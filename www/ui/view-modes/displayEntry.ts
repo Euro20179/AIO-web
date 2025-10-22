@@ -1519,7 +1519,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         || mediaDependant[`${type}-page-count`]
         || 0
 
-    if (progressEl && "max" in progressEl && "value" in progressEl && user.Status === "Viewing") {
+    if (progressEl && "max" in progressEl && "value" in progressEl && /(Re)?Viewing/.test(user.Status)) {
         progressEl.max = lengthInNumber || 1
 
         progressEl.value = userPos || 0

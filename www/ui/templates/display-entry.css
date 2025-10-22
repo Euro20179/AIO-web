@@ -402,7 +402,7 @@
         }
     }
 
-    :host(display-entry:not([data-user-status="Viewing"])) #entry-progressbar-position-label {
+    :host(display-entry:not([data-user-status*="Viewing"])) #entry-progressbar-position-label {
         display: none;
     }
 
