@@ -94,8 +94,8 @@ class DisplayMode extends Mode {
             updateEventsDisplay.call(this, root, item.ItemId)
         }),
         setobjtable: this.displayEntryAction((item, root, target) => {
-            if (!(target instanceof this.win.HTMLInputElement)) {
-                throw new Error("hi")
+            if (!("value" in target)) {
+                throw new Error("set object table element has no value")
             }
 
             const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
