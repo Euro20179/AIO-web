@@ -84,6 +84,7 @@ type InfoEntry = {
     Library: bigint
     Uid: number
     Requires: bigint
+    RecommendedBy: string
 
     Tags: string[]
 }
@@ -332,6 +333,7 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         CopyOf: 0n,
         Library: 0n,
         Requires: 0n,
+        RecommendedBy: "",
 
         Tags: []
     }
