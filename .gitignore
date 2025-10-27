@@ -8,3 +8,5 @@ server-config.ini
 
 www/ui/index.html
 www/config.ts
+
+go.sum
