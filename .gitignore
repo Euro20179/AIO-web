@@ -1,0 +1,10 @@
+!*.ts
+
+*.js.map
+*.js
+
+aio-web
+server-config.ini
+
+www/ui/index.html
+www/config.ts
