@@ -342,7 +342,7 @@
         container-type: size;
         grid-area: main;
 
-        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open, #calendar-output.open))) {
+        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open, #calendar-output.open, #tierlist-output.open))) {
             #error-output {
                 display: unset;
             }
