@@ -6,16 +6,8 @@ function applyUserRating(rating: number, root: HTMLElement) {
         root.classList.remove(`${name}-tier`)
     }
 
-    for (let [name, minRating, tierName] of tierSettings) {
-        if (
-            (typeof minRating === 'function' && minRating(rating))
-            || (typeof minRating === 'number' && rating >= minRating)
-        ) {
-            tierName ||= `${name}-tier`
-            root.classList.add(String(tierName))
-            break
-        }
-    }
+    let tier = settings_tier_from_rating(rating)
+    root.classList.add(`${tier}-tier`)
 }
 
 customElements.define("display-entry", class extends HTMLElement {

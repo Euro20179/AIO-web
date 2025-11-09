@@ -18,13 +18,15 @@ class Mode {
     sub(entry: InfoEntry): any { }
     addList(entry: InfoEntry[]): any { }
     subList(entry: InfoEntry[]): any { }
+    ///Responsible for removing the open class from the output element
+    //and also clearing the selected items (clearSelected())
+    close(): any { }
+    clearSelected(): any { }
     chwin?(win: Window): any { }
     refresh?(id: bigint): any { }
     putSelectedInCollection?(): any { }
     addTagsToSelected?(): any { }
     put?(html: string | HTMLElement | ShadowRoot): any { }
-    close(): any { }
-    clearSelected(): any { }
 }
 
 let openViewModes: Mode[] = []
@@ -207,6 +209,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "script-output": ScriptMode,
         "event-output": EventMode,
         "calendar-output": CalendarMode,
+        "tierlist-output": TierListMode,
     }
     //@ts-ignore
     const newMode = modes[name]

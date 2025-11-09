@@ -1,0 +1,23 @@
+@layer components {
+    #tierlist-output {
+        img {
+            height: 80px;
+        }
+
+        ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+
+            border-bottom: 3px solid var(--secondary);
+            color: black;
+        }
+
+        tier-label {
+            width: 5rem;
+            aspect-ratio: 1;
+            text-align: center;
+            font-weight: bold;
+        }
+    }
+}

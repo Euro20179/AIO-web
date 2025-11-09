@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/colors.css">
     <link rel="stylesheet" href="/css/general.css">
     <link rel="stylesheet" href="/ui/styles.css">
+    <link rel="stylesheet" href="/ui/templates/tierlist.css">
 </head>
 
 <body>
@@ -203,6 +204,7 @@
                         <option value="calc-output" title="Calc mode">🔢︎</option>
                         <option value="gallery-output" title="Gallery mode">🖼︎</option>
                         <option value="script-output" title="Script mode">&lt;></option>
+                        <option value="tierlist-output" title="Tierlist mode">S</option>
                     </select>
                     <button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>
@@ -222,6 +224,9 @@
 
                 <div id="error-output">
                     <p id="error"></p>
+                </div>
+
+                <div id="tierlist-output">
                 </div>
 
                 <div id="script-output">
@@ -381,6 +386,7 @@
     <script src="/ui/sidebar.js"></script>
     <script src="/ui/settings.js"></script>
     <script src="/ui/view-modes/modes.js"></script>
+    <script src="/ui/view-modes/tier-list.js"></script>
     <script src="/ui/view-modes/calendar.js"></script>
     <script src="/ui/view-modes/graph.js"></script>
     <script src="/ui/view-modes/displayEntry.js"></script>

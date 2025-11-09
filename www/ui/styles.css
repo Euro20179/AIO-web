@@ -137,7 +137,8 @@
         #gallery-output,
         #event-output,
         #script-output,
-        #calendar-output) {
+        #calendar-output,
+        #tierlist-output) {
         &.open {
             display: inherit;
         }
@@ -382,6 +383,10 @@
             grid-template-columns: repeat(auto-fit, minmax(33cqi, 1fr));
         }
     }/* }}} */
+
+    #tierlist-output.open {
+        display: block;
+    }
 
     #graph-output {/* {{{ */
         width: 100%;
