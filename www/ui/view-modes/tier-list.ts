@@ -46,6 +46,7 @@ class TierListMode extends Mode {
         let img = document.createElement("img")
         img.src = thumb
         img.alt = entry.En_Title || entry.Native_Title
+        img.title = `${rating.UserRating}`
 
         li.id = `tier-item-${entry.ItemId}`
         li.append(img)
@@ -54,7 +55,18 @@ class TierListMode extends Mode {
 
         let ul = this.rows[tier]
 
-        ul.appendChild(li)
+        const els = ul.querySelectorAll("li")
+
+        if(els.length === 0) {
+            ul.append(li)
+        }
+        else
+        for(let el of els) {
+            let elRating = findUserEntryById(BigInt(el.id.split("-item-")[1])).UserRating
+            if(rating.UserRating < elRating) {
+                el.after(li)
+            }
+        }
 
         return li
     }
