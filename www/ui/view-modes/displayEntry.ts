@@ -9,7 +9,9 @@ class DisplayMode extends Mode {
 
         if (this.parent instanceof HTMLElement) {
             this.parent.addEventListener("scroll", (e) => {
-                //@ts-ignore
+                if (!(this.parent instanceof HTMLElement))
+                    throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
+
                 if (this.parent.scrollHeight - this.parent.scrollTop > innerHeight + 1000) return
 
                 if (this.displayQueue.length) {
@@ -724,7 +726,9 @@ function de_newevent(form: HTMLFormElement) {
         alert("Name required")
         return
     }
-    const tsStr = data.get("timestamp")
+    const tsStr = data.get("timestamp")?.toString()
+    if (!(tsStr)) throw new Error("timestamp is null")
+
     const aftertsStr = data.get("after")
     const beforetsStr = data.get("before")
     const timezoneData = data.get("timezone")
@@ -732,21 +736,17 @@ function de_newevent(form: HTMLFormElement) {
         ? timezoneData.toString()
         : Intl.DateTimeFormat().resolvedOptions().timeStyle
     ) || ""
-    //@ts-ignore
-    let ts = new Date(tsStr).getTime()
-    if (isNaN(ts)) {
-        ts = 0
-    }
-    //@ts-ignore
-    let afterts = new Date(aftertsStr).getTime()
-    if (isNaN(afterts)) {
-        afterts = 0
-    }
-    //@ts-ignore
-    let beforets = new Date(beforetsStr).getTime()
-    if (isNaN(beforets)) {
-        beforets = 0
-    }
+
+    let ts = tsStr
+        ? new Date(tsStr).getTime()
+        : 0
+    let afterts = aftertsStr
+        ? new Date(aftertsStr.toString()).getTime()
+        : 0
+    let beforets = beforetsStr
+        ? new Date(beforetsStr.toString()).getTime()
+        : 0
+
     const itemId = getIdFromDisplayElement(form)
     api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
         .then(res => res?.text())
@@ -977,9 +977,8 @@ function createRelationButtons(this: DisplayMode, elementParent: HTMLElement, re
             el = document.createElement("img")
             formatToName(child.info.Format).then(name => {
                 el.title = `${child.info.En_Title} (${typeToSymbol(child.info.Type)} on ${name})`
-            })
-            //@ts-ignore
-            el.src = fixThumbnailURL(meta.Thumbnail)
+            });
+            (el as HTMLImageElement).src = fixThumbnailURL(meta.Thumbnail)
         } else {
             el = document.createElement("button")
             el.innerText = child.info.En_Title
@@ -1525,7 +1524,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //even if the status != (Re)?Viewing,
     //we should still clear all progress bars
-    if(multipleProgressEl) multipleProgressEl.innerHTML = ""
+    if (multipleProgressEl) multipleProgressEl.innerHTML = ""
 
     if (multipleProgressEl && /(Re)?Viewing/.test(user.Status)) {
         //for each [P]x[/y] in userPos create a progress element
@@ -1538,16 +1537,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 .map(v => v.trim())
                 .map(v => v.match(/(\D)?(\d+)(?:\/(\d+))?/))
 
-        for(let part of parts) {
-            if(!part) continue
+        for (let part of parts) {
+            if (!part) continue
             let label = part[1]
 
             let max =
                 //if there's no label, and no total is given
                 //use the mediaDependant determined length
                 !label && part[3] === undefined
-                ? lengthInNumber
-                : (part[3] || "0") //part[3] could be empty string
+                    ? lengthInNumber
+                    : (part[3] || "0") //part[3] could be empty string
 
             let container = document.createElement("figure")
             container.style.position = "relative"
@@ -1565,7 +1564,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             let c = document.createElement("figcaption")
             c.style.position = "absolute"
             c.innerText = `${label || ""}${part[2]}`
-            if(parseInt(max)) {
+            if (parseInt(max)) {
                 c.innerText += `/${max}`
             }
 

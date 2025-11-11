@@ -8,7 +8,6 @@ class Mode {
         this.parent = parent instanceof win.HTMLElement || parent instanceof win.DocumentFragment
             ? parent
             : win.document.querySelector(parent) as HTMLElement
-        //@ts-ignore
         this.win = win || this.parent.ownerDocument.defaultView
         if (this.win === null) {
             throw new Error("default view (window) is null")
@@ -211,8 +210,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "calendar-output": CalendarMode,
         "tierlist-output": TierListMode,
     }
-    //@ts-ignore
-    const newMode = modes[name]
+    const newMode = modes[name as keyof typeof modes]
     try {
         let newModes = []
         for (const mode of openViewModes) {
@@ -223,8 +221,8 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
             }
         }
         openViewModes = newModes
-        const m = new newMode(null, win)
-        openViewModes.push(m)
+        const m = new newMode(undefined, win)
+        openViewModes.push(m as Mode)
         m.addList(items_getSelected())
     } catch (err) {
     }

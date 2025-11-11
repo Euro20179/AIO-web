@@ -1425,7 +1425,6 @@ class CalcVarTable {
             return new Str(str)
         }))
 
-        //@ts-ignore
         this.symbols.set("abs", new Func(n => {
             return new Num(Math.abs(n.toNum().jsValue))
         }))
@@ -2545,8 +2544,7 @@ class Interpreter {
 function makeSymbolsTableFromObj(obj: object): CalcVarTable {
     let symbols = new CalcVarTable()
     for (let name in obj) {
-        //@ts-ignore
-        let val = obj[name]
+        let val = obj[name as keyof typeof obj]
         let t = Type.from(val)
         if (symbols.get(name)) {
             name = `${name}2`

@@ -613,8 +613,7 @@ function typeToSymbol(type: string): string {
         "Unowned": "X",
     }
     if (type in conversion) {
-        //@ts-ignore
-        return conversion[type]
+        return conversion[type as keyof typeof conversion]
     }
     return type
 }

@@ -913,12 +913,19 @@ async function newEntryUI(form: HTMLFormElement) {
     }
 
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
-    //@ts-ignore
-    const parentId = form.querySelector("[name=\"parentId\"]").value
-    //@ts-ignore
-    const copyOfId = form.querySelector("[name=\"copyOf\"]").value
-    //@ts-ignore
-    const requires = form.querySelector("[name=\"requires\"]").value
+
+    let parentIdEl = form.querySelector("[name=\"parentId\"]")
+    if (!(parentIdEl !== null && "value" in parentIdEl)) throw new Error("name=parentId did not return an input kind element")
+    const parentId = parentIdEl.value
+
+    let copyOfIdEl = form.querySelector("[name=\"copyOf\"]")
+    if(!(copyOfIdEl !== null && "value" in copyOfIdEl)) throw new Error("name=copyOf did not return an input kind element")
+    const copyOfId = copyOfIdEl.value
+
+    let requiresEl = form.querySelector("[name=\"requires\"]")
+    if(!(requiresEl !== null && "value" in requiresEl)) throw new Error("name=requires did not return an input kind element")
+    const requires = copyOfIdEl.value
+
     if (parentId !== "0") {
         queryString += `&parentId=${parentId}`
     }
