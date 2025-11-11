@@ -158,6 +158,13 @@ class items_Entry {
     }
 }
 
+/**
+ * @description normalizes a metadata rating, returns 0 if there is no rating
+ */
+function items_getNormalizedRating(meta: MetadataEntry): number {
+    return (meta.Rating / meta.RatingMax * 100) || 0
+}
+
 function items_setCurrentLibrary(id: bigint) {
     _globalsNewUi.viewingLibrary = id
 }

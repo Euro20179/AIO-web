@@ -3,21 +3,45 @@ class TierListMode extends Mode {
 
     rows: Record<string, HTMLUListElement>
 
+    tierlistEl: HTMLElement
+
+    previousMode = ""
+
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#tierlist-output", win)
         this.win.document.getElementById("tierlist-output")?.classList.add("open")
 
         this.rows = {}
 
+        let temp = this.parent.querySelector("tier-list")
+
+        if (!(temp instanceof HTMLElement))
+            throw new Error("Could not find the tierlist output HTMLElement")
+
+        let modeSelector = this.parent.querySelector("#tierlist-mode")
+
+        if (modeSelector instanceof HTMLSelectElement) {
+            this.previousMode = modeSelector.value
+
+            modeSelector.onchange = () => {
+                let items = items_getSelected()
+                this.clearSelected()
+                this.addList(items)
+
+                this.previousMode = modeSelector.value
+            }
+        }
+
+        this.tierlistEl = temp
 
         const tierListStyles = settings_get("tierlist_styles")
-        
-        while(this.parent.childNodes.length) {
-            this.parent.firstChild?.remove()
+
+        while (this.tierlistEl.childNodes.length) {
+            this.tierlistEl.firstChild?.remove()
         }
 
         const style = document.createElement("style")
-        this.parent.append(style)
+        this.tierlistEl.append(style)
 
         for (let tier of settings_get("tiers")) {
             const ul = document.createElement("ul")
@@ -31,49 +55,96 @@ class TierListMode extends Mode {
             ul.append(label)
             ul.classList.add(`${tier[0]}-tier`)
             this.rows[tier[0]] = ul
-            this.parent.append(ul)
+            this.tierlistEl.append(ul)
         }
 
     }
 
+    _getMode(): "general" | "user" {
+        let modeSelector = this.parent.querySelector("#tierlist-mode")
+
+        if (!(modeSelector instanceof HTMLSelectElement))
+            throw new Error("mode selector could not be found")
+
+        let mode = modeSelector.value
+
+        if (!(mode === "general" || mode === "user"))
+            throw new Error("mode must be `general` or `user`")
+
+        return mode
+    }
+
+    _findInfo(id: bigint, mode: "general" | "user"): [number, string | false] {
+        let user = findUserEntryById(id)
+        let meta = findMetadataById(id)
+
+        let rating = (
+            mode === "general"
+                ? items_getNormalizedRating(meta)
+                : user.UserRating
+        ) || 0
+
+        let tier = settings_tier_from_rating(rating)
+
+        return [rating, tier]
+    }
+
     add(entry: InfoEntry): HTMLElement {
-        let rating = findUserEntryById(entry.ItemId)
         let thumb = fixThumbnailURL(findMetadataById(entry.ItemId).Thumbnail)
 
-        let tier = settings_tier_from_rating(rating.UserRating)
+        let mode = this._getMode()
+        let [rating, tier] = this._findInfo(entry.ItemId, mode)
 
         let li = document.createElement("li")
         let img = document.createElement("img")
         img.src = thumb
         img.alt = entry.En_Title || entry.Native_Title
-        img.title = `${rating.UserRating}`
+        img.title = `${img.alt} - ${rating}`
 
         li.id = `tier-item-${entry.ItemId}`
         li.append(img)
 
-        if (!(tier !== false)) throw new Error(`No tier for rating: ${rating.UserRating}`)
+        if (!(tier !== false)) throw new Error(`No tier for rating: ${rating}`)
 
         let ul = this.rows[tier]
 
         const els = ul.querySelectorAll("li")
 
-        if(els.length === 0) {
+
+        if (els.length === 0) {
             ul.append(li)
-        }
-        else
-        for(let el of els) {
-            let elRating = findUserEntryById(BigInt(el.id.split("-item-")[1])).UserRating
-            if(rating.UserRating < elRating) {
-                el.after(li)
+        } else {
+            for (let el of els) {
+                let elId = BigInt(el.id.split("-item-")[1])
+                let elRating
+
+                if (mode === "user") {
+                    elRating = findUserEntryById(elId).UserRating
+                } else {
+                    let meta = findMetadataById(elId)
+                    elRating = items_getNormalizedRating(meta)
+                }
+
+                if (rating < elRating) {
+                    //if rating < elRating, there may be another element that 
+                    //this new element is closer to in rating, so we can't finish
+                    //yet
+                    el.after(li)
+                } else {
+                    el.before(li)
+                    //if rating >= elRating, and because the <li>s are in order,
+                    //that means nothing else is greater than it so we can stop
+                    break
+                }
             }
         }
 
         return li
     }
 
-    sub(entry: InfoEntry) {
-        let rating = findUserEntryById(entry.ItemId)
-        let tier = settings_tier_from_rating(rating.UserRating)
+    sub(entry: InfoEntry, ratingMode: "general" | "user" | "" = "") {
+        let mode = ratingMode || this._getMode()
+        let [_, tier] = this._findInfo(entry.ItemId, mode)
 
         if (!(tier !== false))
             throw new Error("Trying to remove item with an unknown tier")
@@ -82,21 +153,22 @@ class TierListMode extends Mode {
 
         const li = ul.querySelector(`#tier-item-${entry.ItemId}`)
 
-        if (!(li !== null))
-            throw new Error(`Item: ${entry.ItemId} has not been added to the tier list`)
-
-        li.remove()
+        if (li !== null) {
+            li.remove()
+        } else {
+            console.warn(`${entry.En_Title}:${entry.ItemId} has not been added to the tierlist, not removing`)
+        }
     }
 
     addList(entry: InfoEntry[]) {
-        for(const item of entry) {
+        for (const item of entry) {
             this.add(item)
         }
     }
 
-    subList(entry: InfoEntry[]) {
-        for(const item of entry) {
-            this.sub(item)
+    subList(entry: InfoEntry[], ratingMode: "general" | "user" | "" = "") {
+        for (const item of entry) {
+            this.sub(item, ratingMode)
         }
     }
 
@@ -106,7 +178,7 @@ class TierListMode extends Mode {
     }
 
     clearSelected() {
-        for(let li of this.parent.querySelectorAll('li')) {
+        for (let li of this.tierlistEl.querySelectorAll('li')) {
             li.remove()
         }
     }
