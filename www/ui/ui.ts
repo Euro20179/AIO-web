@@ -36,7 +36,7 @@ function startupUI({
     statsOutput
 }: typeof components) {
 
-    for(let key in arguments[0]) {
+    for (let key in arguments[0]) {
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
 
@@ -64,7 +64,7 @@ function startupUI({
         throw new Error("sort by selector must be a select element")
     }
 
-    if(statsOutput) {
+    if (statsOutput) {
         statistics.push(new Statistic("results", false, () => getFilteredResultsUI().length))
         statistics.push(new Statistic("count", true, (_, mult) => 1 * mult))
         statistics.push(new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult))
@@ -100,7 +100,7 @@ function startupUI({
 
     userSelector?.addEventListener("change", function() {
         refreshInfo(getUidUI()).then(() => loadSearchUI())
-        if(components.recommenders)
+        if (components.recommenders)
             fillRecommendedListUI(components.recommenders, getUidUI())
     })
 
@@ -160,6 +160,18 @@ function setError(text: string) {
     } else {
         components.errorOut?.setAttribute("data-error", text)
     }
+}
+
+/**
+ * Reloads events for an item, updates that item
+ */
+async function reloadEventsUI(itemId: bigint) {
+    loadUserEvents(getUidUI())
+        .then(() => {
+            updateInfo2({
+                [String(itemId)]: items_getAllEntries()[String(itemId)]
+            })
+        })
 }
 
 async function refreshInfo(uid: number) {
@@ -238,7 +250,7 @@ function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let newArr = []
     const search = components.itemFilter?.value.toLowerCase()
 
-    if(typeof search !== 'string') {
+    if (typeof search !== 'string') {
         throw new Error("Could not get filtered search")
     }
 
@@ -487,7 +499,7 @@ function getElementUI<T extends typeof Element>(
     root: { querySelector(selector: string): Element | null } | null = null
 ): InstanceType<T> | null {
     let el = (root || currentDocument()).querySelector(selector)
-    if(!el || !(el instanceof (requiredType as T))) return null
+    if (!el || !(el instanceof (requiredType as T))) return null
     return el as InstanceType<T>
 }
 
@@ -553,7 +565,7 @@ function toggleModalUI(
     }
 ) {
     let dialog = getElementUI(`#${modalName}`, HTMLDialogElement, root)
-    if(!dialog) return
+    if (!dialog) return
 
     dialog.open
         ? dialog.close()
@@ -615,7 +627,7 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
  */
 function sortEntriesUI() {
     const sortby = components.sortBySelector?.value
-    if(!sortby) {
+    if (!sortby) {
         throw new Error("Could not get sort by")
     }
     let newEntries = sortEntries(items_getResults().map(v => v.info), sortby)
@@ -640,7 +652,7 @@ function getUidUI() {
  */
 function getSearchDataUI(): FormData {
     let form = components.searchForm
-    if(!form) throw new Error("No search form found")
+    if (!form) throw new Error("No search form found")
     let data = new FormData(form)
     return data
 }
@@ -651,11 +663,11 @@ function getSearchDataUI(): FormData {
  */
 function mkSearchUI(params: Record<string, string>) {
     let form = components.searchForm
-    if(!form) throw new Error("No search form found")
+    if (!form) throw new Error("No search form found")
 
     for (let param in params) {
         const inp = form.querySelector(`[name="${param}"]`)
-        if(!inp || !("value" in inp)) continue
+        if (!inp || !("value" in inp)) continue
         inp.value = params[param]
     }
     form.submit()
@@ -672,7 +684,7 @@ function mkSearchUI(params: Record<string, string>) {
  */
 async function loadSearchUI() {
     let form = components.searchForm
-    if(!form) throw new Error("No search form found")
+    if (!form) throw new Error("No search form found")
 
     let formData = new FormData(form)
 
@@ -873,6 +885,50 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 }
 
 /**
+ * Creates an event based on a form
+ * Side effects:
+ * - assuming the form is within a popover, hide it
+ * - reloads events
+ */
+function newEventUI(form: HTMLFormElement) {
+    const data = new FormData(form)
+    const name = data.get("name")
+    if (name == null) {
+        alert("Name required")
+        return
+    }
+    const tsStr = data.get("timestamp")?.toString()
+    if (!(tsStr)) throw new Error("timestamp is null")
+
+    const aftertsStr = data.get("after")
+    const beforetsStr = data.get("before")
+    const timezoneData = data.get("timezone")
+    const timezone = (timezoneData
+        ? timezoneData.toString()
+        : Intl.DateTimeFormat().resolvedOptions().timeStyle
+    ) || ""
+
+    let ts = tsStr
+        ? new Date(tsStr).getTime()
+        : 0
+    let afterts = aftertsStr
+        ? new Date(aftertsStr.toString()).getTime()
+        : 0
+    let beforets = beforetsStr
+        ? new Date(beforetsStr.toString()).getTime()
+        : 0
+
+    const itemId = getIdFromDisplayElement(form)
+    api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
+        .then(res => res?.text())
+        .then(() => {
+            reloadEventsUI(itemId)
+            form.parentElement?.hidePopover()
+        })
+        .catch(alert)
+}
+
+/**
  * Creates a new entry based on a form
  * Side effects:
  * - adds the new item to the global entries list
@@ -919,11 +975,11 @@ async function newEntryUI(form: HTMLFormElement) {
     const parentId = parentIdEl.value
 
     let copyOfIdEl = form.querySelector("[name=\"copyOf\"]")
-    if(!(copyOfIdEl !== null && "value" in copyOfIdEl)) throw new Error("name=copyOf did not return an input kind element")
+    if (!(copyOfIdEl !== null && "value" in copyOfIdEl)) throw new Error("name=copyOf did not return an input kind element")
     const copyOfId = copyOfIdEl.value
 
     let requiresEl = form.querySelector("[name=\"requires\"]")
-    if(!(requiresEl !== null && "value" in requiresEl)) throw new Error("name=requires did not return an input kind element")
+    if (!(requiresEl !== null && "value" in requiresEl)) throw new Error("name=requires did not return an input kind element")
     const requires = copyOfIdEl.value
 
     if (parentId !== "0") {
@@ -1425,7 +1481,7 @@ height: 100%;
         }
 
         const closePopout = getElementOrThrowUI("button.popout", HTMLElement, win.document.body)
-        if(closePopout) {
+        if (closePopout) {
             closePopout.onclick = () => {
                 win.close()
                 parent.classList.remove("none")
@@ -1502,32 +1558,32 @@ async function setPropUI<N extends keyof InfoEntry>(obj: InfoEntry, name: N, val
 async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N extends keyof T>(obj: T, name: N, value: any, actionDisplayName?: string): Promise<Response | null> {
     //dont update the actual object until we know we
     //successfully updated the object on the server, otherwise we have desync
-    const cpy = {...obj}
+    const cpy = { ...obj }
     cpy[name] = value
 
     const ty =
-        probablyMetaEntry(obj)?
+        probablyMetaEntry(obj) ?
             "meta"
-        : probablyUserItem(obj)?
-            "user"
-        :
-            "info"
+            : probablyUserItem(obj) ?
+                "user"
+                :
+                "info"
 
     const path =
-        ty === "meta"?
+        ty === "meta" ?
             "metadata/"
-        : ty === "user"?
-            "engagement/"
-        :
-            ""
+            : ty === "user" ?
+                "engagement/"
+                :
+                ""
     try {
         var res = await api_setItem(path, cpy, actionDisplayName)
-    }catch(err) {
+    } catch (err) {
         alert(`Failed to ${actionDisplayName}`)
         return null
     }
 
-    if(res?.status !== 200) {
+    if (res?.status !== 200) {
         alert(`Failed to ${actionDisplayName}, ${await res?.text()}`)
         return res
     }
@@ -1536,12 +1592,12 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
 
     updateInfo2({
         [String(obj.ItemId)]:
-            ty === "meta"?
+            ty === "meta" ?
                 { meta: obj as MetadataEntry }
-            : ty === "user"?
-                { user: obj as UserEntry }
-            :
-                { info: obj as InfoEntry }
+                : ty === "user" ?
+                    { user: obj as UserEntry }
+                    :
+                    { info: obj as InfoEntry }
     })
 
     return res

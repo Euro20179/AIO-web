@@ -143,7 +143,7 @@ class DisplayMode extends Mode {
 
             fillItemListingUI(items_getAllMeta())
             selectItemUI().then(itemid => {
-                if (!itemid) return
+                itemid ||= 0n
                 let info = findInfoEntryById(id)
 
                 info.Requires = itemid
@@ -618,7 +618,7 @@ class DisplayMode extends Mode {
                 .catch(console.error)
             api_registerEvent(item.ItemId, `rating-change - ${user?.UserRating} -> ${newRating}`, Date.now(), 0)
                 .then(() => {
-                    _reloadEvents(item.ItemId)
+                    reloadEventsUI(item.ItemId)
                 })
                 .catch(console.error)
         }),
@@ -863,44 +863,6 @@ function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
     root.innerHTML = html
 }
 
-function de_newevent(form: HTMLFormElement) {
-    const data = new FormData(form)
-    const name = data.get("name")
-    if (name == null) {
-        alert("Name required")
-        return
-    }
-    const tsStr = data.get("timestamp")?.toString()
-    if (!(tsStr)) throw new Error("timestamp is null")
-
-    const aftertsStr = data.get("after")
-    const beforetsStr = data.get("before")
-    const timezoneData = data.get("timezone")
-    const timezone = (timezoneData
-        ? timezoneData.toString()
-        : Intl.DateTimeFormat().resolvedOptions().timeStyle
-    ) || ""
-
-    let ts = tsStr
-        ? new Date(tsStr).getTime()
-        : 0
-    let afterts = aftertsStr
-        ? new Date(aftertsStr.toString()).getTime()
-        : 0
-    let beforets = beforetsStr
-        ? new Date(beforetsStr.toString()).getTime()
-        : 0
-
-    const itemId = getIdFromDisplayElement(form)
-    api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
-        .then(res => res?.text())
-        .then(() => {
-            _reloadEvents(itemId)
-            form.parentElement?.hidePopover()
-        })
-        .catch(alert)
-}
-
 function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
     let multiActionButton = shadowRoot.querySelector('[data-action="Begin+Pause+Resume"]')
@@ -1097,7 +1059,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
         html += `<tr>
                         <td>
                             <div class="grid column">
-                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && _reloadEvents(${event.ItemId}n))">🗑</button>
+                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
                                 ${name}
                             </div>
                         </td>
@@ -1283,8 +1245,11 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
                 data = String(data)
             }
 
-            if (elem.getAttribute("put-data-mode") === "html") {
+            const putDataMode = elem.getAttribute("put-data-mode")
+            if (putDataMode === "html") {
                 elem.innerHTML = String(data)
+            } else if(putDataMode === "value" && elem instanceof this.win.HTMLInputElement) {
+                elem.value = String(data)
             } else {
                 elem.textContent = String(data)
                 // elem.append(String(data))
@@ -1422,7 +1387,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     updateCostDisplay.call(this, el, item.ItemId)
 
     //Set the user's default timezone in the tz selector
-    if (tzEl && tzEl instanceof HTMLSelectElement) {
+    if (tzEl && tzEl instanceof this.win.HTMLSelectElement) {
         tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone
     }
 
@@ -2094,15 +2059,6 @@ async function deleteEventByEventId(eventId: number) {
     }
     alert("Successfully deleted event")
     return true
-}
-
-function _reloadEvents(itemId: bigint) {
-    loadUserEvents(getUidUI())
-        .then(() => {
-            updateInfo2({
-                [String(itemId)]: items_getAllEntries()[String(itemId)]
-            })
-        })
 }
 
 function deleteEventForItemId(itemId: bigint, ts: number, after: number, before: number) {
