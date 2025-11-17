@@ -68,6 +68,23 @@ class DisplayMode extends Mode {
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
         }),
+        setrequired: this.displayEntryAction(function(item){
+            let id = item.ItemId
+
+            fillItemListingUI(items_getAllMeta())
+            selectItemUI().then(itemid => {
+                if (!itemid) return
+                let info = findInfoEntryById(id)
+
+                info.Requires = itemid
+                api_setItem("", info, "update the requirement")
+                updateInfo2({
+                    [String(id)]: {
+                        info
+                    }
+                })
+            })
+        }),
         newcopy: this.displayEntryAction((item) => {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)

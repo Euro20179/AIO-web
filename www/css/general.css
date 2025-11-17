@@ -49,9 +49,9 @@
     }
 
     [role="button"]:focus {
-            outline: none;
-            border: 3px solid var(--green);
-            cursor: pointer;
+        outline: none;
+        border: 3px solid var(--green);
+        cursor: pointer;
     }
 
     select {
@@ -165,6 +165,10 @@
         cursor: help;
     }
 
+    .no-select {
+        user-select: none;
+    }
+
     .margin-center {
         margin: 0 auto;
     }
@@ -179,6 +183,11 @@
             outline: none;
             border: 3px solid var(--green);
         }
+    }
+
+    .styleless-button::before,
+    .styleless-button::after {
+        text-decoration: none;
     }
 
     .bad {

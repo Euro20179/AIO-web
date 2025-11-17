@@ -324,8 +324,11 @@
     }
 
     #required-section {
+
         &:has(#required-items:not(:empty)) {
             display: block;
+            float: left;
+            margin: 0;
         }
 
         &:has(#required-items:empty) {
@@ -407,7 +410,7 @@
     }
 
     #view-count::before {
-        content: "Viewed: "
+        content: "Viewed: ";
     }
 
     #view-count::after {
