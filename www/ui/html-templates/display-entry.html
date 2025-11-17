@@ -786,7 +786,12 @@
         <input id="location-link" placeholder="item location"
             oncontextmenu="if(event.ctrlKey) { open(this.value, '_blank'); } else {this.select()} event.preventDefault()">
         <div class="header-subtitle" id="header-subtitle">
-            <textarea id="style-editor" hidden rows="80" cols="80"></textarea>
+            <textarea
+                id="style-editor"
+                entry-action="save"
+                entry-action-trigger="change"
+                hidden rows="80" cols="80"
+            ></textarea>
         </div>
     </figure>
     <div>

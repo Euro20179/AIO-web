@@ -39,13 +39,47 @@ class DisplayMode extends Mode {
         this.clearSelected()
     }
 
+    /**
+     * Actions can be put onto elements with the entry-action attribute
+     * **this element** refers to the element that the action is on
+     * **current item** refers to the item that the
+         * &lt;display-entry&gt; element parent is displaying
+     */
     de_actions = { //{{{
+        /**
+         * Deletes the item
+         */
         delete: this.displayEntryAction(item => deleteEntryUI(item)),
+
+        /**
+         * Overwrites the metadata
+         */
         refresh: this.displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
+
+        /**
+         * Attempts to set the location
+         */
         fetchlocation: this.displayEntryAction((item) => _fetchLocation.call(this, item.ItemId)),
+
+        /**
+         * Saves changes to styles and the template
+         */
         save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
+
+        /**
+         * Deselects the current item
+         */
         close: this.displayEntryAction(item => mode_deselectItem(item)),
+
+        /**
+         * Creates a copy of the current item
+         */
         copythis: this.displayEntryAction(item => copyThis.call(this, item)),
+
+        /**
+         * Adds a child to the current object. The child that is added
+         * is the child with the id that is the value of this element
+         */
         addchild: this.displayEntryAction((item, _, target) => {
             if (!("value" in target)) {
                 throw new Error("add child button has no value")
@@ -61,6 +95,35 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
+        /**
+         * Lets the user select an item to be added as a child of
+         * the current item
+         */
+        selectnewchild: this.displayEntryAction(item => {
+            selectItemUI().then(id => {
+                if (!id) {
+                    alert("Could not set child")
+                    return
+                }
+                api_setParent(id, item.ItemId).then(() => {
+                    let info = findInfoEntryById(id)
+                    if (!info) {
+                        alert("could not find child id")
+                        return
+                    }
+                    info.ParentId = item.ItemId
+                    updateInfo2({
+                        [String(item.ItemId)]: { info: item },
+                        [String(id)]: { info }
+                    })
+                })
+            })
+        }),
+
+        /**
+         * Creates a new item with the parentId set to the current item
+         */
         newchild: this.displayEntryAction((item) => {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
@@ -68,7 +131,11 @@ class DisplayMode extends Mode {
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
         }),
-        setrequired: this.displayEntryAction(function(item){
+
+        /**
+         * Sets the requirement
+         */
+        setrequired: this.displayEntryAction(function(item) {
             let id = item.ItemId
 
             fillItemListingUI(items_getAllMeta())
@@ -85,6 +152,10 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
+        /**
+         * Creates a new item with copyOf set to the current item
+         */
         newcopy: this.displayEntryAction((item) => {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
@@ -92,6 +163,11 @@ class DisplayMode extends Mode {
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
         }),
+
+        /**
+         * Updates the custom styles with the value of this element
+         * **NOTE**: DOES NOT SAVE
+         */
         updatecustomstyles: this.displayEntryAction((item, root, target) => {
             const customStyles = root.getElementById("custom-styles")
             if (!(customStyles instanceof this.win.HTMLStyleElement)) {
@@ -103,15 +179,38 @@ class DisplayMode extends Mode {
             customStyles.innerText = String(target.value)
 
         }),
+
+        /**
+         * Updates the status of the current item with the value of this element
+         */
         updatestatus: this.displayEntryAction((item, _, target) => {
             if (!(target instanceof this.win.HTMLSelectElement)) return
 
             updateStatusUI(item.ItemId, target.value as UserStatus)
         }),
+
+        /**
+         * Updates the cost, and event list
+         *
+         * This is called togglerelationinclude because it's supposed to be
+         * called by the "include" checkboxes
+         */
         togglerelationinclude: this.displayEntryAction((item, root) => {
             updateCostDisplay.call(this, root, item.ItemId)
             updateEventsDisplay.call(this, root, item.ItemId)
         }),
+
+        /**
+         * Sets the current object table to the value of this element
+         * Value can be
+         * + user-extra
+         * + meta-datapoints
+         * + meta-media-dependant
+         * + aio-web
+         * + user
+         * + meta
+         * + entry
+         */
         setobjtable: this.displayEntryAction((item, root, target) => {
             if (!("value" in target)) {
                 throw new Error("set object table element has no value")
@@ -145,6 +244,11 @@ class DisplayMode extends Mode {
 
             }
         }),
+
+        /**
+         * Toggles the art style of the current item,
+         * the value of this element is used as the art style to toggle
+         */
         toggleartstyle: this.displayEntryAction((item, _, target) => {
             if (!("checked" in target)) return
 
@@ -164,12 +268,21 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
+        /**
+         * Sets the thumbnail of the current item to the value of this element
+         */
         setthumbnail: this.displayEntryAction((item, _, target) => {
             const fileUpload = target.getRootNode().getElementById("thumbnail-file-upload")
             if (!fileUpload || !("value" in fileUpload)) return
 
             fileUpload.click()
         }),
+
+        /**
+         * Toggles the digitization of the current item based on
+         * the checked state of this element
+         */
         setdigitization: this.displayEntryAction((item, _, target) => {
             if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
@@ -185,6 +298,11 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
+        /**
+         * Toggles a display item with id of the value of
+         * the elem-id attribute on this element
+         */
         toggle: this.displayEntryAction((item, root, elem) => {
             let id = elem.getAttribute("elem-id")
             if (!id) return
@@ -200,6 +318,10 @@ class DisplayMode extends Mode {
                 toShow.hidden = !toShow.hidden
             }
         }),
+
+        /**
+         * Sets the format of the current item to the value of this element
+         */
         setformat: this.displayEntryAction((item, _, target) => {
             if (!("value" in target)) return
             api_listFormats().then(formats => {
@@ -215,6 +337,10 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
+        /**
+         * Sets the type of the current item to the value of this element
+         */
         settype: this.displayEntryAction((item, _, target) => {
             if (!("value" in target)) return
             api_listTypes().then(types => {
@@ -230,7 +356,11 @@ class DisplayMode extends Mode {
                 })
             })
         }),
+
         //TODO: this function is a disaster, each edited object should probably get its own save function
+        /**
+         * Saves the current object table
+         */
         saveobject: this.displayEntryAction((item, root) => {
             const tbl = root.getElementById("display-info-object-tbl")
 
@@ -331,9 +461,22 @@ class DisplayMode extends Mode {
                 })
             }
         }),
+
+        /**
+         * Creates a new field in the current object table
+         * **NOTE**: fails if the current object table is one of:
+         * + user
+         * + meta
+         * + entry
+         */
         newobjectfield: this.displayEntryAction(async (item, root) => {
             const name = await promptUI("Field name")
             if (!name) return
+
+            const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
+
+            //These should not get arbitrary field names
+            if(["user", "meta", "entry"].includes(editedObject)) return
 
             const obj: any = getCurrentObjectInObjEditor(item.ItemId, root)
             if (name in obj) return
@@ -343,26 +486,10 @@ class DisplayMode extends Mode {
             const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
             updateObjectTbl(obj, objectTbl, false)
         }),
-        selectnewchild: this.displayEntryAction(item => {
-            selectItemUI().then(id => {
-                if (!id) {
-                    alert("Could not set child")
-                    return
-                }
-                api_setParent(id, item.ItemId).then(() => {
-                    let info = findInfoEntryById(id)
-                    if (!info) {
-                        alert("could not find child id")
-                        return
-                    }
-                    info.ParentId = item.ItemId
-                    updateInfo2({
-                        [String(item.ItemId)]: { info: item },
-                        [String(id)]: { info }
-                    })
-                })
-            })
-        }),
+
+        /**
+         * Toggles the hiddenness of the #style-editor element
+         */
         editstyles: this.displayEntryAction((item, root, elem) => {
             const styleEditor = root.getElementById("style-editor")
             if (!styleEditor) return
@@ -370,17 +497,22 @@ class DisplayMode extends Mode {
                 styleEditor.value = getUserExtra(findUserEntryById(item.ItemId), "styles")
             }
             styleEditor.hidden = !styleEditor.hidden
-            styleEditor.onchange = util_debounce(() => {
-                this.de_actions["save"](elem)
-                alert("saved styles")
-            }, 3000)
         }),
+
+        /**
+         * Toggles the hiddenness of the #template-editor element
+         */
         edittemplate: this.displayEntryAction((item, root, elem) => {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor) return
 
             templEditor.hidden = !templEditor.hidden
         }),
+
+        /**
+         * Opens a preview window to display what the custom template will
+         * look like
+         */
         previewtemplate: this.displayEntryAction(function(item, root) {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor || !(templEditor instanceof this.win.HTMLTextAreaElement)) return
@@ -402,6 +534,10 @@ class DisplayMode extends Mode {
                 preview.self.mode_selectItem(item, false)
             }
         }),
+
+        /**
+         * Copy user info to another item
+         */
         copyto: this.displayEntryAction(async (item) => {
             let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
             if (id === null) return
@@ -411,6 +547,10 @@ class DisplayMode extends Mode {
                 .then(res => res?.text())
                 .then(console.log)
         }),
+
+        /**
+         * Asks the user to set the view count of the current item
+         */
         setviewcount: this.displayEntryAction(async (item) => {
             let count = await promptNumber("New view count", 'Not a number, view count')
             if (count === null) return
@@ -433,6 +573,10 @@ class DisplayMode extends Mode {
                 })
                 .catch(console.error)
         }),
+
+        /**
+         * Asks the user to set the current position of the current item
+         */
         setprogress: this.displayEntryAction(async (item, root) => {
             let newEp = await promptUI("Current position")
             if (!newEp) return
@@ -444,6 +588,10 @@ class DisplayMode extends Mode {
                 [String(item.ItemId)]: { user }
             })
         }),
+
+        /**
+         * Asks teh user to set the rating of the current item
+         */
         setrating: this.displayEntryAction(async (item) => {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
