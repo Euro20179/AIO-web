@@ -695,39 +695,7 @@ class DisplayMode extends Mode {
         }
     }
 
-    putSelectedInCollection() {
-        const selected = items_getSelected()
-        promptUI("Id of collection").then(collectionName => {
-            if (!collectionName) return
-
-            let waiting = []
-            for (let item of selected) {
-                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
-            }
-            Promise.all(waiting).then(res => {
-                for (let r of res) {
-                    console.log(r?.status)
-                }
-            })
-        })
-    }
-
-    addTagsToSelected() {
-        promptUI("tags (, seperated)").then(tags => {
-            if (!tags) return
-            const tagsList = tags.split(",")
-            //FIXME: tags do not update immediately
-            for (let item of items_getSelected()) {
-                item.Tags = item.Tags.concat(tagsList)
-                api_addEntryTags(item.ItemId, tagsList)
-            }
-        })
-    }
-
     put(html: string | HTMLElement | ShadowRoot) {
-        // if (typeof html === 'string') {
-        //     return
-        // }
         this.parent.append(html)
     }
 

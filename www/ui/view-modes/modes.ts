@@ -23,8 +23,6 @@ class Mode {
     clearSelected(): any { }
     chwin?(win: Window): any { }
     refresh?(id: bigint): any { }
-    putSelectedInCollection?(): any { }
-    addTagsToSelected?(): any { }
     put?(html: string | HTMLElement | ShadowRoot): any { }
 }
 

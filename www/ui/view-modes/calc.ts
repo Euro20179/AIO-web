@@ -69,32 +69,6 @@ class CalcMode extends Mode {
         }
     }
 
-    putSelectedInCollection() {
-        promptUI("Id of collection").then(collectionName => {
-            if (!collectionName) return
-
-            let waiting = []
-            for (let item of this._getValidEntries()) {
-                waiting.push(api_setParent(item.ItemId, BigInt(collectionName)))
-            }
-            Promise.all(waiting).then(res => {
-                for (let r of res) {
-                    console.log(r?.status)
-                }
-            })
-        })
-    }
-
-    addTagsToSelected() {
-        promptUI("tags (, seperated)").then(tags => {
-            if (!tags) return
-            const tagsList = tags.split(",")
-            for (let item of this._getValidEntries()) {
-                api_addEntryTags(item.ItemId, tagsList)
-            }
-        })
-    }
-
     chwin(win: Window & typeof globalThis) {
         this.win.close()
         this.win = win
