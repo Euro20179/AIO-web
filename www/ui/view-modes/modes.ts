@@ -174,6 +174,8 @@ const selectItemList = mode_selectItemList
 function mode_toggleItem(item: InfoEntry, updateStats: boolean = true) {
     if (items_getSelected().find(a => a.ItemId === item.ItemId)) {
         mode_deselectItem(item, updateStats)
+        //by definition we are no longer viewing everything
+        setViewingAllUI(false)
     } else {
         mode_selectItem(item, updateStats)
     }

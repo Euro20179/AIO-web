@@ -1550,3 +1550,9 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
 function isViewingAllUI() {
     return components.viewAllElem?.checked
 }
+
+function setViewingAllUI(enabled: boolean) {
+    if (!(components.viewAllElem instanceof HTMLInputElement))
+        throw new Error("If there is a viewAll element it is not an <input>")
+    components.viewAllElem.checked = enabled
+}

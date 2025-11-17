@@ -2,6 +2,9 @@ class DisplayMode extends Mode {
     NAME = "entry-output"
 
     displayQueue: InfoEntry[]
+
+    adding: boolean = false
+
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#entry-output", win)
         this.win.document.getElementById("entry-output")?.classList.add("open")
@@ -662,8 +665,13 @@ class DisplayMode extends Mode {
     }
 
     addList(entry: InfoEntry[]) {
+        this.adding = true;
         (async () => {
-            for (let i = 0; i < entry.length; i++) {
+            //We need to keep track of whether or not we're adding so that
+            //it can be canceled
+            //such as in the case when we are still adding, but mode_clearItems()
+            //is called
+            for (let i = 0; i < entry.length && this.adding; i++) {
                 if ("scheduler" in window && i % 20 === 0 && i !== 0) {
                     //@ts-ignore
                     await window.scheduler.yield()
@@ -673,6 +681,8 @@ class DisplayMode extends Mode {
                     renderDisplayItem.call(this, entry[i].ItemId)
                 }
             }
+
+            this.adding = false
         })()
     }
 
@@ -723,6 +733,7 @@ class DisplayMode extends Mode {
 
     clearSelected() {
         this.displayQueue.length = 0
+        this.adding = false
         // displayEntryIntersected.clear()
         for (let child of this.parent.querySelectorAll("display-entry")) {
             const itemId = child.getAttribute("data-item-id")

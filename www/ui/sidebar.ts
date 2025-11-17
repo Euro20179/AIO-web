@@ -150,6 +150,8 @@ function changeSidebarItemData(id: bigint, el: HTMLElement) {
 function sidebarEntryOpenOne(item: InfoEntry) {
     mode_clearItems()
     mode_selectItem(item)
+
+    setViewingAllUI(false)
 }
 
 /**
