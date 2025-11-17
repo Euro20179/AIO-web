@@ -479,7 +479,7 @@ class DisplayMode extends Mode {
             const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
             //These should not get arbitrary field names
-            if(["user", "meta", "entry"].includes(editedObject)) return
+            if (["user", "meta", "entry"].includes(editedObject)) return
 
             const obj: any = getCurrentObjectInObjEditor(item.ItemId, root)
             if (name in obj) return
@@ -1248,7 +1248,7 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
             const putDataMode = elem.getAttribute("put-data-mode")
             if (putDataMode === "html") {
                 elem.innerHTML = String(data)
-            } else if(putDataMode === "value" && elem instanceof this.win.HTMLInputElement) {
+            } else if (putDataMode === "value" && elem instanceof this.win.HTMLInputElement) {
                 elem.value = String(data)
             } else {
                 elem.textContent = String(data)
@@ -1351,8 +1351,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
 
-    updateBasicDisplayEntryContents.call(this, item, user, meta, el)
-
     const displayEntryTitle = el.getElementById("main-title")
     const displayEntryNativeTitle = el.getElementById("official-native-title")
     const imgEl = el.getElementById("thumbnail")
@@ -1375,6 +1373,39 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const genresRoot = el.getElementById("genres")
     const tagsRoot = el.getElementById("tags")
     const requiredItemsEl = el.getElementById("required-items")
+    const itemInteractionsMenuEl = el.getElementById("item-interaction-menu")
+
+
+    //item item interaction menu
+    if (itemInteractionsMenuEl instanceof this.win.HTMLElement) {
+        const buttons = settings_get("de_item_interactions")
+
+        let btns = []
+
+        for (let btnCls in buttons) {
+            let btnData = buttons[btnCls as keyof typeof buttons]
+            const btn = document.createElement("button")
+            btn.innerText = btnData.text
+
+            if ("attributes" in btnData) {
+                for (let attr in btnData.attributes) {
+                    btn.setAttribute(attr, btnData.attributes[attr as keyof typeof btnData.attributes])
+                }
+            }
+
+            if("title" in btnData) {
+                btn.title = btnData.title
+            }
+
+            if("action" in btnData) {
+                btn.setAttribute("entry-action", btnData.action)
+            }
+
+            btns.push(btn)
+        }
+
+        itemInteractionsMenuEl.replaceChildren(...btns)
+    }
 
     //object editor table
     const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
@@ -1720,6 +1751,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Events
     updateEventsDisplay.call(this, el, user.ItemId)
+
+    //update this last because some legacy elements get filled with new elements
+    //that rely on stuff like entry-action
+    updateBasicDisplayEntryContents.call(this, item, user, meta, el)
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {

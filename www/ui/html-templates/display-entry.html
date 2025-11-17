@@ -613,14 +613,28 @@
     <option value="Zulu">Zulu</option>
 </datalist>
 
+<dialog id="template-editor-container" style="font-size: 1rem;">
+    <h2 style="font-size: revert;" class="center">Template editor</h2>
+    <div class="flex j-center">
+        <button entry-action="save">💾︎</button>
+        <button entry-action="previewtemplate" title="preview the template">👁</button>
+    </div>
+    <textarea id="template-editor" style="width: initial; height: initial;" rows="30" cols="80"></textarea>
+</dialog>
+
+<dialog id="template-preview" style="font-size: 1rem; width: 80vw;"></dialog>
+
+
 <dialog id="new-event-form" popover>
     <button onclick="closeModalUI('new-event-form', this.getRootNode())"
         style="position: absolute; top: 0; right: 0; margin: var(--small-gap);">X</button>
+
     <form action="javascript:void(0)" onsubmit="newEventUI(this)">
         <label for="name">Name: <input id="name" name="name" required></label>
         <p>
             Not all time slots are required. Exact times are also not required.
         </p>
+
         <div class="grid column">
             <div class="flex column" style="align-items: center;">
                 <label for="after-timestamp">
@@ -628,21 +642,26 @@
                 </label>
                 <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
             </div>
+
             <div class="flex column" style="align-items: center;">
                 <label for="timestamp">
                     On:
                 </label>
                 <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
             </div>
+
             <div class="flex column" style="align-items: center;">
                 <label for="before-timestamp">
                     Before:
                 </label>
                 <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
             </div>
+
             <input name="timezone" list="tz-selector">
         </div>
+
         <br>
+
         <div class="flex j-center">
             <button>Add</button>
         </div>
@@ -678,18 +697,14 @@
     </form>
     <p>
         A search can be made by title or by id.
-    </p>
     <p>
         the id is different depending on which provider is chosen.
-    </p>
     <p>
         the id that should be used is the id for that provider. For example, the id for steam should be the appid of the
         steam game you want.
-    </p>
     <p>
         the id MUST be an int, (I hope to fix this later), as a consequence the id for omdb is the imdb id with the tt
         prefix removed.
-    </p>
 </dialog>
 
 <dialog id="identify-items" popover>
@@ -720,6 +735,7 @@
         </tr>
     </table>
 </dialog>
+
 <div class="root" id="root">
     <div id="menu-bar">
         <menu aria-label="item type and format" class="flex" style="margin: 0; padding: 0;">
@@ -749,19 +765,12 @@
                 <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
             </div>
         </menu>
+
         <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
-            <button class="close" entry-action="close" title="remove item from inspection area">X</button>
-            <button class="identify" onclick="openModalUI('item-identification-form', this.getRootNode())"
-                title="identify item">🔍︎</button>
-            <button class="refresh" entry-action="refresh" title="refresh metadata">🗘</button>
-            <button id="fetch-location" entry-action="fetchlocation" title="find location of this item">📍︎</button>
-            <button onclick="openModalUI('display-info-object-editor-popup', this.getRootNode())">✏</button>
-            <button class="edit-styles" entry-action="editstyles" title="edit item's stylesheet">🖌</button>
-            <button class="edit-template" entry-action="toggle" elem-id="template-editor-container"
-                title="edit item's html template">&lt;&gt;</button>
-            <button class="delete" entry-action="delete" title="permanently delete item">🗑</button>
+            <!-- this gets filled with de_item_interaction settings -->
         </menu>
     </div>
+
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
@@ -800,92 +809,41 @@
     </figure>
     <div>
         <div id="misc-info" class="flex row wrap j-center">
-            <div id="cost-calculation-modifiers" class="flex row j-center">
-                <a href="/usage/index.html#include" class="question">include</a>
-                <label for="include-self-in-cost"><input type="checkbox" id="include-self-in-cost" checked>
-                    Self</label>
-                <label for="include-children-in-cost"><input type="checkbox" id="include-children-in-cost">
-                    Children</label>
-                <label for="include-copies-in-cost"><input type="checkbox" id="include-copies-in-cost">
-                    Copies</label>
-                <label for="include-recusively-in-cost"><input type="checkbox" id="include-recusively-in-cost">
-                    Recursive</label>
-            </div>
+            <de-cost-calculation-modifiers>
+            </de-cost-calculation-modifiers>
+
             <div class="tables flex column" id="event-table-area"
                 style="flex-grow: 1; justify-content: center; display: flow-root; align-self: center;">
                 <table class="user-actions" id="user-actions"></table>
                 <button id="new-event-button" onclick="openModalUI('new-event-form', this.getRootNode())">New
                     Event</button>
             </div>
+
             <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
                 <button id="view-count" class="view-count center styleless-button" style="margin-top: 0; width: 100%; display: block;" entry-action="setviewcount"
                     put-data="ViewCount"></button>
+
                 <figure class="entry-progress">
                     <div class="viewing relative">
                         <div id="multiple-progress">
                         </div>
-                        <!-- <progress entry-action="setprogress" id="entry-progressbar" class="entry-progress" min="0" -->
-                        <!--     value="0"></progress> -->
-                        <!-- <figcaption id="entry-progressbar-position-label"></figcaption> -->
                     </div>
                 </figure>
-                <menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
-                    <div class="flex">
-                        <button data-action="Plan" class="action" title="plan">🗓</button>
-                        <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
-                        <button data-action="Wait" class="action" title="wait">⌚︎</button>
-                    </div>
-                    <div class="flex">
-                        <button data-action="Finish" class="action" title="finish">🏁</button>
-                        <button data-action="Drop" class="action" title="drop">⏹</button>
-                        <select id="status-selector">
-                            <option value="">No status</option>
-                            <option value="Planned">Planned</option>
-                            <option value="Viewing">Viewing</option>
-                            <option value="ReViewing">ReViewing</option>
-                            <option value="Paused">Paused</option>
-                            <option value="Waiting">Waiting</option>
-                            <option value="Finished">Finished</option>
-                            <option value="Dropped">Dropped</option>
-                        </select>
-                    </div>
-                </menu>
+
+                <de-status-menu></de-status-menu>
             </div>
         </div>
     </div>
 
-    <dialog id="template-editor-container" style="font-size: 1rem;">
-        <h2 style="font-size: revert;" class="center">Template editor</h2>
-        <div class="flex j-center">
-            <button entry-action="save">💾︎</button>
-            <button entry-action="previewtemplate" title="preview the template">👁</button>
-        </div>
-        <textarea id="template-editor" style="width: initial; height: initial;" rows="30" cols="80"></textarea>
-    </dialog>
-    <dialog id="template-preview" style="font-size: 1rem; width: 80vw;"></dialog>
-
-
-
     <!-- <div class="descriptors" id="descriptors"> -->
     <section>
         <hr>
-        <button class="popout"
-            style="width: 35px; aspect-ratio: 1; margin: 0 var(--small-gap) 0 0; float: right;">↗</button>
-        <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())"
-            style="float: left; width: 35px; aspect-ratio: 1 / 1; margin: 0 0 var(--small-gap) var(--small-gap);">✏</button>
-        <h4 class="center">Notes</h4>
-        <article class="notes" id="notes" put-data="Notes"></article>
-        <div style="text-align: center; display: flex; justify-content: center; margin: var(--small-gap) 0;">
-            <button id="create-tag">+</button>
-            <div class="tags" id="tags"></div>
-        </div>
+        <de-notes></de-notes>
     </section>
+
     <section>
         <hr>
-        <button class="popout" style="float: right; margin: var(--small-gap) var(--small-gap) 0 0;">↗</button>
-        <h4 class="center">Description</h4>
-        <article class="description" id="description" put-data="Description" put-data-mode="html"></article>
-        <div id="genres" class="flex wrap"></div>
+        <de-description></de-description>
     </section>
     <!-- </div> -->
     <!-- <div id="relationship-display"> -->
@@ -897,7 +855,9 @@
                 <img id="required-item" src>
             </div>
         </section>
+
         <hr>
+
         <section class="descendants" id="descendants-section">
             <div>
                 <h4 class="center">Children</h4>
@@ -907,7 +867,9 @@
             <div id="descendants">
             </div>
         </section>
+
         <hr>
+
         <section class="copies" id="copies-section">
             <div>
                 <h4 class="center">Copies</h4>

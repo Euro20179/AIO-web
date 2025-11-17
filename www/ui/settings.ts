@@ -65,8 +65,66 @@ background: var(--red)
          * 12: ""
          */
     } as Record<number, string>,
+
     location_generator: "" as `${string}{}${string}` | ((info: InfoEntry) => string),
-    enable_unsafe: ENABLE_UNSAFE
+
+    enable_unsafe: ENABLE_UNSAFE,
+
+    de_item_interactions: {
+        close:  {
+            text: "X",
+            action: "close",
+            title: "remove item from inspection area"
+        },
+
+        identify: {
+            text: "🔍︎",
+            title: "identify item",
+            attributes: {
+                onclick: "openModalUI('item-identification-form', this.getRootNode())"
+            }
+        },
+
+        refresh: {
+            action: "refresh",
+            title: "refresh metadata",
+            text: "🗘",
+        },
+
+        ['fetch-location']: {
+            action: "fetchlocation",
+            title: "find location",
+            text: "📍︎"
+        },
+
+        ['toggle-object-editor']: {
+            text: "✏",
+            attributes: {
+                onclick: "openModalUI('display-info-object-editor-popup', this.getRootNode())"
+            }
+        },
+
+        ['edit-styles']: {
+            action: "editstyles",
+            title: "edit item's stylesheet",
+            text: "🖌"
+        },
+
+        ['edit-template']: {
+            action: "toggle",
+            title: "edit item's html template",
+            text: "<>",
+            attributes: {
+                ['elem-id']: "template-editor-container"
+            }
+        },
+
+        ['delete']: {
+            action: "delete",
+            title: "permanently delete item",
+            text: "🗑"
+        }
+    },
 } as const
 
 type Settings = typeof settings

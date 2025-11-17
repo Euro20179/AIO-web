@@ -32,6 +32,9 @@
             name="value"></textarea>
     </form>
 </body>
+<script src="/js/api.js"></script>
+<script src="/ui/ui.js"></script>
+
 <script>
 
     const urlData = new URLSearchParams(document.location.search)
@@ -49,7 +52,7 @@
     }
     function done(form) {
         const data = new FormData(form)
-        fetch(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}`)
+        authorizedRequest(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}`)
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
 </script>

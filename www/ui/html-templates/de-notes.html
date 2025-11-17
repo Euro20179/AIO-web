@@ -1,0 +1,31 @@
+<button class="popout"
+    style="
+        width: 35px;
+        aspect-ratio: 1;
+        margin: 0 var(--small-gap) 0 0;
+        float: right;"
+>
+    ↗
+</button>
+
+<button onclick="openModalUI('notes-edit-dialog', this.getRootNode())"
+    style="
+        float: left;
+         width: 35px;
+         aspect-ratio: 1 / 1;
+         margin: 0 0 var(--small-gap) var(--small-gap);"
+>✏</button>
+
+<h4 class="center">Notes</h4>
+
+<article class="notes" id="notes" put-data="Notes"></article>
+
+<div style="
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    margin: var(--small-gap) 0;
+">
+    <button id="create-tag">+</button>
+    <div class="tags" id="tags"></div>
+</div>

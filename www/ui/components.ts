@@ -86,8 +86,36 @@ customElements.define("gallery-entry", class extends HTMLElement {
         super()
         let template = document.getElementById("gallery-entry") as HTMLTemplateElement
         let content = template.content.cloneNode(true)
-        let root = this.attachShadow({mode: "open"})
+        let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
         this.root = root
     }
 })
+
+function _registerElement(name: string) {
+    customElements.define(name, class extends HTMLElement {
+        constructor() {
+            super()
+
+            this.style.display = "contents"
+        }
+
+        connectedCallback() {
+            let templ = document.getElementById(name)
+            if (!(templ instanceof HTMLTemplateElement))
+                throw new Error(`#${name} is not a template`)
+            let content = templ.content.cloneNode(true)
+            console.log(content)
+            this.replaceChildren(content)
+        }
+    })
+}
+
+for (const name of [
+    "de-status-menu",
+    "de-cost-calculation-modifiers",
+    "de-notes",
+    "de-description"
+]) {
+    _registerElement(name)
+}
