@@ -895,7 +895,7 @@ function openEventFormUI(itemid: string) {
     if (!modal) return
 
     const form = modal.querySelector("form")
-    if(!form) return
+    if (!form) return
 
     const itemidEl = getElementOrThrowUI('[name="itemid"]', HTMLInputElement, form)
     itemidEl.value = itemid
@@ -936,25 +936,47 @@ function newEventUI(form: HTMLFormElement) {
         : Intl.DateTimeFormat().resolvedOptions().timeZone
     ) || ""
 
-    //NOTE:
-    //even within the same location eg America/Los_Angeles
-    //the date may need to convert timezones (eg: PST -> PDT)
-    //this may lead to 1 hours differences if the user inputs an old date
-    //which is correct because we're converting from the current timezone
-    //to the one used on that old date
-    let offset = Intl.DateTimeFormat("en", {
-        timeZone: timezone,
-        timeZoneName: "longOffset"
-    }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
+    let tsOffset: string, beforeOffset: string, afterOffset: string
+    //calculate an offset for each time
+    //because, depending on daylight savings
+    //the offset can be different depending on time of year!
+    if ("Temporal" in window) {
+        let t
+        if (tsStr) {
+            t = Temporal.ZonedDateTime.from(tsStr + `[${timezone}]`)
+            tsOffset = t.offset
+        }
+        if (beforetsStr) {
+            t = Temporal.ZonedDateTime.from(beforetsStr + `[${timezone}]`)
+            beforeOffset = t.offset
+        }
+        if (aftertsStr) {
+            t = Temporal.ZonedDateTime.from(aftertsStr + `[${timezone}]`)
+            afterOffset = t.offset
+        }
+    } else {
+        //NOTE:
+        //even within the same location eg America/Los_Angeles
+        //the date may need to convert timezones (eg: PST -> PDT)
+        //this may lead to 1 hours differences if the user inputs an old date
+        //which is correct because we're converting from the current timezone
+        //to the one used on that old date
+        //
+        //Users should migrate to a browser that uses real dates (Temporal)
+        afterOffset = beforeOffset = tsOffset = Intl.DateTimeFormat("en", {
+            timeZone: timezone,
+            timeZoneName: "longOffset"
+        }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
+    }
 
     let ts = tsStr
-        ? _utcDate(new Date(tsStr + offset))
+        ? _utcDate(new Date(tsStr + tsOffset))
         : 0
     let afterts = aftertsStr
-        ? _utcDate(new Date(aftertsStr.toString() + offset))
+        ? _utcDate(new Date(aftertsStr.toString() + afterOffset))
         : 0
     let beforets = beforetsStr
-        ? _utcDate(new Date(beforetsStr.toString() + offset))
+        ? _utcDate(new Date(beforetsStr.toString() + beforeOffset))
         : 0
 
     const itemidvalue = data.get("itemid")?.toString()
