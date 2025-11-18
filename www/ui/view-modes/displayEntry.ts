@@ -1029,19 +1029,13 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, recursive)
         .sort(items_compareEventTiming).reverse()
 
-    if (!eventsToLookAt.length) {
-        //there are no events
-        eventsTbl.innerHTML = ""
-        return
-    }
-
     let html = `
             <thead>
                 <tr>
                     <!-- this nonsense is so that the title lines up with the events -->
                     <th>
                         <div class="grid column">
-                            <button onclick="openModalUI('new-event-form', this.getRootNode())">➕︎</button><span style="text-align: center">Event</span>
+                            <button onclick="openEventFormUI('${itemId}')">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
                     <th>Time</th>
@@ -2094,25 +2088,4 @@ async function deleteEventByEventId(eventId: number) {
     }
     alert("Successfully deleted event")
     return true
-}
-
-function deleteEventForItemId(itemId: bigint, ts: number, after: number, before: number) {
-    if (!confirm("Are you sure you would like to delete this event")) {
-        return
-    }
-    api_deleteEvent(itemId, ts, after, before)
-        .then(res => res?.text())
-        .then((text) =>
-            loadUserEvents(getUidUI())
-                .then(() => {
-                    updateInfo2({
-                        [String(itemId)]: items_getAllEntries()[String(itemId)]
-                    })
-                })
-        )
-        .catch(alert)
-}
-
-function deleteEvent(el: HTMLElement, ts: number, after: number, before: number) {
-    deleteEventForItemId(getIdFromDisplayElement(el), ts, after, before)
 }

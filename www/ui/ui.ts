@@ -535,8 +535,10 @@ function openModalUI(
     root?: {
         querySelector(query: string): HTMLElement | null
     }
-) {
-    getElementUI(`#${modalName}`, HTMLDialogElement, root)?.showModal()
+): HTMLDialogElement | null {
+    const modal = getElementUI(`#${modalName}`, HTMLDialogElement, root)
+    modal?.showModal()
+    return modal
 }
 
 /**
@@ -885,6 +887,21 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 }
 
 /**
+ * Opens the new-event-form dialog fills the itemid input element with {itemid}
+ * @param {string} itemid the item id to add the event to
+ */
+function openEventFormUI(itemid: string) {
+    const modal = openModalUI("new-event-form")
+    if (!modal) return
+
+    const form = modal.querySelector("form")
+    if(!form) return
+
+    const itemidEl = getElementOrThrowUI('[name="itemid"]', HTMLInputElement, form)
+    itemidEl.value = itemid
+}
+
+/**
  * Creates an event based on a form
  * Side effects:
  * - assuming the form is within a popover, hide it
@@ -918,7 +935,11 @@ function newEventUI(form: HTMLFormElement) {
         ? new Date(beforetsStr.toString()).getTime()
         : 0
 
-    const itemId = getIdFromDisplayElement(form)
+    const itemidvalue = data.get("itemid")?.toString()
+    if (!(itemidvalue)) throw new Error("No itemid from new event form")
+
+    const itemId = BigInt(itemidvalue)
+
     api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
         .then(res => res?.text())
         .then(() => {

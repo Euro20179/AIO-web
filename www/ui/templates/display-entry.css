@@ -179,15 +179,6 @@
         content: "$"
     }
 
-    #new-event-button {
-        align-self: center;
-        width: 100%;
-    }
-
-    /*if the table has events, we no longer need the new event button*/
-    #user-actions:has(*)+#new-event-button {
-        display: none;
-    }
 
     #user-actions {
         width: 100%;

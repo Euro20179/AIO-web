@@ -105,7 +105,6 @@ function _registerElement(name: string) {
             if (!(templ instanceof HTMLTemplateElement))
                 throw new Error(`#${name} is not a template`)
             let content = templ.content.cloneNode(true)
-            console.log(content)
             this.replaceChildren(content)
         }
     })
