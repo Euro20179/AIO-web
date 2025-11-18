@@ -1755,6 +1755,22 @@ function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: b
     return open(`/ui/display.html?item-id=${itemId}`, target, popup ? "popup=true" : undefined)
 }
 
+function displayEntryEditStyles(el: HTMLElement) {
+    let root = el.getRootNode() as ShadowRoot
+    const styleEditor = root.getElementById("style-editor")
+    if (!styleEditor) return
+
+    styleEditor.hidden = !styleEditor.hidden
+}
+
+function displayEntryEditTemplate(el: HTMLElement) {
+    let root = el.getRootNode() as ShadowRoot
+    const templEditor = root.getElementById("template-editor")
+    if (!templEditor) return
+
+    templEditor.hidden = !templEditor.hidden
+}
+
 function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string): HTMLElement {
     let el = document.createElement("display-entry")
     let root = el.shadowRoot
@@ -1776,6 +1792,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         //@ts-ignore
         template = self.GLOBAL_TEMPLATE[String(itemId)]
     }
+
 
     if (template || ((template = getUserExtra(user, "template")?.trim()))) {
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
