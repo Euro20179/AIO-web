@@ -901,6 +901,18 @@ function openEventFormUI(itemid: string) {
     itemidEl.value = itemid
 }
 
+function _utcDate(date: Date) {
+    return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds(),
+        date.getUTCMilliseconds(),
+    )
+}
+
 /**
  * Creates an event based on a form
  * Side effects:
@@ -921,17 +933,28 @@ function newEventUI(form: HTMLFormElement) {
     const timezoneData = data.get("timezone")
     const timezone = (timezoneData
         ? timezoneData.toString()
-        : Intl.DateTimeFormat().resolvedOptions().timeStyle
+        : Intl.DateTimeFormat().resolvedOptions().timeZone
     ) || ""
 
+    //NOTE:
+    //even within the same location eg America/Los_Angeles
+    //the date may need to convert timezones (eg: PST -> PDT)
+    //this may lead to 1 hours differences if the user inputs an old date
+    //which is correct because we're converting from the current timezone
+    //to the one used on that old date
+    let offset = Intl.DateTimeFormat("en", {
+        timeZone: timezone,
+        timeZoneName: "longOffset"
+    }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
+
     let ts = tsStr
-        ? new Date(tsStr).getTime()
+        ? _utcDate(new Date(tsStr + offset))
         : 0
     let afterts = aftertsStr
-        ? new Date(aftertsStr.toString()).getTime()
+        ? _utcDate(new Date(aftertsStr.toString() + offset))
         : 0
     let beforets = beforetsStr
-        ? new Date(beforetsStr.toString()).getTime()
+        ? _utcDate(new Date(beforetsStr.toString() + offset))
         : 0
 
     const itemidvalue = data.get("itemid")?.toString()

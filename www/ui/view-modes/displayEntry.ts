@@ -1965,7 +1965,7 @@ function _fetchLocationBackup(this: DisplayMode, itemId: bigint) {
         updateInfo2({
             [String(item.ItemId)]: { info: item }
         })
-        popover.hidePopover()
+        // popover.hidePopover()
     }
 
     api_identify(item.En_Title || item.Native_Title, provider).then(async (res) => {
