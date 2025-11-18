@@ -914,6 +914,39 @@ function _utcDate(date: Date) {
 }
 
 /**
+ * Converts an Temporal.ZonedDateTime parsable date, and timezone and converts
+ * it to a utc timestamp
+ */
+function dateAndTZToUTC(date: string, timezone: string): number {
+    let offset: string
+
+    //calculate an offset for each time
+    //because, depending on daylight savings
+    //the offset can be different depending on time of year!
+    if ("Temporal" in window) {
+        let t = Temporal.ZonedDateTime.from(date + `[${timezone}]`)
+        offset = t.offset
+    } else {
+        //NOTE:
+        //even within the same location eg America/Los_Angeles
+        //the date may need to convert timezones (eg: PST -> PDT)
+        //this may lead to 1 hours differences if the user inputs an old date
+        //which is correct because we're converting from the current timezone
+        //to the one used on that old date
+        //
+        //Users should migrate to a browser that uses real dates
+        offset = Intl.DateTimeFormat("en", {
+            timeZone: timezone,
+            timeZoneName: "longOffset"
+        }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
+    }
+
+    return date
+        ? _utcDate(new Date(date + offset))
+        : 0
+}
+
+/**
  * Creates an event based on a form
  * Side effects:
  * - assuming the form is within a popover, hide it
@@ -936,47 +969,14 @@ function newEventUI(form: HTMLFormElement) {
         : Intl.DateTimeFormat().resolvedOptions().timeZone
     ) || ""
 
-    let tsOffset: string, beforeOffset: string, afterOffset: string
-    //calculate an offset for each time
-    //because, depending on daylight savings
-    //the offset can be different depending on time of year!
-    if ("Temporal" in window) {
-        let t
-        if (tsStr) {
-            t = Temporal.ZonedDateTime.from(tsStr + `[${timezone}]`)
-            tsOffset = t.offset
-        }
-        if (beforetsStr) {
-            t = Temporal.ZonedDateTime.from(beforetsStr + `[${timezone}]`)
-            beforeOffset = t.offset
-        }
-        if (aftertsStr) {
-            t = Temporal.ZonedDateTime.from(aftertsStr + `[${timezone}]`)
-            afterOffset = t.offset
-        }
-    } else {
-        //NOTE:
-        //even within the same location eg America/Los_Angeles
-        //the date may need to convert timezones (eg: PST -> PDT)
-        //this may lead to 1 hours differences if the user inputs an old date
-        //which is correct because we're converting from the current timezone
-        //to the one used on that old date
-        //
-        //Users should migrate to a browser that uses real dates (Temporal)
-        afterOffset = beforeOffset = tsOffset = Intl.DateTimeFormat("en", {
-            timeZone: timezone,
-            timeZoneName: "longOffset"
-        }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
-    }
-
     let ts = tsStr
-        ? _utcDate(new Date(tsStr + tsOffset))
+        ? dateAndTZToUTC(tsStr, timezone)
         : 0
     let afterts = aftertsStr
-        ? _utcDate(new Date(aftertsStr.toString() + afterOffset))
+        ? dateAndTZToUTC(aftertsStr.toString(), timezone)
         : 0
     let beforets = beforetsStr
-        ? _utcDate(new Date(beforetsStr.toString() + beforeOffset))
+        ? dateAndTZToUTC(beforetsStr.toString(), timezone)
         : 0
 
     const itemidvalue = data.get("itemid")?.toString()
