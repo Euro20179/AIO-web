@@ -853,7 +853,7 @@
                         <option value="entry-output" title="Normal mode">🏠︎</option>
                         <option value="graph-output" title="Graph mode">📊︎</option>
                         <option value="calendar-output" title="Calendar mode">📅︎</option>
-                        <option value="event-output" title="Event mode">🗓︎</option>
+                        <option value="event-output" hidden title="Event mode">🗓︎</option>
                         <option value="calc-output" title="Calc mode">🔢︎</option>
                         <option value="gallery-output" title="Gallery mode">🖼︎</option>
                         <option value="script-output" title="Script mode">&lt;></option>
@@ -911,9 +911,9 @@
                 </div>
 
                 <div id="calendar-output" class="overflow">
-                    <canvas id="cal-canvas"></canvas>
                     <div id="month-display">
                         <nav id="month-nav">
+                            <button onclick="mode_setMode('event-output')">Event Table</button>
                             <label for="time-start">start <input id="time-start" type="date"></label>
                             <button id="month-prev">&lt;</button>
                             <button id="month-next">&gt;</button>
@@ -938,7 +938,8 @@
                     </div>
                 </div>
 
-                <div id="event-output" class="overflow">
+                <div id="event-output" class="overflow flex column">
+                    <button onclick="mode_setMode('calendar-output')">Calendar</button>
                     <div class="flex column">
                         <label>Filter events <input type="search" id="event-filter"></label>
                         <table id="event-output-table">

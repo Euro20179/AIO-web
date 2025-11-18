@@ -1,7 +1,5 @@
 class CalendarMode extends Mode {
     NAME = "calendar-output"
-    canv: HTMLCanvasElement
-    ctx: CanvasRenderingContext2D
 
     #mode: "day" | "month"
 
@@ -25,9 +23,6 @@ class CalendarMode extends Mode {
     }
 
     _setupWin() {
-        this.canv = this.win.document.getElementById("cal-canvas") as HTMLCanvasElement
-        this.ctx = this.canv.getContext("2d") as CanvasRenderingContext2D
-
         this.onResize()
         this.win.addEventListener("resize", this.onResize.bind(this))
 
@@ -94,8 +89,8 @@ class CalendarMode extends Mode {
     }
 
     onResize() {
-        this.canv.width = this.canv.parentElement?.clientWidth || 100
-        this.canv.height = this.canv.parentElement?.clientHeight || 100
+        // this.canv.width = this.canv.parentElement?.clientWidth || 100
+        // this.canv.height = this.canv.parentElement?.clientHeight || 100
     }
 
     close() {
@@ -105,6 +100,7 @@ class CalendarMode extends Mode {
 
     _renderDay() {
         const timeDiffMins = (this.selectedTime[1].getTime() - this.selectedTime[0].getTime()) / 1000 / 60
+        return document.createElement("div")
     }
 
     _renderMonth(start: Date, end?: Date) {
@@ -176,10 +172,10 @@ class CalendarMode extends Mode {
 
     _render() {
         if (this.mode === "day") {
-            this._renderDay()
+            return this._renderDay()
         } else {
             const output = this.parent.querySelector("#month-display") as HTMLElement | null
-            if (!output) return
+            if (!output) return document.createElement("div")
 
             const months = output.querySelector("#months") as HTMLDivElement
             while (months.firstElementChild) {
@@ -241,13 +237,14 @@ class CalendarMode extends Mode {
     <td>${(count / stats.total * 100).toFixed(2)}</td>
 </tr>`
             }
+
+            return output
         }
     }
 
     add(entry: InfoEntry): HTMLElement {
         this.selectedItems.push(entry)
-        this._render()
-        return this.canv
+        return this._render()
     }
 
     sub(entry: InfoEntry) {
