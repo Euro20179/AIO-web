@@ -914,8 +914,7 @@ function newEventUI(form: HTMLFormElement) {
         alert("Name required")
         return
     }
-    const tsStr = data.get("timestamp")?.toString()
-    if (!(tsStr)) throw new Error("timestamp is null")
+    const tsStr = data.get("timestamp")?.toString() || ""
 
     const aftertsStr = data.get("after")
     const beforetsStr = data.get("before")
