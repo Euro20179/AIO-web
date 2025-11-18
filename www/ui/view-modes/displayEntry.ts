@@ -1755,6 +1755,10 @@ function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: b
     return open(`/ui/display.html?item-id=${itemId}`, target, popup ? "popup=true" : undefined)
 }
 
+/**
+ * @description legacy version of de_actions.editstyles
+ * @deprecated
+ */
 function displayEntryEditStyles(el: HTMLElement) {
     let root = el.getRootNode() as ShadowRoot
     const styleEditor = root.getElementById("style-editor")
@@ -1763,6 +1767,10 @@ function displayEntryEditStyles(el: HTMLElement) {
     styleEditor.hidden = !styleEditor.hidden
 }
 
+/**
+ * @description legacy version of de_actions.edittemplate
+ * @deprecated
+ */
 function displayEntryEditTemplate(el: HTMLElement) {
     let root = el.getRootNode() as ShadowRoot
     const templEditor = root.getElementById("template-editor")

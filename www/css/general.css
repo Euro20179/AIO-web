@@ -309,6 +309,8 @@
     .spoiler {
         color: var(--red);
         background: var(--red);
+
+        cursor: pointer;
     }
 
     .spoiler:active {
