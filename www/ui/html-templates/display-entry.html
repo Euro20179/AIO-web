@@ -153,7 +153,22 @@
             put-data="Location"
             put-data-mode="value"
             placeholder="item location"
+            onchange="updateLocationUI(getIdFromDisplayElement(this), this.value)"
             oncontextmenu="if(event.ctrlKey) { open(this.value, '_blank'); } else {this.select()} event.preventDefault()">
+        <div>
+                Recommended by
+        <input
+                put-data="RecommendedBy"
+                put-data-mode="value"
+                onchange="
+                    setPropUI(
+                        findInfoEntryById(getIdFromDisplayElement(this)),
+                        'RecommendedBy',
+                        this.value,
+                        'Update recommended by'
+                    )"
+         >
+            </div>
         <div class="header-subtitle" id="header-subtitle">
             <textarea
                 id="style-editor"
