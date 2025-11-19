@@ -99,6 +99,7 @@ background: var(--red)
 
         ['toggle-object-editor']: {
             text: "✏",
+            title: "Raw object editor",
             attributes: {
                 onclick: "openModalUI('display-info-object-editor-popup', this.getRootNode())"
             }
