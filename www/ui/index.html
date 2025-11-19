@@ -12,28 +12,27 @@
 </head>
 
 <body>
-    <script src="/ui/components.js"></script>
-    {{include "www/ui/html-templates/sidebar-entry.html"}}
-    {{include "www/ui/html-templates/new-entry-dialog.html"}}
-    {{include "www/ui/html-templates/login-dialog.html"}}
-    {{include "www/ui/html-templates/gallery-entry.html"}}
-    {{include "www/ui/html-templates/display-entry.html"}}
+    {{template "www/ui/html-templates/sidebar-entry.html"}}
+    {{template "www/ui/html-templates/new-entry-dialog.html"}}
+    {{template "www/ui/html-templates/login-dialog.html"}}
+    {{template "www/ui/html-templates/gallery-entry.html"}}
+    {{template "www/ui/html-templates/display-entry.html"}}
 
-    {{include "www/ui/html-templates/de-status-menu.html"}}
-    {{include "www/ui/html-templates/de-notes.html"}}
-    {{include "www/ui/html-templates/de-description.html"}}
-    {{include "www/ui/html-templates/de-cost-calculation-modifiers.html"}}
+    {{template "www/ui/html-templates/de-status-menu.html"}}
+    {{template "www/ui/html-templates/de-notes.html"}}
+    {{template "www/ui/html-templates/de-description.html"}}
+    {{template "www/ui/html-templates/de-cost-calculation-modifiers.html"}}
 
-    {{include "www/ui/html-templates/event-template.html"}}
-    {{include "www/ui/html-templates/calendar-template.html"}}
-    {{include "www/ui/html-templates/tierlist-template.html"}}
-    {{include "www/ui/html-templates/calc-template.html"}}
-    {{include "www/ui/html-templates/script-template.html"}}
-    {{include "www/ui/html-templates/graph-template.html"}}
+    {{template "www/ui/html-templates/event-template.html"}}
+    {{template "www/ui/html-templates/calendar-template.html"}}
+    {{template "www/ui/html-templates/tierlist-template.html"}}
+    {{template "www/ui/html-templates/calc-template.html"}}
+    {{template "www/ui/html-templates/script-template.html"}}
+    {{template "www/ui/html-templates/graph-template.html"}}
 
-    {{include "www/ui/html-templates/calc-entry.html"}}
-    {{include "www/ui/html-templates/new-event-dialog.html"}}
-    {{include "www/ui/html-templates/prompt-dialog.html"}}
+    {{template "www/ui/html-templates/calc-entry.html"}}
+    {{template "www/ui/html-templates/new-event-dialog.html"}}
+    {{template "www/ui/html-templates/prompt-dialog.html"}}
 
     <datalist id="recommended-by"></datalist>
     <datalist id="tz-selector">
@@ -775,6 +774,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/ui/components.js"></script>
     <script src="/config.js"></script>
     <script src="/js/items.js"></script>
     <script src="/js/api.js"></script>

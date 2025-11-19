@@ -10,15 +10,11 @@
 </head>
 
 <body>
-    <dialog id="login" popover>
-        <h3 class="center">Login</h3>
-        <form action="javascript:void(0)" class="flex column" style="align-content: center">
-            <input type="text" placeholder="username" name="username">
-            <input type="password" placeholder="password" name="password">
-            <input type="submit" value="login">
-        </form>
-        <p>Please sign in to <span id="login-reason"></span></p>
-    </dialog>
+    {{ template "www/ui/html-templates/login-dialog.html" }}
+    {{ template "www/ui/html-templates/display-entry.html" }}
+
+    <login-dialog></login-dialog>
+
     <template id="display-entry">
     </template>
     <div id="notifications" style="position: absolute;"></div>
@@ -48,11 +44,7 @@
     const urlParams = new URLSearchParams(document.location.search)
     let id = urlParams.get("item-id")
     fetch(`${apiPath}/get-all-for-entry?id=${id}&uid=0`).then(async (res) => {
-        let dispRes = await fetch(`/ui/html-templates/display-entry.html`)
-        let templ = await dispRes.text()
-
         const template = document.getElementById("display-entry")
-        template.innerHTML = templ
 
         let info, meta, user
         let events = []

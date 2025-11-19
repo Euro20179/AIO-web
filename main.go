@@ -38,6 +38,8 @@ type TemplateInfo struct {
 
 var SETTINGS_ROOT = ""
 
+var templates *template.Template
+
 func setupAIOWebStorage() {
 	os.MkdirAll(SETTINGS_ROOT+"/aio-web", 0o700)
 }
@@ -78,6 +80,20 @@ func setUserSetting(uid int64, name string, value any) error {
 	}
 	err = os.WriteFile(SETTINGS_ROOT+fmt.Sprintf("/aio-web/%d/settings.json", uid), text, os.FileMode(os.O_WRONLY))
 	return err
+}
+
+// func include(file string, data any) (template.HTML, error) {
+// 	var buf bytes.Buffer
+// 	println(file)
+// 	if err := parseTemplate(&buf, file, data); err != nil {
+// 		return template.HTML(""), err
+// 	}
+// 	return template.HTML(buf.String()), nil
+// }
+
+func parseTemplate(into io.Writer, file string, data any) error {
+	templates.Lookup(file).Execute(into, data)
+	return nil
 }
 
 func root(w http.ResponseWriter, req *http.Request) {
@@ -132,25 +148,6 @@ func root(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if strings.HasSuffix(fullPath, ".html") {
-		basename := filepath.Base(fullPath)
-
-		fnmap := template.FuncMap{
-			"include": func (doc string) template.HTML {
-				data, _ := os.ReadFile(doc)
-				basename := filepath.Base(doc)
-				htmlTmplName := strings.TrimSuffix(basename, ".html")
-				return template.HTML("<template id=\"" + htmlTmplName + "\">" + string(data) + "</template>")
-			},
-		}
-
-		tmpl, err := template.New(basename).Funcs(fnmap).ParseFiles(fullPath)
-
-		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte("Failed to parse file as template"))
-			return
-		}
-
 		aioLimasSection, _ := config.GetSection("aio_limas")
 		host, err := aioLimasSection.GetKey("host")
 		hostString := "http://localhost:8080"
@@ -160,8 +157,10 @@ func root(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprintf(os.Stderr, "Failed to get config host: %s", err.Error())
 		}
 
-		if err := tmpl.Execute(w,  TemplateInfo{AIO: hostString}); err != nil {
-			println(err.Error())
+		if err := parseTemplate(w, fullPath, TemplateInfo{AIO: hostString}); err != nil {
+			w.WriteHeader(500)
+			w.Write([]byte(err.Error()))
+			return
 		}
 	} else {
 		http.ServeFile(w, req, fullPath)
@@ -282,6 +281,21 @@ func main() {
 	port = portKey.String()
 
 start:
+
+	filepath.WalkDir("www", func(file string, d os.DirEntry, err error) error {
+		if !strings.HasSuffix(file, ".html") {
+			return nil
+		}
+
+		if templates == nil {
+			bytes, _ := os.ReadFile(file)
+			templates, _ = template.New(file).Parse(string(bytes))
+		} else {
+			bytes, _ := os.ReadFile(file)
+			templates.New(file).Parse(string(bytes))
+		}
+		return nil
+	})
 
 	http.HandleFunc("/user/{username}", userRedirect)
 	http.HandleFunc("/uid/{uid}", userIDRedirect)
