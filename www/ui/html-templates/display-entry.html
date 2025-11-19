@@ -85,6 +85,18 @@
 </dialog>
 
 <div class="root" id="root">
+    <details class="hamburger-menu" style="
+            display: flex;
+            flex-direction: column;
+            float: right;
+            margin-inline: var(--small-gap);
+        ">
+        <summary>Actions</summary>
+        <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
+            <!-- this gets filled with de_item_interaction settings -->
+        </menu>
+    </details>
+
     <div id="menu-bar">
         <menu aria-label="item type and format" class="flex" style="margin: 0; padding: 0;">
             <select id="type-selector" entry-action="settype" entry-action-trigger="change" class="center"
@@ -113,16 +125,6 @@
                 <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
             </div>
         </menu>
-
-        <details class="hamburger-menu" style="
-            display: grid;
-            grid-template-columns: max-content 1fr;
-            ">
-            <summary>Actions</summary>
-            <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
-                <!-- this gets filled with de_item_interaction settings -->
-            </menu>
-        </details>
     </div>
 
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
