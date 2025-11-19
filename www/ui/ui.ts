@@ -629,7 +629,8 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
  */
 function sortEntriesUI() {
     const sortby = components.sortBySelector?.value
-    if (!sortby) {
+    //checks if null or undefined, if it's an empty string that's no-sort
+    if (sortby == undefined) {
         throw new Error("Could not get sort by")
     }
     let newEntries = sortEntries(items_getResults().map(v => v.info), sortby)
