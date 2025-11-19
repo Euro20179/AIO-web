@@ -10,8 +10,8 @@
 
 :host(sidebar-entry) {
     @media (width < 800px) {
-        border-left: 1px solid white;
-        border-right: 1px solid white;
+        border-left: 1px solid var(--text-color);
+        border-right: 1px solid var(--text-color);
     }
 
     [data-type-icon]::before {
@@ -41,28 +41,40 @@
 
         border-style: none;
 
-        @media (width < 800px) {
-            display: none;
-        }
-
-        @media (width >= 800px) {
+        @media (width >=800px) {
             text-align: center;
         }
     }
 
     figure {
         gap: 0.4em;
-        margin: 0 25%;
+        margin: 0;
 
         contain: inline-size;
 
-        @media (width >= 800px) {
+        @media (width >=800px) {
             display: grid;
             justify-items: center;
         }
 
         @media (width < 800px) {
             display: grid;
+            justify-items: center;
+
+            gap: 0;
+        }
+
+        button {
+            min-height: 70cqi;
+            width: fit-content;
+            height: fit-content;
+            padding: 0;
+            border: none;
+            background: transparent;
+
+            @media (width < 800px) {
+                min-height: revert;
+            }
         }
     }
 
