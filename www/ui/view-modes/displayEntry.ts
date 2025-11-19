@@ -1253,14 +1253,19 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
     }
 
     for (let actionEl of root.querySelectorAll("[entry-action]")) {
-        let event = actionEl.getAttribute("entry-action-trigger") || "click"
-        //@ts-ignore
-        //use on_ instead of addEventListener because if the entry is refreshed, it will add multiple event listeners
-        actionEl[`on${event}`] = e => {
+        let events = (actionEl.getAttribute("entry-action-trigger") || "click")
+                .split(",").map(v => v.trim())
+        let actions =
+            (actionEl.getAttribute("entry-action") as keyof typeof this.de_actions)
+            .split(",").map(v => v.trim())
+        for(let i = 0; i < actions.length; i++) {
             //@ts-ignore
-            let actionFn = this.de_actions[actionEl.getAttribute("entry-action") as keyof typeof de_actions];
-            if (actionFn)
-                actionFn(e.target as HTMLElement)
+            actionEl[`on${events[i % events.length]}`] = e => {
+                let actionFn = this.de_actions[actions[i] as keyof typeof this.de_actions];
+                if (actionFn)
+                    actionFn(e.target as HTMLElement)
+
+            }
         }
     }
 
@@ -1387,11 +1392,11 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 }
             }
 
-            if("title" in btnData) {
+            if ("title" in btnData) {
                 btn.title = btnData.title
             }
 
-            if("action" in btnData) {
+            if ("action" in btnData) {
                 btn.setAttribute("entry-action", btnData.action)
             }
 
