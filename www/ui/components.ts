@@ -94,18 +94,30 @@ customElements.define("gallery-entry", class extends HTMLElement {
 
 function _registerElement(name: string) {
     customElements.define(name, class extends HTMLElement {
+        templ?: HTMLTemplateElement
+        name: string = name
         constructor() {
             super()
+            let templ = document.getElementById(name)
+            //we may want to register these on different places
+            //so that we can reuse templates
+            if (!(templ instanceof HTMLTemplateElement)) {
+                console.warn(`${name} is not a template`)
+                return
+            }
 
-            this.style.display = "contents"
+            this.templ = templ
         }
 
         connectedCallback() {
-            let templ = document.getElementById(name)
-            if (!(templ instanceof HTMLTemplateElement))
-                throw new Error(`#${name} is not a template`)
-            let content = templ.content.cloneNode(true)
+            if(!this.templ) {
+                console.error(`Attempting to use <${this.name}> despite coenciding template not existing`)
+                return
+            }
+
+            let content = this.templ.content.cloneNode(true)
             this.replaceChildren(content)
+            this.style.display = "contents"
         }
     })
 }
@@ -114,7 +126,19 @@ for (const name of [
     "de-status-menu",
     "de-cost-calculation-modifiers",
     "de-notes",
-    "de-description"
+    "de-description",
+
+    "calendar-template",
+    "event-template",
+    "tierlist-template",
+    "calc-template",
+    "script-template",
+    "graph-template",
+
+    "prompt-dialog",
+    "new-entry-dialog",
+    "new-event-dialog",
+    "login-dialog"
 ]) {
     _registerElement(name)
 }

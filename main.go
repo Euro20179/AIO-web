@@ -132,7 +132,19 @@ func root(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if strings.HasSuffix(fullPath, ".html") {
-		tmpl, err := template.ParseFiles(fullPath)
+		basename := filepath.Base(fullPath)
+
+		fnmap := template.FuncMap{
+			"include": func (doc string) template.HTML {
+				data, _ := os.ReadFile(doc)
+				basename := filepath.Base(doc)
+				htmlTmplName := strings.TrimSuffix(basename, ".html")
+				return template.HTML("<template id=\"" + htmlTmplName + "\">" + string(data) + "</template>")
+			},
+		}
+
+		tmpl, err := template.New(basename).Funcs(fnmap).ParseFiles(fullPath)
+
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte("Failed to parse file as template"))
@@ -148,7 +160,9 @@ func root(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprintf(os.Stderr, "Failed to get config host: %s", err.Error())
 		}
 
-		tmpl.Execute(w, TemplateInfo{AIO: hostString})
+		if err := tmpl.Execute(w,  TemplateInfo{AIO: hostString}); err != nil {
+			println(err.Error())
+		}
 	} else {
 		http.ServeFile(w, req, fullPath)
 	}

@@ -12,6 +12,29 @@
 </head>
 
 <body>
+    <script src="/ui/components.js"></script>
+    {{include "www/ui/html-templates/sidebar-entry.html"}}
+    {{include "www/ui/html-templates/new-entry-dialog.html"}}
+    {{include "www/ui/html-templates/login-dialog.html"}}
+    {{include "www/ui/html-templates/gallery-entry.html"}}
+    {{include "www/ui/html-templates/display-entry.html"}}
+
+    {{include "www/ui/html-templates/de-status-menu.html"}}
+    {{include "www/ui/html-templates/de-notes.html"}}
+    {{include "www/ui/html-templates/de-description.html"}}
+    {{include "www/ui/html-templates/de-cost-calculation-modifiers.html"}}
+
+    {{include "www/ui/html-templates/event-template.html"}}
+    {{include "www/ui/html-templates/calendar-template.html"}}
+    {{include "www/ui/html-templates/tierlist-template.html"}}
+    {{include "www/ui/html-templates/calc-template.html"}}
+    {{include "www/ui/html-templates/script-template.html"}}
+    {{include "www/ui/html-templates/graph-template.html"}}
+
+    {{include "www/ui/html-templates/calc-entry.html"}}
+    {{include "www/ui/html-templates/new-event-dialog.html"}}
+    {{include "www/ui/html-templates/prompt-dialog.html"}}
+
     <datalist id="recommended-by"></datalist>
     <datalist id="tz-selector">
         <option value="Africa/Abidjan">Africa/Abidjan</option>
@@ -621,66 +644,6 @@
         <option value="Zulu">Zulu</option>
     </datalist>
 
-    <dialog id="new-event-form" popover>
-        <button onclick="closeModalUI('new-event-form')"
-            style="position: absolute; top: 0; right: 0; margin: var(--small-gap);">X</button>
-
-        <form action="javascript:void(0)" onsubmit="newEventUI(this)" class="block">
-            <input type="hidden" name="itemid">
-
-            <label for="name">Name: <input id="name" name="name" required></label>
-            <p>
-                Not all time slots are required. Exact times are also not required.
-            </p>
-
-            <div class="grid column">
-                <div class="flex column" style="align-items: center;">
-                    <label for="after-timestamp">
-                        After:
-                    </label>
-                    <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
-                </div>
-
-                <div class="flex column" style="align-items: center;">
-                    <label for="timestamp">
-                        On:
-                    </label>
-                    <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
-                </div>
-
-                <div class="flex column" style="align-items: center;">
-                    <label for="before-timestamp">
-                        Before:
-                    </label>
-                    <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
-                </div>
-
-                <input name="timezone" list="tz-selector">
-            </div>
-
-            <br>
-
-            <div class="flex j-center">
-                <button>Add</button>
-            </div>
-        </form>
-        <br>
-    </dialog>
-
-    <dialog id="prompt" style="position: relative; height: max(200px, 20%); width: max(50vw, 500px);">
-        <button style="position: absolute; top: 2ch; right: 2ch;">X</button>
-        <div class="grid" style="grid-auto-rows: 3fr 1fr; height: 100%;">
-            <center>
-                <div root style="height: 100%; align-content: center;">
-                </div>
-            </center>
-            <form action="javascript:void(0)" class="j-center">
-                <input type="text" name="prompt-value" style="width: 50%; height: fit-content; align-self: start;"
-                    autofocus>
-            </form>
-        </div>
-    </dialog>
-
     <dialog id="items-listing" popover>
         <center>
             <h3>Find Item</h3>
@@ -694,104 +657,10 @@
         </div>
     </dialog>
 
-    <dialog id="login" popover>
-        <h3 class="center">Login</h3>
-        <form action="javascript:void(0)" class="flex column" style="align-content: center">
-            <input type="text" placeholder="username" name="username">
-            <input type="password" placeholder="password" name="password">
-            <input type="submit" value="login">
-        </form>
-        <p>Please sign in to <span id="login-reason"></span></p>
-    </dialog>
-
-    <dialog id="new-entry" popover>
-        <h3>New Entry</h3>
-        <button onclick="closeModalUI('new-entry')"
-            style="position: absolute; height: 2em; top: 5px; right: 5px; aspect-ratio: 1;">X</button>
-        <form id="new-item-form" method="dialog" action="javascript:void(0)">
-            <div class="flex wrap" style="width: 100%;">
-                <input type="text" placeholder="title" name="title" required style="flex-grow: 1; max-width: 100%;">
-                <select name="type" title="The type of media" required style="flex-grow: 1;">
-                    <option value="">Type</option>
-                </select>
-            </div>
-
-            <input type="text" placeholder="native title" name="native-title" style="width: 100%;">
-
-            <div class="flex wrap" style="width: 100%;">
-                <select name="user-status" style="flex-grow: 1;">
-                    <option value="">Status</option>
-                    <option value="Planned">Planned</option>
-                    <option value="Viewing">Viewing</option>
-                    <option value="Finished">Finished</option>
-                    <option value="Dropped">Dropped</option>
-                    <option value="Paused">Paused</option>
-                    <option value="ReViewing">Re viewing</option>
-                    <option value="Waiting">Waiting</option>
-                </select>
-                <input type="number" min="0" step="0.01" name="price" placeholder="price" style="flex-grow:1;">
-            </div>
-
-            <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location"
-                style="width: 100%;">
-
-            <div class="flex wrap" style="gap: 2ch; width: 100%; justify-content: center;">
-                <select name="format" required title="Format type"></select>
-                <label for="is-digital" style="text-wrap: nowrap;"><input type="checkbox" id='is-digital'
-                        style="vertical-align: middle;" name="is-digital"
-                        title="Whether or not the item is a digitized/digital version of the format"> digital?</label>
-                <label for="fetch-metadata"><input id="fetch-metadata" type="checkbox" name="get-metadata"> Get
-                    metadata</label>
-            </div>
-
-            <p class="center">
-                Art style
-            </p>
-            <div class="flex" style="gap: 2ch; width: 100%; overflow:auto">
-                <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
-                    Anime</label>
-                <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
-                    Cartoon</label>
-                <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
-                    Hand drawn</label>
-                <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
-                    Digitally drawn </label>
-                <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-                <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
-                    action</label>
-                <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
-                    2d</label>
-                <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
-                    3d</label>
-            </div>
-
-            <input type="text" placeholder="tags (',' separated)" name="tags" value="">
-
-            <br>
-
-            <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
-
-            <div class="flex j-space-between wrap" style="align-content: center; gap: 5%;">
-                <select name="libraryId" style="flex-grow: 1; height: fit-content; align-self: center;"></select>
-                <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                    <span>Parent</span>
-                    <input type="button" value="0" title="parent id" name="parentId"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </div>
-                <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                    <span>Copy of</span>
-                    <input type="button" value="0" title="copy of id" name="copyOf"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </div>
-                <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                    <span>Requires</span>
-                    <input type="button" value="0" title="prerequiset for this show" name="requires"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </div>
-            </div>
-            <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
-        </form>
-    </dialog>
+    <prompt-dialog></prompt-dialog>
+    <new-event-dialog></new-event-dialog>
+    <login-dialog></login-dialog>
+    <new-entry-dialog></new-entry-dialog>
 
     <dialog id="script-select">
     </dialog>
@@ -873,162 +742,31 @@
                 <div class="sidebar--items" id="sidebar-items">
                 </div>
             </nav>
+
             <section id="viewing-area" class="flex column overflow">
 
                 <div id="error-output">
                     <p id="error"></p>
                 </div>
 
-                <div id="tierlist-output">
-                    <menu aria-label="tierlist controls">
-                        <select id="tierlist-mode">
-                            <option value="general">General Rating</option>
-                            <option value="user">User Rating</option>
-                        </select>
-                    </menu>
-                    <tier-list class="block">
-                    </tier-list>
-                </div>
-
-                <div id="script-output">
-                    <div id="script-root">
-                        <div class="flex" style="grid-area: run-button;">
-                            <button id="script-execute">▶</button>
-                            <div class="flex column">
-                                <label for="script-execute-output-clear">clear on run <input type="checkbox"
-                                        id="script-execute-output-clear" style="vertical-align: middle;"
-                                        checked></label>
-                                <label for="script-js-mode">js mode <input type="checkbox" id="script-js-mode"
-                                        style="vertical-align: middle;"></label>
-                            </div>
-                        </div>
-                        <textarea id="script"></textarea>
-                        <output id="script-execute-output" style="font-family: monospace"></output>
-                    </div>
-                </div>
-
                 <div id="entry-output" class="overflow">
                 </div>
 
-                <div id="calendar-output" class="overflow">
-                    <div id="month-display">
-                        <nav id="month-nav">
-                            <button onclick="mode_setMode('event-output')">Event Table</button>
-                            <label for="time-start">start <input id="time-start" type="date"></label>
-                            <button id="month-prev">&lt;</button>
-                            <button id="month-next">&gt;</button>
-                            <label for="time-end">end <input id="time-end" type="date"></label>
-                        </nav>
-                        <span id="month-stats">
-                            <span id="total-events"></span>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Event</th>
-                                        <th>Count</th>
-                                        <th>%</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="event-totals">
-                                </tbody>
-                            </table>
-                        </span>
-                        <div id="months">
-                        </div>
-                    </div>
-                </div>
+                <script-template></script-template>
 
-                <div id="event-output" class="overflow flex column">
-                    <button onclick="mode_setMode('calendar-output')">Calendar</button>
-                    <div class="flex column">
-                        <label>Filter events <input type="search" id="event-filter"></label>
-                        <table id="event-output-table">
-                            <thead>
-                                <tr>
-                                    <th>For</th>
-                                    <th>Event</th>
-                                    <th>Time</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
+                <tierlist-template></tierlist-template>
 
-                <div id="calc-output" class="overflow">
-                    <p class="center"><mark>WARNING</mark>, if you are planning on using functions that modify items,
-                        this mode is rather dangerous, prefer scripting mode instead</p>
-                    <div class="flex row">
-                        <textarea id="calc-expression" style="flex-grow: 1" placeholer="expression"></textarea>
-                        <button onclick="sortCalcDisplay()" id="calc-sorter">Sort</button>
-                    </div>
-                    <div id="calc-items"></div>
-                </div>
+                <calendar-template></calendar-template>
+
+                <event-template></event-template>
+
+                <calc-template></calc-template>
 
                 <div id="gallery-output" class="overflow">
                     <div id="gallery-items"></div>
                 </div>
 
-                <div id="graph-output" class="overflow">
-                    <not-a-div class="flex column">
-                        <form action="javascript:void()">
-                            <select id="group-by" title="Group by">
-                                <option value="Year">Year</option>
-                                <option value="Decade">Decade</option>
-                                <option value="Century">Century</option>
-                                <option value="Type">Type</option>
-                                <option value="Format">Format</option>
-                                <option value="Status">Status</option>
-                                <option value="Tags">Tags</option>
-                                <option value="Genres">Genres</option>
-                                <option value="Item-name">Item Name</option>
-                                <option value="View-count">View Count</option>
-                                <option value="Is-anime">Is Anime</option>
-                            </select>
-                            <select id="chart-type" title="Chart type">
-                                <option value="bar">Bar</option>
-                                <option value="pie">pie</option>
-                                <option value="pie-percentage">pie percentage</option>
-                                <option value="bubble">bubble</option>
-                            </select>
-
-                            <textarea type="text" name="group-by-expr" id="group-by-expr"
-                                placeholder="Group by expression"></textarea>
-                        </form>
-                        <form action="javascript:void(0)" id="add-chart">
-                            <textarea type="text" placeholder="y formula" name="y-formula" id="y-formula"></textarea>
-                            <textarea type="text" placeholder="x formula" name="x-formula" id="x-formula"></textarea>
-                            <input type="text" placeholder="name" name="chart-name">
-                            <input type="submit" value="add chart">
-                        </form>
-                    </not-a-div>
-                    <div>
-                        <div>
-                            <canvas id="by-year"></canvas>
-                        </div>
-                        <div>
-                            <canvas id="watch-time-by-year"></canvas>
-                        </div>
-
-                        <div>
-                            <canvas id="rating-by-year"></canvas>
-                        </div>
-                        <div>
-                            <canvas id="adj-rating-by-year"></canvas>
-                        </div>
-
-                        <div>
-                            <canvas id="general-rating-by-year"></canvas>
-                        </div>
-                        <div>
-                            <canvas id="rating-disparity-graph"></canvas>
-                        </div>
-
-                        <div>
-                            <canvas id="cost-by-format"></canvas>
-                        </div>
-                    </div>
-                </div>
-
+                <graph-template></graph-template>
             </section>
 
             <div id="notifications">
@@ -1043,7 +781,6 @@
     <script src="/js/notes-parser.js"></script>
     <script src="/ui/js_api.js"></script>
     <script src="/ui/calculator.js"></script>
-    <script src="/ui/components.js"></script>
     <script src="/ui/globals.js"></script>
     <script src="/ui/sidebar.js"></script>
     <script src="/ui/settings.js"></script>
@@ -1064,3 +801,4 @@
 
 
 </html>
+

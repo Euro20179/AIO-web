@@ -1,0 +1,27 @@
+<div id="calendar-output">
+    <div id="month-display">
+        <nav id="month-nav">
+            <button onclick="mode_setMode('event-output')">Event Table</button>
+            <label for="time-start">start <input id="time-start" type="date"></label>
+            <button id="month-prev">&lt;</button>
+            <button id="month-next">&gt;</button>
+            <label for="time-end">end <input id="time-end" type="date"></label>
+        </nav>
+        <span id="month-stats">
+            <span id="total-events"></span>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </thead>
+                <tbody id="event-totals">
+                </tbody>
+            </table>
+        </span>
+        <div id="months">
+        </div>
+    </div>
+</div>

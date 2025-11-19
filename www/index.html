@@ -3,8 +3,10 @@
 
 <head>
     <script src="/config.js"></script>
-    <script src="/ui/api.js"></script>
     <script src="/ui/ui.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/ui/components.js"></script>
+
     <meta charset="UTF-8" />
     <title>Home</title>
     <link rel="stylesheet" href="/css/colors.css" />
@@ -46,6 +48,8 @@
 </head>
 
 <body>
+    {{ include "www/ui/html-templates/login-dialog.html" }}
+
     <h2 class="">Welcome</h2>
     <div style="display: flex; flex-direction: row;">
         <button onclick="signinUI()">Login</button>
@@ -62,16 +66,8 @@
 
     <div id="users-output"></div>
 
-    <dialog id="login" popover>
-        <h3 class="center">Login</h3>
-        <form action="javascript:void(0)" class="flex column" style="align-content: center">
-            <input type="text" placeholder="username" name="username" />
-            <input type="password" placeholder="password" name="password" />
-            <input type="submit" value="login" />
-        </form>
-    </dialog>
+    <login-dialog></login-dialog>
 
-    <script src="/js/api.js"></script>
     <script>
         const params = new URLSearchParams(document.location.search);
         const uid = params.get("uid");

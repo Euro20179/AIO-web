@@ -6,7 +6,7 @@
 aio-web
 server-config.ini
 
-www/ui/index.html
 www/config.ts
+www/usage/js_api_docs.html
 
 go.sum

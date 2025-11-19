@@ -1,0 +1,45 @@
+<dialog id="new-event-form" popover>
+    <button onclick="closeModalUI('new-event-form')"
+        style="position: absolute; top: 0; right: 0; margin: var(--small-gap);">X</button>
+
+    <form action="javascript:void(0)" onsubmit="newEventUI(this)" class="block">
+        <input type="hidden" name="itemid">
+
+        <label for="name">Name: <input id="name" name="name" required></label>
+        <p>
+            Not all time slots are required. Exact times are also not required.
+        </p>
+
+        <div class="grid column">
+            <div class="flex column" style="align-items: center;">
+                <label for="after-timestamp">
+                    After:
+                </label>
+                <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
+            </div>
+
+            <div class="flex column" style="align-items: center;">
+                <label for="timestamp">
+                    On:
+                </label>
+                <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
+            </div>
+
+            <div class="flex column" style="align-items: center;">
+                <label for="before-timestamp">
+                    Before:
+                </label>
+                <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
+            </div>
+
+            <input name="timezone" list="tz-selector">
+        </div>
+
+        <br>
+
+        <div class="flex j-center">
+            <button>Add</button>
+        </div>
+    </form>
+    <br>
+</dialog>
