@@ -9,8 +9,6 @@
 }
 
 :host(sidebar-entry) {
-    width: 100%;
-
     @media (width < 800px) {
         border-left: 1px solid white;
         border-right: 1px solid white;
@@ -54,7 +52,7 @@
 
     figure {
         gap: 0.4em;
-        margin: 0;
+        margin: 0 25%;
 
         contain: inline-size;
 
