@@ -873,9 +873,12 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
                     break;
             }
         } else if (filter === "!child") {
-            entries = entries.filter(v => v.ParentId === 0n)
+            entries = entries.filter(v => {
+                let e = items_getEntry(v.ItemId)
+                return !e.relations.isChild()
+            })
         } else if (filter === "!copy") {
-            entries = entries.filter(v => v.CopyOf === 0n)
+            entries = entries.filter(v => items_getEntry(v.ItemId).relations.isCopy())
         }
     }
 

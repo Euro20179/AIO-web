@@ -18,46 +18,49 @@ const AS_LIVE_ACTION = 32
 const AS_2D = 64
 const AS_3D = 128
 
-type ASName = 
-	| "Anime" 
-	| "Cartoon" 
-	| "Handrawn" 
-	| "Digital" 
-	| "CGI" 
-	| "Liveaction" 
-	| "2D" 
-	| "3D"
+type ASName =
+    | "Anime"
+    | "Cartoon"
+    | "Handrawn"
+    | "Digital"
+    | "CGI"
+    | "Liveaction"
+    | "2D"
+    | "3D"
 
-type ArtStyle = typeof AS_ANIME
+type ArtStyle =
+    | typeof AS_ANIME
     | typeof AS_CARTOON
     | typeof AS_HANDRAWN
     | typeof AS_DIGITAL
     | typeof AS_CGI
     | typeof AS_LIVE_ACTION
 
-type UserStatus = "" |
-    "Viewing" |
-    "Finished" |
-    "Dropped" |
-    "Planned" |
-    "ReViewing" |
-    "Paused" |
-    "Waiting"
+type UserStatus =
+    | ""
+    | "Viewing"
+    | "Finished"
+    | "Dropped"
+    | "Planned"
+    | "ReViewing"
+    | "Paused"
+    | "Waiting"
 
-type EntryType = "Show" |
-    "Movie" |
-    "MovieShort" |
-    "Game" |
-    "BoardGame" |
-    "Song" |
-    "Book" |
-    "Manga" |
-    "Collection" |
-    "Picture" |
-    "Meme" |
-    "Library" |
-    "Albumn" |
-    "Soundtrack"
+type EntryType =
+    | "Show"
+    | "Movie"
+    | "MovieShort"
+    | "Game"
+    | "BoardGame"
+    | "Song"
+    | "Book"
+    | "Manga"
+    | "Collection"
+    | "Picture"
+    | "Meme"
+    | "Library"
+    | "Albumn"
+    | "Soundtrack"
 
 type UserEvent = {
     EventId: number
@@ -119,6 +122,94 @@ type MetadataEntry = {
 }
 
 
+class items_Relations {
+    parent: bigint | null = null
+    children: bigint[]
+
+    constructor(id: bigint, parent: bigint, requires: bigint[], copies: bigint[])
+    constructor(public id: bigint, children: bigint[] | bigint, public copies: bigint[], public requires: bigint[]) {
+        //accept a parent for legacy compat
+        if (typeof children === 'bigint') {
+            this.parent = children
+            this.children = []
+        } else {
+            this.children = children
+        }
+    }
+
+    isChild() {
+        if(this.parent === 0n) {
+            return false
+        }
+
+        for(let k in items_getAllEntries()){ 
+            if(this.isChildOf(BigInt(k))) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    isCopy() {
+        return this.copies.length !== 0
+    }
+
+    /**
+     * Checks if `this` is a child of `id`
+     */
+    isChildOf(id: bigint) {
+        if (this.parent === id) {
+            return true
+        }
+
+        if (items_getEntry(id).relations.children.includes(this.id)) {
+            return true
+        }
+
+        return false
+    }
+
+    *findCopies(): Generator<items_Entry> {
+        yield* this.copies.values().map(v => items_getEntry(v))
+    }
+
+    *findRequirements(): Generator<items_Entry> {
+        yield* this.requires.values().map(v => items_getEntry(v))
+    }
+
+    *findDescendants(): Generator<items_Entry> {
+        if (this.parent === null) {
+            yield* this.children.values().map(v => items_getEntry(v))
+        }
+        else {
+            yield*
+                Object.values(items_getAllEntries())
+                    .values()
+                    .filter(v => v.relations.isChildOf(this.id))
+        }
+    }
+
+    *findParents() {
+        //treat this as the only parent for legacy compat
+        if (this.parent) {
+            yield this.parent
+            return
+        }
+
+        const entries = items_getAllEntries()
+        for (let id in entries) {
+            const entry = entries[id]
+
+            for (let child of entry.relations.children) {
+                if (child === this.id) {
+                    yield child
+                }
+            }
+        }
+    }
+}
+
 type GlobalsNewUi = {
     entries: Record<string, items_Entry>
     results: items_Entry[]
@@ -139,6 +230,7 @@ class items_Entry {
     user: UserEntry
     meta: MetadataEntry
     info: InfoEntry
+    relations: items_Relations
 
     events: UserEvent[]
 
@@ -147,6 +239,8 @@ class items_Entry {
         this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.events = events || []
+
+        this.relations = new items_Relations(this.info.ItemId, this.info.ParentId, this.info.CopyOf ? [this.info.CopyOf] : [], this.info.Requires ? [this.info.Requires] : [])
     }
 
     get fixedThumbnail() {
@@ -274,6 +368,12 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
         return await loadMetadataById(id)
     }
     return m
+}
+
+function items_getEntry(id: bigint) {
+    const val = _globalsNewUi.entries[String(id)]
+    if (!(val)) throw new Error(`${id} Is not an entry`)
+    return val
 }
 
 function items_getAllEntries() {
@@ -446,15 +546,17 @@ async function items_refreshMetadata(uid: number) {
 }
 
 function* findDescendants(itemId: bigint) {
-    let entries = Object.values(_globalsNewUi.entries)
-    yield* entries.values()
-        .filter(v => v.info.ParentId === itemId)
+    const entry = items_getEntry(itemId)
+    yield* entry.relations.findDescendants()
 }
 
 function* findCopies(itemId: bigint) {
-    let entries = Object.values(_globalsNewUi.entries)
-    yield* entries.values()
-        .filter(v => v.info.CopyOf === itemId)
+    const entry = items_getEntry(itemId)
+    yield* entry.relations.findCopies()
+}
+
+function* findRequirements(itemId: bigint) {
+    yield* items_getEntry(itemId).relations.findRequirements()
 }
 
 async function loadUserEvents(uid: number) {
@@ -963,10 +1065,10 @@ function getUserExtra(user: UserEntry, prop: string) {
 
 
 function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end: number): Generator<UserEvent> {
-    for(let item of items) {
+    for (let item of items) {
         const events = findUserEventsById(item.ItemId)
-        for(let ev of events) {
-            if(items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end) >= 0) {
+        for (let ev of events) {
+            if (items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end) >= 0) {
                 yield ev
             }
         }

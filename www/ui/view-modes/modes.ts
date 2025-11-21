@@ -55,10 +55,11 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
 
         mode_refreshItem(BigInt(id))
 
-        const parent = (info || findInfoEntryById(BigInt(id)))?.ParentId
-        if (parent && items_getAllEntries()[String(parent)]) {
+        for (let parent of items_getEntry(BigInt(id)).relations.findParents()) {
+            const parentEntry = items_getEntry(parent)
+
             //if the parent is this, or itself, just dont update
-            if (![BigInt(id), parent].includes(items_getAllEntries()[String(parent)].info.ParentId)) {
+            if(parent !== BigInt(id)) {
                 updateInfo2({
                     [String(parent)]: {
                         info: findInfoEntryById(parent),
@@ -78,8 +79,8 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
 
 
 function mode_getFirstModeInWindow(win: Window) {
-    for(let mode of openViewModes) {
-        if(mode.win === win) {
+    for (let mode of openViewModes) {
+        if (mode.win === win) {
             return mode
         }
     }
