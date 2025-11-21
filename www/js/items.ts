@@ -164,8 +164,20 @@ class items_Relations {
 
     removeCopy(id: bigint) {
         const e = items_getEntry(id)
-        e.info.CopyOf = 0n
-        this.copies = this.copies.filter(v => v !== id)
+        if (id === e.info.CopyOf) {
+            e.info.CopyOf = 0n
+        }
+
+        //prevent infinite recursion
+        if (this.copies.includes(id)) {
+            this.copies = this.copies.filter(v => v !== id)
+            items_getEntry(id).relations.removeCopy(this.id)
+
+            const e = items_getEntry(this.id)
+            if(e.info.CopyOf === id) {
+                e.info.CopyOf = 0n
+            }
+        }
     }
 
     setNotACopy() {

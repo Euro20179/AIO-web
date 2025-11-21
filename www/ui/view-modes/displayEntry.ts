@@ -1097,7 +1097,7 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
                 switch (relationType) {
                     case "copies":
                         const e = items_getEntry(thisId)
-                        e.relations.setNotACopy()
+                        e.relations.removeCopy(child.ItemId)
                         api_setItem("", e.info).then((res) => {
                             if (!res || res.status !== 200) {
                                 alert("Failed to update item")
