@@ -56,8 +56,6 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
         mode_refreshItem(BigInt(id))
 
         for (let parent of items_getEntry(BigInt(id)).relations.findParents()) {
-            const parentEntry = items_getEntry(parent)
-
             //if the parent is this, or itself, just dont update
             if(parent !== BigInt(id)) {
                 updateInfo2({

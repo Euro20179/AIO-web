@@ -115,7 +115,7 @@ class DisplayMode extends Mode {
                         alert("could not find child id")
                         return
                     }
-                    info.ParentId = item.ItemId
+                    items_getEntry(info.ItemId).relations.setParent(item.ItemId)
                     updateInfo2({
                         [String(item.ItemId)]: { info: item },
                         [String(id)]: { info }
@@ -1064,7 +1064,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
     eventsTbl.innerHTML = html
 }
 
-function createRelationButtons(this: DisplayMode, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
+function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
     relationships = relationships.sort((a, b) => {
@@ -1094,27 +1094,32 @@ function createRelationButtons(this: DisplayMode, elementParent: HTMLElement, re
                 "copies": "Would you like to remove this item as a copy"
             }
             if (confirm(confirmationText[relationType])) {
-                let thisId: bigint
                 switch (relationType) {
                     case "copies":
-                        thisId = child.info.CopyOf
-                        child.info.CopyOf = 0n
+                        const e = items_getEntry(thisId)
+                        e.relations.setNotACopy()
+                        api_setItem("", e.info).then((res) => {
+                            if (!res || res.status !== 200) {
+                                alert("Failed to update item")
+                                return
+                            }
+                            updateInfo2({
+                                [String(thisId)]: { info: e.info }
+                            })
+                        })
                         break
                     case "descendants":
-                        thisId = child.info.ParentId
-                        child.info.ParentId = 0n
-                        break
+                        child.relations.removeParent(thisId)
+                        api_setItem("", child.info).then((res) => {
+                            if (!res || res.status !== 200) {
+                                alert("Failed to update item")
+                                return
+                            }
+                            updateInfo2({
+                                [String(child.ItemId)]: { info: child.info }
+                            })
+                        })
                 }
-                api_setItem("", child.info).then((res) => {
-                    if (!res || res.status !== 200) {
-                        alert("Failed to update item")
-                        return
-                    }
-                    updateInfo2({
-                        [String(child.ItemId)]: { info: child.info }
-                    })
-                    refreshDisplayItem.call(this, thisId)
-                })
             }
         })
     }
@@ -1254,11 +1259,11 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
 
     for (let actionEl of root.querySelectorAll("[entry-action]")) {
         let events = (actionEl.getAttribute("entry-action-trigger") || "click")
-                .split(",").map(v => v.trim())
+            .split(",").map(v => v.trim())
         let actions =
             (actionEl.getAttribute("entry-action") as keyof typeof this.de_actions)
-            .split(",").map(v => v.trim())
-        for(let i = 0; i < actions.length; i++) {
+                .split(",").map(v => v.trim())
+        for (let i = 0; i < actions.length; i++) {
             //@ts-ignore
             actionEl[`on${events[i % events.length]}`] = e => {
                 let actionFn = this.de_actions[actions[i] as keyof typeof this.de_actions];
@@ -1724,7 +1729,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         if (!relationshipEl) continue
 
         relationshipEl.innerHTML = ""
-        createRelationButtons.call(this, relationshipEl, relationship[1](item.ItemId), relationship[0])
+        createRelationButtons.call(this, item.ItemId, relationshipEl, relationship[1](item.ItemId), relationship[0])
     }
 
     //Required items

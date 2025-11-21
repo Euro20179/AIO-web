@@ -137,13 +137,73 @@ class items_Relations {
         }
     }
 
+    removeChild(id: bigint) {
+        if (this.children.includes(id)) {
+            this.children = this.children.filter(v => v !== id)
+        }
+    }
+
+    removeParent(id: bigint) {
+        if (this.parent === id) {
+            this.parent = 0n
+            items_getEntry(this.id).info.ParentId = 0n
+        }
+
+        for (let parent of this.findParents()) {
+            items_getEntry(parent).relations.removeChild(this.id)
+        }
+    }
+
+    removeAllParents() {
+        this.parent = 0n
+        items_getEntry(this.id).info.ParentId = 0n
+        for (let parent of this.findParents()) {
+            items_getEntry(parent).relations.removeChild(this.id)
+        }
+    }
+
+    removeCopy(id: bigint) {
+        const e = items_getEntry(id)
+        e.info.CopyOf = 0n
+        this.copies = this.copies.filter(v => v !== id)
+    }
+
+    setNotACopy() {
+        items_getEntry(this.id).info.CopyOf = 0n
+        for (let copy of this.findCopies()) {
+            copy.relations.removeCopy(this.id)
+        }
+        this.copies = []
+    }
+
+    /**
+     * Sets `this` to have `id` as a parent
+     * Adds `this` as a child of `id`
+     */
+    setParent(id: bigint) {
+        this.parent = id
+        items_getEntry(this.id).info.ParentId = id
+        items_getEntry(id).relations.children.push(this.id)
+    }
+
+    /**
+     * Sets `this` to have `id` as a copy
+     * Adds `this` as a copy of `id`
+     */
+    setCopy(id: bigint) {
+        //this only has one copy because **set**copy
+        this.copies = [id]
+        //however the copy may have more than just this as a copy
+        items_getEntry(id).relations.copies.push(id)
+    }
+
     isChild() {
-        if(this.parent === 0n) {
+        if (this.parent === 0n) {
             return false
         }
 
-        for(let k in items_getAllEntries()){ 
-            if(this.isChildOf(BigInt(k))) {
+        for (let k in items_getAllEntries()) {
+            if (this.isChildOf(BigInt(k))) {
                 return true
             }
         }
