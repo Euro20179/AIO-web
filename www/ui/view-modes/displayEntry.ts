@@ -1733,24 +1733,27 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //Required items
-    if (requiredItemsEl && item.Requires !== 0n) {
-        const requiredItem = findInfoEntryById(item.Requires)
-        let meta = findMetadataById(requiredItem.ItemId)
-        let el = requiredItemsEl.querySelector("#required-item") as HTMLElement
-        if (el instanceof HTMLImageElement) {
-            formatToName(requiredItem.Format).then(name => {
-                el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
-            })
-            el.src = fixThumbnailURL(meta.Thumbnail)
-            el.alt = requiredItem.En_Title || requiredItem.Native_Title
-        } else {
-            formatToName(requiredItem.Format).then(name => {
-                el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
-            })
-            el.innerText = requiredItem.En_Title || requiredItem.Native_Title
+    if (requiredItemsEl) {
+        for (let requirement of items_getEntry(item.ItemId).relations.requires) {
+            const requiredItem = findInfoEntryById(requirement)
+            let meta = findMetadataById(requirement)
+
+            let el = requiredItemsEl.querySelector("#required-item") as HTMLElement
+            if (el instanceof HTMLImageElement) {
+                formatToName(requiredItem.Format).then(name => {
+                    el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
+                })
+                el.src = fixThumbnailURL(meta.Thumbnail)
+                el.alt = requiredItem.En_Title || requiredItem.Native_Title
+            } else {
+                formatToName(requiredItem.Format).then(name => {
+                    el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
+                })
+                el.innerText = requiredItem.En_Title || requiredItem.Native_Title
+            }
+            el.onclick = () => mode_toggleItem(requiredItem)
+            requiredItemsEl.appendChild(el)
         }
-        el.onclick = () => mode_toggleItem(requiredItem)
-        requiredItemsEl.appendChild(el)
     }
 
     //Events

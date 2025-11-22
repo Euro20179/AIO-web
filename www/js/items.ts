@@ -6,6 +6,14 @@
  * such as retrieving and setting entries
  */
 
+//TODO:
+//add a /list-relations which pulls from the relations table
+//and from parentId/copyOf/requires
+//and sends the results back as a list of relations
+//
+//there should then be a function here that loads all relations into
+//the EntryRelations instance for each Entry
+
 //for format
 const DIGI_MOD = 0x1000
 
@@ -126,7 +134,6 @@ class items_Relations {
     parent: bigint | null = null
     children: bigint[]
 
-    constructor(id: bigint, parent: bigint, requires: bigint[], copies: bigint[])
     constructor(public id: bigint, children: bigint[] | bigint, public copies: bigint[], public requires: bigint[]) {
         //accept a parent for legacy compat
         if (typeof children === 'bigint') {
@@ -312,7 +319,8 @@ class items_Entry {
         this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.events = events || []
 
-        this.relations = new items_Relations(this.info.ItemId, this.info.ParentId, this.info.CopyOf ? [this.info.CopyOf] : [], this.info.Requires ? [this.info.Requires] : [])
+        //items_refreshRelations() must be called to fill all relations
+        this.relations = new items_Relations(this.info.ItemId, [], [], [])
     }
 
     get fixedThumbnail() {
@@ -562,6 +570,28 @@ function items_getAllMeta() {
         meta[key] = _globalsNewUi.entries[key].meta
     }
     return meta
+}
+
+async function items_refreshRelations(uid: number) {
+    const entries = items_getAllEntries()
+    for(let id in entries) {
+        const e = entries[id]
+        for(let id2 in entries) {
+            const e2 = entries[id2]
+            if(e2.info.ParentId === e.ItemId) {
+                console.log(e2.info)
+                e.relations.children.push(e2.ItemId)
+            }
+
+            if(e.info.Requires === e2.ItemId) {
+                e.relations.requires.push(e2.ItemId)
+            }
+
+            if(e2.info.CopyOf === e.ItemId) {
+                e.relations.copies.push(e2.ItemId)
+            }
+        }
+    }
 }
 
 /**

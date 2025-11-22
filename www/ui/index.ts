@@ -33,6 +33,7 @@ async function main() {
     const onrender = () => {
         //just in case
         removeEventListener("aio-items-rendered", onrender)
+        items_refreshRelations(uid)
         items_refreshMetadata(uid).then(() => {
             for (let item of items_getSelected()) {
                 mode_refreshItem(item.ItemId)
