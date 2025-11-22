@@ -91,6 +91,7 @@ class DisplayMode extends Mode {
             let childId = BigInt(String(target.value))
             let info = findInfoEntryById(childId)
             info.ParentId = item.ItemId
+            items_getEntry(info.ItemId).relations.setParent(item.ItemId)
             api_setParent(childId, item.ItemId).then(() => {
                 updateInfo2({
                     [String(item.ItemId)]: { info: item },
@@ -148,6 +149,7 @@ class DisplayMode extends Mode {
 
                 info.Requires = itemid
                 api_setItem("", info, "update the requirement")
+                items_getEntry(id).relations.requires.push(itemid)
                 updateInfo2({
                     [String(id)]: {
                         info
