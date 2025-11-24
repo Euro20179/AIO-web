@@ -44,7 +44,6 @@ function probablyInfoEntry(item: object): item is InfoEntry {
         "ArtStyle",
         "Location",
         "Native_Title",
-        "ParentId",
         "PurchasePrice",
         "Type",
         "En_Title",

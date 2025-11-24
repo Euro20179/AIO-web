@@ -87,7 +87,6 @@ type InfoEntry = {
     ArtStyle: number
     Location: string
     Native_Title: string
-    ParentId: bigint
     PurchasePrice: number
     Type: EntryType
     En_Title: string
@@ -131,13 +130,11 @@ type MetadataEntry = {
 
 
 class items_Relations {
-    parent: bigint | null = null
     children: bigint[]
 
     constructor(public id: bigint, children: bigint[] | bigint, public copies: bigint[], public requires: bigint[]) {
         //accept a parent for legacy compat
         if (typeof children === 'bigint') {
-            this.parent = children
             this.children = []
         } else {
             this.children = children
@@ -148,27 +145,9 @@ class items_Relations {
         if (this.children.includes(id)) {
             this.children = this.children.filter(v => v !== id)
         }
-
-        const e = items_getEntry(id)
-        if(e.relations.parent === this.id) {
-            e.relations.parent = 0n
-        }
-    }
-
-    removeParent(id: bigint) {
-        if (this.parent === id) {
-            this.parent = 0n
-            items_getEntry(this.id).info.ParentId = 0n
-        }
-
-        for (let parent of this.findParents()) {
-            items_getEntry(parent).relations.removeChild(this.id)
-        }
     }
 
     removeAllParents() {
-        this.parent = 0n
-        items_getEntry(this.id).info.ParentId = 0n
         for (let parent of this.findParents()) {
             items_getEntry(parent).relations.removeChild(this.id)
         }
@@ -205,8 +184,6 @@ class items_Relations {
      * Adds `this` as a child of `id`
      */
     setParent(id: bigint) {
-        this.parent = id
-        items_getEntry(this.id).info.ParentId = id
         items_getEntry(id).relations.children.push(this.id)
     }
 
@@ -226,10 +203,6 @@ class items_Relations {
     }
 
     isChild() {
-        if (this.parent === 0n) {
-            return false
-        }
-
         for (let k in items_getAllEntries()) {
             if (this.isChildOf(BigInt(k))) {
                 return true
@@ -247,10 +220,6 @@ class items_Relations {
      * Checks if `this` is a child of `id`
      */
     isChildOf(id: bigint) {
-        if (this.parent === id) {
-            return true
-        }
-
         if (items_getEntry(id).relations.children.includes(this.id)) {
             return true
         }
@@ -267,24 +236,13 @@ class items_Relations {
     }
 
     *findDescendants(): Generator<items_Entry> {
-        if (this.parent === null) {
-            yield* this.children.values().map(v => items_getEntry(v))
-        }
-        else {
-            yield*
-                Object.values(items_getAllEntries())
-                    .values()
-                    .filter(v => v.relations.isChildOf(this.id))
-        }
+        yield*
+            Object.values(items_getAllEntries())
+                .values()
+                .filter(v => v.relations.isChildOf(this.id))
     }
 
     *findParents() {
-        //treat this as the only parent for legacy compat
-        if (this.parent) {
-            yield this.parent
-            return
-        }
-
         const entries = items_getAllEntries()
         for (let id in entries) {
             const entry = entries[id]
@@ -534,7 +492,6 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         ArtStyle: 0,
         Location: "",
         Native_Title: "",
-        ParentId: 0n,
         PurchasePrice: 0,
         Type: "Show",
         En_Title: "",
