@@ -181,7 +181,7 @@ class items_Relations {
             items_getEntry(id).relations.removeCopy(this.id)
 
             const e = items_getEntry(this.id)
-            if(e.info.CopyOf === id) {
+            if (e.info.CopyOf === id) {
                 e.info.CopyOf = 0n
             }
         }
@@ -573,23 +573,18 @@ function items_getAllMeta() {
 }
 
 async function items_refreshRelations(uid: number) {
-    const entries = items_getAllEntries()
-    for(let id in entries) {
-        const e = entries[id]
-        for(let id2 in entries) {
-            const e2 = entries[id2]
-            if(e2.info.ParentId === e.ItemId) {
-                console.log(e2.info)
-                e.relations.children.push(e2.ItemId)
-            }
-
-            if(e.info.Requires === e2.ItemId) {
-                e.relations.requires.push(e2.ItemId)
-            }
-
-            if(e2.info.CopyOf === e.ItemId) {
-                e.relations.copies.push(e2.ItemId)
-            }
+    const relations = await api_getRelations(uid)
+    for (let id in relations) {
+        //FIXME: this only throws an error because
+        //api_getRelations does not respect uid
+        //because the /list-relations endpoint does not respect uid
+        try {
+            const e = items_getEntry(BigInt(id))
+            e.relations.children = relations[id].Children?.map((v: any) => BigInt(v)) || []
+            e.relations.requires = relations[id].Requires?.map((v: any) => BigInt(v)) || []
+            e.relations.copies = relations[id].Copies?.map((v: any) => BigInt(v)) || []
+        } catch (err) {
+            continue
         }
     }
 }

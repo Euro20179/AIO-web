@@ -203,6 +203,16 @@ async function api_listTypes() {
     return _api_types_cache
 }
 
+async function api_getRelations(uid: number) {
+    const res = await fetch(`${apiPath}/list-relations?uid=${uid}`)
+
+    if(!res) {
+        return {}
+    }
+    const text = await res.text()
+    return JSON.parse(text.replace(/(?<!")(\d+)(?=,|\])(?!")/g, '"$1"'))
+}
+
 async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
     const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
     if (!res) {
