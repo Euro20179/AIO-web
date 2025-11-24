@@ -1107,6 +1107,7 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
                         api_delChild(child.info.Uid, child.ItemId, thisId).then(() => {
                             items_removeChild(child.ItemId, thisId)
                             updateInfo2({
+                                [String(thisId)]: { info: findInfoEntryById(thisId) },
                                 [String(child.ItemId)]: { info: child.info }
                             })
                         })
