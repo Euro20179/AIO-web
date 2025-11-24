@@ -1516,7 +1516,20 @@ async function getSettings(uid: number): Promise<UserSettings> {
  * WARNING: interactive elements may not work in the popout window
  */
 function popoutUI(popoutTarget: HTMLElement, event: keyof WindowEventMap = "click") {
-    const parent = popoutTarget.parentElement
+
+    const toPop = popoutTarget.getAttribute("popout-target")
+    let parent = popoutTarget.parentElement
+    if(toPop) {
+        const root = popoutTarget.getRootNode()
+        console.log(root, root.nodeType)
+        if (!(
+            root.nodeType === Node.DOCUMENT_NODE
+            || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE
+        ))
+            throw new Error("Popout button root is not a document")
+        //@ts-ignore
+        parent = root.getElementById(toPop)
+    }
     if (!parent) return
 
     popoutTarget.onclick = function() {
