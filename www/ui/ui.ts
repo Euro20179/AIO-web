@@ -1521,7 +1521,6 @@ function popoutUI(popoutTarget: HTMLElement, event: keyof WindowEventMap = "clic
     let parent = popoutTarget.parentElement
     if(toPop) {
         const root = popoutTarget.getRootNode()
-        console.log(root, root.nodeType)
         if (!(
             root.nodeType === Node.DOCUMENT_NODE
             || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE

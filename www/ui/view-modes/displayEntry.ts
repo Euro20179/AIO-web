@@ -89,13 +89,12 @@ class DisplayMode extends Mode {
             }
 
             let childId = BigInt(String(target.value))
-            let info = findInfoEntryById(childId)
-            info.ParentId = item.ItemId
-            items_getEntry(info.ItemId).relations.setParent(item.ItemId)
-            api_setParent(childId, item.ItemId).then(() => {
+            let child = findInfoEntryById(childId)
+            api_addChild(item.Uid, childId, item.ItemId).then(() => {
+                items_addChild(child.ItemId, item.ItemId)
                 updateInfo2({
                     [String(item.ItemId)]: { info: item },
-                    [String(target.value)]: { info }
+                    [String(target.value)]: { info: child }
                 })
             })
         }),
@@ -110,16 +109,12 @@ class DisplayMode extends Mode {
                     alert("Could not set child")
                     return
                 }
-                api_setParent(id, item.ItemId).then(() => {
-                    let info = findInfoEntryById(id)
-                    if (!info) {
-                        alert("could not find child id")
-                        return
-                    }
-                    items_getEntry(info.ItemId).relations.setParent(item.ItemId)
+                api_addChild(item.Uid, id, item.ItemId).then(() => {
+                    let child = findInfoEntryById(id)
+                    items_addChild(child.ItemId, item.ItemId)
                     updateInfo2({
                         [String(item.ItemId)]: { info: item },
-                        [String(id)]: { info }
+                        [String(id)]: { info: child }
                     })
                 })
             })
@@ -1100,23 +1095,17 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
                     case "copies":
                         const e = items_getEntry(thisId)
                         e.relations.removeCopy(child.ItemId)
-                        api_setItem("", e.info).then((res) => {
-                            if (!res || res.status !== 200) {
-                                alert("Failed to update item")
-                                return
-                            }
+                        api_delCopy(e.info.Uid, e.ItemId, child.ItemId).then(() => {
+                            items_removeCopy(e.ItemId, child.ItemId)
                             updateInfo2({
-                                [String(thisId)]: { info: e.info }
+                                [String(thisId)]: { info: e.info },
+                                [String(child.ItemId)]: { info: child.info }
                             })
                         })
                         break
                     case "descendants":
-                        child.relations.removeParent(thisId)
-                        api_setItem("", child.info).then((res) => {
-                            if (!res || res.status !== 200) {
-                                alert("Failed to update item")
-                                return
-                            }
+                        api_delChild(child.info.Uid, child.ItemId, thisId).then(() => {
+                            items_removeChild(child.ItemId, thisId)
                             updateInfo2({
                                 [String(child.ItemId)]: { info: child.info }
                             })

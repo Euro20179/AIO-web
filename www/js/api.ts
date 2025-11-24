@@ -265,6 +265,30 @@ async function api_setParent(id: bigint, parent: bigint) {
     return await authorizedRequest(`${apiPath}/mod-entry?id=${id}&parent-id=${parent}`)
 }
 
+async function api_addChild(uid: number, child: bigint, parent: bigint) {
+    return await authorizedRequest(`${apiPath}/add-child?uid=${uid}&child=${child}&parent=${parent}`)
+}
+
+async function api_addCopy(uid: number, copy: bigint, copyof: bigint) {
+    return await authorizedRequest(`${apiPath}/add-copy?uid=${uid}&copy=${copy}&copyof=${copyof}`)
+}
+
+async function api_addRequires(uid: number, itemid: bigint, requires: bigint) {
+    return await authorizedRequest(`${apiPath}/add-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
+}
+
+async function api_delChild(uid: number, child: bigint, parent: bigint) {
+    return await authorizedRequest(`${apiPath}/del-child?uid=${uid}&child=${child}&parent=${parent}`)
+}
+
+async function api_delCopy(uid: number, copy: bigint, copyof: bigint) {
+    return await authorizedRequest(`${apiPath}/del-child?uid=${uid}&copy=${copy}&copyof=${copyof}`)
+}
+
+async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
+    return await authorizedRequest(`${apiPath}/del-child?uid=${uid}&itemid=${itemid}&requires=${requires}`)
+}
+
 /**
  * Performs a search
  * @param {string} searchString - the search query

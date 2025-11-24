@@ -148,6 +148,11 @@ class items_Relations {
         if (this.children.includes(id)) {
             this.children = this.children.filter(v => v !== id)
         }
+
+        const e = items_getEntry(id)
+        if(e.relations.parent === this.id) {
+            e.relations.parent = 0n
+        }
     }
 
     removeParent(id: bigint) {
@@ -203,6 +208,10 @@ class items_Relations {
         this.parent = id
         items_getEntry(this.id).info.ParentId = id
         items_getEntry(id).relations.children.push(this.id)
+    }
+
+    addChild(id: bigint) {
+        items_getEntry(id).relations.setParent(this.id)
     }
 
     /**
@@ -356,6 +365,18 @@ function items_setLibrary(info: InfoEntry) {
 }
 function items_deleteLibrary(id: string) {
     delete _globalsNewUi.libraries[id]
+}
+
+function items_addChild(child: bigint, parent: bigint) {
+    items_getEntry(parent).relations.addChild(child)
+}
+
+function items_removeChild(child: bigint, parent: bigint) {
+    items_getEntry(parent).relations.removeChild(child)
+}
+
+function items_removeCopy(copy: bigint, copyof: bigint) {
+    items_getEntry(copy).relations.removeCopy(copyof)
 }
 
 /**
