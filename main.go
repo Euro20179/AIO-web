@@ -99,7 +99,6 @@ func parseTemplate(into io.Writer, file string, data any) error {
 func root(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Path == "/login" {
 		auth := req.Header.Get("Authorization")
-		println(auth)
 
 		b64 := ""
 
@@ -120,6 +119,7 @@ func root(w http.ResponseWriter, req *http.Request) {
 				w.Header().Set("Set-Cookie", fmt.Sprintf("login=%s", b64))
 				w.Header().Add("Set-Cookie", fmt.Sprintf("uid=%d", uid))
 				w.WriteHeader(301)
+				w.Write([]byte("<title>[AIO] LOGGED IN, REDIRECTING</title>"))
 			} else {
 				w.WriteHeader(status)
 				w.Write([]byte(err.Error()))
