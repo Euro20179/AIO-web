@@ -1110,29 +1110,22 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
                 "descendants": "Would you like to remove this item as a descendant of it's parent",
                 "copies": "Would you like to remove this item as a copy"
             }
-            if (confirm(confirmationText[relationType])) {
-                switch (relationType) {
-                    case "copies":
-                        const e = items_getEntry(thisId)
-                        e.relations.removeCopy(child.ItemId)
-                        api_delCopy(e.info.Uid, e.ItemId, child.ItemId).then(() => {
-                            items_removeCopy(e.ItemId, child.ItemId)
-                            updateInfo2({
-                                [String(thisId)]: { info: e.info },
-                                [String(child.ItemId)]: { info: child.info }
-                            })
-                        })
-                        break
-                    case "descendants":
-                        api_delChild(child.info.Uid, child.ItemId, thisId).then(() => {
-                            items_removeChild(child.ItemId, thisId)
-                            updateInfo2({
-                                [String(thisId)]: { info: findInfoEntryById(thisId) },
-                                [String(child.ItemId)]: { info: child.info }
-                            })
-                        })
-                }
-            }
+            if (!confirm(confirmationText[relationType])) return
+
+            const [apiFunc, itemsFunc] = ({
+                "copies": [api_delCopy, items_removeCopy],
+                "descendants": [api_delChild, items_removeChild]
+            } as const)[relationType]
+
+            //since copyof left/right doesn't matter
+            //we'll just use the left/right for adding a child
+            apiFunc(child.info.Uid, child.ItemId, thisId).then(() => {
+                itemsFunc(child.ItemId, thisId)
+                updateInfo2({
+                    [String(thisId)]: { info: findInfoEntryById(thisId) },
+                    [String(child.ItemId)]: { info: child.info }
+                })
+            })
         })
     }
 }

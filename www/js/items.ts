@@ -311,6 +311,7 @@ function items_removeChild(child: bigint, parent: bigint) {
 }
 
 function items_removeCopy(copy: bigint, copyof: bigint) {
+    //relations.removeCopy removes both sides of the copy
     items_getEntry(copy).relations.removeCopy(copyof)
 }
 
