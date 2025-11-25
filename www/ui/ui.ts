@@ -1049,7 +1049,7 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let requiresEl = form.querySelector("[name=\"requires\"]")
     if (!(requiresEl !== null && "value" in requiresEl)) throw new Error("name=requires did not return an input kind element")
-    const requires = copyOfIdEl.value
+    const requires = requiresEl.value
 
     if (parentId !== "0") {
         queryString += `&parentId=${parentId}`

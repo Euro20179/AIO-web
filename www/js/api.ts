@@ -281,11 +281,11 @@ async function api_delChild(uid: number, child: bigint, parent: bigint) {
 }
 
 async function api_delCopy(uid: number, copy: bigint, copyof: bigint) {
-    return await authorizedRequest(`${apiPath}/del-child?uid=${uid}&copy=${copy}&copyof=${copyof}`)
+    return await authorizedRequest(`${apiPath}/del-copy?uid=${uid}&copy=${copy}&copyof=${copyof}`)
 }
 
 async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
-    return await authorizedRequest(`${apiPath}/del-child?uid=${uid}&itemid=${itemid}&requires=${requires}`)
+    return await authorizedRequest(`${apiPath}/del-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
 }
 
 /**
@@ -478,7 +478,7 @@ async function api_getEntryAll(itemId: bigint, uid: number) {
         return null
     }
     const text = await res.text()
-    const [user, meta, info, ...events] = text.split("\n")
+    const [user, meta, info, ...events] = text.split("\n").filter(Boolean)
     return {
         user: api_deserializeJsonl<UserEntry>(user).next().value,
         meta: api_deserializeJsonl<MetadataEntry>(meta).next().value,

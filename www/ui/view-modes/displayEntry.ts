@@ -1806,7 +1806,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         template = self.GLOBAL_TEMPLATE[String(itemId)]
     }
 
-
     if (template || ((template = getUserExtra(user, "template")?.trim()))) {
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }

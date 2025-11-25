@@ -90,7 +90,6 @@ type InfoEntry = {
     PurchasePrice: number
     Type: EntryType
     En_Title: string
-    CopyOf: bigint
     Library: bigint
     Uid: number
     Requires: bigint
@@ -155,28 +154,12 @@ class items_Relations {
 
     removeCopy(id: bigint) {
         const e = items_getEntry(id)
-        if (id === e.info.CopyOf) {
-            e.info.CopyOf = 0n
-        }
 
         //prevent infinite recursion
         if (this.copies.includes(id)) {
             this.copies = this.copies.filter(v => v !== id)
             items_getEntry(id).relations.removeCopy(this.id)
-
-            const e = items_getEntry(this.id)
-            if (e.info.CopyOf === id) {
-                e.info.CopyOf = 0n
-            }
         }
-    }
-
-    setNotACopy() {
-        items_getEntry(this.id).info.CopyOf = 0n
-        for (let copy of this.findCopies()) {
-            copy.relations.removeCopy(this.id)
-        }
-        this.copies = []
     }
 
     /**
@@ -189,17 +172,6 @@ class items_Relations {
 
     addChild(id: bigint) {
         items_getEntry(id).relations.setParent(this.id)
-    }
-
-    /**
-     * Sets `this` to have `id` as a copy
-     * Adds `this` as a copy of `id`
-     */
-    setCopy(id: bigint) {
-        //this only has one copy because **set**copy
-        this.copies = [id]
-        //however the copy may have more than just this as a copy
-        items_getEntry(id).relations.copies.push(id)
     }
 
     isChild() {
@@ -495,7 +467,6 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         PurchasePrice: 0,
         Type: "Show",
         En_Title: "",
-        CopyOf: 0n,
         Library: 0n,
         Requires: 0n,
         RecommendedBy: "",
