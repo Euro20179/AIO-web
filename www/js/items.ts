@@ -301,6 +301,11 @@ function items_addChild(child: bigint, parent: bigint) {
     items_getEntry(parent).relations.addChild(child)
 }
 
+function items_addCopy(copy: bigint, copyof: bigint) {
+    items_getEntry(copy).relations.copies.push(copyof)
+    items_getEntry(copyof).relations.copies.push(copy)
+}
+
 function items_removeChild(child: bigint, parent: bigint) {
     items_getEntry(parent).relations.removeChild(child)
 }

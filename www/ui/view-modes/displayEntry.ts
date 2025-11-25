@@ -80,6 +80,26 @@ class DisplayMode extends Mode {
         copythis: this.displayEntryAction(item => copyThis.call(this, item)),
 
         /**
+         * Adds a copy fo the current object. The copy taht is added
+         * is the copy with the id that is the value of this element
+         */
+        selectnewcopy: this.displayEntryAction(item => {
+            selectItemUI().then(id => {
+                if (!id) {
+                    alert("Could not add copy")
+                    return
+                }
+                api_addCopy(item.Uid, id, item.ItemId).then(() => {
+                    items_addCopy(id, item.ItemId)
+                    updateInfo2({
+                        [String(item.ItemId)]: { info: item },
+                        [String(id)]: { info: findInfoEntryById(id) }
+                    })
+                })
+            })
+        }),
+
+        /**
          * Adds a child to the current object. The child that is added
          * is the child with the id that is the value of this element
          */
