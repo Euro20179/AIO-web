@@ -1276,6 +1276,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
         "DIGITAL": "Misc",
         "IMAGE": "Misc",
         "UNOWNED": "Misc",
+        "THEATER": "Misc",
         "OTHER": "Misc",
         "CD": "Optical",
         "DVD": "Optical",

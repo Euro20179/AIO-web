@@ -1084,12 +1084,15 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
 function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
+
     relationships = relationships.sort((a, b) => {
         return (sequenceNumberGrabber(a.info.En_Title, titles) || 0) - (sequenceNumberGrabber(b.info.En_Title, titles) || 0)
     })
+
     for (let child of relationships) {
         let meta = findMetadataById(child.ItemId)
         let el: HTMLElement
+
         if (meta?.Thumbnail) {
             el = document.createElement("img")
             formatToName(child.info.Format).then(name => {
@@ -1100,10 +1103,13 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
             el = document.createElement("button")
             el.innerText = child.info.En_Title
         }
+
         elementParent.append(el)
+
         el.addEventListener("click", (e) => {
             mode_toggleItem(child.info)
         })
+
         el.addEventListener("contextmenu", e => {
             e.preventDefault()
             const confirmationText = {
