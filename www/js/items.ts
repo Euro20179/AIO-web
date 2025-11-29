@@ -800,7 +800,8 @@ function items_formatToSymbol(format: number): string {
         13: "🤷",
         14: "V💿︎",
         15: "🖼️",
-        16: "🚫"
+        16: "🚫",
+        17: "🎞",
     }[format] + out
 }
 
