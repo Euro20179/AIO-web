@@ -188,7 +188,6 @@ class DisplayMode extends Mode {
                 itemid ||= 0n
                 let info = findInfoEntryById(id)
 
-                info.Requires = itemid
                 api_setItem("", info, "update the requirement")
                 items_getEntry(id).relations.requires.push(itemid)
                 updateInfo2({
@@ -2076,8 +2075,6 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         "art-style": item.ArtStyle,
         libraryId: item.Library || undefined,
         copyOf: item.ItemId,
-        parentId: item.ParentId || undefined,
-        requires: item.Requires || undefined,
         tags: item.Collection,
         location: item.Location,
         "user-notes": user.Notes,

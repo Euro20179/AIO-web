@@ -1234,7 +1234,7 @@ async function signinUI(reason: string): Promise<string> {
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
     if (loginReasonEl instanceof HTMLElement) {
-        loginReasonEl.innerText = reason
+        loginReasonEl.innerText = reason || ""
     }
 
     //if the popover is already open, something already called this function for the user to sign in
