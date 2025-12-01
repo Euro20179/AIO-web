@@ -21,6 +21,7 @@
     {{template "www/ui/html-templates/de-status-menu.html"}}
     {{template "www/ui/html-templates/de-notes.html"}}
     {{template "www/ui/html-templates/de-description.html"}}
+    {{template "www/ui/html-templates/de-requirements.html"}}
     {{template "www/ui/html-templates/de-cost-calculation-modifiers.html"}}
 
     {{template "www/ui/html-templates/event-template.html"}}
@@ -677,38 +678,38 @@
                     <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
-                <form action="javascript:loadSearchUI()" id="sidebar-form">
+                <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
                     <input type="search" name="search-query" placeholder="search query">
-                    <div class="grid">
-                        <select name="sort-by" title="sort by">
-                            <optgroup label="Misc">
-                                <option value="">No Sort</option>
-                                <option value="item-id">Item Id</option>
-                                <option value="release-year" title="*requires metadata">Release year*</option>
-                                <option value="cost">Cost</option>
-                            </optgroup>
-                            <optgroup label="Title">
-                                <option value="user-title">User Title</option>
-                                <option value="native-title">Native Title</option>
-                                <option value="-aiow-numeric-title">Numeric User Title</option>
-                            </optgroup>
-                            <optgroup label="Rating">
-                                <option value="rating">User Rating</option>
-                                <option value="general-rating" title="*requires metadata">General rating*</option>
-                            </optgroup>
-                            <!-- <option value="rating-disparity" -->
-                            <!--     title="How different your rating is from the general consensous"> -->
-                            <!--     Rating disparity</option> -->
-                            <optgroup label="Event">
-                                <option value="added">Added</option>
-                                <option value="finished" title="**does not happen clientside">Finished**</option>
-                                <option value="viewing" title="**does not happen clientside">Viewing**</option>
-                            </optgroup>
-                        </select>
-                        <select name="uid">
-                            <option value="0">ALL</option>
-                        </select>
-                    </div>
+                    <select name="sort-by" title="sort by">
+                        <optgroup label="Misc">
+                            <option value="">No Sort</option>
+                            <option value="item-id">Item Id</option>
+                            <option value="release-year" title="*requires metadata">Release year*</option>
+                            <option value="cost">Cost</option>
+                        </optgroup>
+                        <optgroup label="Title">
+                            <option value="user-title">User Title</option>
+                            <option value="native-title">Native Title</option>
+                            <option value="-aiow-numeric-title">Numeric User Title</option>
+                        </optgroup>
+                        <optgroup label="Rating">
+                            <option value="rating">User Rating</option>
+                            <option value="general-rating" title="*requires metadata">General rating*</option>
+                        </optgroup>
+                        <!-- <option value="rating-disparity" -->
+                        <!--     title="How different your rating is from the general consensous"> -->
+                        <!--     Rating disparity</option> -->
+                        <optgroup label="Event">
+                            <option value="added">Added</option>
+                            <option value="finished" title="**does not happen clientside">Finished**</option>
+                            <option value="viewing" title="**does not happen clientside">Viewing**</option>
+                        </optgroup>
+                    </select>
+
+                    <!-- ui relies on this to keep track of the uid -->
+                    <select name="uid" hidden>
+                        <option value="0">ALL</option>
+                    </select>
                     <button type="submit">🔎</button>
                 </form>
                 <!--used for proper overflow-->

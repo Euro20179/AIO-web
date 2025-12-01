@@ -56,9 +56,9 @@ function startupUI({
         throw new Error("library selector must be a select element")
     }
 
-    if (!(components["userSelector"] instanceof HTMLSelectElement)) {
-        throw new Error("user uid selector must be a select element")
-    }
+    // if (!(components["userSelector"] instanceof HTMLSelectElement)) {
+    //     throw new Error("user uid selector must be a select element")
+    // }
 
     if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
         throw new Error("sort by selector must be a select element")
@@ -1366,16 +1366,18 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
     typeDropdown.replaceChildren(...Object.values(optGroups))
 }
 
-async function fillUserSelectionUI(selector: HTMLSelectElement) {
+async function fillUserSelectionUI(selector: HTMLSelectElement | undefined | null) {
     for (let acc of await api_listAccounts()) {
-        const opt = document.createElement("option")
         const [id, name] = acc.split(":")
 
         ACCOUNTS[Number(id)] = name
 
-        opt.value = id
-        opt.innerText = name
-        selector.append(opt)
+        if (selector) {
+            const opt = document.createElement("option")
+            opt.value = id
+            opt.innerText = name
+            selector.append(opt)
+        }
     }
 }
 
@@ -1392,7 +1394,7 @@ function setUIDFromHeuristicsUI() {
             setError(`username: ${params.get("uname")} does not exist`)
             return
         }
-        setUIDUI(String(uid))
+        setUIDUI(uid[0])
     } else if (params.has("uid")) {
         setUIDUI(params.get("uid") as string)
     } else if (localStorage.getItem("userUID")) {
@@ -1520,7 +1522,7 @@ function popoutUI(popoutTarget: HTMLElement, event: keyof WindowEventMap = "clic
 
     const toPop = popoutTarget.getAttribute("popout-target")
     let parent = popoutTarget.parentElement
-    if(toPop) {
+    if (toPop) {
         const root = popoutTarget.getRootNode()
         if (!(
             root.nodeType === Node.DOCUMENT_NODE

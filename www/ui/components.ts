@@ -127,6 +127,7 @@ for (const name of [
     "de-cost-calculation-modifiers",
     "de-notes",
     "de-description",
+    "de-requirements",
 
     "calendar-template",
     "event-template",

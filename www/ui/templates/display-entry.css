@@ -145,7 +145,7 @@
 
         font-size: min(1em, 3cqw);
 
-        max-width: 40cqw;
+        max-width: 30cqw;
         overflow: auto auto;
 
         width: min-width;
@@ -462,7 +462,6 @@
         div:first-child {
             display: flex;
             gap: var(--small-gap);
-            justify-content: center;
         }
     }
 

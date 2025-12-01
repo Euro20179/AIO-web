@@ -231,24 +231,20 @@
         <hr>
 
         <section id="required-section">
-            <div>
-                <h4 class="center">Requirements</h4>
-                <button entry-action="newrequires">+</button>
-                <button entry-action="selectnewrequirement">Add Existing</button>
-            </div>
-            <div id="required-items" class="flex wrap">
-            </div>
+                <de-requirements></de-requirements>
         </section>
 
         <hr>
 
         <section class="descendants" id="descendants-section">
             <div>
-                <h4 class="center">Children</h4>
-                <button id="new-child" title="Create new item as a child of this">+</button>
-                <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
+                <h4>Children</h4>
             </div>
             <div id="descendants">
+            </div>
+            <div>
+                <button id="new-child" title="Create new item as a child of this">+</button>
+                <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
             </div>
         </section>
 
@@ -256,15 +252,17 @@
 
         <section class="copies" id="copies-section">
             <div>
-                <h4 class="center">Copies</h4>
+                <h4>Copies</h4>
+            </div>
+            <div id="copies">
+            </div>
+            <div>
                 <button id="new-copy" title="Create new item as a copy of this">+</button>
                 <button id="copy-from-this" title="Create a new item that is an exact copy of this"
                     entry-action="copythis">Copy
                     this</button>
                 <button id="new-copy-by-id" entry-action="selectnewcopy">Add Existing</button>
-            </div>
-            <div id="copies">
-            </div>
+            </div>                    
         </section>
     </div>
     <!-- </div> -->

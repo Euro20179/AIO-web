@@ -15,7 +15,7 @@ async function main() {
         itemFilter: getElementOrThrowUI("#item-filter", HTMLInputElement),
         newEntryLibrarySelector: getElementOrThrowUI("[name=\"libraryId\"]", HTMLSelectElement),
         librarySelector: getElementOrThrowUI("#library-selector", HTMLSelectElement),
-        userSelector: getElementOrThrowUI('[name="uid"]', HTMLSelectElement),
+        userSelector: getElementUI('[name="uid"]', HTMLSelectElement),
         sortBySelector, 
         errorOut: document.getElementById("error"),
         searchForm: getElementOrThrowUI("#sidebar-form", HTMLFormElement),
@@ -58,7 +58,8 @@ async function main() {
 
     fillFormatSelectionUI(getElementOrThrowUI('[name="format"]', HTMLSelectElement))
     fillTypeSelectionUI(getElementOrThrowUI("#new-item-form [name=\"type\"]", HTMLSelectElement))
-    await fillUserSelectionUI(getElementOrThrowUI("[name=\"uid\"]", HTMLSelectElement))
+    await fillUserSelectionUI(getElementUI("[name=\"uid\"]", HTMLSelectElement))
+
     setUIDFromHeuristicsUI()
 
     fillRecommendedListUI(recommenders, getUidUI())

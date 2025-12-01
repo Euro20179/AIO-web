@@ -258,7 +258,6 @@
 
 
         [name="search-query"] {
-            width: 10cqi;
             flex-grow: 1;
         }
 
@@ -272,15 +271,6 @@
                 grid-template-rows: 1fr;
                 width: 20cqi;
             }
-        }
-
-        [name="sort-by"] {
-            flex-grow: 0.3;
-            width: 100%;
-        }
-
-        [name="uid"] {
-            width: 100%;
         }
 
         [data-stat-name="totalCost"]::before {
