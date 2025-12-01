@@ -241,8 +241,8 @@
     }
 
     #tags {
-        overflow: auto;
         display: flex;
+        flex-wrap: wrap;
         gap: 2ch;
 
         /*div containing the tags which includes the new tag button*/
@@ -381,10 +381,6 @@
         &::before {
             content: attr(data-type-icon) " ";
         }
-    }
-
-    #genres {
-        padding: var(--small-gap) 0;
     }
 
     #official-native-title {
