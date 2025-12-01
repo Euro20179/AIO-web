@@ -119,6 +119,32 @@ class DisplayMode extends Mode {
             })
         }),
 
+        selectnewrequirement: this.displayEntryAction(item => {
+            selectItemUI().then(id => {
+                if(!id) {
+                    alert("Could not add requirement")
+                    return
+                }
+
+                api_addRequires(item.Uid, item.ItemId, id).then(() => {
+                    let requirement = findInfoEntryById(id)
+                    items_addRequires(item.ItemId, id)
+                    updateInfo2({ 
+                        [String(item.ItemId)]: {info: item},
+                        [String(requirement.ItemId)]: {info: requirement}
+                    })
+                })
+            })
+        }),
+
+        newrequires: this.displayEntryAction(item => {
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const requiresIdEl = getElementOrThrowUI(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
+
+            requiresIdEl.value = String(item.ItemId)
+            newEntryDialog.showModal()
+        }),
+
         /**
          * Lets the user select an item to be added as a child of
          * the current item
@@ -1081,7 +1107,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
     eventsTbl.innerHTML = html
 }
 
-function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies") {
+function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
     let relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
 
@@ -1104,6 +1130,8 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
             el.innerText = child.info.En_Title
         }
 
+        el.setAttribute("data-view-count", String(findUserEntryById(child.ItemId).ViewCount))
+
         elementParent.append(el)
 
         el.addEventListener("click", (e) => {
@@ -1114,13 +1142,18 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
             e.preventDefault()
             const confirmationText = {
                 "descendants": "Would you like to remove this item as a descendant of it's parent",
-                "copies": "Would you like to remove this item as a copy"
+                "copies": "Would you like to remove this item as a copy",
+                "required-items": "Would you like to remove this item as a requirement"
             }
             if (!confirm(confirmationText[relationType])) return
 
             const [apiFunc, itemsFunc] = ({
                 "copies": [api_delCopy, items_removeCopy],
-                "descendants": [api_delChild, items_removeChild]
+                "descendants": [api_delChild, items_removeChild],
+                "required-items": [
+                    (uid: number, right: bigint, left: bigint) => api_delRequires(uid, left, right),
+                    (right: bigint, left: bigint) => items_removeRequires(left, right)
+                ],
             } as const)[relationType]
 
             //since copyof left/right doesn't matter
@@ -1387,7 +1420,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const digitized = el.getElementById("format-digitized")
     const genresRoot = el.getElementById("genres")
     const tagsRoot = el.getElementById("tags")
-    const requiredItemsEl = el.getElementById("required-items")
     const itemInteractionsMenuEl = el.getElementById("item-interaction-menu")
 
 
@@ -1735,36 +1767,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
     //relation elements
-    for (let relationship of [["descendants", findDescendants], ["copies", findCopies]] as const) {
+    for (let relationship of [["descendants", findDescendants], ["copies", findCopies], ["required-items", findRequirements]] as const) {
         let relationshipEl = el.getElementById(relationship[0])
         if (!relationshipEl) continue
 
         relationshipEl.innerHTML = ""
         createRelationButtons.call(this, item.ItemId, relationshipEl, relationship[1](item.ItemId), relationship[0])
-    }
-
-    //Required items
-    if (requiredItemsEl) {
-        for (let requirement of items_getEntry(item.ItemId).relations.requires) {
-            const requiredItem = findInfoEntryById(requirement)
-            let meta = findMetadataById(requirement)
-
-            let el = requiredItemsEl.querySelector("#required-item") as HTMLElement
-            if (el instanceof HTMLImageElement) {
-                formatToName(requiredItem.Format).then(name => {
-                    el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
-                })
-                el.src = fixThumbnailURL(meta.Thumbnail)
-                el.alt = requiredItem.En_Title || requiredItem.Native_Title
-            } else {
-                formatToName(requiredItem.Format).then(name => {
-                    el.title = `${requiredItem.En_Title} (${typeToSymbol(requiredItem.Type)} on ${name})`
-                })
-                el.innerText = requiredItem.En_Title || requiredItem.Native_Title
-            }
-            el.onclick = () => mode_toggleItem(requiredItem)
-            requiredItemsEl.appendChild(el)
-        }
     }
 
     //Events

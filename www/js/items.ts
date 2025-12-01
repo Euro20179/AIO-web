@@ -140,6 +140,12 @@ class items_Relations {
         }
     }
 
+    removeRequires(id: bigint) {
+        if(this.requires.includes(id)) {
+            this.requires = this.requires.filter(v => v !== id)
+        }
+    }
+
     removeChild(id: bigint) {
         if (this.children.includes(id)) {
             this.children = this.children.filter(v => v !== id)
@@ -172,6 +178,10 @@ class items_Relations {
 
     addChild(id: bigint) {
         items_getEntry(id).relations.setParent(this.id)
+    }
+
+    addRequires(id: bigint) {
+        this.requires.push(id)
     }
 
     isChild() {
@@ -297,6 +307,10 @@ function items_deleteLibrary(id: string) {
     delete _globalsNewUi.libraries[id]
 }
 
+function items_addRequires(item: bigint, requires: bigint) {
+    items_getEntry(item).relations.addRequires(requires)
+}
+
 function items_addChild(child: bigint, parent: bigint) {
     items_getEntry(parent).relations.addChild(child)
 }
@@ -304,6 +318,10 @@ function items_addChild(child: bigint, parent: bigint) {
 function items_addCopy(copy: bigint, copyof: bigint) {
     items_getEntry(copy).relations.copies.push(copyof)
     items_getEntry(copyof).relations.copies.push(copy)
+}
+
+function items_removeRequires(item: bigint, requires: bigint) {
+    items_getEntry(item).relations.removeRequires(requires)
 }
 
 function items_removeChild(child: bigint, parent: bigint) {

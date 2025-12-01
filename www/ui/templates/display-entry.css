@@ -314,25 +314,6 @@
         width: auto;
     }
 
-    #required-section {
-        display: block;
-        float: left;
-        margin: 0 var(--small-gap) 0 0;
-
-        &:has(img[src=""]) #required-items::after{
-            content: "No Requirement"
-        }
-
-        #required-items {
-            justify-content: center;
-        }
-
-        img {
-            cursor: pointer;
-            height: max(15cqb, 100px);
-        }
-    }
-
     :is(#description, #notes) {
         overflow: auto auto;
 
@@ -403,7 +384,8 @@
         content: " times (" attr(data-time-spent, "Unknown") " hours)"
     }
 
-    #entry-progressbar, .entry-progressbar {
+    #entry-progressbar,
+    .entry-progressbar {
         justify-self: center;
         margin: 0;
 
@@ -412,7 +394,8 @@
         appearance: none;
     }
 
-    #entry-progressbar-position-label, .entry-progressbar-position-label {
+    #entry-progressbar-position-label,
+    .entry-progressbar-position-label {
         position: absolute;
         right: 0;
 
@@ -436,7 +419,7 @@
     #entry-progressbar[max]::-moz-progress-bar,
     #entry-progressbar[max]::-webkit-progress-bar,
     .entry-progressbar[max]::-moz-progress-bar,
-    .entry-progressbar[max]::-webkit-progress-bar{
+    .entry-progressbar[max]::-webkit-progress-bar {
         background: var(--green);
     }
 
@@ -463,6 +446,7 @@
     }
 
     #descendants-section,
+    #required-section,
     #copies-section {
         display: flex;
         flex-direction: column;
@@ -482,6 +466,17 @@
         }
     }
 
+    #required-items {
+        img[data-view-count="0"] {
+            border: 2px solid var(--error);
+        }
+
+        img:not([data-view-count="0"]) {
+            border: 2px solid var(--green);
+        }
+    }
+
+    #required-items,
     #descendants,
     #copies {
         display: flex;
