@@ -1,6 +1,6 @@
 # AIO-WEB
 
-The web frontend for the AIO LIMAS.
+The web frontend for the [AIO LIMAS](https://github.com/euro20179/aio-limas).
 
 # Setup
 
