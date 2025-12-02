@@ -119,6 +119,10 @@ class DisplayMode extends Mode {
             })
         }),
 
+        /**
+         * Lets the user select an item to be added as a requirement of
+         * the current item
+         */
         selectnewrequirement: this.displayEntryAction(item => {
             selectItemUI().then(id => {
                 if(!id) {
@@ -137,6 +141,10 @@ class DisplayMode extends Mode {
             })
         }),
 
+        /**
+         * Opens the new entry dialog
+         * with requires filled in as the current item
+         */
         newrequires: this.displayEntryAction(item => {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
             const requiresIdEl = getElementOrThrowUI(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)

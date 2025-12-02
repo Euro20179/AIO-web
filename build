@@ -63,8 +63,10 @@ generate_js_api_docs() {
 
     # Extract function documentation using awk
     for file in www/**/*.ts; do
-        gawk -f ./gen-docs -v "file=${file##www/}" "$file"
+        gawk -f ./build-system/gen-docs -v "file=${file##www/}" "$file"
     done | sed -e "/{{CONTENT}}/r /dev/stdin" -e "/{{CONTENT}}/d" "./build-system/js_api_docs_template.html" >"$temp_file"
+
+    gawk -f ./build-system/gen-de-action-docs "./www/ui/view-modes/displayEntry.ts" > ./www/usage/display-entry-actions.html
 
     # Move the processed file to the final location
     mv "$temp_file" "$docs_file"

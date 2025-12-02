@@ -8,5 +8,6 @@ server-config.ini
 
 www/config.ts
 www/usage/js_api_docs.html
+www/usage/display-entry-actions.html
 
 go.sum

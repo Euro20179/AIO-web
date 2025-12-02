@@ -1,0 +1,72 @@
+#!/bin/gawk
+
+BEGIN {
+    in_de_actions = 0
+
+    in_doc = 0
+    doc = ""
+
+    print "<!DOCTYPE html>"
+    print "<link rel='stylesheet' href='/css/general.css'>"
+    print "<link rel='stylesheet' href='/ui/styles.css'>"
+    print "<style> \
+    body { \
+        height: revert; \
+    } \
+ \
+    ul { \
+        list-style: none; \
+        display: grid; \
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); \
+        gap: 20px; \
+    } \
+    \
+    article { \
+        border: 1px solid var(--blue); \
+        border-radius: 5px; \
+        margin: 5px 0; \
+        height: 100%; \
+        \
+        :first-child { \
+            text-align: center; \
+        } \
+        p { \
+            padding: 0 20px; \
+        } \
+    } \
+    </style>"
+    print "<center><h1>DE Actions</h1></center>"
+    print "<ul>"
+}
+
+/de_actions =/ {
+    in_de_actions = 1
+}
+
+/} as const/ {
+    in_de_actions = 0
+}
+
+in_de_actions && /^[[:space:]]*\/\*\*/ {
+    in_doc = 1
+}
+
+in_de_actions && in_doc && /^[[:space:]]*\* / {
+    sub(/^\s*\* ?/, "", $0)
+    doc = doc $0 "<BR>"
+}
+
+in_de_actions && /^[[:space:]]*\*\// {
+    in_doc = 0
+}
+
+in_de_actions && in_doc == 0 && /^[[:space:]]*[[:alnum:]]*:.*this.displayEntryAction/ {
+    #this line will look like `name: this.displayEntryAction(...`
+    sub(/:/, "", $1) #get name of de action
+    print "<li><article><h3>" $1 "</h3>" "<p>" doc "</p></article></li>"
+    doc = ""
+}
+
+END {
+    print "</ul>"
+}
