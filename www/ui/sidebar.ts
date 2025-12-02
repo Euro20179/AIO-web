@@ -2,6 +2,22 @@ const sidebarItems = document.getElementById("sidebar-items") as HTMLElement
 
 const sidebarItemsOnScreen: Set<HTMLElement> = new Set()
 
+//necessary to load the images
+const sidebarObserver = new IntersectionObserver((entries) => {
+    for (let entry of entries) {
+        if (entry.isIntersecting) {
+            entry.target.dispatchEvent(new Event("on-screen-appear"))
+            sidebarItemsOnScreen.add(entry.target as HTMLElement)
+        } else if (sidebarItemsOnScreen.has(entry.target as HTMLElement)) {
+            sidebarItemsOnScreen.delete(entry.target as HTMLElement)
+        }
+    }
+}, {
+    root: document.getElementById("sidebar"),
+    rootMargin: "0px",
+    threshold: 0.1
+})
+
 let resizeTO = 0
 let setToNone = false
 addEventListener("resize", () => {
@@ -56,6 +72,7 @@ function focusNextSidebarItem(backward: boolean = false) {
 function clearSidebar() {
 
     while (sidebarItems.firstElementChild) {
+        sidebarObserver.unobserve(sidebarItems.firstElementChild)
         sidebarItems.firstElementChild.remove()
     }
 }
@@ -174,21 +191,6 @@ async function renderSidebarItemList(items: InfoEntry[], sidebarParent: HTMLElem
     }
 }
 
-function _sidebarHandleMouse(itemid: bigint, button: number, altKey: boolean, ctrlKey: boolean) {
-    if (button === 1) {
-        displayItemInWindow(itemid)
-    }
-    else if (altKey) {
-        displayItemInWindow(itemid, "_blank", true)
-    }
-    else if (ctrlKey) {
-        sidebarEntryOpenMultiple(findInfoEntryById(itemid))
-    } else {
-        sidebarEntryOpenOne(findInfoEntryById(itemid))
-    }
-}
-
-
 /**
   * @description below is an itemid that the item gets rendered below
 */
@@ -212,24 +214,38 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     }
 
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
-    if (img && options?.renderImg && meta.Thumbnail) {
-        img.src = fixThumbnailURL(meta.Thumbnail)
+    if (img) {
+
+        if (options?.renderImg && meta.Thumbnail) {
+            img.src = fixThumbnailURL(meta.Thumbnail)
+        } else {
+            sidebarObserver.observe(elem)
+        }
+    }
+    function handleMouse(button: number, altKey: boolean, ctrlKey: boolean) {
+        if (button === 1) {
+            displayItemInWindow(item.ItemId)
+        }
+        else if (altKey) {
+            displayItemInWindow(item.ItemId, "_blank", true)
+        }
+        else if (ctrlKey) {
+            sidebarEntryOpenMultiple(item)
+        } else {
+            sidebarEntryOpenOne(item)
+        }
     }
 
-    const itemid = item.ItemId
-
     const btn = elem.shadowRoot.querySelector("button") as HTMLButtonElement
-
     btn.addEventListener("mousedown", e => {
         if (e.button === 1 || e.button === 0) {
-            _sidebarHandleMouse(itemid, e.button, e.altKey, e.ctrlKey)
+            handleMouse(e.button, e.altKey, e.ctrlKey)
             e.preventDefault()
         }
     })
-
     btn.addEventListener("keydown", e => {
         if (e.key === " " || e.key === "Enter") {
-            _sidebarHandleMouse(itemid, 0, e.altKey, e.ctrlKey)
+            handleMouse(0, e.altKey, e.ctrlKey)
             e.preventDefault()
         }
     })
@@ -238,11 +254,11 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     title && (
         title.onchange = (e) =>
             e.target instanceof HTMLInputElement &&
-            updateUserTitleUI(itemid, e.target.value)
+            updateUserTitleUI(item.ItemId, e.target.value)
     )
 
     elem.addEventListener("on-screen-appear", async function(e) {
-        let meta = await findMetadataByIdAtAllCosts(itemid)
+        let meta = await findMetadataByIdAtAllCosts(item.ItemId)
         if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         }
