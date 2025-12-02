@@ -234,7 +234,7 @@
         text-wrap: nowrap;
         overflow-x: auto;
         display: grid;
-        grid-template-columns: min-content 1fr min-content min-content;
+        grid-template-columns: min-content 0.8fr min-content auto;
         width: 100%;
 
         border-bottom: 2px solid var(--secondary);
