@@ -98,11 +98,11 @@ function _registerElement(name: string) {
         name: string = name
         constructor() {
             super()
-            let templ = document.getElementById(name)
+            let templ = document.getElementById(this.name)
             //we may want to register these on different places
             //so that we can reuse templates
             if (!(templ instanceof HTMLTemplateElement)) {
-                console.warn(`${name} is not a template`)
+                console.warn(`${this.name} is not a template`)
                 return
             }
 

@@ -158,7 +158,7 @@ function startupUI({
  * Creates an element that the user can click to
  * open that element in the current mode
  */
-function createClickableEntryUI(itemid: bigint): HTMLElement {
+function createClickableEntryUI(itemid: bigint, onclick?: EventListenerOrEventListenerObject): HTMLElement {
     const meta = findMetadataById(itemid)
     const info = findInfoEntryById(itemid)
 
@@ -173,7 +173,7 @@ function createClickableEntryUI(itemid: bigint): HTMLElement {
 
     el.title = info.En_Title || meta.Title || info.Native_Title || meta.Native_Title
 
-    el.addEventListener("click", () => mode_toggleItem(info))
+    el.addEventListener("click", onclick || (() => mode_toggleItem(info)))
 
     return el
 }
