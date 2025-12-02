@@ -130,6 +130,7 @@ for (const name of [
     "de-requirements",
     "de-descendants",
     "de-copies",
+    "de-template-editor",
 
     "calendar-template",
     "event-template",
