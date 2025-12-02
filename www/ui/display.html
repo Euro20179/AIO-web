@@ -12,6 +12,13 @@
 <body>
     {{ template "www/ui/html-templates/login-dialog.html" }}
     {{ template "www/ui/html-templates/display-entry.html" }}
+    {{ template "www/ui/html-templates/de-copies.html" }}
+    {{ template "www/ui/html-templates/de-cost-calculation-modifiers.html" }}
+    {{ template "www/ui/html-templates/de-descendants.html" }}
+    {{ template "www/ui/html-templates/de-description.html" }}
+    {{ template "www/ui/html-templates/de-notes.html" }}
+    {{ template "www/ui/html-templates/de-requirements.html" }}
+    {{ template "www/ui/html-templates/de-status-menu.html" }}
 
     <login-dialog></login-dialog>
 
@@ -43,6 +50,7 @@
     }
     const urlParams = new URLSearchParams(document.location.search)
     let id = urlParams.get("item-id")
+
     fetch(`${apiPath}/get-all-for-entry?id=${id}&uid=0`).then(async (res) => {
         const template = document.getElementById("display-entry")
 

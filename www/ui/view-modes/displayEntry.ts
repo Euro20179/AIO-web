@@ -1566,7 +1566,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
 
     if (getUidUI() === 0)
-        displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid])
+        displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid] || `uid ${item.Uid}`)
 
     let formatIcon = formatToSymbolUI(item.Format)
     displayEntryTitle?.setAttribute("data-format-icon", formatIcon)

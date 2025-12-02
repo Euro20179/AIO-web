@@ -47,7 +47,6 @@ function probablyInfoEntry(item: object): item is InfoEntry {
         "PurchasePrice",
         "Type",
         "En_Title",
-        "CopyOf",
         "Library",
     ]) {
         if (!(key in item)) {
