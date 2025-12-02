@@ -128,6 +128,8 @@ for (const name of [
     "de-notes",
     "de-description",
     "de-requirements",
+    "de-descendants",
+    "de-copies",
 
     "calendar-template",
     "event-template",

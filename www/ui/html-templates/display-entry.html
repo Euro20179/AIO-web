@@ -213,7 +213,6 @@
 
     </div>
 
-    <!-- <div class="descriptors" id="descriptors"> -->
     <section>
         <hr>
         <de-notes></de-notes>
@@ -223,49 +222,15 @@
         <hr>
         <de-description></de-description>
     </section>
-    <!-- </div> -->
-    <!-- <div id="relationship-display"> -->
 
     <div id="relationship-display">
-
         <hr>
-
-        <section id="required-section">
-                <de-requirements></de-requirements>
-        </section>
-
+        <de-requirements></de-requirements>
         <hr>
-
-        <section class="descendants" id="descendants-section">
-            <div>
-                <h4>Children</h4>
-            </div>
-            <div id="descendants">
-            </div>
-            <div>
-                <button id="new-child" title="Create new item as a child of this">+</button>
-                <button id="new-child-by-id" entry-action="selectnewchild">Add Existing</button>
-            </div>
-        </section>
-
+        <de-descendants></de-descendants>
         <hr>
-
-        <section class="copies" id="copies-section">
-            <div>
-                <h4>Copies</h4>
-            </div>
-            <div id="copies">
-            </div>
-            <div>
-                <button id="new-copy" title="Create new item as a copy of this">+</button>
-                <button id="copy-from-this" title="Create a new item that is an exact copy of this"
-                    entry-action="copythis">Copy
-                    this</button>
-                <button id="new-copy-by-id" entry-action="selectnewcopy">Add Existing</button>
-            </div>                    
-        </section>
+        <de-copies></de-copies>
     </div>
-    <!-- </div> -->
 </div>
 
 <template id="tag">
