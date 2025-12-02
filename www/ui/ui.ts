@@ -154,6 +154,30 @@ function startupUI({
         }
 }
 
+/**
+ * Creates an element that the user can click to
+ * open that element in the current mode
+ */
+function createClickableEntryUI(itemid: bigint): HTMLElement {
+    const meta = findMetadataById(itemid)
+    const info = findInfoEntryById(itemid)
+
+    let el
+    if(meta.Thumbnail) {
+        el = document.createElement("img")
+        el.src = fixThumbnailURL(meta.Thumbnail)
+    } else {
+        el = document.createElement("button")
+        el.innerText = info.En_Title
+    }
+
+    el.title = info.En_Title || meta.Title || info.Native_Title || meta.Native_Title
+
+    el.addEventListener("click", () => mode_toggleItem(info))
+
+    return el
+}
+
 function setError(text: string) {
     if (text == "") {
         components.errorOut?.removeAttribute("data-error")

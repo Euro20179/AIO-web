@@ -1116,26 +1116,11 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
 
     for (let child of relationships) {
         let meta = findMetadataById(child.ItemId)
-        let el: HTMLElement
-
-        if (meta?.Thumbnail) {
-            el = document.createElement("img")
-            formatToName(child.info.Format).then(name => {
-                el.title = `${child.info.En_Title} (${typeToSymbol(child.info.Type)} on ${name})`
-            });
-            (el as HTMLImageElement).src = fixThumbnailURL(meta.Thumbnail)
-        } else {
-            el = document.createElement("button")
-            el.innerText = child.info.En_Title
-        }
+        let el = createClickableEntryUI(child.ItemId)
 
         el.setAttribute("data-view-count", String(findUserEntryById(child.ItemId).ViewCount))
 
         elementParent.append(el)
-
-        el.addEventListener("click", (e) => {
-            mode_toggleItem(child.info)
-        })
 
         el.addEventListener("contextmenu", e => {
             e.preventDefault()
