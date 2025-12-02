@@ -883,14 +883,14 @@ async function nameToFormat(name: string): Promise<number> {
  * @param {((p: T, c: bigint) => T)} reduction - the reducer function
  * @param {T} initial the starting value
  */
-function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T): T {
+function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, includeRequires: boolean, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T): T {
     if (includeSelf) {
         initial = reduction(initial, itemId)
     }
     if (includeChildren) {
         for (let child of findDescendants(itemId)) {
             if (recursive) {
-                initial = items_reduce(child.ItemId, includeSelf, true, includeCopies, true, reduction, initial)
+                initial = items_reduce(child.ItemId, includeSelf, true, includeCopies, includeRequires, true, reduction, initial)
             } else {
                 initial = reduction(initial, child.ItemId)
             }
@@ -899,9 +899,18 @@ function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: 
     if (includeCopies) {
         for (let copy of findCopies(itemId)) {
             if (recursive) {
-                initial = items_reduce(copy.ItemId, includeSelf, includeChildren, true, true, reduction, initial)
+                initial = items_reduce(copy.ItemId, includeSelf, includeChildren, true, includeRequires, true, reduction, initial)
             } else {
                 initial = reduction(initial, copy.ItemId)
+            }
+        }
+    }
+    if (includeRequires) {
+        for(let requirement of findRequirements(itemId)) {
+            if(recursive) {
+                initial = items_reduce(requirement.ItemId, includeSelf, includeChildren, includeCopies, true, true, reduction, initial)
+            } else {
+                initial = reduction(initial, requirement.ItemId)
             }
         }
     }
@@ -914,11 +923,12 @@ function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: 
  * @param {boolean} includeSelf - whether or not to include it's own events
  * @param {boolean} includeChildren - whether or not to include its children's events
  * @param {boolean} includeCopies - whether or not to include copies' events
+ * @param {boolean} includeRequires - whether or not to include requires' events
  * @param {boolean} recursive - if includeChildren is set, apply this function to all of its children
  * @returns {UserEvent[]}
 */
-function items_findAllEvents(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean): UserEvent[] {
-    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, recursive, (p, c) => p.concat(findUserEventsById(c)), [] as UserEvent[])
+function items_findAllEvents(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, includeRequires: boolean, recursive: boolean): UserEvent[] {
+    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, includeRequires, recursive, (p, c) => p.concat(findUserEventsById(c)), [] as UserEvent[])
 }
 
 /**
@@ -927,11 +937,12 @@ function items_findAllEvents(itemId: bigint, includeSelf: boolean, includeChildr
  * @param {boolean} includeSelf - whether or not to include itself in the cost calculation
  * @param {boolean} includeChildren - whether or not to include its children in the cost calculation
  * @param {boolean} includeCopies - whether or not to include copies in the cost calculation
+ * @param {boolean} includeRequires - whether or not to include requires in the cost calculation
  * @param {boolean} recursive - if includeChildren is set, apply this function to all of its children
  * @returns {number}
 */
-function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, recursive: boolean): number {
-    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
+function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, includeRequires: boolean, recursive: boolean): number {
+    return items_reduce(itemId, includeSelf, includeChildren, includeCopies, includeRequires, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
 }
 
 function items_eventTimeEstimate(event: UserEvent) {

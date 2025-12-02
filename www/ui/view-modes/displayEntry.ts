@@ -1045,15 +1045,17 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 }
 
 
-function whatToInclude(el: ShadowRoot): { self: boolean, children: boolean, copies: boolean, recursive: boolean } {
+function whatToInclude(el: ShadowRoot): { self: boolean, children: boolean, copies: boolean, recursive: boolean, requires: boolean } {
     const self = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
     const children = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
     const copies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
+    const requires = (el.getElementById("include-requires-in-cost") as HTMLInputElement)?.checked
     const recursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
     return {
         self,
         children,
         copies,
+        requires,
         recursive
     }
 }
@@ -1065,18 +1067,18 @@ function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const info = findInfoEntryById(itemId)
     if (!info) return
 
-    const { self, children, copies, recursive } = whatToInclude(el)
+    const { self, children, copies, recursive, requires } = whatToInclude(el)
 
-    costEl.innerText = String(items_calculateCost(itemId, self, children, copies, recursive))
+    costEl.innerText = String(items_calculateCost(itemId, self, children, copies, requires, recursive))
 }
 
 function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const eventsTbl = el.getElementById("user-actions")
     if (!eventsTbl || !(eventsTbl instanceof this.win.HTMLTableElement)) return
 
-    const { self, children, copies, recursive } = whatToInclude(el)
+    const { self, children, copies, recursive, requires } = whatToInclude(el)
 
-    const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, recursive)
+    const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
         .sort(items_compareEventTiming).reverse()
 
     let html = `
@@ -1857,7 +1859,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         currentEditedObj.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.setobjtable(e.target)
     }
 
-    for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-recusively-in-cost"]) {
+    for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-requires-in-cost", "include-recusively-in-cost"]) {
         const el = root.getElementById(input)
         if (!el) continue
         el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.togglerelationinclude(e.target)
