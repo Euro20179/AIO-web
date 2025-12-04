@@ -1,6 +1,6 @@
 function! EditTemplate(path)
     exec 'e www/ui/html-templates/' . a:path
-    if !findfile("www/ui/html-templates", a:path)
+    if findfile(a:path, "www/ui/html-templates") == ""
         call setline(1, "<template id=\"" . a:path[:-6] . "\">")
         call setline(2, "</template>")
         norm 1o
