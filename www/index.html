@@ -22,26 +22,21 @@
             display: flex;
             flex-direction: column;
 
-            margin-top: 5ch;
+            padding: 0;
+            list-style: none;
+            gap: var(--small-gap);
 
-            align-items: center;
-            gap: 30px;
+            text-transform: capitalize;
 
-            div {
-                display: flex;
-                flex-direction: column;
+            a {
+                font-size: 1.2em;
                 width: 100%;
+                cursor: pointer;
+                text-transform: capitalize;
+            }
 
-                a {
-                    font-size: 1.2em;
-                    width: 100%;
-                    cursor: pointer;
-                    text-transform: capitalize;
-                }
-
-                a::after {
-                    content: "'s media";
-                }
+            a::after {
+                content: "'s media";
             }
         }
 
@@ -97,7 +92,7 @@
 
     <h2 class="">Users</h2>
 
-    <div id="users-output"></div>
+    <ul id="users-output"></ul>
 
     <login-dialog></login-dialog>
 
@@ -120,7 +115,10 @@
                     if (!user) return;
 
                     const [id, name] = user.split(":");
-                    const html = `<div style="display: flex; gap: 2ch; flex-direction: row; justify-content: left;"><a href="/ui?uid=${id}">${name}</a></div>`;
+                    const html = `
+<li>
+    <a href="/ui?uid=${id}">${name}</a>
+</li>`;
                     usersOutput.innerHTML += html;
                 });
             });
