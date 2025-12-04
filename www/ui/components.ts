@@ -143,7 +143,8 @@ for (const name of [
     "new-entry-dialog",
     "new-event-dialog",
     "login-dialog",
-    "alert-box"
+    "alert-box",
+    "tz-datalist",
 ]) {
     _registerElement(name)
 }
