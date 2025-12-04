@@ -73,7 +73,8 @@
     }
 
     #root {
-        width: 100%;
+        /* -1px to account for the margin of buttons */
+        width: calc(100% - 1px);
         height: fit-content;
         container: entry / inline-size;
 
