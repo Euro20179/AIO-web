@@ -4,44 +4,6 @@
 
 @layer general, util, components;
 
-@layer general {
-    table {
-        border-collapse: collapse;
-
-        td,
-        th {
-            border: 1px solid var(--secondary);
-        }
-    }
-
-    * {
-        box-sizing: border-box;
-    }
-
-    input,
-    button,
-    select {
-        border-color: var(--input-border-color);
-        font-family: inherit;
-    }
-
-    select {
-
-        /*select is colored wrong in safari*/
-        @supports (-webkit-backdrop-filter: blur(1px)) {
-            -webkit-appearance: none;
-        }
-    }
-
-    hr {
-        border-color: var(--secondary);
-    }
-
-    article {
-        padding: var(--small-gap);
-    }
-}
-
 @layer util {
 
     /*for begin/finish/etc... action buttons*/
