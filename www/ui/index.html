@@ -19,6 +19,7 @@
     {{template "www/ui/html-templates/display-entry.html"}}
     {{template "www/ui/html-templates/alert-box.html"}}
     {{template "www/ui/html-templates/tz-datalist.html"}}
+    {{template "www/ui/html-templates/color-scheme-selector.html"}}
 
     {{template "www/ui/html-templates/de-status-menu.html"}}
     {{template "www/ui/html-templates/de-notes.html"}}
@@ -74,6 +75,8 @@
                         <a href="javascript:openSettingsUI()" id="help-link">⚙</a>
                         <button onclick="openModalUI('script-select')">run</button>
                     </div>
+
+                    <color-scheme-selector></color-scheme-selector>
 
                     <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
                 </div>

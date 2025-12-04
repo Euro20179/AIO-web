@@ -163,7 +163,7 @@ function createClickableEntryUI(itemid: bigint): HTMLElement {
     const info = findInfoEntryById(itemid)
 
     let el
-    if(meta.Thumbnail) {
+    if (meta.Thumbnail) {
         el = document.createElement("img")
         el.src = fixThumbnailURL(meta.Thumbnail)
     } else {

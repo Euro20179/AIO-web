@@ -145,6 +145,7 @@ for (const name of [
     "login-dialog",
     "alert-box",
     "tz-datalist",
+    "color-scheme-selector",
 ]) {
     _registerElement(name)
 }

@@ -10,6 +10,7 @@
 </head>
 
 <body>
+
     {{ template "www/ui/html-templates/login-dialog.html" }}
     {{ template "www/ui/html-templates/display-entry.html" }}
     {{ template "www/ui/html-templates/de-copies.html" }}
@@ -19,8 +20,10 @@
     {{ template "www/ui/html-templates/de-notes.html" }}
     {{ template "www/ui/html-templates/de-requirements.html" }}
     {{ template "www/ui/html-templates/de-status-menu.html" }}
+    {{ template "www/ui/html-templates/color-scheme-selector.html" }}
 
     <login-dialog></login-dialog>
+    <color-scheme-selector style="display: none;"></color-scheme-selector>
 
     <template id="display-entry">
     </template>

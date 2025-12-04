@@ -1,0 +1,26 @@
+<template id="color-scheme-selector">
+    <script>
+        {
+            let urlParams = new URLSearchParams(location.search)
+            const colorSelector = document.querySelector("#color-scheme")
+            if (colorSelector && colorSelector instanceof HTMLSelectElement) {
+                if (urlParams.has("color-scheme")) {
+                    const colorscheme = urlParams.get("color-scheme")
+                    colorSelector.value = colorscheme || ""
+                } else {
+                    if (matchMedia('(prefers-color-scheme: dark)').matches) {
+                        console.log("dark")
+                        colorSelector.value = "dark"
+                    } else {
+                        console.log("light")
+                        colorSelector.value = "light"
+                    }
+                }
+            }
+        }
+    </script>
+    <select id="color-scheme">
+        <option value="light">light</option>
+        <option value="dark">dark</option>
+    </select>
+</template>
