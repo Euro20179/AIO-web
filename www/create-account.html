@@ -9,11 +9,24 @@
     <link href="/css/general.css" rel="stylesheet">
 </head>
 
+<style>
+    form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap: 2ch;
+
+        width: 20%;
+    }
+</style>
+
 <body>
-    <form action="{{ .AIO }}/account/create" class="flex column" style="gap: 1em" method="POST">
-        <label for="username">Username <input type="text" placeholder="username" name="username" id="username" required></label>
-        <label for="password">Password <input type="password" placeholder="password" name="password"
-                id="password" required></label>
+    <form action="{{ .AIO }}/account/create" method="POST">
+        <label for="username">Username </label>
+        <input type="text" placeholder="username" name="username" id="username" required>
+        <label for="password" for="password">Password </label>
+        <input type="password" placeholder="password" name="password"
+        id="password" required>
         <input type="submit" value="CREATE!" style="width: fit-content">
     </form>
 </body>
