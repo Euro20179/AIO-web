@@ -92,6 +92,8 @@
 
     <h2 class="">Users</h2>
 
+    <input placeholder="search users" oninput="userFilter(this)">
+
     <ul id="users-output"></ul>
 
     <login-dialog></login-dialog>
@@ -101,6 +103,19 @@
     </footer>
 
     <script>
+
+        function userFilter(inp) {
+            const search = inp.value.toLowerCase()
+
+            for(let userLink of document.querySelectorAll("#users-output a")) {
+                userLink.parentElement.hidden = false
+
+                if(!userLink.innerText.toLowerCase().includes(search)) {
+                    userLink.parentElement.hidden = true
+                }
+            }
+        }
+
         const params = new URLSearchParams(document.location.search);
         const uid = params.get("uid");
         if (uid) {
