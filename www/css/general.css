@@ -42,7 +42,14 @@
     textarea,
     input,
     select {
+        margin-inline: 1px;
+
         color: inherit;
+
+        /*inherit the font, but keep the font size small because otherwise
+         * it breaks assumptions i had about button font sizes*/
+        font: inherit;
+        font-size: 0.8em;
 
         border-style: solid;
         background: var(--input-background);
@@ -52,8 +59,10 @@
         }
 
         &:focus {
-            outline: none;
-            border: 3px solid var(--green);
+            outline: 3px solid var(--green);
+            /* making it transparent keeps
+             * the box size the same avoiding relayout*/
+            border-color: transparent;
         }
     }
 

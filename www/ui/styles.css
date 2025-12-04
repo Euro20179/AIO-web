@@ -454,12 +454,17 @@
                 width: 100%;
             }
 
+            #item-filter {
+                margin-bottom: calc(var(--small-gap) / 2);
+            }
+
             @container body (width < 800px) {
                 display: flex;
                 justify-content: space-around;
 
                 #item-filter {
                     flex-grow: 1;
+                    margin-bottom: 0;
                 }
 
                 :has(> #view-all) {
