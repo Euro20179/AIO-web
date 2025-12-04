@@ -46,23 +46,25 @@
         }
 
         nav {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-
-            > * {
-                margin: 0;
-            }
+            float: right;
 
             button, a {
                 height: 2em;
             }
 
-            div {
-                justify-self: end;
+            a {
+                text-decoration: none;
             }
 
-            a {
-                display: contents;
+            img {
+                vertical-align: middle;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                [src="/assets/github.ico"] {
+                    /*basically invisible otherwise*/
+                    background: var(--text-color);
+                }
             }
         }
     </style>
@@ -72,18 +74,25 @@
     {{ template "www/ui/html-templates/login-dialog.html" }}
 
     <nav>
-        <h2 class="">Welcome</h2>
-        <div>
-            <button onclick="signinUI()">Login</button>
-            <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
-            <a href="/create-account.html"><button>Create account</button></a>
-        </div>
+        <a href="https://github.com/euro20179/aio-web">
+            <img src="/assets/github.ico">
+        </a>
+        <button onclick="signinUI()">Login</button>
+        <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
+        <a href="/create-account.html"><button>Create account</button></a>
     </nav>
 
+    <header>
+            <h1>AIO Web</h1>
+    </header>
+
     <p>
-        Welcome to the AIO LIMAS, basic usage information can be found
-        <a href="/usage">here</a>.
+        Welcome to AIO Web, a frontend for <a href="https://github.com/euro20179/aio-limas">aio limas</a>.
     </p>
+    <div class="flex" style="gap: 2ch;">
+        <a href="/usage/">aio web usage</a>
+        <a href="{{ .AIO }}/docs">aio server usage</a>
+    </div>
 
     <h2 class="">Users</h2>
 

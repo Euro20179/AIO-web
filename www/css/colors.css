@@ -42,7 +42,7 @@
 
 @property --main {
     syntax: "<color>";
-    initial-value: #24273a;
+    initial-value: #121626;
     inherits: true;
 }
 
