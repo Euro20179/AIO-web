@@ -3,6 +3,7 @@
 
 <head>
     <script src="/config.js"></script>
+    <script src="/ui/globals.js"></script>
     <script src="/ui/ui.js"></script>
     <script src="/js/api.js"></script>
     <script src="/ui/components.js"></script>
@@ -72,6 +73,7 @@
 
 <body>
     {{ template "www/ui/html-templates/login-dialog.html" }}
+    {{ template "www/ui/html-templates/alert-box.html" }}
 
     <nav>
         <a href="https://github.com/euro20179/aio-web">
@@ -99,6 +101,10 @@
     <div id="users-output"></div>
 
     <login-dialog></login-dialog>
+
+    <footer>
+        <alert-box></alert-box>
+    </footer>
 
     <script>
         const params = new URLSearchParams(document.location.search);

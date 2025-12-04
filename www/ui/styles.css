@@ -181,26 +181,6 @@
         overflow: clip;
     }
 
-    #notifications {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        display: flex;
-        flex-direction: column;
-
-        .notification {
-            padding: 30px;
-            border-bottom: 1px solid var(--secondary);
-            white-space: pre;
-            background: var(--main);
-            border: 2px solid var(--secondary);
-        }
-
-        .notification::before {
-            content: "Notification\a";
-        }
-    }
-
     #new-entry h3 {
         text-align: center;
     }

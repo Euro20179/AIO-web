@@ -142,7 +142,8 @@ for (const name of [
     "prompt-dialog",
     "new-entry-dialog",
     "new-event-dialog",
-    "login-dialog"
+    "login-dialog",
+    "alert-box"
 ]) {
     _registerElement(name)
 }
