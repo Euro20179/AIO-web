@@ -287,6 +287,27 @@ async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
     return await authorizedRequest(`${apiPath}/del-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
 }
 
+async function api_queryV4(searchString: string, uid: number): Promise<InfoEntry[]> {
+    let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
+
+    const res = await fetch(`${apiPath}/query-v4${qs}`).catch(console.error)
+    if (!res) return []
+
+    let itemsText = await res.text()
+    if (res.status !== 200) {
+        alert(itemsText)
+        return []
+    }
+
+    try {
+        return [...api_deserializeJsonl<InfoEntry>(itemsText.split("\n").filter(Boolean))]
+    } catch (err) {
+        console.error(err)
+    }
+
+    return []
+}
+
 /**
  * Performs a search
  * @param {string} searchString - the search query

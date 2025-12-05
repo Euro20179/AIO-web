@@ -717,7 +717,9 @@ async function loadSearchUI() {
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
+    let entries = filters.useV4
+        ? await api_queryV4(String(filters.newSearch) || "%", Number(formData.get('uid')) || 0)
+        : await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -825,6 +827,13 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     // let end = -1
 
     let search = searchForm.get("search-query") as string
+
+    let useV4 = true
+    if(search.startsWith("3")) {
+        useV4 = false
+        search = search.slice(1).trimStart()
+    }
+
     let inBracket = 0
     let filterStartPos = -1
     for (let i = 0; i < search.length; i++) {
@@ -847,6 +856,7 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
         filterRules: filters,
         newSearch: search,
         sortBy,
+        useV4
     }
 }
 
