@@ -42,19 +42,29 @@ function get_aio_host() {
 function get_settings($uid, $raw = false) {
     $root = settingsroot();
     $data = file_get_contents("$root/$uid/settings.json");
+
+    if($data == "") {
+        return $raw ? "{}" : array();
+    }
+
     if (!$raw) {
-        return json_decode($data);
+        return json_decode($data, true);
     }
     return $data;
 }
 
 function set_setting($uid, $key, $value) {
     $root = settingsroot();
-    $settings = get_settings($uid);
+    $settings = get_settings($uid, false);
 
-    $settings[$key] = $value;
+    $settings["$key"] = $value;
 
     $data = json_encode($settings);
+
+    if (!is_dir("$root/$uid")) {
+        error_log("MAKING $root/$uid");
+        mkdir("$root/$uid");
+    }
 
     file_put_contents("$root/$uid/settings.json", $data);
 }

@@ -1542,7 +1542,8 @@ async function getSettings(uid: number): Promise<UserSettings> {
         console.error(res?.status)
         return { UIStartupScript: "", StartupLang: "" }
     }
-    return await res.json() as UserSettings
+    const t = await res.text()
+    return JSON.parse(t) as UserSettings
 }
 
 /**
