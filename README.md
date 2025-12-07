@@ -10,7 +10,6 @@ Once finished rename it to `server-config.ini` and move to the `www` directory
 # Running
 
 1. `./build`
-
 2.
     * `./quickstart.sh`
     * OR see `./example.nginx` for an nginx installation

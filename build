@@ -27,6 +27,10 @@ handle_configts_from_ini() {
         *)
             name="${line%%[[:space:]]=*}"
             value="${line#*=[[:space:]]}"
+
+            # comment
+            [[ "${name[0]}" =~ [[:space:]]*# ]] && continue 
+
             case "$section" in
             aio_limas)
                 case "$name" in
