@@ -18,6 +18,29 @@
                 }
             }
         }
+
+        function color_scheme_register(name, css_definition) {
+            const opt = document.createElement("option")
+            opt.innerText = name
+            opt.value = name
+            window["color-scheme"].appendChild(opt)
+
+            const style = document.createElement("style")
+            style.innerText = `
+                :root:has(#color-scheme > option[value="${name}"]:checked) {
+                    ${css_definition}
+                }
+            `
+
+            document.body.append(style)
+        }
+
+        /*
+        IMPORTANT:
+        registering dark/light here wont do because ui.ts needs to switch it to
+        dark/light based on the users preferences, which may or may not happen
+        before the themes are registered
+        */
     </script>
     <select id="color-scheme">
         <option value="light">light</option>

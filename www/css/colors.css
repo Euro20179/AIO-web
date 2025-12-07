@@ -53,6 +53,18 @@
 }
 
 :root {
+    /*initial-value doesn't work unless it's set to initial...*/
+
+    --input-border-roundness : initial;
+    --main : initial;
+    --red : initial;
+    --lavender : initial;
+    --yellow : initial;
+    --blue : initial;
+    --light-blue : initial;
+    --green : initial;
+    --pink : initial;
+
     &:has(option[value="light"]:checked) {
         --text-color: CanvasText;
         --main: #eff1f5;
@@ -78,14 +90,14 @@
     }
 
     &:has(option[value="dark"]:checked) {
-        --main:#121626;
-        --red:#e78284;
-        --lavender:#b4befe;
-        --yellow:#e5c890;
-        --blue:#95bdff;
-        --light-blue:#b4e4ff;
-        --green:#dfffd8;
-        --pink:#f7c8e0;
+        --main: #121626;
+        --red: #e78284;
+        --lavender: #b4befe;
+        --yellow: #e5c890;
+        --blue: #95bdff;
+        --light-blue: #b4e4ff;
+        --green: #dfffd8;
+        --pink: #f7c8e0;
         --text-color: hsl(from var(--main) h s calc(l * 8))
     }
 
