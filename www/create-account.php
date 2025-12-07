@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<?php include $_SERVER["DOCUMENT_ROOT"] . '/lib/util.php'; ?>
 <html lang="en">
 
 <head>
@@ -25,7 +26,7 @@
         <a href="/">Home</a>
     </nav>
     <br>
-    <form action="{{ .AIO }}/account/create" method="POST">
+        <form action="<?=get_aio_host()?>/account/create" method="POST">
         <label for="username">Username </label>
         <input type="text" placeholder="username" name="username" id="username" required>
         <label for="password" for="password">Password </label>

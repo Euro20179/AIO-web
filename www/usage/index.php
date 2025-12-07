@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<?php include $_SERVER["DOCUMENT_ROOT"] . '/lib/util.php'; ?>
 <html lang="en">
 
 <head>
@@ -22,7 +23,7 @@
 
     <section>
         <h3>Searching</h3>
-        see <a href="{{.AIO}}/docs#searching">searching docs</a>
+            see <a href="<?=get_aio_host()?>/docs#searching">searching docs</a>
         <p>
             A regular search may be followed by 1 or more of <code>-&gt;</code> followed by a <a
                 href="client-filter">client filter</a>

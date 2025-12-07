@@ -1,4 +1,5 @@
 <!doctype html>
+<?php include $_SERVER["DOCUMENT_ROOT"] . '/lib/util.php'; ?>
 <html lang="en">
 
 <head>
@@ -66,9 +67,11 @@
 </head>
 
 <body>
-    {{ template "www/ui/html-templates/login-dialog.html" }}
-    {{ template "www/ui/html-templates/alert-box.html" }}
-    {{ template "www/ui/html-templates/color-scheme-selector.html" }}
+<?php
+    tmpl("login-dialog");
+    tmpl("alert-box");
+    tmpl("color-scheme-selector");
+?>
 
     <color-scheme-selector hidden></color-scheme-selector>
     <nav>
@@ -89,7 +92,7 @@
     </p>
     <div class="flex" style="gap: 2ch;">
         <a href="/usage/">aio web usage</a>
-        <a href="{{ .AIO }}/docs">aio server usage</a>
+            <a href="<?=get_aio_host()?>/docs">aio server usage</a>
     </div>
 
     <h2 class="">Users</h2>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,34 +13,38 @@
 </head>
 
 <body>
-    {{template "www/ui/html-templates/sidebar-entry.html"}}
-    {{template "www/ui/html-templates/new-entry-dialog.html"}}
-    {{template "www/ui/html-templates/login-dialog.html"}}
-    {{template "www/ui/html-templates/gallery-entry.html"}}
-    {{template "www/ui/html-templates/display-entry.html"}}
-    {{template "www/ui/html-templates/alert-box.html"}}
-    {{template "www/ui/html-templates/tz-datalist.html"}}
-    {{template "www/ui/html-templates/color-scheme-selector.html"}}
+<?php
+    include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
 
-    {{template "www/ui/html-templates/de-status-menu.html"}}
-    {{template "www/ui/html-templates/de-notes.html"}}
-    {{template "www/ui/html-templates/de-description.html"}}
-    {{template "www/ui/html-templates/de-requirements.html"}}
-    {{template "www/ui/html-templates/de-descendants.html"}}
-    {{template "www/ui/html-templates/de-copies.html"}}
-    {{template "www/ui/html-templates/de-cost-calculation-modifiers.html"}}
-    {{template "www/ui/html-templates/de-template-editor.html"}}
+    tmpl("sidebar-entry");
+    tmpl("new-entry-dialog");
+    tmpl("login-dialog");
+    tmpl("gallery-entry");
+    tmpl("display-entry");
+    tmpl("alert-box");
+    tmpl("tz-datalist");
+    tmpl("color-scheme-selector");
 
-    {{template "www/ui/html-templates/event-template.html"}}
-    {{template "www/ui/html-templates/calendar-template.html"}}
-    {{template "www/ui/html-templates/tierlist-template.html"}}
-    {{template "www/ui/html-templates/calc-template.html"}}
-    {{template "www/ui/html-templates/script-template.html"}}
-    {{template "www/ui/html-templates/graph-template.html"}}
+    tmpl("de-status-menu");
+    tmpl("de-notes");
+    tmpl("de-description");
+    tmpl("de-requirements");
+    tmpl("de-descendants");
+    tmpl("de-copies");
+    tmpl("de-cost-calculation-modifiers");
+    tmpl("de-template-editor");
 
-    {{template "www/ui/html-templates/calc-entry.html"}}
-    {{template "www/ui/html-templates/new-event-dialog.html"}}
-    {{template "www/ui/html-templates/prompt-dialog.html"}}
+    tmpl("event-template");
+    tmpl("calendar-template");
+    tmpl("tierlist-template");
+    tmpl("calc-template");
+    tmpl("script-template");
+    tmpl("graph-template");
+
+    tmpl("calc-entry");
+    tmpl("new-event-dialog");
+    tmpl("prompt-dialog");
+?>
 
     <tz-datalist></tz-datalist>
 
