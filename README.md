@@ -10,8 +10,9 @@ Once finished rename it to `server-config.ini`
 # Running
 
 ```sh
-./build
-./aio-web
+./quickstart.sh
 ```
+
+OR see `./example.nginx` for an nginx installation
 
 the default port is 8081
