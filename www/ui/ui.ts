@@ -358,6 +358,23 @@ document.addEventListener("keydown", e => {
 
     if (!e.ctrlKey) return
     switch (e.key) {
+        case "\\": {
+            const search = getElementOrThrowUI("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
+
+            search.focus()
+
+            //3 indicates a query-v3 search
+            //if the user is pressing ctrl-\ they want to do a query-v3 search
+            if(!search.value.startsWith("3")) {
+                //since it does not start with a 3, add one
+                search.value = '3 '
+            }
+            //select everything after '3 '
+            search.setSelectionRange(2, Math.max(search.value.length, 2))
+
+            e.preventDefault()
+            break
+        }
         case "/": {
             const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, components.searchForm)
             search?.focus()
@@ -1542,7 +1559,8 @@ async function getSettings(uid: number): Promise<UserSettings> {
         console.error(res?.status)
         return { UIStartupScript: "", StartupLang: "" }
     }
-    return await res.json() as UserSettings
+    const t = await res.text()
+    return JSON.parse(t) as UserSettings
 }
 
 /**

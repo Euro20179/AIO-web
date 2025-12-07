@@ -27,6 +27,10 @@ handle_configts_from_ini() {
         *)
             name="${line%%[[:space:]]=*}"
             value="${line#*=[[:space:]]}"
+
+            # comment
+            [[ "${name[0]}" =~ [[:space:]]*# ]] && continue 
+
             case "$section" in
             aio_limas)
                 case "$name" in
@@ -38,7 +42,7 @@ handle_configts_from_ini() {
             esac
             ;;
         esac
-    done <./server-config.ini
+    done <./www/server-config.ini
 
     cat <<-EOF >"$AIO_CONFIGTS"
 //making this not a constant so that a tampermonkey script can change it because i want to change it with a tampermonkey script
@@ -109,4 +113,3 @@ generateSidebarStyles
 # done
 
 #main go program
-${GO:-go} build .

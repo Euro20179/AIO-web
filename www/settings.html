@@ -52,7 +52,7 @@
     }
     function done(form) {
         const data = new FormData(form)
-        authorizedRequest(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}`)
+        authorizedRequest(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}&uid=${uid}`)
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
 </script>

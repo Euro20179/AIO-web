@@ -1,0 +1,28 @@
+#########################################################################
+# INSTRUCTIONS TO USE THIS CONFIG                                       #
+# 1. copy the www folder to /srv/http/aio-web                           #
+# 2. make sure the user that nginx is running under owns that directory #
+# 3. make sure /run/php-fpm/php-fpm.sock exists,                        #
+#    or change it to where your fastcgi php socket is                   #
+#########################################################################
+server {
+    listen 80;
+    root "/srv/http/aio-web/";
+    try_files $uri $uri.php $uri.html $uri/index.php$is_query$query_string;
+
+    location ~ ^/user/(.*)$ {
+        rewrite /user/(.*)$ /ui?uname=$1 break;
+    }
+
+    location ~ ^/uid/(.*)$ {
+        rewrite /user/(.*)$ /ui?uid=$1 break;
+    }
+
+    location ~ \.php$ {
+        include fastcgi_params;
+
+        fastcgi_pass unix:/run/php-fpm/php-fpm.sock;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    }
+}
