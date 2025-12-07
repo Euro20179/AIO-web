@@ -24,8 +24,8 @@ if (str_starts_with($auth_header, "Basic ")) {
     }
 
     header("Location: $path");
-    setcookie("uid", $uid);
-    setcookie("login", $b64);
+    setrawcookie("uid", $uid);
+    setrawcookie("login", $b64);
     http_status_code(301);
 }
 ?>
