@@ -38,7 +38,7 @@ handle_configts_from_ini() {
             esac
             ;;
         esac
-    done <./server-config.ini
+    done <./www/server-config.ini
 
     cat <<-EOF >"$AIO_CONFIGTS"
 //making this not a constant so that a tampermonkey script can change it because i want to change it with a tampermonkey script
