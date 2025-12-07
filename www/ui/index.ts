@@ -92,9 +92,15 @@ async function main() {
     await loadInfoEntries(uid)
 
 
-    if (initialSearch || searchInput.value) {
+    if (initialSearch) {
         ui_search(initialSearch || searchInput.value, () => {
             dispatchEvent(new CustomEvent("aio-items-rendered"))
+        })
+        //this should be separate because ui_search will add another 3
+        // if serachInput.value is something like `3 @hi`
+    } else if (searchInput.value) {
+        mkSearchUI({
+            "search-query": searchInput.value
         })
     } else {
         let entries = Object.values(items_getAllEntries()).map(v => v.info)
