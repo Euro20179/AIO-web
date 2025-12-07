@@ -1,4 +1,5 @@
 <?php
+include $_SERVER["DOCUMENT_ROOT"] . '/lib/util.php';
 if (!array_key_exists("HTTP_AUTHORIZATION", $_SERVER)) {
     header("WWW-Authenticate: Basic realm=\"user\"");
     echo "Login";
@@ -14,6 +15,17 @@ if (str_starts_with($auth_header, "Basic ")) {
         $path = "/ui?${_SERVER['QUERY_STRING']}";
     }
 
+
+    $uid = ckauth($b64);
+    if ($uid == "") {
+        http_response_code(401);
+        header("WWW-Authenticate: Basic realm=\"user\"");
+        exit();
+    }
+
     header("Location: $path");
+    setcookie("uid", $uid);
+    setcookie("login", $b64);
+    http_status_code(301);
 }
 ?>
