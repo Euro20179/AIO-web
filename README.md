@@ -9,10 +9,8 @@ Once finished rename it to `server-config.ini` and move to the `www` directory
 
 # Running
 
-```sh
-./quickstart.sh
-```
+1. `./build`
 
-OR see `./example.nginx` for an nginx installation
-
-the default port is 8081
+2.
+    * `./quickstart.sh`
+    * OR see `./example.nginx` for an nginx installation
