@@ -8,7 +8,7 @@
 server {
     listen 80;
     root "/srv/http/aio-web/";
-    try_files $uri $uri.php $uri.html $uri/index.php;
+    try_files $uri $uri.php $uri.html $uri/index.php$is_query$query_string;
 
     location ~ ^/user/(.*)$ {
         rewrite /user/(.*)$ /ui?uname=$1 break;
