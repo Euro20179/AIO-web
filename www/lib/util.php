@@ -1,17 +1,13 @@
 <?php
 
 function settingsroot() {
-    $settings_root = getenv("XDG_DATA_HOME");
-
-    if ($settings_root == "") {
-        echo "\$XDG_DATA_HOME must be set";
-        exit();
-    }
-
-    $settings_root = "$settings_root/aio-web";
+    $server_settings = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/server-config.ini", true);
+    $settings_root = $server_settings["data"]["settings_dir"];
 
     if (!is_dir($settings_root)) {
-        mkdir($settings_root);
+        http_response_code(500);
+        echo "the administrator has not setup the settings_dir or the directory does not exist";
+        exit();
     }
 
     return $settings_root;
