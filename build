@@ -109,4 +109,3 @@ generateSidebarStyles
 # done
 
 #main go program
-${GO:-go} build .
