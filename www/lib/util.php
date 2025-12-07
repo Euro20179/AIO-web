@@ -38,7 +38,7 @@ function ckauth($auth) {
 }
 
 function get_aio_host() {
-    $server_settings = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/../server-config.ini", true);
+    $server_settings = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/server-config.ini", true);
     $host = $server_settings["aio_limas"]["host"];
     return $host;
 }
