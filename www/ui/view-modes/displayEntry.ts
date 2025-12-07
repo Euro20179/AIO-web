@@ -1562,9 +1562,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 btn.onclick = function(e) {
                     let btn = e.target as HTMLButtonElement
                     let tag = btn.innerText
-                    mkSearchUI({
-                        ["search-query"]: `#tag:${tag}`
-                    })
+                    ui_search(`#tag:${tag}`)
                 }
 
                 tagsRoot?.append(copy)
