@@ -343,18 +343,16 @@ class Statistic {
     }
 }
 
-const _registeredShortcuts: Record<string, (event: Event) => any> = {}
-
 /**
  * Registers a shortcut that when ctrl+key is pressed, run will be called
  */
 function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any) {
-    if (Array.isArray(key)) {
-        for (let k of key) {
+    if(Array.isArray(key)) {
+        for(let k of key) {
             registerCTRLShortcutUI(k, run)
         }
     } else {
-        _registeredShortcuts[key] = run
+        shortcuts.nnoremap(key, true, false, false, run)
     }
 }
 
@@ -446,6 +444,7 @@ for (let i = 0; i < 10; i++) {
     })
 }
 
+let curkey = shortcuts
 document.addEventListener("keydown", e => {
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
@@ -459,8 +458,11 @@ document.addEventListener("keydown", e => {
         return
     }
 
-    if (e.key in _registeredShortcuts) {
-        _registeredShortcuts[e.key](e)
+    const next = curkey.press(e, e.key, e.ctrlKey, e.shiftKey, e.altKey)
+    if (next instanceof Trie) {
+        curkey = next
+    } else if(!next) {
+        curkey = shortcuts
     }
 })
 

@@ -201,6 +201,7 @@
     <script src="/ui/view-modes/gallery.js"></script>
     <script src="/ui/view-modes/scriptMode.js"></script>
     <script src="/ui/view-modes/event-mode.js"></script>
+    <script src="/ui/shortcuts.js"></script>
     <script src="/ui/ui.js"></script>
     <!-- defer because document needs to load first -->
     <script src="/ui/index.js" defer></script>
