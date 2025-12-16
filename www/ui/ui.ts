@@ -343,6 +343,109 @@ class Statistic {
     }
 }
 
+const _registeredShortcuts: Record<string, (event: Event) => any> = {}
+
+/**
+ * Registers a shortcut that when ctrl+key is pressed, run will be called
+ */
+function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any) {
+    if (Array.isArray(key)) {
+        for (let k of key) {
+            registerCTRLShortcutUI(k, run)
+        }
+    } else {
+        _registeredShortcuts[key] = run
+    }
+}
+
+registerCTRLShortcutUI("\\", (e) => {
+    const search = getElementOrThrowUI("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
+
+    search.focus()
+
+    //3 indicates a query-v3 search
+    //if the user is pressing ctrl-\ they want to do a query-v3 search
+    if (!search.value.startsWith("3")) {
+        //since it does not start with a 3, add one
+        search.value = '3 '
+    }
+    //select everything after '3 '
+    search.setSelectionRange(2, Math.max(search.value.length, 2))
+
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("/", e => {
+    const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, components.searchForm)
+    search?.focus()
+    search?.select()
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("?", e => {
+    components.itemFilter?.focus()
+    components.itemFilter?.select()
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("A", e => {
+    components.viewAllElem && components.viewAllElem.click()
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("m", e => {
+    e.preventDefault()
+    components.viewToggle?.focus()
+})
+
+registerCTRLShortcutUI(["p", "P"], e => {
+    openModalUI("script-select")
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("N", e => {
+    openModalUI("new-entry")
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("S", e => {
+    toggleUI("search-area")
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("B", e => {
+    toggleUI("sidebar")
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("V", e => {
+    let mainUI = document.getElementById("main-ui")
+    //we dont want dual-window mode to be toggleable if we are in display mode
+    if (mainUI?.classList.contains("display-mode")) {
+        return
+    }
+    if (isCatalogModeUI()) {
+        closeCatalogModeUI()
+    } else {
+        openCatalogModeUI()
+    }
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("D", e => {
+    setDisplayModeUI()
+    e.preventDefault()
+})
+
+for (let i = 0; i < 10; i++) {
+    registerCTRLShortcutUI(String(i), e => {
+        let event = e as KeyboardEvent
+        mode_clearItems()
+        sidebarSelectNth(Number(event.key))
+        e.preventDefault()
+    })
+}
+
 document.addEventListener("keydown", e => {
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
@@ -356,93 +459,8 @@ document.addEventListener("keydown", e => {
         return
     }
 
-    if (!e.ctrlKey) return
-    switch (e.key) {
-        case "\\": {
-            const search = getElementOrThrowUI("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
-
-            search.focus()
-
-            //3 indicates a query-v3 search
-            //if the user is pressing ctrl-\ they want to do a query-v3 search
-            if(!search.value.startsWith("3")) {
-                //since it does not start with a 3, add one
-                search.value = '3 '
-            }
-            //select everything after '3 '
-            search.setSelectionRange(2, Math.max(search.value.length, 2))
-
-            e.preventDefault()
-            break
-        }
-        case "/": {
-            const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, components.searchForm)
-            search?.focus()
-            search?.select()
-            e.preventDefault()
-            break
-        }
-        case "?": {
-            components.itemFilter?.focus()
-            components.itemFilter?.select()
-            e.preventDefault()
-            break
-        }
-        case "A": {
-            components.viewAllElem && components.viewAllElem.click()
-            e.preventDefault()
-            break
-        }
-        case "m": {
-            e.preventDefault()
-            components.viewToggle?.focus()
-            break
-        }
-        case "P":
-        case "p": {
-            openModalUI("script-select")
-            e.preventDefault()
-            break
-        }
-        case "N": {
-            openModalUI("new-entry")
-            e.preventDefault()
-            break
-        }
-        case "S": {
-            toggleUI("search-area")
-            e.preventDefault()
-            break
-        }
-        case "B": {
-            toggleUI("sidebar")
-            e.preventDefault()
-            break
-        }
-        case "V": {
-            let mainUI = document.getElementById("main-ui")
-            //we dont want dual-window mode to be toggleable if we are in display mode
-            if (mainUI?.classList.contains("display-mode")) {
-                return
-            }
-            if (isCatalogModeUI()) {
-                closeCatalogModeUI()
-            } else {
-                openCatalogModeUI()
-            }
-            e.preventDefault()
-            break
-        }
-        case "D": {
-            setDisplayModeUI()
-            e.preventDefault()
-            break
-        }
-    }
-    if ("0123456789".includes(e.key)) {
-        mode_clearItems()
-        sidebarSelectNth(Number(e.key))
-        e.preventDefault()
+    if (e.key in _registeredShortcuts) {
+        _registeredShortcuts[e.key](e)
     }
 })
 
@@ -846,7 +864,7 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     let search = searchForm.get("search-query") as string
 
     let useV4 = true
-    if(search.startsWith("3")) {
+    if (search.startsWith("3")) {
         useV4 = false
         search = search.slice(1).trimStart()
     }
