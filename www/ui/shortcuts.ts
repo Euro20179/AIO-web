@@ -7,6 +7,7 @@ class shortcuts_Trie {
     alt: boolean
     shift: boolean
     run: shortcuts_run_t
+
     constructor(value: string, children: Record<string, shortcuts_Trie>,
                ctrl: boolean, alt: boolean, shift: boolean, run?: shortcuts_run_t) {
         this.value = value

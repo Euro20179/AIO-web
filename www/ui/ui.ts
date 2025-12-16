@@ -345,6 +345,8 @@ class Statistic {
 
 /**
  * Registers a shortcut that when ctrl+key is pressed, run will be called
+ * @param {string} key the key to add a ctrl+key shortcut for
+ * @param {(event: Event) => any} run what to run when {key} is pressed
  */
 function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any) {
     if(Array.isArray(key)) {
