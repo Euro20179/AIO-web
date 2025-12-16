@@ -459,7 +459,7 @@ document.addEventListener("keydown", e => {
     }
 
     const next = curkey.press(e, e.key, e.ctrlKey, e.shiftKey, e.altKey)
-    if (next instanceof Trie) {
+    if (next instanceof shortcuts_Trie) {
         curkey = next
     } else if(!next) {
         curkey = shortcuts

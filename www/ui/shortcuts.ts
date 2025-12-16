@@ -1,13 +1,13 @@
 type shortcuts_run_t = (e: Event) => any
 
-class Trie {
+class shortcuts_Trie {
     value: string
-    children: Record<string, Trie>
+    children: Record<string, shortcuts_Trie>
     ctrl: boolean
     alt: boolean
     shift: boolean
     run: shortcuts_run_t
-    constructor(value: string, children: Record<string, Trie>,
+    constructor(value: string, children: Record<string, shortcuts_Trie>,
                ctrl: boolean, alt: boolean, shift: boolean, run?: shortcuts_run_t) {
         this.value = value
         this.children = children
@@ -41,11 +41,11 @@ class Trie {
         const char = seq[0]
         if(!char) return
         if(!(char in this.children)) {
-            this.children[char] = new Trie(char, {}, ctrl, alt, shift, run)
+            this.children[char] = new shortcuts_Trie(char, {}, ctrl, alt, shift, run)
         }
 
         this.children[char].nnoremap(seq.slice(1), ctrl, alt, shift, run)
     }
 }
 
-const shortcuts = new Trie("", {}, false, false, false)
+const shortcuts = new shortcuts_Trie("", {}, false, false, false)
