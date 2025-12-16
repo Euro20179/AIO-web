@@ -447,6 +447,7 @@ for (let i = 0; i < 10; i++) {
 }
 
 let curkey = shortcuts
+let execute_to: number | null = null
 document.addEventListener("keydown", e => {
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
@@ -462,8 +463,9 @@ document.addEventListener("keydown", e => {
 
     const next = curkey.press(e, e.key, e.ctrlKey, e.shiftKey, e.altKey)
     if (next instanceof shortcuts_Trie) {
+        e.preventDefault()
         curkey = next
-    } else if(!next) {
+    } else{
         curkey = shortcuts
     }
 })

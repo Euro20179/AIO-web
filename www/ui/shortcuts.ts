@@ -8,6 +8,8 @@ class shortcuts_Trie {
     shift: boolean
     run: shortcuts_run_t
 
+    static execute_to: number | null = null
+
     constructor(value: string, children: Record<string, shortcuts_Trie>,
                ctrl: boolean, alt: boolean, shift: boolean, run?: shortcuts_run_t) {
         this.value = value
@@ -19,6 +21,10 @@ class shortcuts_Trie {
     }
 
     press(event: Event, key: string, ctrl: boolean, alt: boolean, shift: boolean) {
+        if(shortcuts_Trie.execute_to) {
+            clearTimeout(shortcuts_Trie.execute_to)
+        }
+
         if(!(key in this.children)) return false
 
         let next = this.children[key]
@@ -31,6 +37,7 @@ class shortcuts_Trie {
             next.run(event)
             return true
         } else {
+            shortcuts_Trie.execute_to = setTimeout(() => next.run(event), 300)
             return next
         }
     }
@@ -40,12 +47,16 @@ class shortcuts_Trie {
              run: shortcuts_run_t) {
 
         const char = seq[0]
-        if(!char) return
         if(!(char in this.children)) {
             this.children[char] = new shortcuts_Trie(char, {}, ctrl, alt, shift, run)
         }
 
-        this.children[char].nnoremap(seq.slice(1), ctrl, alt, shift, run)
+        if(seq.length > 1) {
+            this.children[char].nnoremap(seq.slice(1), ctrl, alt, shift, run)
+        } else {
+            this.children[char] = new shortcuts_Trie(char, {},
+                                                     ctrl, alt, shift, run)
+        }
     }
 }
 
