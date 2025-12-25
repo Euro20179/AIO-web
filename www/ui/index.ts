@@ -43,6 +43,14 @@ async function main() {
 
             const ev = new CustomEvent("aio-metadata-loaded")
             dispatchEvent(ev)
+
+            if(urlParams.has("view-all")) {
+                for (let mode of openViewModes) {
+                    mode_selectItemList(getFilteredResultsUI(), true, mode)
+                }
+
+                setViewingAllUI(true)
+            }
         })
     }
     //allow the fetch to happen *after* items are rendered on firefox

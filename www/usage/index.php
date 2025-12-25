@@ -68,6 +68,7 @@
                 or the item specified by <code>item-id</code>
             </li>
             <li><code>catalog</code>: use catalog mode, where the viewing-area is in a seperate window</li>
+            <li><code>view-all</code>: Automatically select all itmes
         </ul>
     </section>
 
