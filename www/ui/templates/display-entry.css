@@ -213,10 +213,6 @@
             gap: 2ch;
         }
 
-        *:has(> &:empty) {
-            display: none;
-        }
-
         /*each div in #tags contains a delete button and the tag itself*/
         &>div {
             display: flex;
