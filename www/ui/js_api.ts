@@ -425,7 +425,7 @@ function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => numbe
  * @returns 1 if option not found
  */
 function ui_delsort(name: string) {
-    let opt = sortBySelector.querySelector(`option[value="${name}"]`)
+    let opt = components.sortBySelector?.querySelector(`option[value="${name}"]`)
     if (!opt) return 1
     opt.remove()
     items_delSort(name)
