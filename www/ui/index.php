@@ -181,7 +181,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/chart.js"></script>
     <script src="/ui/components.js"></script>
     <script src="/config.js"></script>
     <script src="/js/items.js"></script>
