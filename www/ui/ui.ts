@@ -354,7 +354,7 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
             registerCTRLShortcutUI(k, run)
         }
     } else {
-        shortcuts.nnoremap(key, true, false, false, run)
+        shortcuts.nnoremap(key, true, false, key.toUpperCase() == key, run)
     }
 }
 
@@ -448,7 +448,7 @@ for (let i = 0; i < 10; i++) {
 
 let curkey = shortcuts
 let execute_to: number | null = null
-document.addEventListener("keydown", e => {
+addEventListener("keydown", e => {
     if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
         if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
             focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
@@ -461,7 +461,7 @@ document.addEventListener("keydown", e => {
         return
     }
 
-    const next = curkey.press(e, e.key, e.ctrlKey, e.shiftKey, e.altKey)
+    const next = curkey.press(e, e.key, e.ctrlKey, e.altKey, e.shiftKey)
     if (next instanceof shortcuts_Trie) {
         e.preventDefault()
         curkey = next
