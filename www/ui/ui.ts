@@ -354,7 +354,7 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
             registerCTRLShortcutUI(k, run)
         }
     } else {
-        shortcuts.nnoremap(key, true, false, key.toUpperCase() == key, run)
+        shortcuts.nnoremap(key, true, false, /^[A-Z]$/.test(key), run)
     }
 }
 
