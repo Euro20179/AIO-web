@@ -29,7 +29,6 @@ function startupUI({
     newWindow,
     viewToggle,
     viewAllElem,
-    itemFilter,
     librarySelector,
     userSelector,
     sortBySelector,
@@ -40,7 +39,7 @@ function startupUI({
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
 
-    if (!(components["itemFilter"] instanceof HTMLInputElement)) {
+    if (components['itemFilter'] && !(components["itemFilter"] instanceof HTMLInputElement)) {
         throw new Error("item filter must be an <input>")
     }
 
@@ -108,7 +107,7 @@ function startupUI({
         sortEntriesUI()
     })
 
-    itemFilter?.addEventListener("input", function() {
+    components['itemFilter']?.addEventListener("input", function() {
         const filtered = getFilteredResultsUI()
         const ids = filtered.map(v => v.ItemId)
         //remove items that dont match
@@ -271,14 +270,20 @@ function getCSSProp(name: string, fallback: string) {
 }
 
 function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
-    let newArr = []
-    const search = components.itemFilter?.value.toLowerCase()
+    let items = list || items_getResults()
 
-    if (typeof search !== 'string') {
-        throw new Error("Could not get filtered search")
+    if(!components.itemFilter) {
+        return items.map(v => v.info)
     }
 
-    for (let item of list || items_getResults()) {
+    let newArr = []
+    const search = components.itemFilter.value.toLowerCase()
+
+    if(search == "") {
+        return items.map(v => v.info)
+    }
+
+    for (let item of items) {
         for (let str of [item.info.En_Title, item.info.Native_Title, item.meta.Title, item.meta.Native_Title]) {
             if (str.toLowerCase().includes(search)) {
                 newArr.push(item.info)

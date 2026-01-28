@@ -143,7 +143,6 @@
                 <div class="sidebar--navigation" id="sidebar-navigation">
                     <label class="center block" style="align-content: center;"><input type="checkbox" name="view-all"
                             id="view-all">View all</label>
-                    <input type="text" placeholder="filter" aria-label="filter" id="item-filter">
                     <select id="library-selector">
                     </select>
                 </div>

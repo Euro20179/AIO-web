@@ -14,7 +14,6 @@ async function main() {
         viewToggle: getElementOrThrowUI("#view-toggle", HTMLSelectElement),
         viewAllElem: getElementOrThrowUI("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
-        itemFilter: getElementOrThrowUI("#item-filter", HTMLInputElement),
         newEntryLibrarySelector: getElementOrThrowUI("[name=\"libraryId\"]", HTMLSelectElement),
         librarySelector: getElementOrThrowUI("#library-selector", HTMLSelectElement),
         userSelector: getElementUI('[name="uid"]', HTMLSelectElement),
