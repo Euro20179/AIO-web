@@ -468,4 +468,11 @@
             align-self: center;
         }
     }
+
+    @container entry (width < 450px) {
+        #genres {
+            align-items: start;
+            width: 50%;
+        }
+    }
 }
