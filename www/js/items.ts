@@ -124,6 +124,7 @@ type MetadataEntry = {
     Provider: string
     ProviderID: string
     Genres: string
+    Country: string
 }
 
 
