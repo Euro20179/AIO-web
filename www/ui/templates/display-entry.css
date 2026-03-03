@@ -43,7 +43,7 @@
 
     #menu-bar {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(10px, 1fr));
+        grid-template-columns: min-content min-content min-content auto;
         gap: var(--small-gap);
         column-rule: currentColor 1px dashed;
 
@@ -56,6 +56,9 @@
     }
 
     #art-selectors {
+        float: right;
+        display: flex;
+        flex-direction: column;
 
         label {
             text-wrap: nowrap;
