@@ -42,8 +42,8 @@
     }
 
     #menu-bar {
-        display: grid;
-        grid-template-columns: min-content min-content min-content auto;
+        display: flex;
+        flex-wrap: wrap;
         gap: var(--small-gap);
         column-rule: currentColor 1px dashed;
 
