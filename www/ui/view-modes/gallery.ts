@@ -3,7 +3,7 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     const root = entry.shadowRoot
     if(!root) {
         alert("Could not add gallery item, gallery-entry has no shadowroot")
-        return
+        return entry
     }
 
     entry.setAttribute("data-item-id", String(item.ItemId))
@@ -58,6 +58,14 @@ class GalleryMode extends Mode {
         for (let item of entry) {
             this.removeGalleryItem(item)
         }
+    }
+
+    refresh(id: bigint) {
+        const entry = items_getEntry(id)
+        let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        const frag = new DocumentFragment()
+        const item = renderGalleryItem(entry.info, frag)
+        this.parent.replaceChild(frag, el)
     }
 
     clearSelected() {
