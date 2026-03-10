@@ -1648,12 +1648,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         return
     }
 
+    let type = String(item.Type)
+
     //View count
     let viewCount = user.ViewCount
     if (viewCountEl && (viewCount || user.Minutes)) {
         const user = findUserEntryById(item.ItemId)
         let mins = user.Minutes
-            || Number(viewCount) * Number(mediaDependant["Show-length"] || mediaDependant["Movie-length"] || 0)
+            || Number(viewCount) * Number(mediaDependant[`${type}-length`] || 0)
 
         viewCountEl.title = String(mins) + " minutes"
 
@@ -1667,8 +1669,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     }
 
 
-    //Media dependant
-    let type = String(item.Type)
 
     if (mediaInfoTbl) {
         //remove the <Media>- part from the key looks ugly
@@ -1684,6 +1684,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     el.host.setAttribute("data-user-status", user.Status)
 
+    //Media dependant
     const lengthInNumber =
         mediaDependant[`${type}-episodes`]
         || mediaDependant[`${type}-volumes`]
