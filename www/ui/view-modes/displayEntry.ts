@@ -675,7 +675,29 @@ class DisplayMode extends Mode {
     } as const //}}}
 
     add(entry: InfoEntry) {
-        return renderDisplayItem.call(this, entry.ItemId)
+        const el = renderDisplayItem.call(this, entry.ItemId)
+
+        //shortcut: <c-s-a-MouseLeft>
+        //replicate what happens when the template editor button is clicked
+        //this way if the user locks themselves out of the template editor
+        //they can always do this
+        el.onmousedown = (e) => {
+            if(e.ctrlKey && e.altKey && e.shiftKey && e.button === 0) {
+                e.preventDefault()
+                const toShow = el.shadowRoot?.querySelector("#template-editor-container")
+                if(!toShow || !(toShow instanceof this.win.HTMLElement)) return
+                if (toShow instanceof this.win.HTMLDialogElement) {
+                    if (toShow.open) {
+                        toShow.close()
+                    } else {
+                        toShow.showModal()
+                    }
+                } else {
+                    toShow.hidden = !toShow.hidden
+                }
+            }
+        }
+        return el
     }
 
     sub(entry: InfoEntry) {
