@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<?php
-include $_SERVER["DOCUMENT_ROOT"] . "/lib/util.php";
-?>
 <html lang="en">
 
 <head>
@@ -15,6 +12,7 @@ include $_SERVER["DOCUMENT_ROOT"] . "/lib/util.php";
 <body>
 
 <?php
+    include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
     tmpl("login-dialog");
     tmpl("display-entry");
     tmpl("de-copies");
