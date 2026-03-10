@@ -1842,6 +1842,11 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
     const cost = root.getElementById("cost")
     const newTag = root.getElementById("create-tag")
     const locationEl = root.getElementById("location-link")
+    const recommendedByList = root.getElementById("recommended-by")
+
+    if(recommendedByList && recommendedByList instanceof this.win.HTMLDataListElement) {
+        fillRecommendedListUI(recommendedByList, getUidUI())
+    }
 
     hookActionButtons(root, itemId)
 

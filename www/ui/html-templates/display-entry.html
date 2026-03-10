@@ -6,6 +6,8 @@
 <style id="custom-styles">
 </style>
 
+<datalist id="recommended-by"></datalist>
+
 <de-template-editor></de-template-editor>
 
 <dialog id="notes-edit-dialog" popover>
@@ -157,6 +159,7 @@
         <div>
                 Recommended by
         <input
+                list="recommended-by"
                 put-data="RecommendedBy"
                 put-data-mode="value"
                 onchange="
