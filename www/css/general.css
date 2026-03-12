@@ -39,6 +39,7 @@
     }
 
     button,
+    [role="button"],
     textarea,
     input,
     select {
@@ -54,6 +55,8 @@
         border-style: solid;
         background: var(--input-background);
 
+        cursor: pointer;
+
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
@@ -64,12 +67,6 @@
              * the box size the same avoiding relayout*/
             border-color: transparent;
         }
-    }
-
-    [role="button"]:focus {
-        outline: none;
-        border: 3px solid var(--green);
-        cursor: pointer;
     }
 
     select {
@@ -115,6 +112,7 @@
     }
 
     button,
+    [role="button"],
     input[type="submit"] {
         border: 1px solid var(--input-border-color);
         border-radius: var(--border-roundness);
@@ -122,7 +120,7 @@
         cursor: pointer;
     }
 
-    button:hover {
+    :where(button, [role="button"]):hover {
         background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
     }
 

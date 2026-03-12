@@ -50,6 +50,31 @@ class DisplayMode extends Mode {
      */
     de_actions = { //{{{
         /**
+         * Deletes a tag based on the target's tag-name
+        */
+        deletetag: this.displayEntryAction((item, root, target) => {
+            const tag = target.getAttribute("tag-name")
+            if(!tag) {
+                console.warn("The target with entry-aciton=deletetag has no tag-name")
+                alert("This button is not hooked up to a tag")
+                return
+            }
+
+            api_deleteEntryTags(item.ItemId, [tag])
+                .then(res => {
+                    if(res?.status !== 200) return ""
+                    res.text().then(() => {
+                        item.Tags = item.Tags.filter((t: string) => t != tag)
+                        updateInfo2({
+                            [String(item.ItemId)]: {
+                                info: item
+                            }
+                        })
+                    })
+                })
+        }),
+
+        /**
          * Deletes the item
          */
         delete: this.displayEntryAction(item => deleteEntryUI(item)),
@@ -1324,12 +1349,15 @@ function updateBasicDisplayEntryContents(this: DisplayMode, item: InfoEntry, use
             (actionEl.getAttribute("entry-action") as keyof typeof this.de_actions)
                 .split(",").map(v => v.trim())
         for (let i = 0; i < actions.length; i++) {
+            let actionFn = this.de_actions[actions[i] as keyof typeof this.de_actions];
+            if(!actionFn) {
+                console.error(`Failed to register event: ${actions[i]}`)
+                continue
+            }
+            console.log(actions[i], `on${events[i % events.length]}`)
             //@ts-ignore
             actionEl[`on${events[i % events.length]}`] = e => {
-                let actionFn = this.de_actions[actions[i] as keyof typeof this.de_actions];
-                if (actionFn)
-                    actionFn(e.target as HTMLElement)
-
+                actionFn(e.target as HTMLElement)
             }
         }
     }
@@ -1563,26 +1591,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 const copy = tagTempl.content.cloneNode(true) as HTMLElement
                 const del = copy.querySelector("#delete-tag") as HTMLElement
 
-                //TODO: make this and the btn.onclick a generic de_action
-                //also put copy through updateBasicDisplayEntryContents that way
-                //the tag template can be fully declarative
-                del && (del.onclick = () => {
-                    const info = findInfoEntryById(item.ItemId)
-                    api_deleteEntryTags(info.ItemId, [tag])
-                        .then(res => {
-                            if (res?.status !== 200) return ""
-                            res.text().then(() => {
-                                info.Tags = info.Tags.filter((t: string) => t != tag)
-                                changeDisplayItemData.call(this, info, user, meta, events, el.host as HTMLElement)
-                            })
-                        })
-                        .catch(console.error)
-                })
+                del.setAttribute("tag-name", tag)
 
                 const btn = copy.querySelector("#tag-name") as HTMLElement
-                btn.innerText = tag
+                btn.prepend(tag)
 
                 btn.onclick = function(e) {
+                    if(e.target?.id === "delete-tag") return
+
                     let btn = e.target as HTMLButtonElement
                     let tag = btn.innerText
                     ui_search(`#tag:${tag}`)

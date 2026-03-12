@@ -228,6 +228,14 @@
         }
     }
 
+    #delete-tag {
+        display: none;
+    }
+
+    #tag-name:hover #delete-tag {
+        display: revert;
+    }
+
     #create-tag {
         align-self: center;
         height: fit-content;
