@@ -1552,7 +1552,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //tags
     if (tagsRoot) {
-        tagsRoot.innerHTML = ""
+        tagsRoot.querySelectorAll("div").forEach(div => div.remove())
+
         const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
         if (tagTempl)
             for (let tag of item.Tags || []) {
@@ -1587,7 +1588,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                     ui_search(`#tag:${tag}`)
                 }
 
-                tagsRoot?.append(copy)
+                tagsRoot?.prepend(copy)
             }
     }
 

@@ -214,7 +214,7 @@
     #tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 2ch;
+        justify-content: center;
 
         /*div containing the tags which includes the new tag button*/
         *:has(> &:not(:empty)) {
