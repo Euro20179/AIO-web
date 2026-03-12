@@ -55,8 +55,6 @@
         border-style: solid;
         background: var(--input-background);
 
-        cursor: pointer;
-
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
