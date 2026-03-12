@@ -15,6 +15,7 @@ async function main() {
     "datalist#recommended-by",
     HTMLDataListElement,
   );
+
   startupUI({
     newWindow: document.getElementById("new-view-window"),
     viewToggle: getElementOrThrowUI("#view-toggle", HTMLSelectElement),
