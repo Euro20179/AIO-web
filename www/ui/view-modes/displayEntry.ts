@@ -1595,12 +1595,13 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
                 const btn = copy.querySelector("#tag-name") as HTMLElement
                 btn.prepend(tag)
+                btn.setAttribute("tag-name", tag)
 
                 btn.onclick = function(e) {
                     if(e.target?.id === "delete-tag") return
 
                     let btn = e.target as HTMLButtonElement
-                    let tag = btn.innerText
+                    let tag = btn.getAttribute("tag-name")
                     ui_search(`#tag:${tag}`)
                 }
 
