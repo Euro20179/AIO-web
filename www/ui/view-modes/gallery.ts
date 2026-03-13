@@ -63,8 +63,12 @@ class GalleryMode extends Mode {
     refresh(id: bigint) {
         const entry = items_getEntry(id)
         let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        if(!el) {
+            console.error("Failed to refresh gallery item")
+            return
+        }
         const frag = new DocumentFragment()
-        const item = renderGalleryItem(entry.info, frag)
+        renderGalleryItem(entry.info, frag)
         this.parent.replaceChild(frag, el)
     }
 

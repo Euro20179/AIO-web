@@ -66,7 +66,6 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => a
                 console.error(`Failed to register event: ${actions[i]}`)
                 continue
             }
-            console.log(requested_acitons[i], `on${events[i % events.length]}`)
             //@ts-ignore
             actionEl[`on${events[i % events.length]}`] = e => {
                 actionFn(e.target as HTMLElement)
