@@ -1,7 +1,7 @@
 /**
  * @description updates all put-data elements with their respective contents
  */
-function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => any>, win: Window & typeof globalThis, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
+function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => any>, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
     //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
     for (let elem of root.querySelectorAll("[put-data]")) {
         let keys = elem.getAttribute("put-data")?.split(",")
@@ -44,7 +44,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => a
             const putDataMode = elem.getAttribute("put-data-mode")
             if (putDataMode === "html") {
                 elem.innerHTML = String(data)
-            } else if (putDataMode === "value" && elem instanceof win.HTMLInputElement) {
+            } else if (putDataMode === "value" && "value" in elem) {
                 elem.value = String(data)
             } else {
                 elem.textContent = String(data)

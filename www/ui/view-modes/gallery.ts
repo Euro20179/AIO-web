@@ -16,15 +16,8 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         thumbImg.src = thumb
     }
 
-    const title = item.En_Title || meta.Title || item.Native_Title || meta.Native_Title
-    const titleE = root.querySelector("#title") as HTMLElement
-    titleE.append(title)
-
-    const rating = findUserEntryById(item.ItemId).UserRating
-    const ratingE = root.querySelector("#rating") as HTMLSpanElement
-    ratingE.append(String(rating))
-
     parent.appendChild(entry)
+    updateDeclarativeDSL({}, item, findUserEntryById(item.ItemId), meta, root)
     return entry
 }
 
