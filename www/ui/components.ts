@@ -1,3 +1,152 @@
+/**
+ * @description updates all put-data elements with their respective contents
+ */
+function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => any>, win: Window & typeof globalThis, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
+    //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
+    for (let elem of root.querySelectorAll("[put-data]")) {
+        let keys = elem.getAttribute("put-data")?.split(",")
+        if (!keys || !keys.length) continue
+
+        for (let key of keys) {
+            let data
+
+            if (key.includes(".")) {
+                let [from, realKey] = key.split(".")
+                switch (from.toLowerCase()) {
+                    case "info":
+                        data = item[realKey as keyof typeof item]
+                        break
+                    case "meta":
+                        data = meta[realKey as keyof typeof meta]
+                        break
+                    case "user":
+                        data = user[realKey as keyof typeof user]
+                        break
+                }
+
+            } else if (key in item) {
+                data = item[key as keyof typeof item]
+            } else if (key in meta) {
+                data = meta[key as keyof typeof meta]
+            } else if (key in user) {
+                data = user[key as keyof typeof user]
+            }
+
+            if (!data) {
+                const fallback = elem.getAttribute("put-data-fallback")
+                if (fallback !== null) {
+                    data = fallback
+                }
+            } else {
+                data = String(data)
+            }
+
+            const putDataMode = elem.getAttribute("put-data-mode")
+            if (putDataMode === "html") {
+                elem.innerHTML = String(data)
+            } else if (putDataMode === "value" && elem instanceof win.HTMLInputElement) {
+                elem.value = String(data)
+            } else {
+                elem.textContent = String(data)
+                // elem.append(String(data))
+            }
+            break
+        }
+    }
+
+    for (let actionEl of root.querySelectorAll("[entry-action]")) {
+        let events = (actionEl.getAttribute("entry-action-trigger") || "click")
+            .split(",").map(v => v.trim())
+        let requested_acitons =
+            (actionEl.getAttribute("entry-action") as keyof typeof actions)
+                .split(",").map(v => v.trim())
+        for (let i = 0; i < requested_acitons.length; i++) {
+            let actionFn = actions[requested_acitons[i] as keyof typeof actions];
+            if(!actionFn) {
+                console.error(`Failed to register event: ${actions[i]}`)
+                continue
+            }
+            console.log(requested_acitons[i], `on${events[i % events.length]}`)
+            //@ts-ignore
+            actionEl[`on${events[i % events.length]}`] = e => {
+                actionFn(e.target as HTMLElement)
+            }
+        }
+    }
+
+    //put-tbl, for raw objects such as user.Extra
+    for (let elem of root.querySelectorAll("[put-tbl]")) {
+        let requestedObj = elem.getAttribute("put-tbl") || ""
+
+        switch (requestedObj) {
+            case "user.Extra":
+            case "Extra":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(user.Extra))
+                break
+            case "Datapoints":
+            case "meta.Datapoints":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.Datapoints))
+                break
+            case "MediaDependant":
+            case "meta.MediaDependant":
+                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.MediaDependant))
+                break
+            case "info":
+                mkGenericTbl(elem as HTMLElement, item)
+                break
+            case "user":
+                mkGenericTbl(elem as HTMLElement, user)
+                break
+            case "meta":
+                mkGenericTbl(elem as HTMLElement, meta)
+                break
+            default:
+                elem.append(`Invalid object: ${requestedObj}`)
+
+        }
+    }
+
+    function renderVal(val: Type | string, output: HTMLElement) {
+        if (val instanceof Elem) {
+            output.append(val.el)
+        } else if (val instanceof Arr) {
+            for (let item of val.jsValue) {
+                renderVal(item, output)
+            }
+        } else if (val instanceof Type) {
+            output.innerHTML += val.jsStr()
+        } else {
+            output.innerHTML += val
+        }
+    }
+
+    if (settings_get("enable_unsafe"))
+        for (let elem of root.querySelectorAll("script")) {
+            let script = elem.textContent
+            if (!script) continue
+
+            let res: string | Type
+
+            if (elem.getAttribute("type") === "application/x-aiol") {
+                let symbols = new CalcVarTable()
+                symbols.set("root", new Elem(root as unknown as HTMLElement))
+                symbols.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
+                symbols.set("this", new EntryTy(item))
+                res = parseExpression(script, symbols)
+            } else {
+                res = new win.Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
+            }
+            let outputId = elem.getAttribute("data-output")
+            if (outputId) {
+                let outputEl = root.querySelector(`[id="${outputId}"]`) as HTMLElement
+                if (outputEl) {
+                    outputEl.innerHTML = ""
+                    renderVal(res, outputEl)
+                }
+            }
+        }
+}
+
 function applyUserRating(rating: number, root: HTMLElement) {
 
     const tierSettings = settings_get("tiers")
