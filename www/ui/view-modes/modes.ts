@@ -118,6 +118,8 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
 }
 
 function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
+    setError("")
+
     items_selectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
@@ -147,6 +149,10 @@ function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
     updateStats && changeResultStatsWithItemUI(item, -1)
     for (let mode of openViewModes) {
         mode.sub(item)
+    }
+
+    if(items_getSelected().length === 0) {
+        setError("No items selected")
     }
 }
 //just in case
@@ -187,6 +193,7 @@ const toggleItem = mode_toggleItem
  * @see ui_modeclear(), which clears miscellanious nodes from modes
  */
 function mode_clearItems(updateStats: boolean = true) {
+    setError("No items selected")
     items_clearSelected()
     for (const mode of openViewModes) {
         mode.clearSelected()

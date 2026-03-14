@@ -155,9 +155,7 @@
 
             <section id="viewing-area" class="flex column overflow">
 
-                <div id="error-output">
-                    <p id="error"></p>
-                </div>
+                <p id="error"></p>
 
                 <div id="entry-output" class="overflow">
                 </div>

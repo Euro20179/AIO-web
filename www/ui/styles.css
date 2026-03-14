@@ -118,8 +118,12 @@
         }
     }
 
-    #error-output {
+    #error:not([data-error]) {
         display: none;
+    }
+
+    #error[data-error]::before {
+        content: attr(data-error)
     }
 
     p:has(#login-reason) {
@@ -311,17 +315,6 @@
         container-name: viewing-area;
         container-type: size;
         grid-area: main;
-
-        &:not(:has(:where(display-entry, #calc-output.open, #gallery-output.open, #graph-output.open, #event-output.open, #calendar-output.open, #tierlist-output.open))) {
-            #error-output {
-                display: unset;
-            }
-
-            #error::after {
-                /*default error*/
-                content: attr(data-error, "No items selected");
-            }
-        }
 
         &:not(:has(display-entry)) {
             align-items: center;
