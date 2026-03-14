@@ -65,7 +65,6 @@ function startupUI({
 
     if (statsOutput) {
         statistics.push(new Statistic("results", false, () => getFilteredResultsUI().length))
-        statistics.push(new Statistic("count", true, (_, mult) => 1 * mult))
         statistics.push(new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult))
 
         statistics[0].resetable = false
