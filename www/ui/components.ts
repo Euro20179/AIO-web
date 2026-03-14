@@ -133,7 +133,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => a
                 symbols.set("this", new EntryTy(item))
                 res = parseExpression(script, symbols)
             } else {
-                res = new win.Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
+                res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
             }
             let outputId = elem.getAttribute("data-output")
             if (outputId) {
