@@ -3,6 +3,7 @@
 *.js.map
 *.js
 
+update
 aio-web
 server-config.ini
 

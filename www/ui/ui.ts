@@ -272,14 +272,14 @@ function getCSSProp(name: string, fallback: string) {
 function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let items = list || items_getResults()
 
-    if(!components.itemFilter) {
+    if (!components.itemFilter) {
         return items.map(v => v.info)
     }
 
     let newArr = []
     const search = components.itemFilter.value.toLowerCase()
 
-    if(search == "") {
+    if (search == "") {
         return items.map(v => v.info)
     }
 
@@ -354,8 +354,8 @@ class Statistic {
  * @param {(event: Event) => any} run what to run when {key} is pressed
  */
 function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any) {
-    if(Array.isArray(key)) {
-        for(let k of key) {
+    if (Array.isArray(key)) {
+        for (let k of key) {
             registerCTRLShortcutUI(k, run)
         }
     } else {
@@ -470,7 +470,7 @@ addEventListener("keydown", e => {
     if (next instanceof shortcuts_Trie) {
         e.preventDefault()
         curkey = next
-    } else{
+    } else {
         curkey = shortcuts
     }
 })
@@ -551,6 +551,33 @@ async function promptUI(html?: string, _default?: string): Promise<string | null
         (submission.form as HTMLFormElement).onsubmit = () => {
             pEl.close(submission.value)
         }
+    })
+}
+
+/**
+  * Shows a confirmation dialogue
+  * If the user clicks ok, resolve with true
+  * otherwise reject with true
+  * @param html {string} the html to put in the confirmation box
+  */
+async function confirmUI(html: string) {
+    const cEl = getElementOrThrowUI("#confirm", HTMLDialogElement)
+    const close = cEl.querySelector("button:first-child") as HTMLButtonElement
+    const cancel = getElementOrThrowUI("#cancel", HTMLButtonElement, cEl)
+    const ok = getElementOrThrowUI("#ok", HTMLButtonElement, cEl)
+    const root = getElementOrThrowUI("[root]", HTMLElement, cEl)
+    root.innerHTML = html || "<p>CONFIRM</p>"
+
+    cEl.showModal()
+    return await new Promise((res, rej) => {
+        cEl.onclose = () => {
+            (cEl.returnValue ? res : rej)(true)
+        }
+        close.onclick = () => cEl.close("");
+        cancel.onclick = () => {
+            cEl.close("")
+        }
+        ok.onclick = () => cEl.close("true")
     })
 }
 
@@ -787,17 +814,16 @@ async function loadSearchUI() {
  * @param {InfoEntry} item - the item to delete
  */
 function deleteEntryUI(item: InfoEntry) {
-    if (!confirm("Are you sure you want to delete this item")) {
-        return
-    }
-
-    aio_delete(item.ItemId).then(res => {
-        if (res === 1) {
-            alert("Failed to delete item")
-            return
-        }
-        alert(`Deleted: ${item.En_Title} (${item.Native_Title ? item.Native_Title + " : " : ""}${item.ItemId})`)
-    })
+    confirmUI("Are you sure you want to delete this item")
+        .then(() => {
+            aio_delete(item.ItemId).then(res => {
+                if (res === 1) {
+                    alert("Failed to delete item")
+                    return
+                }
+                alert(`Deleted: ${item.En_Title} (${item.Native_Title ? item.Native_Title + " : " : ""}${item.ItemId})`)
+            })
+        })
 }
 
 /**
@@ -825,28 +851,27 @@ async function fetchLocationUI(id: bigint, provider?: string) {
 }
 
 function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
-    if (!confirm("Are you sure you want to overwrite the metadata with a refresh")) {
-        return
-    }
+    confirmUI("Are you sure you want to overwrite the metadata with a refresh")
+        .then(() => {
+            api_overwriteMetadataEntry(item.ItemId).then(res => {
+                if (res?.status !== 200) {
+                    alert("Failed to get metadata")
+                    return
+                }
 
-    api_overwriteMetadataEntry(item.ItemId).then(res => {
-        if (res?.status !== 200) {
-            alert("Failed to get metadata")
-            return
-        }
+                alert("Metadata set")
 
-        alert("Metadata set")
+                res.text().then((newMetaText: string) => {
+                    let newMeta = api_deserializeJsonl(newMetaText).next().value
+                    let sId = String(item.ItemId)
+                    updateInfo2({ [sId]: { meta: newMeta } })
 
-        res.text().then((newMetaText: string) => {
-            let newMeta = api_deserializeJsonl(newMetaText).next().value
-            let sId = String(item.ItemId)
-            updateInfo2({ [sId]: { meta: newMeta } })
-
-            if (newMeta.Provider === "steam") {
-                fetchLocationUI(item.ItemId, "steam")
-            }
+                    if (newMeta.Provider === "steam") {
+                        fetchLocationUI(item.ItemId, "steam")
+                    }
+                })
+            })
         })
-    })
 }
 
 function updateLibraryDropdown() {

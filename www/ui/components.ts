@@ -288,6 +288,7 @@ for (const name of [
     "graph-template",
 
     "prompt-dialog",
+    "confirm-dialog",
     "new-entry-dialog",
     "new-event-dialog",
     "login-dialog",

@@ -44,6 +44,7 @@
     tmpl("calc-entry");
     tmpl("new-event-dialog");
     tmpl("prompt-dialog");
+    tmpl("confirm-dialog");
 ?>
 
     <tz-datalist></tz-datalist>
@@ -64,6 +65,7 @@
     </dialog>
 
     <prompt-dialog></prompt-dialog>
+    <confirm-dialog></confirm-dialog>
     <new-event-dialog></new-event-dialog>
     <login-dialog></login-dialog>
     <new-entry-dialog></new-entry-dialog>

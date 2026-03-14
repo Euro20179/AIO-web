@@ -235,12 +235,16 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
             }
 
             addList(entries: InfoEntry[]) {
-                if (entries.length !== 1 && !confirm(`${entries.length} windows are about to open, are you sure this is ok`)) {
-                    return
-                }
-
-                for (let entry of entries) {
-                    this.add(entry)
+                if (entries.length !== 1) {
+                    confirmUI(`${entries.length} windows are about to open, are you sure this is ok`)
+                        .then(() => {
+                            for (let entry of entries) {
+                                this.add(entry)
+                            }
+                        })
+                } else {
+                    // there is only one entry due to the if statement
+                    this.add(entries[0])
                 }
             }
 

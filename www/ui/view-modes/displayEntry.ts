@@ -54,7 +54,7 @@ class DisplayMode extends Mode {
         */
         deletetag: this.displayEntryAction((item, root, target) => {
             const tag = target.getAttribute("tag-name")
-            if(!tag) {
+            if (!tag) {
                 console.warn("The target with entry-aciton=deletetag has no tag-name")
                 alert("This button is not hooked up to a tag")
                 return
@@ -62,7 +62,7 @@ class DisplayMode extends Mode {
 
             api_deleteEntryTags(item.ItemId, [tag])
                 .then(res => {
-                    if(res?.status !== 200) return ""
+                    if (res?.status !== 200) return ""
                     res.text().then(() => {
                         item.Tags = item.Tags.filter((t: string) => t != tag)
                         updateInfo2({
@@ -150,7 +150,7 @@ class DisplayMode extends Mode {
          */
         selectnewrequirement: this.displayEntryAction(item => {
             selectItemUI().then(id => {
-                if(!id) {
+                if (!id) {
                     alert("Could not add requirement")
                     return
                 }
@@ -158,9 +158,9 @@ class DisplayMode extends Mode {
                 api_addRequires(item.Uid, item.ItemId, id).then(() => {
                     let requirement = findInfoEntryById(id)
                     items_addRequires(item.ItemId, id)
-                    updateInfo2({ 
-                        [String(item.ItemId)]: {info: item},
-                        [String(requirement.ItemId)]: {info: requirement}
+                    updateInfo2({
+                        [String(item.ItemId)]: { info: item },
+                        [String(requirement.ItemId)]: { info: requirement }
                     })
                 })
             })
@@ -707,10 +707,10 @@ class DisplayMode extends Mode {
         //this way if the user locks themselves out of the template editor
         //they can always do this
         el.onmousedown = (e) => {
-            if(e.ctrlKey && e.altKey && e.shiftKey && e.button === 0) {
+            if (e.ctrlKey && e.altKey && e.shiftKey && e.button === 0) {
                 e.preventDefault()
                 const toShow = el.shadowRoot?.querySelector("#template-editor-container")
-                if(!toShow || !(toShow instanceof this.win.HTMLElement)) return
+                if (!toShow || !(toShow instanceof this.win.HTMLElement)) return
                 if (toShow instanceof this.win.HTMLDialogElement) {
                     if (toShow.open) {
                         toShow.close()
@@ -988,11 +988,10 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 return
             }
 
-            if (!confirm(`Are you sure you want to ${action} this entry`)) {
-                return
-            }
-
-            authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
+            confirmUI(`Are you sure you want to ${action} this entry`)
+                .then(() => {
+                    return authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
+                })
                 .then(res => {
                     if (res && res.status === 200) {
                         updateStatusDisplay(action, shadowRoot)
@@ -1024,21 +1023,19 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
         btn.addEventListener("click", async (_) => {
             const item = findInfoEntryById(itemId) as InfoEntry
+            confirmUI(`Are you sure you want to ${action} this entry`)
+                .then(async () => {
+                    let queryParams = `?id=${item.ItemId}`
+                    if (action === "Finish") {
+                        let rating = await promptNumber("Rating", "Not a number\nRating")
+                        if (rating !== null) {
+                            queryParams += `&rating=${rating}`
+                        }
+                    }
 
-            if (!confirm(`Are you sure you want to ${action} this entry`)) {
-                return
-            }
-
-            let queryParams = `?id=${item.ItemId}`
-            if (action === "Finish") {
-                let rating = await promptNumber("Rating", "Not a number\nRating")
-                if (rating !== null) {
-                    queryParams += `&rating=${rating}`
-                }
-            }
-
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
-            authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
+                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+                    return authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
+                })
                 .then(res => {
                     if (res && res.status === 200) {
                         updateStatusDisplay(action, shadowRoot)
@@ -1059,6 +1056,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                         })
                     )
                 })
+
         })
     }
 
@@ -1186,26 +1184,28 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
                 "copies": "Would you like to remove this item as a copy",
                 "required-items": "Would you like to remove this item as a requirement"
             }
-            if (!confirm(confirmationText[relationType])) return
 
-            const [apiFunc, itemsFunc] = ({
-                "copies": [api_delCopy, items_removeCopy],
-                "descendants": [api_delChild, items_removeChild],
-                "required-items": [
-                    (uid: number, right: bigint, left: bigint) => api_delRequires(uid, left, right),
-                    (right: bigint, left: bigint) => items_removeRequires(left, right)
-                ],
-            } as const)[relationType]
+            confirmUI(confirmationText[relationType])
+                .then(() => {
+                    const [apiFunc, itemsFunc] = ({
+                        "copies": [api_delCopy, items_removeCopy],
+                        "descendants": [api_delChild, items_removeChild],
+                        "required-items": [
+                            (uid: number, right: bigint, left: bigint) => api_delRequires(uid, left, right),
+                            (right: bigint, left: bigint) => items_removeRequires(left, right)
+                        ],
+                    } as const)[relationType]
 
-            //since copyof left/right doesn't matter
-            //we'll just use the left/right for adding a child
-            apiFunc(child.info.Uid, child.ItemId, thisId).then(() => {
-                itemsFunc(child.ItemId, thisId)
-                updateInfo2({
-                    [String(thisId)]: { info: findInfoEntryById(thisId) },
-                    [String(child.ItemId)]: { info: child.info }
+                    //since copyof left/right doesn't matter
+                    //we'll just use the left/right for adding a child
+                    apiFunc(child.info.Uid, child.ItemId, thisId).then(() => {
+                        itemsFunc(child.ItemId, thisId)
+                        updateInfo2({
+                            [String(thisId)]: { info: findInfoEntryById(thisId) },
+                            [String(child.ItemId)]: { info: child.info }
+                        })
+                    })
                 })
-            })
         })
     }
 }
@@ -1450,7 +1450,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 btn.setAttribute("tag-name", tag)
 
                 btn.onclick = function(e) {
-                    if(e.target?.id === "delete-tag") return
+                    if (e.target?.id === "delete-tag") return
 
                     let btn = e.target as HTMLButtonElement
                     let tag = btn.getAttribute("tag-name")
@@ -1737,7 +1737,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
     const locationEl = root.getElementById("location-link")
     const recommendedByList = root.getElementById("recommended-by")
 
-    if(recommendedByList && recommendedByList instanceof this.win.HTMLDataListElement) {
+    if (recommendedByList && recommendedByList instanceof this.win.HTMLDataListElement) {
         fillRecommendedListUI(recommendedByList, getUidUI())
     }
 
@@ -2021,15 +2021,21 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
 
 async function deleteEventByEventId(eventId: number) {
     const uid = getUidUI()
-    if (!confirm("Are you sure you want to delete this event")) {
-        return false
-    }
+    return await new Promise(final => {
+        confirmUI("Are you sure you want to delete this event")
+            .then(async() => {
+                console.log("HI")
+                const res = await api_deleteEventV2(eventId, uid)
+                if (res?.status !== 200) {
+                    alert(res?.text() || "Failed to delete event")
+                    final(true)
+                }
+                alert("Successfully deleted event")
+                final(true)
+            })
+            .catch(() => {
+                console.log("hi?")
+            })
+    })
 
-    const res = await api_deleteEventV2(eventId, uid)
-    if (res?.status !== 200) {
-        alert(res?.text() || "Failed to delete event")
-        return true
-    }
-    alert("Successfully deleted event")
-    return true
 }
