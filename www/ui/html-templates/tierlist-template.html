@@ -1,10 +1,15 @@
 <template id="tierlist-template">
 <div id="tierlist-output">
-    <menu aria-label="tierlist controls">
-        <select id="tierlist-mode" value="user">
+    <menu aria-label="tierlist controls" class="flex" style="gap: 1ch;">
+        <select id="tierlist-mode" value="user" style="height: fit-content; align-self: center;">
             <option value="general">General Rating</option>
             <option value="user">User Rating</option>
         </select>
+
+        <div class="flex column">
+            <p>Custom tierlist expression</p>
+            <textarea id="tierlist-custom"></textarea>
+        </div>
     </menu>
     <tier-list class="block">
     </tier-list>

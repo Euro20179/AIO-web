@@ -19,8 +19,9 @@ class TierListMode extends Mode {
             throw new Error("Could not find the tierlist output HTMLElement")
 
         let modeSelector = this.parent.querySelector("#tierlist-mode")
+        let customExpr = this.parent.querySelector("#tierlist-custom")
 
-        if (modeSelector instanceof HTMLSelectElement) {
+        if (modeSelector instanceof this.win.HTMLSelectElement) {
             this.previousMode = modeSelector.value
 
             modeSelector.onchange = () => {
@@ -29,6 +30,14 @@ class TierListMode extends Mode {
                 this.addList(items)
 
                 this.previousMode = modeSelector.value
+            }
+        }
+
+        if(customExpr instanceof this.win.HTMLTextAreaElement) {
+            customExpr.oninput = () => {
+                let items = items_getSelected()
+                this.clearSelected()
+                this.addList(items)
             }
         }
 
@@ -60,8 +69,12 @@ class TierListMode extends Mode {
 
     }
 
-    _getMode(): "general" | "user" {
+    _getMode(): "general" | "user"  | "custom"{
         let modeSelector = this.parent.querySelector("#tierlist-mode")
+        let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.parent)
+        if(custom) {
+            return "custom"
+        }
 
         if (!(modeSelector instanceof HTMLSelectElement))
             throw new Error("mode selector could not be found")
@@ -74,15 +87,23 @@ class TierListMode extends Mode {
         return mode
     }
 
-    _findInfo(id: bigint, mode: "general" | "user"): [number, string | false] {
+    _findInfo(id: bigint, mode: "general" | "user" | "custom"): [number, string | false] {
         let user = findUserEntryById(id)
         let meta = findMetadataById(id)
 
-        let rating = (
-            mode === "general"
-                ? items_getNormalizedRating(meta)
-                : user.UserRating
-        ) || 0
+        let rating
+        if(mode === "general") {
+            rating = items_getNormalizedRating(meta)
+        } else if (mode === "user") {
+            rating = user.UserRating
+        } else /*custom*/ {
+            let customExprEl = getElementOrThrowUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.parent)
+            const expr = customExprEl.value
+            let item = findInfoEntryById(id)
+            let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
+            let calc = parseExpression(expr, symbols)
+            rating = calc.toNum().jsValue
+        }
 
         let tier = settings_tier_from_rating(rating)
 
@@ -116,14 +137,8 @@ class TierListMode extends Mode {
         } else {
             for (let el of els) {
                 let elId = BigInt(el.id.split("-item-")[1])
-                let elRating
 
-                if (mode === "user") {
-                    elRating = findUserEntryById(elId).UserRating
-                } else {
-                    let meta = findMetadataById(elId)
-                    elRating = items_getNormalizedRating(meta)
-                }
+                let [elRating, _] = this._findInfo(elId, mode)
 
                 if (rating < elRating) {
                     //if rating < elRating, there may be another element that 
