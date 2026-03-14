@@ -50,3 +50,11 @@ function sequenceNumberGrabber(text: string, allItems: string[]): number | null 
         }
     })[0][1])
 }
+
+interface Object {
+    isA(ty: any): boolean
+}
+
+Object.prototype.isA = function(ty: any) {
+    return this instanceof ty
+}

@@ -39,10 +39,16 @@ function startupUI({
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
 
-    if (components['itemFilter'] && !(components["itemFilter"] instanceof HTMLInputElement)) {
+    //optional
+    if (!components["itemFilter"]?.isA(HTMLInputElement)) {
         throw new Error("item filter must be an <input>")
     }
 
+    if(!components['userSelector']?.isA(HTMLSelectElement)) {
+        throw new Error("user uid selector must be a select element")
+    }
+
+    //required
     if (!(components["viewToggle"] instanceof HTMLSelectElement)) {
         throw new Error("view toggle must be a <select>")
     }
@@ -54,10 +60,6 @@ function startupUI({
     if (!(components["librarySelector"] instanceof HTMLSelectElement)) {
         throw new Error("library selector must be a select element")
     }
-
-    // if (!(components["userSelector"] instanceof HTMLSelectElement)) {
-    //     throw new Error("user uid selector must be a select element")
-    // }
 
     if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
         throw new Error("sort by selector must be a select element")
