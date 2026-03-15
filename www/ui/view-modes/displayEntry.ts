@@ -1420,7 +1420,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         const children = []
         for (let genre of genres) {
             const el = document.createElement("button")
-            el.classList.add("tag")
+            el.classList.add("genre")
             el.onclick = function() {
                 ui_search(`#g:${genre.replaceAll(" ", "\\ ")}`)
             }

@@ -18,6 +18,11 @@
         line-height: 0;
     }
 
+    .genre::before {
+        content: "🎭︎ ";
+        line-height: 0;
+    }
+
     .delete {
         color: var(--error);
         border-color: var(--error);
