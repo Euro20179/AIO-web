@@ -129,12 +129,13 @@ async function main() {
     ui_search(initialSearch || searchInput.value, () => {
       dispatchEvent(new CustomEvent("aio-items-rendered"));
     });
+  } else if (searchInput.value) {
     //this should be separate because ui_search will add another 3
     // if serachInput.value is something like `3 @hi`
-  } else if (searchInput.value) {
     mkSearchUI({
       "search-query": searchInput.value,
     });
+    dispatchEvent(new CustomEvent("aio-items-rendered"));
   } else {
     let entries = Object.values(items_getAllEntries()).map((v) => v.info);
     entries = sortEntries(entries, sortBySelector.value);
