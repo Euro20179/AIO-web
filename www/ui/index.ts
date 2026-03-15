@@ -47,7 +47,11 @@ async function main() {
   const onrender = () => {
     //just in case
     removeEventListener("aio-items-rendered", onrender);
-    items_refreshRelations(uid);
+    items_refreshRelations(uid).then(() => {
+      for (let item of items_getSelected()) {
+        mode_refreshItem(item.ItemId);
+      }
+    });
     items_refreshMetadata(uid).then(() => {
       for (let item of items_getSelected()) {
         mode_refreshItem(item.ItemId);
@@ -56,6 +60,7 @@ async function main() {
       const ev = new CustomEvent("aio-metadata-loaded");
       dispatchEvent(ev);
 
+      //i think this is to reorder everything?:
       if (urlParams.has("view-all")) {
         for (let mode of openViewModes) {
           mode_selectItemList(getFilteredResultsUI(), true, mode);
