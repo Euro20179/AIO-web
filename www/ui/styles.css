@@ -245,6 +245,10 @@
             flex-grow: 1;
         }
 
+        [name="uid"] {
+            max-width: 10ch;
+        }
+
         div:has(> [name="sort-by"]) {
             flex-shrink: 2;
             grid-template-rows: 1fr 1fr;

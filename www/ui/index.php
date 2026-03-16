@@ -117,7 +117,7 @@
                     </select>
 
                     <!-- ui relies on this to keep track of the uid -->
-                    <select name="uid" hidden>
+                    <select name="uid">
                         <option value="0">ALL</option>
                     </select>
                     <button type="submit">🔎</button>
