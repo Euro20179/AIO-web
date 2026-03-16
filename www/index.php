@@ -80,7 +80,7 @@
         </a>
         <button onclick="signinUI()">Login</button>
         <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
-        <a href="/create-account"><button>Create account</button></a>
+        <a href="/create-account.php"><button>Create account</button></a>
     </nav>
 
     <header>
