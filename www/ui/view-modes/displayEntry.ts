@@ -1162,7 +1162,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) 
 }
 
 function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
-    let relationships = relationGenerator.toArray()
+    var relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
 
     relationships = relationships.sort((a, b) => {

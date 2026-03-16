@@ -427,7 +427,31 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
 
 function items_getEntry(id: bigint) {
     const val = _globalsNewUi.entries[String(id)]
-    if (!(val)) throw new Error(`${id} Is not an entry`)
+    if (!(val)) {
+        console.error(`${id} is not an entry or is not loaded`)
+        const info = genericInfo(id, 0)
+        info.En_Title = `UNKNOWN <id:${id}>`
+        return _globalsNewUi.entries[String(id)] = new items_Entry(info)
+    }
+    return val
+}
+
+/**
+    * Gets an entry based on an item id
+    * if the entry is not loaded, load it
+    * ignores current user
+*/
+async function items_getEntryAny(id: bigint) {
+    let val = _globalsNewUi.entries[String(id)]
+    if (!(val)) {
+        const stuff = await api_getEntryAll(id, 0)
+        if(!stuff) {
+            throw new Error(`${id} is not an entry`)
+        }
+        val = _globalsNewUi.entries[String(id)] = new items_Entry(
+            stuff.info, stuff.user, stuff.meta, stuff.events
+        )
+    }
     return val
 }
 

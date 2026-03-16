@@ -177,7 +177,7 @@ class NotesTagNode implements NotesNode {
                     this.innerText = "INVALID ID"
                     endTag = "</span>"
                 } else {
-                    startTag = `<button onclick="toggleItem(findInfoEntryById(${this.propertyValue}n))">`
+                    startTag = `<button onclick="items_getEntryAny(${this.propertyValue}).then(res => res.ItemId && toggleItem(res.info))">`
                     endTag = "</button>"
                 }
                 break
