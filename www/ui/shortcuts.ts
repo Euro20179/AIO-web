@@ -60,4 +60,7 @@ class shortcuts_Trie {
     }
 }
 
-const shortcuts = new shortcuts_Trie("", {}, false, false, false)
+interface Window {
+    shortcuts: shortcuts_Trie
+}
+window.shortcuts = new shortcuts_Trie("", {}, false, false, false)

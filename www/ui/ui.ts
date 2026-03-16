@@ -358,7 +358,10 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
             registerCTRLShortcutUI(k, run)
         }
     } else {
-        shortcuts.nnoremap(key, true, false, /^[A-Z]$/.test(key), run)
+        //@ts-ignore
+        if(window.shortcuts) {
+            window.shortcuts.nnoremap(key, true, false, /^[A-Z]$/.test(key), run)
+        }
     }
 }
 
@@ -450,29 +453,30 @@ for (let i = 0; i < 10; i++) {
     })
 }
 
-let curkey = shortcuts
-let execute_to: number | null = null
-addEventListener("keydown", e => {
-    if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
-        if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
-            focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
-        } else focusNextSidebarItem(e.key === "ArrowUp")
-        if (e.ctrlKey) {
-            if (!e.shiftKey) mode_clearItems()
-            selectFocusedSidebarItem()
+if(window.shortcuts) {
+    let curkey = window.shortcuts
+    addEventListener("keydown", e => {
+        if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
+            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
+                focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
+            } else focusNextSidebarItem(e.key === "ArrowUp")
+            if (e.ctrlKey) {
+                if (!e.shiftKey) mode_clearItems()
+                selectFocusedSidebarItem()
+            }
+            e.preventDefault()
+            return
         }
-        e.preventDefault()
-        return
-    }
 
-    const next = curkey.press(e, e.key, e.ctrlKey, e.altKey, e.shiftKey)
-    if (next instanceof shortcuts_Trie) {
-        e.preventDefault()
-        curkey = next
-    } else {
-        curkey = shortcuts
-    }
-})
+        const next = curkey?.press(e, e.key, e.ctrlKey, e.altKey, e.shiftKey)
+        if (next instanceof shortcuts_Trie) {
+            e.preventDefault()
+            curkey = next
+        } else {
+            curkey = window.shortcuts
+        }
+    })
+}
 
 type UserScript_FN = (selected: InfoEntry[], results: InfoEntry[]) => any
 class UserScript {
