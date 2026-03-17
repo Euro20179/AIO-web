@@ -107,10 +107,6 @@
         }
     }
 
-    #cost-calculation-modifiers {
-        width: 100%;
-    }
-
     #thumbnail-fig {
         float: left;
         margin: 0 var(--small-gap) 0 0;
@@ -156,6 +152,11 @@
     }
 
 
+    #user-actions-filter {
+        width: 50%;
+        text-align: center;
+    }
+
     #user-actions {
         width: 100%;
         margin: 0 auto;
@@ -187,7 +188,10 @@
     }
 
     #event-table-area {
-        gap: calc(var(--small-gap) / 2);
+        flex-grow: 1;
+        text-align: center;
+        display: flow-root;
+        align-self: center;
         overflow: auto auto;
         max-height: 30cqb;
     }

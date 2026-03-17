@@ -1120,11 +1120,14 @@ function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     costEl.innerText = String(items_calculateCost(itemId, self, children, copies, requires, recursive))
 }
 
-function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint) {
+function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint, eventFilter = "") {
 
     const { self, children, copies, recursive, requires } = whatToInclude(el)
 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
+        .filter(v => {
+            return v.Event.includes(eventFilter)
+        })
         .sort(items_compareEventTiming).reverse()
 
 
@@ -1912,6 +1915,16 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
         el.onchange = async () => {
             await updateLocationUI(itemId, String(el.value))
+        }
+    })
+
+    renderComponent("#user-actions-filter", el => {
+        if(!("value" in el)) return
+        el.oninput = (e) => {
+            renderComponent("#user-actions", eventsTbl => {
+                if(!(eventsTbl instanceof this.win.HTMLTableElement)) return
+                updateEventsDisplay.call(this, root, eventsTbl, itemId, String(el.value))
+            })
         }
     })
 
