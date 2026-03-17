@@ -1139,13 +1139,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     }
 
     for (let event of eventsToLookAt) {
-        tbodyHTML += `<tr>
-                        <td>
-                            <div class="grid column">
-                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
-                                ${event.Event}
-                            </div>
-                        </td>`
+        tbodyHTML += `<tr>`
 
         if(hasNonSelfEvent) {
             if(event.ItemId !== itemId) {
@@ -1155,19 +1149,26 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
             }
         }
 
+        tbodyHTML += ` <td>
+            <div class="grid column">
+                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
+                ${event.Event}
+            </div>
+        </td>`
+
         tbodyHTML += `<td>${items_eventTSHTML(event)}</td>`
     }
 
     eventsTbl.innerHTML = `
             <thead>
                 <tr>
+                    ${hasNonSelfEvent ? "<th>For</th>" : ""}
                     <!-- this nonsense is so that the title lines up with the events -->
                     <th>
                         <div class="grid column">
                             <button onclick="openEventFormUI('${itemId}')">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
-                    ${hasNonSelfEvent ? "<th>For</th>" : ""}
                     <th>Time</th>
                 </tr>
             </thead>
