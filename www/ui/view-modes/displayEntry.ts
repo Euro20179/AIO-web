@@ -275,7 +275,10 @@ class DisplayMode extends Mode {
          */
         togglerelationinclude: this.displayEntryAction((item, root) => {
             updateCostDisplay.call(this, root, item.ItemId)
-            updateEventsDisplay.call(this, root, item.ItemId)
+            for(let el of root.querySelectorAll("#user-actions")) {
+                if(!(el instanceof this.win.HTMLTableElement)) continue
+                updateEventsDisplay.call(this, root, el, item.ItemId)
+            }
         }),
 
         /**
@@ -2095,7 +2098,6 @@ async function deleteEventByEventId(eventId: number) {
     return await new Promise(final => {
         confirmUI("Are you sure you want to delete this event")
             .then(async () => {
-                console.log("HI")
                 const res = await api_deleteEventV2(eventId, uid)
                 if (res?.status !== 200) {
                     alert(res?.text() || "Failed to delete event")
