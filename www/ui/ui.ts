@@ -1216,7 +1216,14 @@ if (newItemForm) {
 }
 
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
-    let results = await api_queryV3(search, getUidUI())
+    let useV3 = false
+    if (search.startsWith("3")) {
+        useV3 = true
+        search = search.slice(1).trimStart()
+    }
+
+    let results = await (useV3 ? api_queryV3 : api_queryV4)(search, getUidUI())
+
     return fillItemListingUI(Object.fromEntries(
         results.map(v => [
             String(v.ItemId),

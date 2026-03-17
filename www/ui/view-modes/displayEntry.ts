@@ -1183,7 +1183,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
         `
 }
 
-function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
+function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
     var relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
 
@@ -1722,8 +1722,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies], ["required-items", findRequirements]] as const) {
         renderComponent(`#${relationship[0]}`, relationshipEl => {
             relationshipEl.innerHTML = ""
-            createRelationButtons.call(
-                this,
+            createRelationButtons(
                 item.ItemId,
                 relationshipEl,
                 relationship[1](item.ItemId),
