@@ -1127,7 +1127,38 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
         .sort(items_compareEventTiming).reverse()
 
-    let html = `
+
+    let hasNonSelfEvent = false
+    let tbodyHTML = ""
+
+
+    for(let event of eventsToLookAt) {
+        if(event.ItemId !== itemId) {
+            hasNonSelfEvent = true
+        }
+    }
+
+    for (let event of eventsToLookAt) {
+        tbodyHTML += `<tr>
+                        <td>
+                            <div class="grid column">
+                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
+                                ${event.Event}
+                            </div>
+                        </td>`
+
+        if(hasNonSelfEvent) {
+            if(event.ItemId !== itemId) {
+                tbodyHTML += `<td>${findInfoEntryById(event.ItemId).En_Title}</td>`
+            } else {
+                tbodyHTML += `<td><b>self</b></td>`
+            }
+        }
+
+        tbodyHTML += `<td>${items_eventTSHTML(event)}</td>`
+    }
+
+    eventsTbl.innerHTML = `
             <thead>
                 <tr>
                     <!-- this nonsense is so that the title lines up with the events -->
@@ -1136,30 +1167,14 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
                             <button onclick="openEventFormUI('${itemId}')">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
+                    ${hasNonSelfEvent ? "<th>For</th>" : ""}
                     <th>Time</th>
                 </tr>
             </thead>
             <tbody>
+            ${tbodyHTML}
+            </tbody>
         `
-    for (let event of eventsToLookAt) {
-        let name = event.ItemId === itemId
-            ? event.Event
-            : `<div class='flex row j-space-evenly'><span class='event-for'>${findInfoEntryById(event.ItemId).En_Title}</span> <span class='event'>${event.Event}</span></div>`
-
-        let timeTd = `<td>${items_eventTSHTML(event)}</td>`
-
-        html += `<tr>
-                        <td>
-                            <div class="grid column">
-                                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
-                                ${name}
-                            </div>
-                        </td>
-                            ${timeTd}
-                        </tr>`
-    }
-    html += "</tbody>"
-    eventsTbl.innerHTML = html
 }
 
 function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
