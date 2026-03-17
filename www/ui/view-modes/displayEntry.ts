@@ -1144,7 +1144,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     for (let event of eventsToLookAt) {
         let name = event.ItemId === itemId
             ? event.Event
-            : `(${findInfoEntryById(event.ItemId).En_Title}) ${event.Event}`
+            : `<div class='flex row j-space-evenly'><span class='event-for'>${findInfoEntryById(event.ItemId).En_Title}</span> <span class='event'>${event.Event}</span></div>`
 
         let timeTd = `<td>${items_eventTSHTML(event)}</td>`
 
