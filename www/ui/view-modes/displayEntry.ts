@@ -1117,9 +1117,7 @@ function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     costEl.innerText = String(items_calculateCost(itemId, self, children, copies, requires, recursive))
 }
 
-function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
-    const eventsTbl = el.getElementById("user-actions")
-    if (!eventsTbl || !(eventsTbl instanceof this.win.HTMLTableElement)) return
+function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint) {
 
     const { self, children, copies, recursive, requires } = whatToInclude(el)
 
@@ -1210,11 +1208,10 @@ function createRelationButtons(this: DisplayMode, thisId: bigint, elementParent:
     }
 }
 
-function updateStatusDisplay(newStatus: string, el: ShadowRoot) {
-    const statusText = el.getElementById("status-selector")
-    if (!statusText || !("value" in statusText)) return
+function updateStatusDisplay(newStatus: string, display: HTMLElement) {
+    if (!display || !("value" in display)) return
 
-    statusText.value = newStatus
+    display.value = newStatus
     // statusText.innerText = newStatus
 }
 
@@ -1291,6 +1288,13 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
  * @description updates special-case legacy elements
  */
 async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+    const renderComponent = (query: string,
+        fill: (element: HTMLElement, itemId: bigint) => any) => {
+        for (let l of el.querySelectorAll(query)) {
+            fill(l as HTMLElement, item.ItemId)
+        }
+    }
+
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
@@ -1316,11 +1320,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     const digitized = el.getElementById("format-digitized")
     const genresRoot = el.getElementById("genres")
     const tagsRoot = el.getElementById("tags")
-    const itemInteractionsMenuEl = el.getElementById("item-interaction-menu")
-
 
     //item item interaction menu
-    if (itemInteractionsMenuEl instanceof this.win.HTMLElement) {
+    renderComponent("#item-interaction-menu", el => {
+        if (!(el instanceof this.win.HTMLElement)) return
         const buttons = settings_get("de_item_interactions")
 
         let btns = []
@@ -1347,57 +1350,76 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             btns.push(btn)
         }
 
-        itemInteractionsMenuEl.replaceChildren(...btns)
-    }
+        el.replaceChildren(...btns)
+    })
 
-    //object editor table
-    const objectTbl = el.getElementById("display-info-object-tbl") as HTMLTableElement
-    updateObjectTbl(getCurrentObjectInObjEditor(item.ItemId, el), objectTbl)
+    renderComponent("#display-info-object-tbl", objTable => {
+        if (!(objTable instanceof this.win.HTMLTableElement)) {
+            console.warn("#display-info-object-tbl must be a <table>")
+            return
+        }
 
-    //status
-    updateStatusDisplay(user.Status, el)
+        updateObjectTbl(getCurrentObjectInObjEditor(item.ItemId, el), objTable)
+    })
 
-    //Cost
-    updateCostDisplay.call(this, el, item.ItemId)
+    renderComponent("#status-selector",
+        el => updateStatusDisplay(user.Status, el))
 
-    //Set the user's default timezone in the tz selector
-    if (tzEl && tzEl instanceof this.win.HTMLSelectElement) {
+    renderComponent("#cost", l => {
+        const { self, children, copies, recursive, requires } = whatToInclude(el)
+        l.innerText = String(items_calculateCost(item.ItemId, self, children, copies, requires, recursive))
+    })
+
+    renderComponent("#tz-selector", tzEl => {
+        if (!(tzEl instanceof this.win.HTMLSelectElement)) {
+            console.warn("#tz-selector must be a <select>")
+            return
+        }
         tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone
-    }
+    })
 
     //Art Style
     api_listArtStyles().then(as => {
         for (let a in as) {
-            const cb = el.getElementById(`is-${as[a]}`)
-            if (!cb || !(cb instanceof HTMLInputElement)) continue
-            if (items_hasArtStyle(item, Number(a) as ArtStyle)) {
-                cb.checked = true
-            }
+            renderComponent(`#is-${as[a]}`, cb => {
+                if (!cb || !(cb instanceof HTMLInputElement)) return
+                if (items_hasArtStyle(item, Number(a) as ArtStyle)) {
+                    cb.checked = true
+                }
+            })
         }
     })
 
-    //Location
-    if (item.Location !== '' && locationEl && "value" in locationEl) {
+    renderComponent("#location-link", el => {
+        if (!("value" in el)) return
         let loc = item.Location
-        locationEl.value = loc
-    }
+        el.value = loc
+    })
 
     //user styles
-    let userExtra = getUserExtra(user, "styles")
-    let styles = userExtra || ""
-    if (customStyles) {
-        customStyles.innerText = styles
-    }
+    renderComponent("#custom-styles", el => {
+        let userExtra = getUserExtra(user, "styles")
+        let styles = userExtra || ""
+        el.innerText = styles
+    })
 
     //type selector
-    if (typeSelector && (typeSelector instanceof this.win.HTMLSelectElement)) {
-        fillTypeSelectionUI(typeSelector).then(() => {
-            typeSelector.value = item.Type
+    renderComponent("#type-selector", el => {
+        if (!(el instanceof this.win.HTMLSelectElement)) {
+            console.warn("#type-selector must be a <select>")
+            return
+        }
+        fillTypeSelectionUI(el).then(() => {
+            el.value = item.Type
         })
-    }
+    })
 
     //format selector
-    if (formatSelector && (formatSelector instanceof this.win.HTMLSelectElement)) {
+    renderComponent("#format-selector", formatSelector => {
+        if (!(formatSelector instanceof this.win.HTMLSelectElement)) {
+            console.warn("#format-selector must be a <select>")
+            return
+        }
         fillFormatSelectionUI(formatSelector).then(() => {
             if (items_isDigitized(item.Format)) {
                 formatSelector.value = String(item.Format - DIGI_MOD)
@@ -1405,17 +1427,24 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 formatSelector.value = String(item.Format)
             }
         })
-    }
+    })
 
-    if (onFormat && !(await formatToName(item.Format)).startsWith("UNOWNED")) {
-        onFormat.innerHTML = formatToSymbolUI(item.Format)
-    }
+    renderComponent("#on-format", async (onFormat) => {
+        if (!(await formatToName(item.Format)).startsWith("UNOWNED")) {
+            onFormat.innerHTML = formatToSymbolUI(item.Format)
+        }
+    })
 
-    if (digitized && (digitized instanceof this.win.HTMLInputElement)) {
+    renderComponent("#format-digitized", el => {
+        if (!(digitized instanceof this.win.HTMLInputElement)) {
+            console.warn("#format-digitized must be a <input>")
+            return
+        }
         digitized.checked = items_isDigitized(item.Format)
-    }
+    })
 
-    if (genresRoot) {
+
+    renderComponent("#genres", genresRoot => {
         const genres = JSON.parse(meta.Genres || "[]")
         const children = []
         for (let genre of genres) {
@@ -1428,10 +1457,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             children.push(el)
         }
         genresRoot.replaceChildren(...children)
-    }
+    })
 
     //tags
-    if (tagsRoot) {
+    renderComponent("#tags", tagsRoot => {
         tagsRoot.querySelectorAll("div").forEach(div => div.remove())
 
         const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
@@ -1459,78 +1488,86 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
                 tagsRoot?.prepend(copy)
             }
-    }
+    })
 
     //type icon
     let typeIcon = typeToSymbol(item.Type)
-    displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
-
-    if (getUidUI() === 0)
-        displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid] || `uid ${item.Uid}`)
-
     let formatIcon = formatToSymbolUI(item.Format)
-    displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
+    renderComponent("#main-title", displayEntryTitle => {
+        displayEntryTitle.innerText = meta.Title || item.En_Title
+        //only set the title of the heading to the user's title if the metadata title exists
+        //otherwise it looks dumb
+        if (meta.Title && item.En_Title) {
+            displayEntryTitle.title = item.En_Title
+        }
 
+        displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
+        if (getUidUI() !== item.Uid)
+            displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid] || (item.Uid && `uid ${item.Uid}`) || 'unknown')
 
-    //format
-    formatToName(item.Format).then(name => {
-        displayEntryTitle?.setAttribute("data-format-name", name)
+        displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
+
+        //format
+        formatToName(item.Format).then(name => {
+            displayEntryTitle?.setAttribute("data-format-name", name)
+        })
     })
 
 
-    //Title
-    if (displayEntryTitle)
-        displayEntryTitle.innerText = meta.Title || item.En_Title
-    //only set the title of the heading to the user's title if the metadata title exists
-    //otherwise it looks dumb
-    if (displayEntryTitle && meta.Title && item.En_Title) {
-        displayEntryTitle.title = item.En_Title
-    }
+
 
     //Native title
-    if (displayEntryNativeTitle)
+    renderComponent("#official-native-title", displayEntryNativeTitle => {
         displayEntryNativeTitle.innerText = meta.Native_Title || item.Native_Title
-    //Same as with the regular title
-    if (displayEntryNativeTitle && meta.Native_Title && item.Native_Title) {
-        displayEntryNativeTitle.title = item.Native_Title
-    }
+        //Same as with the regular title
+        if (meta.Native_Title && item.Native_Title) {
+            displayEntryNativeTitle.title = item.Native_Title
+        }
+    })
 
     //Thumbnail
-    if (imgEl && imgEl instanceof this.win.HTMLImageElement) {
+    renderComponent("#thumbnail", imgEl => {
+        if (!(imgEl instanceof this.win.HTMLImageElement)) {
+            console.warn("#thumbnail must be an <img>")
+            return
+        }
         imgEl.alt = meta.Title || item.En_Title
         imgEl.src = fixThumbnailURL(meta.Thumbnail)
-    }
+    })
 
     //Notes
-    if (notesEditBox && "value" in notesEditBox)
+    renderComponent("#notes-edit-box", notesEditBox => {
+        if (!("value" in notesEditBox)) return
         notesEditBox.value = user.Notes
-    if (notesEl)
-        notesEl.innerHTML = parseNotes(user.Notes)
+    })
+
+    renderComponent("#notes", notesEl =>
+        notesEl.innerHTML = parseNotes(user.Notes))
 
     //Rating
-    if (ratingEl) {
+    renderComponent("#user-rating", ratingEl => {
         applyUserRating(user.UserRating, ratingEl)
-        ratingEl.innerHTML = user.UserRating ? String(user.UserRating) : "Unrated"
-    }
+        ratingEl.innerHTML = user.UserRating
+            ? String(user.UserRating)
+            : "Unrated"
+    })
 
     //Audience Rating
     let max = meta.RatingMax
-    if (meta.Rating && audienceRatingEl) {
-        let rating = meta.Rating
-        let normalizedRating = rating
-        if (max !== 0) {
-            normalizedRating = rating / max * 100
+    renderComponent("#audience-rating", audienceRatingEl => {
+        if (meta.Rating) {
+            let rating = meta.Rating
+            let normalizedRating = rating
+            if (max !== 0) {
+                normalizedRating = rating / max * 100
+            }
+            applyUserRating(normalizedRating, audienceRatingEl)
+            audienceRatingEl.innerHTML = String(rating)
+        } else if (audienceRatingEl) {
+            audienceRatingEl.innerText = "Unrated"
         }
-        applyUserRating(normalizedRating, audienceRatingEl)
-        audienceRatingEl.innerHTML = String(rating)
-    } else if (audienceRatingEl) {
-        audienceRatingEl.innerText = "Unrated"
-    }
+    })
 
-    //Info table raw
-    // if (infoRawTbl) mkGenericTbl(infoRawTbl, item)
-
-    //Meta table raw
     let data = meta
     let mediaDependant
     try {
@@ -1540,37 +1577,39 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         return
     }
 
-    let type = String(item.Type)
+    let type = item.Type
 
     //View count
     let viewCount = user.ViewCount
-    if (viewCountEl && (viewCount || user.Minutes)) {
-        const user = findUserEntryById(item.ItemId)
-        let mins = user.Minutes
-            || Number(viewCount) * Number(mediaDependant[`${type}-length`] || 0)
+    if (viewCount || user.Minutes) {
+        renderComponent("#view-count", viewCountEl => {
+            const user = findUserEntryById(item.ItemId)
+            let mins = user.Minutes
+                || Number(viewCount) * Number(mediaDependant[`${type}-length`] || 0)
 
-        viewCountEl.title = String(mins) + " minutes"
+            viewCountEl.title = String(mins) + " minutes"
 
-        let minutesRounded = String(Math.round(mins / 0.6) / 100 || "unknown")
-        if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
-            user.Minutes = mins
-            api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
-        }
-        viewCountEl.setAttribute("data-time-spent", minutesRounded)
-        viewCountEl.innerText = String(viewCount)
+            let minutesRounded = String(Math.round(mins / 0.6) / 100 || "unknown")
+            if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
+                user.Minutes = mins
+                api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
+            }
+            viewCountEl.setAttribute("data-time-spent", minutesRounded)
+            viewCountEl.innerText = String(viewCount)
+        })
     }
 
-
-
-    if (mediaInfoTbl) {
+    renderComponent("#media-info", mediaInfoTbl => {
         //remove the <Media>- part from the key looks ugly
         let modifiedKeys: { [k: string]: string } = {}
         for (let key in mediaDependant) {
+            let title = key.split("-")[1]
+            title = title[0].toLocaleUpperCase() + title.slice(1)
             const val = mediaDependant[key]
-            modifiedKeys[key] = val
+            modifiedKeys[title] = val
         }
         mkGenericTbl(mediaInfoTbl, modifiedKeys)
-    }
+    })
 
     let userPos = parseInt(user.CurrentPosition)
 
@@ -1584,21 +1623,25 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         || mediaDependant[`${type}-page-count`]
         || 0
 
-    if (progressEl && "max" in progressEl && "value" in progressEl && /(Re)?Viewing/.test(user.Status)) {
+    renderComponent("#entry-progressbar", progressEl => {
+        if (!("max" in progressEl &&
+            "value" in progressEl &&
+            /(Re)?Viewing/.test(user.Status))) return
         progressEl.max = lengthInNumber || 1
-
         progressEl.value = userPos || 0
-    }
-    if (captionEl) {
+    })
+
+    renderComponent("#entry-progressbar-position-label", captionEl => {
         captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
         captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber) * 1000) / 10}%`
-    }
+    })
 
-    //even if the status != (Re)?Viewing,
-    //we should still clear all progress bars
-    if (multipleProgressEl) multipleProgressEl.innerHTML = ""
+    renderComponent("#multiple-progress", multipleProgressEl => {
+        //even if the status != (Re)?Viewing,
+        //we should still clear all progress bars
+        multipleProgressEl.innerHTML = ""
 
-    if (multipleProgressEl && /(Re)?Viewing/.test(user.Status)) {
+        if (!/(Re)?Viewing/.test(user.Status)) return
         //for each [P]x[/y] in userPos create a progress element
         //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
         //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
@@ -1649,19 +1692,27 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
             multipleProgressEl.append(container)
         }
-    }
+    })
 
     //relation elements
     for (let relationship of [["descendants", findDescendants], ["copies", findCopies], ["required-items", findRequirements]] as const) {
-        let relationshipEl = el.getElementById(relationship[0])
-        if (!relationshipEl) continue
-
-        relationshipEl.innerHTML = ""
-        createRelationButtons.call(this, item.ItemId, relationshipEl, relationship[1](item.ItemId), relationship[0])
+        renderComponent(`#${relationship[0]}`, relationshipEl => {
+            relationshipEl.innerHTML = ""
+            createRelationButtons.call(
+                this,
+                item.ItemId,
+                relationshipEl,
+                relationship[1](item.ItemId),
+                relationship[0]
+            )
+        })
     }
 
     //Events
-    updateEventsDisplay.call(this, el, user.ItemId)
+    renderComponent("#user-actions", tbl => {
+        if(!(tbl instanceof this.win.HTMLTableElement)) return
+        updateEventsDisplay.call(this, el, tbl, user.ItemId)
+    })
 
     //update this last because some legacy elements get filled with new elements
     //that rely on stuff like entry-action
@@ -1710,6 +1761,15 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         events = findUserEventsById(itemId),
         item = findInfoEntryById(itemId)
 
+    let userStyles = getUserExtra(user, "styles")
+
+    const renderComponent = function(query: string,
+        fill: (element: HTMLElement, itemId: bigint) => any) {
+        for (let el of root.querySelectorAll(query)) {
+            fill(el as HTMLElement, itemId)
+        }
+    }
+
     //use the dumbest hack imaginable to allow the previewtemplate function to force the window it opens to do the rendering
     //that hack being setting a global variable called GLOBAL_TEMPLATE which is the template to use
     //@ts-ignore
@@ -1724,106 +1784,117 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
     this.parent.append(el)
 
-    const currentEditedObj = root.getElementById("current-edited-object")
-    const statusSelector = root.getElementById("status-selector")
-    const styleEditor = root.getElementById("style-editor")
-    const templEditor = root.getElementById("template-editor")
-    const newChildButton = root.getElementById("new-child")
-    const newChildByIdInput = root.getElementById("new-child-by-id")
-    const newCopyButton = root.getElementById("new-copy")
-    const notesEditBox = root.getElementById("notes-edit-box")
-    const cost = root.getElementById("cost")
-    const newTag = root.getElementById("create-tag")
-    const locationEl = root.getElementById("location-link")
-    const recommendedByList = root.getElementById("recommended-by")
-
-    if (recommendedByList && recommendedByList instanceof this.win.HTMLDataListElement) {
-        fillRecommendedListUI(recommendedByList, getUidUI())
-    }
-
     hookActionButtons(root, itemId)
+
+    renderComponent("#recommended-by",
+        el => {
+            if (!(el instanceof this.win.HTMLDataListElement)) {
+                console.warn("#recommended-by must be a datalist element")
+                return
+            }
+            fillRecommendedListUI(el, getUidUI())
+        })
 
     api_listArtStyles().then(as => {
         for (let a in as) {
-            const cb = root.getElementById(`is-${as[a]}`)
-            if (!cb || !(cb instanceof HTMLInputElement)) continue
-            cb.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.toggleartstyle(e.target)
+            renderComponent(`#is-${as[a]}`, el => {
+                if (!el || !(el instanceof HTMLInputElement)) return
+                el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.toggleartstyle(e.target)
+            })
         }
     })
 
-    if (currentEditedObj && "value" in currentEditedObj) {
-        currentEditedObj.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.setobjtable(e.target)
+    renderComponent("#current-edited-object",
+        el => {
+            el.onchange =
+                e =>
+                    e.target instanceof this.win.HTMLElement &&
+                    this.de_actions.setobjtable(e.target)
+        })
+
+    for (let input of [
+        "include-self-in-cost",
+        "include-copies-in-cost",
+        "include-children-in-cost",
+        "include-requires-in-cost",
+        "include-recusively-in-cost"
+    ]) {
+        renderComponent(`#${input}`, el => {
+            el.onchange =
+                (e) =>
+                    e.target instanceof this.win.HTMLElement &&
+                    this.de_actions.togglerelationinclude(e.target)
+        })
     }
 
-    for (let input of ["include-self-in-cost", "include-copies-in-cost", "include-children-in-cost", "include-requires-in-cost", "include-recusively-in-cost"]) {
-        const el = root.getElementById(input)
-        if (!el) continue
-        el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.togglerelationinclude(e.target)
-    }
+    renderComponent("button.popout", el => popoutUI(el))
+    renderComponent("#status-selector", el => {
+        el.onchange =
+            e =>
+                e.target instanceof this.win.HTMLSelectElement &&
+                this.de_actions.updatestatus(e.target)
+    })
 
-    for (let popout of root.querySelectorAll("button.popout") as NodeListOf<HTMLElement>) {
-        popoutUI(popout)
-    }
-
-    statusSelector && (statusSelector.onchange = (e) => {
-        e.target instanceof HTMLSelectElement && this.de_actions.updatestatus(e.target)
-    });
-
-    let extra = getUserExtra(user, "styles")
-
-    if (styleEditor && styleEditor instanceof this.win.HTMLTextAreaElement) {
-        (styleEditor as HTMLTextAreaElement).value = extra || ""
-        styleEditor.addEventListener("change", e => {
+    renderComponent("#style-editor", el => {
+        if (!(el instanceof this.win.HTMLTextAreaElement)) return
+        el.value = userStyles || ""
+        el.addEventListener("change", e => {
             e.target instanceof HTMLElement &&
                 this.de_actions.updatecustomstyles(e.target)
         })
-    }
+    })
 
-    if (templEditor && templEditor instanceof this.win.HTMLTextAreaElement) {
-        (templEditor as HTMLTextAreaElement).value = getUserExtra(user, "template") || ""
-    }
+    renderComponent("#template-editor", el => {
+        if (!(el instanceof this.win.HTMLTextAreaElement)) return
+        el.value = getUserExtra(user, "template") || ""
+    })
 
-    if (newChildButton) {
-        newChildButton.addEventListener("click", e => {
+    renderComponent("#new-child", el => {
+        el.addEventListener("click", e => {
             this.de_actions.newchild(e.target as HTMLElement)
         })
-    }
+    })
 
-    if (newCopyButton) {
-        newCopyButton.addEventListener("click", e => {
+    renderComponent("#new-copy", el => {
+        el.addEventListener("click", e => {
             this.de_actions.newcopy(e.target as HTMLElement)
         })
-    }
+    })
 
-    if (newChildByIdInput && "value" in newChildByIdInput) {
-        newChildByIdInput.onchange = e => {
+    renderComponent("#new-child-by-id", el => {
+        if (!("value" in el)) return
+        el.onchange = e => {
             e.target instanceof HTMLElement && this.de_actions.addchild(e.target)
         }
-    }
+    })
 
-    if (notesEditBox && "value" in notesEditBox) {
-        notesEditBox.onchange = () => {
-            updateNotesUI(item.ItemId, String(notesEditBox.value))
+    renderComponent("#notes-edit-box", el => {
+        if (!("value" in el)) return
+
+        el.onchange = () => {
+            updateNotesUI(item.ItemId, String(el.value))
         }
-    }
+    })
 
-    if (cost) {
-        cost.onclick = async function() {
+    renderComponent("#cost", el => {
+        el.onclick = async function() {
             await updateCostUI(itemId)
         }
-    }
+    })
 
-    if (newTag) {
-        newTag.onclick = async () => {
+    renderComponent("#create-tag", el => {
+        el.onclick = async () => {
             await newTagsUI(itemId)
         }
-    }
+    })
 
-    if (locationEl && 'value' in locationEl) {
-        locationEl.onchange = async () => {
-            await updateLocationUI(itemId, String(locationEl.value))
+    renderComponent("#location-link", el => {
+        if (!("value" in el)) return
+
+        el.onchange = async () => {
+            await updateLocationUI(itemId, String(el.value))
         }
-    }
+    })
 
     changeDisplayItemData.call(this, item, user, meta, events, el)
     return el
@@ -2023,7 +2094,7 @@ async function deleteEventByEventId(eventId: number) {
     const uid = getUidUI()
     return await new Promise(final => {
         confirmUI("Are you sure you want to delete this event")
-            .then(async() => {
+            .then(async () => {
                 console.log("HI")
                 const res = await api_deleteEventV2(eventId, uid)
                 if (res?.status !== 200) {
