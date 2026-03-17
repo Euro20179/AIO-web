@@ -1126,7 +1126,9 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
         .filter(v => {
-            return v.Event.includes(eventFilter)
+            if(!eventFilter) return true
+            return v.Event.includes(eventFilter) ||
+                findInfoEntryById(v.ItemId).En_Title.includes(eventFilter)
         })
         .sort(items_compareEventTiming).reverse()
 
