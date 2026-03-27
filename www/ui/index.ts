@@ -11,6 +11,7 @@ async function main() {
     '[name="sort-by"]',
     HTMLSelectElement,
   );
+
   const recommenders = getElementOrThrowUI(
     "datalist#recommended-by",
     HTMLDataListElement,
@@ -47,11 +48,13 @@ async function main() {
   const onrender = () => {
     //just in case
     removeEventListener("aio-items-rendered", onrender);
+
     items_refreshRelations(uid).then(() => {
       for (let item of items_getSelected()) {
         mode_refreshItem(item.ItemId);
       }
     });
+
     items_refreshMetadata(uid).then(() => {
       for (let item of items_getSelected()) {
         mode_refreshItem(item.ItemId);
@@ -89,9 +92,11 @@ async function main() {
   fillFormatSelectionUI(
     getElementOrThrowUI('[name="format"]', HTMLSelectElement),
   );
+
   fillTypeSelectionUI(
     getElementOrThrowUI('#new-item-form [name="type"]', HTMLSelectElement),
   );
+
   await fillUserSelectionUI(getElementUI('[name="uid"]', HTMLSelectElement));
 
   setUIDFromHeuristicsUI();
@@ -160,11 +165,10 @@ addUserScriptUI(
   "Converts remote (non-data uri) thumbnails to thumbnails hosted on the aio server",
 );
 
-let servicing = false;
-async function remote2LocalThumbService() {
-  if (servicing) return;
+async function remote2LocalThumbService(this: { servicing: boolean }) {
+  if (this.servicing) return;
 
-  servicing = true;
+  this.servicing = true;
   for (let item of items_getResults()) {
     let metadata = item.meta;
     let thumbnail = metadata.Thumbnail;
@@ -212,10 +216,10 @@ async function remote2LocalThumbService() {
 
     await new Promise((res) => setTimeout(res, 200));
 
-    if (!servicing) break;
+    if (!this.servicing) break;
   }
 
   console.log("ALL IMAGES HAVE BEEN INLINED");
 
-  servicing = false;
+  this.servicing = false;
 }
