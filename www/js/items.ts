@@ -516,7 +516,7 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         Type: "Show",
         En_Title: "",
         Library: 0n,
-        RecommendedBy: "",
+        RecommendedBy: "[]",
 
         Tags: []
     }
@@ -650,6 +650,18 @@ function* findCopies(itemId: bigint) {
 
 function* findRequirements(itemId: bigint) {
     yield* items_getEntry(itemId).relations.findRequirements()
+}
+
+function items_getRecommendedBy(itemId: bigint): string[] {
+    let entry = items_getEntry(itemId)
+    return JSON.parse(entry.info.RecommendedBy)
+}
+
+function items_addRecommendedBy(itemId: bigint, recommender: string) {
+    let entry = items_getEntry(itemId)
+    let r = JSON.parse(entry.info.RecommendedBy)
+    r.push(recommender)
+    entry.info.RecommendedBy = JSON.stringify(r)
 }
 
 async function loadUserEvents(uid: number) {

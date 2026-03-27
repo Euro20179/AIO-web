@@ -245,6 +245,14 @@
         display: revert;
     }
 
+    #delete-recommended-by {
+        display: none;
+    }
+
+    .recommender:hover #delete-recommended-by {
+        display: revert;
+    }
+
     #create-tag {
         align-self: center;
         height: fit-content;

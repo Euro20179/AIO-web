@@ -75,6 +75,29 @@ class DisplayMode extends Mode {
         }),
 
         /**
+         * deletes a recommender from the list of recommended bys
+         */
+         deleterecommendedby: this.displayEntryAction((item, root, target) => {
+             const r = target.getAttribute("recommender-idx")
+             if(!r) {
+                 console.warn("The target with entry-action=deleterecommendedby has no recommender-idx attribute")
+                 alert("This button is not hooked up to a recommender-idx")
+                 return
+             }
+
+             let idx = Number(r)
+             let recs = items_getRecommendedBy(item.ItemId).filter((_, i) => i !== idx)
+             item.RecommendedBy = JSON.stringify(recs)
+             api_setItem("", item, "Remove recommender").then(() => {
+                 updateInfo2({
+                     [String(item.ItemId)]: {
+                         info: item
+                     }
+                 })
+             })
+         }),
+
+        /**
          * Deletes the item
          */
         delete: this.displayEntryAction(item => deleteEntryUI(item)),
@@ -1323,27 +1346,30 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
 
-    const displayEntryTitle = el.getElementById("main-title")
-    const displayEntryNativeTitle = el.getElementById("official-native-title")
-    const imgEl = el.getElementById("thumbnail")
-    const notesEl = el.getElementById('notes')
-    const ratingEl = el.getElementById('user-rating')
-    const audienceRatingEl = el.getElementById('audience-rating')
-    const viewCountEl = el.getElementById('view-count')
-    const progressEl = el.getElementById("entry-progressbar")
-    const captionEl = el.getElementById("entry-progressbar-position-label")
-    const multipleProgressEl = el.getElementById("multiple-progress")
-    const mediaInfoTbl = el.getElementById("media-info")
-    const customStyles = el.getElementById("custom-styles")
-    const locationEl = el.getElementById("location-link")
-    const tzEl = el.getElementById("tz-selector")
-    const typeSelector = el.getElementById("type-selector")
-    const formatSelector = el.getElementById("format-selector")
-    const notesEditBox = el.getElementById("notes-edit-box")
-    const onFormat = el.getElementById("on-format")
-    const digitized = el.getElementById("format-digitized")
-    const genresRoot = el.getElementById("genres")
-    const tagsRoot = el.getElementById("tags")
+    renderComponent("#recommended-bys", el => {
+        el.querySelectorAll("div").forEach(div => div.remove())
+        let i = 0
+        for(let r of items_getRecommendedBy(item.ItemId)) {
+            const b = document.createElement("div")
+            const db = document.createElement("button")
+            db.classList.add("delete")
+            db.id = "delete-recommended-by"
+            db.setAttribute("entry-action", "deleterecommendedby")
+            db.innerText = "✗"
+            b.role = "button"
+            b.onclick = function(e) {
+                if (e.target?.getAttribute("recommender-idx")) return
+                ui_search(`recommendedBy ~ '%"${r}"%'`)
+            }
+            b.classList.add("recommender")
+            b.innerHTML = r
+            b.append(db)
+            db.setAttribute("recommender-idx", String(i))
+            el.append(b)
+
+            i++
+        }
+    })
 
     //item item interaction menu
     renderComponent("#item-interaction-menu", el => {
@@ -1459,7 +1485,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         }
     })
 
-    renderComponent("#format-digitized", el => {
+
+    renderComponent("#format-digitized", () => {
+        const digitized = el.getElementById("format-digitized")
         if (!(digitized instanceof this.win.HTMLInputElement)) {
             console.warn("#format-digitized must be a <input>")
             return
@@ -1908,6 +1936,12 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
     renderComponent("#create-tag", el => {
         el.onclick = async () => {
             await newTagsUI(itemId)
+        }
+    })
+
+    renderComponent("#create-recommended-by", el => {
+        el.onclick = async () => {
+            await newRecommendedByUI(itemId)
         }
     })
 

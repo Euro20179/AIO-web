@@ -162,20 +162,13 @@
             placeholder="item location"
             onchange="updateLocationUI(getIdFromDisplayElement(this), this.value)"
             oncontextmenu="if(event.ctrlKey) { open(this.value, '_blank'); } else {this.select()} event.preventDefault()">
-        <input
-                style="flex-grow: 1;"
-                list="recommended-by"
-                placeholder="Recommended By"
-                put-data="RecommendedBy"
-                put-data-mode="value"
-                onchange="
-                    setPropUI(
-                        findInfoEntryById(getIdFromDisplayElement(this)),
-                        'RecommendedBy',
-                        this.value,
-                        'Update recommended by'
-                    )"
-         >
+
+        <div style="
+            text-align: center;
+        " class="j-center flex"  id="recommended-bys">
+            <button id="create-recommended-by">+</button>
+        </div>
+
         <div class="header-subtitle" id="header-subtitle">
             <textarea
                 id="style-editor"

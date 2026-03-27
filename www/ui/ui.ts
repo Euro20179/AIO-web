@@ -535,13 +535,19 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
  * @param {string} [_default] - Optional default value for the prompt
  * @returns {Promise<string | null>} the user's response
  */
-async function promptUI(html?: string, _default?: string): Promise<string | null> {
+async function promptUI(html?: string, _default?: string, uselist?: string): Promise<string | null> {
     const pEl = getElementOrThrowUI("#prompt", HTMLDialogElement)
 
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
     const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
     submission.value = ""
+
+    if (uselist)
+        submission.setAttribute("list", uselist)
+    else
+        submission.removeAttribute("list")
+
     root.innerHTML = html || "<p>prompt</p>"
     pEl.showModal()
     return await new Promise((res, rej) => {
@@ -1710,6 +1716,29 @@ async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
     if (newPrice === null) return
 
     return await setPropUI(findInfoEntryById(itemId), "PurchasePrice", newPrice, "Update purchase price")
+}
+
+async function newRecommendedByUI(itemId: bigint) {
+    let newRecommendedBy = await promptUI("Names (, separated)", "", "recommended-by")
+    if(!newRecommendedBy) return
+
+    let r = newRecommendedBy.split(",")
+    try {
+        const info = findInfoEntryById(itemId)
+        info.RecommendedBy = JSON.stringify(
+            JSON.parse(info.RecommendedBy).concat(r)
+        )
+
+        var res = await api_setItem("", info, "Update recommended by")
+        if(res?.status !== 200) return ""
+        updateInfo2({
+            [String(itemId)]: {
+                info
+            }
+        })
+    } catch(err) {
+        console.error(err)
+    }
 }
 
 async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
