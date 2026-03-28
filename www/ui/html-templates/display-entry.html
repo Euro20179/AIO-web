@@ -130,6 +130,7 @@
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
+
         <hgroup class="flex column center">
             <h1 class="m-0 title center" id="main-title"></h1>
             <div class="flex wrap j-center" style="gap: var(--small-gap);">
@@ -144,10 +145,13 @@
                 <button class="cost styleless-button" id="cost"></button>
             </div>
         </hgroup>
+
         <button class="styleless-button" entry-action="setthumbnail">
             <img src="" alt="" class="thumbnail" id="thumbnail">
         </button>
+
         <div id="genres" style="margin-bottom: calc(var(--small-gap) / 2);" class="flex wrap j-center"></div>
+
         <div style="
             text-align: center;
         " class="j-center flex">
@@ -155,7 +159,9 @@
                 <button id="create-tag" title="add tag">+</button>
             </div>
         </div>
+
         <table class="media-info" id="media-info"></table>
+
         <input
             put-data="Location"
             put-data-mode="value"
@@ -169,14 +175,12 @@
             <button id="create-recommended-by" title="add recommender">+</button>
         </div>
 
-        <div class="header-subtitle" id="header-subtitle">
-            <textarea
-                id="style-editor"
-                entry-action="save"
-                entry-action-trigger="change"
-                hidden rows="80" cols="80"
-            ></textarea>
-        </div>
+        <textarea
+            id="style-editor"
+            entry-action="save"
+            entry-action-trigger="change"
+            hidden rows="80" cols="80"
+        ></textarea>
     </figure>
 
     <div>

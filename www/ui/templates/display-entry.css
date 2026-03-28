@@ -196,18 +196,6 @@
         max-height: 30cqb;
     }
 
-    #header-subtitle {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-
-        text-align: center;
-
-        gap: var(--small-gap);
-
-        font-size: 0.85em;
-    }
-
     #actions {
         justify-content: center;
 
