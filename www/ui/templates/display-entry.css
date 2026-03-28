@@ -245,14 +245,6 @@
         display: revert;
     }
 
-    #delete-recommended-by {
-        display: none;
-    }
-
-    .recommender:hover #delete-recommended-by {
-        display: revert;
-    }
-
     #create-tag {
         align-self: center;
         height: fit-content;
@@ -266,6 +258,20 @@
 
     button:has(~ .tag) {
         vertical-align: middle;
+    }
+
+    #create-recommended-by {
+        :has(> &):not(:has(.recommender)) #create-recommended-by::after {
+            content: " recommender";
+        }
+    }
+
+    #delete-recommended-by {
+        display: none;
+    }
+
+    .recommender:hover #delete-recommended-by {
+        display: revert;
     }
 
     #item-interaction-menu {
