@@ -287,48 +287,23 @@ async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
     return await authorizedRequest(`${apiPath}/del-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
 }
 
-async function api_queryV4(searchString: string, uid: number, orderby: string = ""): Promise<InfoEntry[]> {
-    switch (orderby) {
-        case "user-title":
-            orderby = "En_Title"
-            break
-        case "native-title":
-            orderby = "entryInfo.Native_Title"
-            break
-        case "rating":
-            orderby = "UserRating"
-            break
-        case "general-rating":
-            orderby = "(CAST(Rating as REAL) / CAST(RatingMax AS REAL))"
-            break
-        case "release-year":
-            orderby = "ReleaseYear"
-            break
-        case "cost":
-            orderby = "PurchasePrice"
-            break
-        case "added":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
-            break
-        case "viewing":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
-            break
-        case "finished":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
-            break
-        case "item-id":
-            orderby = "entryInfo.itemId"
-            break
-        //in case the order by doesnt exist on the server
-        default:
-            orderby = ""
-    }
+/**
+ * Performs a v3 or v4 search
+ * @param {string} searchString the search query
+ * @param {string} uid can be 0 to allow results from all users
+ * @param {3 | 4} version the search version
+ * @param {string} [orderby=""]
+ */
+async function api_query(searchString: string, uid: number, version: 3 | 4, orderby: SortKind = ""): Promise<InfoEntry[]> {
+    let apiOrder = api_uiSort2Api(orderby)
     let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
-    if(orderby !== "") {
-        qs += `&order-by=${encodeURIComponent(orderby)}`
+    if(apiOrder !== "") {
+        qs += `&order-by=${encodeURIComponent(apiOrder)}`
     }
 
-    const res = await fetch(`${apiPath}/query-v4${qs}`).catch(console.error)
+    const endPoint = version === 3 ? "query-v3" : "query-v4"
+
+    const res = await fetch(`${apiPath}/${endPoint}${qs}`).catch(console.error)
     if (!res) return []
 
     let itemsText = await res.text()
@@ -347,69 +322,23 @@ async function api_queryV4(searchString: string, uid: number, orderby: string = 
 }
 
 /**
+ * Performs a v4 search
+ * @param {string} searchString the search query
+ * @param {string} uid can be 0 to allow results from all users
+ * @param {string} [orderby=""]
+ */
+async function api_queryV4(searchString: string, uid: number, orderby: SortKind = ""): Promise<InfoEntry[]> {
+    return await api_query(searchString, uid, 3, orderby)
+}
+
+/**
  * Performs a search
  * @param {string} searchString - the search query
  * @param {number} uid - can be 0 to allow results from all users
  * @param {string} [orderby=""]
 */
-async function api_queryV3(searchString: string, uid: number, orderby: string = ""): Promise<InfoEntry[]> {
-    switch (orderby) {
-        case "user-title":
-            orderby = "En_Title"
-            break
-        case "native-title":
-            orderby = "entryInfo.Native_Title"
-            break
-        case "rating":
-            orderby = "UserRating"
-            break
-        case "general-rating":
-            orderby = "(CAST(Rating as REAL) / CAST(RatingMax AS REAL))"
-            break
-        case "release-year":
-            orderby = "ReleaseYear"
-            break
-        case "cost":
-            orderby = "PurchasePrice"
-            break
-        case "added":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
-            break
-        case "viewing":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
-            break
-        case "finished":
-            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
-            break
-        case "item-id":
-            orderby = "entryInfo.itemId"
-            break
-        //in case the order by doesnt exist on the server
-        default:
-            orderby = ""
-    }
-
-    let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
-    if (orderby != "") {
-        qs += `&order-by=${encodeURIComponent(orderby)}`
-    }
-
-    const res = await fetch(`${apiPath}/query-v3${qs}`).catch(console.error)
-    if (!res) return []
-
-    let itemsText = await res.text()
-    if (res.status !== 200) {
-        alert(itemsText)
-        return []
-    }
-
-    try {
-        return [...api_deserializeJsonl<InfoEntry>(itemsText.split("\n").filter(Boolean))]
-    } catch (err) {
-        console.error(err)
-    }
-
-    return []
+async function api_queryV3(searchString: string, uid: number, orderby: SortKind = ""): Promise<InfoEntry[]> {
+    return await api_query(searchString, uid, 4, orderby)
 }
 
 async function api_setPos(id: bigint, pos: string) {
@@ -607,4 +536,47 @@ async function api_list_recommenders(uid: number): Promise<string[]> {
 
     let r = await res.text()
     return r.split("\x1F")
+}
+
+type SortKind = "user-title"
+                    | "native-title"
+                    | "rating"
+                    | "general-rating"
+                    | "release-year"
+                    | "cost"
+                    | "added"
+                    | "viewing"
+                    | "finished"
+                    | "item-id"
+                    | ""
+
+/**
+ * Converts a ui sort kind into a valid sort for a search api
+ */
+function api_uiSort2Api(sort: SortKind) {
+    switch (sort) {
+        case "user-title":
+            return "En_Title"
+        case "native-title":
+            return "entryInfo.Native_Title"
+        case "rating":
+            return "UserRating"
+        case "general-rating":
+            return "(CAST(Rating as REAL) / CAST(RatingMax AS REAL))"
+        case "release-year":
+            return "ReleaseYear"
+        case "cost":
+            return "PurchasePrice"
+        case "added":
+            return "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
+        case "viewing":
+            return "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+        case "finished":
+            return "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+        case "item-id":
+            return "entryInfo.itemId"
+        //in case the order by doesnt exist on the server
+        default:
+            return ""
+    }
 }

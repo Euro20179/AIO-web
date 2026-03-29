@@ -63,6 +63,8 @@ in_doc {
                 sub(/</, "\\&lt;", $i)
                 param_type = param_type " " $i
             }
+            sub(/^[[:space:]]*/, "", param_type)
+            sub(/[[:space:]]*$/, "", param_type)
             param_name_pos = param_type_end + 1
             param_text = param_text "<span class=\"parameter-item\">"
             param_text = param_text "<span class=\"parameter-name\"><code>" $param_name_pos "</code></span>"
