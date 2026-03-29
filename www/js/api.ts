@@ -287,8 +287,46 @@ async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
     return await authorizedRequest(`${apiPath}/del-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
 }
 
-async function api_queryV4(searchString: string, uid: number): Promise<InfoEntry[]> {
+async function api_queryV4(searchString: string, uid: number, orderby: string = ""): Promise<InfoEntry[]> {
+    switch (orderby) {
+        case "user-title":
+            orderby = "En_Title"
+            break
+        case "native-title":
+            orderby = "entryInfo.Native_Title"
+            break
+        case "rating":
+            orderby = "UserRating"
+            break
+        case "general-rating":
+            orderby = "(CAST(Rating as REAL) / CAST(RatingMax AS REAL))"
+            break
+        case "release-year":
+            orderby = "ReleaseYear"
+            break
+        case "cost":
+            orderby = "PurchasePrice"
+            break
+        case "added":
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
+            break
+        case "viewing":
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+            break
+        case "finished":
+            orderby = "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+            break
+        case "item-id":
+            orderby = "entryInfo.itemId"
+            break
+        //in case the order by doesnt exist on the server
+        default:
+            orderby = ""
+    }
     let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
+    if(orderby !== "") {
+        qs += `&order-by=${encodeURIComponent(orderby)}`
+    }
 
     const res = await fetch(`${apiPath}/query-v4${qs}`).catch(console.error)
     if (!res) return []

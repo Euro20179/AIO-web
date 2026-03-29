@@ -802,7 +802,7 @@ async function loadSearchUI() {
     let filters = parseClientsideSearchFiltering(formData)
 
     let entries = filters.useV4
-        ? await api_queryV4(String(filters.newSearch) || "%", Number(formData.get('uid')) || 0)
+        ? await api_queryV4(String(filters.newSearch) || "%", Number(formData.get('uid')) || 0, filters.sortBy)
         : await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
 
     entries = applyClientsideSearchFiltering(entries, filters)
