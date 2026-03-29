@@ -254,12 +254,16 @@
         }
     }
 
-    #delete-recommended-by {
-        display: none;
-    }
+    .recommender {
+        padding-inline: var(--small-gap);
 
-    .recommender:hover #delete-recommended-by {
-        display: revert;
+        #delete-recommended-by {
+            display: none;
+        }
+
+        &:hover #delete-recommended-by {
+            display: revert;
+        }
     }
 
     #item-interaction-menu {

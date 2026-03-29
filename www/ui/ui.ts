@@ -579,6 +579,8 @@ async function confirmUI(html: string) {
 
     cEl.showModal()
     return await new Promise((res, rej) => {
+        ok.focus()
+
         cEl.onclose = () => {
             (cEl.returnValue ? res : rej)(true)
         }
