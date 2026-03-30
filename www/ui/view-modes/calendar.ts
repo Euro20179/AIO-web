@@ -127,7 +127,6 @@ class CalendarMode extends Mode {
             this.parent
         )
 
-        console.log(validEvents)
         if (eventFilter) {
             validEvents = validEvents.filter(e => {
                 const symbols = makeSymbolsTableFromObj({

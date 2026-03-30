@@ -1,0 +1,131 @@
+<link rel="stylesheet" href="/css/colors.css">
+<link rel="stylesheet" href="/css/general.css">
+
+<title>Calculator Script</title>
+
+<h1>Calculator Script</h1>
+
+<p> Calculator script is a simple scripting language with an incomplete api
+    that was created for the calculator mode.
+
+<p> Due to the lackluster api, I recommend just using JS where possible.
+
+<p> This language has a couple of unique features.
+    Every statement is an expression that returns a value.
+
+<p> There is a list version of while loops, and for(each) loops, that
+    instead of just returning the last value, put the last value of each
+    iteration into a list, and that is what is returned
+
+<p> Calling a number is the same as multiplication
+
+<h2>Unorthadox Syntax</h2>
+<p> <code>expr (=&gt; expr)+</code>: map all items from the lefthand side expr
+through each arrow one at a time. Each expr after an arrow is treated as a
+closure. To access the current item, use arg0.
+
+<figure>
+    <figcaption>Map Arrow Example</figcaption>
+    <pre>
+    [1, 2, 3] =&gt; arg0 * 5
+    ---
+    [5, 10, 15]
+    </pre>
+</figure>
+
+<p> <code>expr (?&gt; expr)+</code>: similar to the map arrow, but is a filter
+arrow.
+
+<figure>
+    <figcaption>Filter Arrow Example</figcaption>
+    <pre>
+    [1, 2, 3] ?&gt; arg0 &lt; 2
+    ---
+    [1]
+    </pre>
+</figure>
+
+<p> For Lists. A list created by a for loop
+<figure>
+    <figcaption>Forlist example (builds a list of user entries from ids)</figcaption>
+    <pre>
+    let x = for i = 1,3 :
+        user(int(x))
+    rof
+    </pre>
+</figure>
+
+<h2>Grammar</h2>
+<pre>
+NUMBER       :    [0-9]+ | [0-9]*.[0-9]+
+STRING       : '"' ... '"'
+WORD         :    [A-Za-z][A-Za-z0-9]*
+atom         :    NUMBER
+                    | STRING
+                    | "(" program ")"
+                    | var-def
+                    | func-def
+                    | while-loop
+                    | while-list
+                    | for-loop
+                    | for-list
+                    | foreach-loop
+                    | foreach-list
+                    | if-statement
+func-call    :    WORD "(" (expr ",")* ")"
+prop-access  :   "[" expr "]"
+left-un-op   :   ("+" | "-")? atom
+right-un-op  :   left-un-op (func-call | prop-access)?
+factor       :   right-un-op (("*" | "/") right-un-op)*
+term         :   factor (("+" | "-") factor)*
+comp         :   term (("&gt;" | "&lt;" | "==" | "&lt;=" | "&gt;=") comp)*
+logical-comp :   comp (("and" | "or" | "xor" | "nand") logical-comp)*
+pipe-ops     :   logical-comp (("=&gt;" | "?&gt;") logical-comp)*
+pipe         :   pipe-ops ("-&gt; pipe-ops)*
+
+func-def     :  "var()" WORD "=" program "rav"
+var-def      :  (("var" | "let") WORD "=" expr) | func-def
+
+while-loop   : "while" expr "do" expr ("fi" | "elihw" | "done")
+while-list   : "while" expr ":" expr ("fi" | "elihw" | "done")
+
+foreach-loop : "foreach" WORD "in" expr "do" expr "rof"
+foreach-list : "foreach" WORD "in" expr ":" expr "rof"
+
+for-loop     : "for" WORD "=" expr "," expr "do" expr "rof"
+for-list     : "for" WORD "=" expr "," expr ":" expr "rof"
+
+if-statement : "if" expr "do" atom ("else" atom)? "fi"?
+
+expr         :  pipe
+
+program: (expr ";")*
+</pre>
+
+<h2>Sandbox</h2>
+
+<div style="display: flex">
+    <textarea id="script" rows="20" cols="40">
+
+    </textarea>
+
+    <div id="output"></div>
+</div>
+
+<script src="/js/items.js"></script>
+<script src="/js/api.js"></script>
+<script src="/ui/ui.js"></script>
+<script src="/ui/js_api.js"></script>
+<script src="/ui/calculator.js"></script>
+
+<script>
+script.value = `let y = if "yes" == "no" do
+    3
+else 4
+fi`
+    script.onchange = function() {
+        output.innerHTML = parseExpression(script.value, new CalcVarTable()).toStr().jsStr()
+    }
+
+    script.onchange()
+</script>

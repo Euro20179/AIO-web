@@ -97,13 +97,19 @@
     <hr>
 
     <section>
+        <h3>Calculator Script</h3>
+        <p> There is a special script that is used in various places.
+            <a href="/usage/calculator-script.html">documentation</a> on said script
+    </section>
+
+    <section>
         <h3>Display Mode</h3>
-        <p>This mode is a beast, and has a <a href="./display-output.html">dedicated page</a> for documenting it
+        <p>This mode is a beast, and has a <a href="/usage/display-output.html">dedicated page</a> for documenting it
     </section>
 
     <section>
         <h3>Js API</h3>
-        <a href="js_api_docs.html">js api docs</a>
+        <a href="/usage/js_api_docs.html">js api docs</a>
     </section>
 
 </body>
