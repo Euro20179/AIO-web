@@ -1795,18 +1795,17 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
     const ty =
         probablyMetaEntry(obj) ?
             "meta"
-            : probablyUserItem(obj) ?
-                "user"
-                :
-                "info"
+        : probablyUserItem(obj) ?
+            "user"
+        : "info"
 
     const path =
         ty === "meta" ?
             "metadata/"
-            : ty === "user" ?
-                "engagement/"
-                :
-                ""
+        : ty === "user" ?
+            "engagement/"
+        : ""
+
     try {
         var res = await api_setItem(path, cpy, actionDisplayName)
     } catch (err) {
@@ -1825,10 +1824,9 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
         [String(obj.ItemId)]:
             ty === "meta" ?
                 { meta: obj as MetadataEntry }
-                : ty === "user" ?
-                    { user: obj as UserEntry }
-                    :
-                    { info: obj as InfoEntry }
+            : ty === "user" ?
+                { user: obj as UserEntry }
+            : { info: obj as InfoEntry }
     })
 
     return res

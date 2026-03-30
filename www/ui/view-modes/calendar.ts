@@ -22,6 +22,9 @@ class CalendarMode extends Mode {
         this._setupWin()
     }
 
+    /**
+     * sets everything up in the current window
+     */
     _setupWin() {
         this.onResize()
         this.win.addEventListener("resize", this.onResize.bind(this))
@@ -59,6 +62,10 @@ class CalendarMode extends Mode {
         this.parent.querySelector("#time-end")?.addEventListener("change", e => {
             const d = new Date(e.target.value)
             this._setEnd(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()))
+            this._render()
+        })
+
+        this.parent.querySelector("#event-filter")?.addEventListener("input", e => {
             this._render()
         })
 
@@ -103,12 +110,8 @@ class CalendarMode extends Mode {
         return document.createElement("div")
     }
 
-    _renderMonth(start: Date, end?: Date) {
+    _getValidEvents(start: Date, end?: Date) {
         end ??= new Date(start.getFullYear(), start.getMonth() + 1, 0)
-
-        const monthGrid = document.createElement("div")
-        monthGrid.classList.add('month-grid')
-
         //events within the month
         //(finding valid events each day is COSTLY)
         let validEvents: UserEvent[] = [
@@ -118,9 +121,43 @@ class CalendarMode extends Mode {
                 end.getTime(),
             )
         ]
+        const eventFilter = getElementUI(
+            "#event-filter",
+            this.win.HTMLInputElement,
+            this.parent
+        )
+
+        console.log(validEvents)
+        if (eventFilter) {
+            validEvents = validEvents.filter(e => {
+                const symbols = makeSymbolsTableFromObj({
+                    ...e,
+                    "Planned": e.Event === "Planned",
+                    "Viewing": e.Event === "Viewing",
+                    "Finished": e.Event === "Finished",
+                    "Paused": e.Event === "Paused",
+                    "ReViewing": e.Event === "ReViewing",
+                    "Added": e.Event === "Added",
+                    "Dropped": e.Event === "Dropped",
+                    "Purchased": e.Event === "Purchased",
+                })
+                return parseExpression(eventFilter.value, symbols).truthy()
+            })
+        }
+
+        return validEvents
+    }
+
+    _renderMonth(start: Date, end?: Date) {
+        end ??= new Date(start.getFullYear(), start.getMonth() + 1, 0)
+
+        const monthGrid = document.createElement("div")
+        monthGrid.classList.add('month-grid')
+
+
 
         //plus finding the valid events now, lets us sort it once and only once
-        validEvents = validEvents.sort((a, b) => items_compareEventTiming(b, a))
+        const validEvents = this._getValidEvents(start, end).sort((a, b) => items_compareEventTiming(b, a))
 
         while (monthGrid.firstElementChild) {
             monthGrid.removeChild(monthGrid.firstElementChild)
@@ -187,16 +224,12 @@ class CalendarMode extends Mode {
                 eventStats: {} as Record<string, number>
             }
 
-            let validEvents: UserEvent[] = [
-                ...items_getEventsWithinTimeRange(
-                    this.selectedItems,
-                    this.selectedTime[0].getTime(),
-                    this.selectedTime[1].getTime(),
-                )
-            ]
-            for(let event of validEvents) {
+            const validEvents = this._getValidEvents(this.selectedTime[0],
+                                                     this.selectedTime[1])
+
+            for (let event of validEvents) {
                 stats.total++
-                if(stats.eventStats[event.Event]) {
+                if (stats.eventStats[event.Event]) {
                     stats.eventStats[event.Event] += 1
                 } else {
                     stats.eventStats[event.Event] = 1
@@ -226,17 +259,17 @@ class CalendarMode extends Mode {
 
             const statsTbl = output.querySelector("#event-totals")
             const totalEvents = output.querySelector("#total-events")
-            if(totalEvents)
+            if (totalEvents)
                 totalEvents.innerText = stats.total
-            if(statsTbl)
-            for(let [event, count] of Object.entries(stats.eventStats).sort((a, b) => b[1] - a[1])) {
-                statsTbl.innerHTML += `
+            if (statsTbl)
+                for (let [event, count] of Object.entries(stats.eventStats).sort((a, b) => b[1] - a[1])) {
+                    statsTbl.innerHTML += `
 <tr>
     <td>${event}</td>
     <td>${count}</td>
     <td>${(count / stats.total * 100).toFixed(2)}</td>
 </tr>`
-            }
+                }
 
             return output
         }
