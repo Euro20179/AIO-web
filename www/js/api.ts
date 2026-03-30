@@ -328,7 +328,7 @@ async function api_query(searchString: string, uid: number, version: 3 | 4, orde
  * @param {string} [orderby=""]
  */
 async function api_queryV4(searchString: string, uid: number, orderby: SortKind = ""): Promise<InfoEntry[]> {
-    return await api_query(searchString, uid, 3, orderby)
+    return await api_query(searchString, uid, 4, orderby)
 }
 
 /**
@@ -338,7 +338,7 @@ async function api_queryV4(searchString: string, uid: number, orderby: SortKind 
  * @param {string} [orderby=""]
 */
 async function api_queryV3(searchString: string, uid: number, orderby: SortKind = ""): Promise<InfoEntry[]> {
-    return await api_query(searchString, uid, 4, orderby)
+    return await api_query(searchString, uid, 3, orderby)
 }
 
 async function api_setPos(id: bigint, pos: string) {
