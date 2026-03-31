@@ -1275,8 +1275,15 @@ class EntryTy extends Type {
 }
 
 class Func extends Type {
-    constructor(fn: (...params: Type[]) => Type) {
+    constructor(fn: (...params: Type[]) => Type,
+        public description?: string,
+        public params?: [string, string][],
+        public return_?: string
+    ) {
         super(fn)
+        this.description = description
+        this.return_ = return_
+        this.params = params
     }
 
     truthy(): boolean {
@@ -1394,7 +1401,8 @@ class CalcVarTable {
             }
             let int = new Interpreter(code.code, this)
             return int.interpret()
-        }))
+        }, "evaluate calculator script, and return the result",
+            [["code: string", "the code to execute"]], "any"))
 
         this.symbols.set("true", new Num(1))
         this.symbols.set("false", new Num(0))
@@ -1402,11 +1410,13 @@ class CalcVarTable {
 
         this.symbols.set("len", new Func(n => {
             return n.len()
-        }))
+        }, "Get the length of an object",
+            [["obj: any", "the object to get the length of"]], "Num"))
 
         this.symbols.set("str", new Func(n => {
             return n.toStr()
-        }))
+        }, "Convert an object to a string",
+            [["obj: any", "the object to convert to a string"]], "Str"))
 
         this.symbols.set("join", new Func((arr, by) => {
             if (!(arr instanceof Arr)) {
@@ -1423,15 +1433,20 @@ class CalcVarTable {
                 }
             }
             return new Str(str)
-        }))
+        }, "Join each item in an array by a joiner",
+            [["arr: Arr", "The array to join together"],
+            ["by: Str", "What to join each item by"]], "Str"))
 
         this.symbols.set("abs", new Func(n => {
             return new Num(Math.abs(n.toNum().jsValue))
-        }))
+        }, "Return the absolute value of a number",
+            [["num: Num", "the number to get the absolute value of"]], "Num"))
 
         this.symbols.set("pow", new Func((x, y) => {
-            return new Num(x.toNum().jsValue ** y.toNum().jsValue)
-        }))
+            return new Num(Math.pow(x.toNum().jsValue, y.toNum().jsValue))
+        }, "Return x to the power of y",
+            [["x: Num", "x"],
+            ["y: Num", "y"]], "Num"))
 
         this.symbols.set("avg", new Func((nums) => {
             let len = nums.len().jsValue
@@ -1441,7 +1456,8 @@ class CalcVarTable {
                 total += cur.toNum().jsValue
             }
             return new Num(total / len)
-        }))
+        }, "Return the average of a list of Nums",
+            [["nums: Arr[Num]", "The list of numbers to average"]], "Num"))
 
         this.symbols.set("round", new Func((n, by) => {
             if (!(n instanceof Num)) {
@@ -1452,7 +1468,9 @@ class CalcVarTable {
                 return new Num(Math.round(n.jsValue * (10 ** roundBy)) / (10 ** roundBy))
             }
             return new Num(Math.round(n.jsValue))
-        }))
+        }, "Round a num to by decimal places",
+            [["n: Num", "the number to round"],
+             ["by: Num", "the scale/number of decimal places to round"]], "Num"))
 
         this.symbols.set("floor", new Func(n => {
             if (!(n instanceof Num)) {
@@ -1460,7 +1478,7 @@ class CalcVarTable {
             }
 
             return new Num(Math.floor(n.jsValue))
-        }))
+        }, "Round a number down", [["n: Num", "the number to round down"]], "Num"))
 
         this.symbols.set("max", new Func((...items) => {
             let max = items[0].toNum()
@@ -1470,11 +1488,25 @@ class CalcVarTable {
                 }
             }
             return max
-        }))
+        }, "Find the max of the given items",
+            [["...nums: Num", "The nums"]], "Num"))
+
+        this.symbols.set("min", new Func((...items) => {
+            let min = items[0].toNum()
+            for (let item of items) {
+                if (item.toNum().jsValue < min.jsValue) {
+                    min = item
+                }
+            }
+            return min
+        }, "Find the minimum of some numbers",
+            [["...nums: Num", "The nums"]], "Num"))
+
 
         this.symbols.set("type", new Func(i => {
             return new Str(i.constructor.name)
-        }))
+        }, "Get the type of an object as a string",
+            [["obj: any", "The object to get the type of"]], "Str"))
 
         this.symbols.set("map", new Func((list, fn) => {
 
@@ -1486,7 +1518,10 @@ class CalcVarTable {
             }
 
             return new Arr(newList)
-        }))
+        }, "Put each item in a list through a function to make a new list",
+            [["list: Arr", "The list to map"],
+             ["fn: Func(n: any): any", "the function to map each item through"]],
+                "Arr"))
 
         this.symbols.set("sort", new Func((list, fn) => {
             if (!(list instanceof Arr)) {
@@ -1494,7 +1529,9 @@ class CalcVarTable {
             }
 
             return new Arr(list.jsValue.sort((a: Type, b: Type) => fn.call([a, b]).toNum().jsValue))
-        }))
+        }, "Sort a list via a sort function",
+            [["list: Arr<T>", "The list to sort"],
+             ["fn: Func(a: any, b: any): Num", "The sorting function, same as the js sort function"]], "Arr<T>"))
 
         this.symbols.set("slice", new Func((list, start, end) => {
             let newList = []
@@ -1512,7 +1549,10 @@ class CalcVarTable {
                 newList.push(list.getattr(new Num(i)))
             }
             return new Arr(newList)
-        }))
+        }, "Slice a list",
+            [["list: Arr<T>", "The list to slice"],
+             ["start: Num", "The starting point (inclusive)"],
+             ["end?: Num", "The ending point (exclusive)"]], "Arr<T>"))
 
         this.symbols.set("shuf", new Func((list) => {
             let len = list.len().jsValue
@@ -1527,13 +1567,15 @@ class CalcVarTable {
                 list.setattr(new Num(randIdx), cur)
             }
             return list
-        }))
+        }, "Shuffle a list",
+            [["list: Arr<T>", "The list to shuffle"]], "Arr<T>"))
 
         this.symbols.set("randitem", new Func(list => {
             let len = list.len().jsValue
             let idx = Math.floor(Math.random() * len)
             return list.getattr(new Num(idx))
-        }))
+        }, "Pick a random item from a list",
+            [["list: Arr<T>", "The list to pick from"]], "T"))
 
         this.symbols.set("rand", new Func((low, high) => {
             let l = 0, h = 100
@@ -1545,17 +1587,21 @@ class CalcVarTable {
             }
 
             return new Num(Math.floor(Math.random() * (h - l) + l))
-        }))
+        }, "Choose an integer within a range (high exclusive, low inclusive)",
+            [["low: Num", "The start of the range"],
+             ["high: Num", "The end of the range"]], "Num"))
 
         this.symbols.set("in", new Func((list, value) => {
             let len = list.len().jsValue
-            for(let i = 0; i < len; i++) {
-                if(list.getattr(new Num(i)).eq(value)) {
+            for (let i = 0; i < len; i++) {
+                if (list.getattr(new Num(i)).eq(value)) {
                     return new Num(1)
                 }
             }
             return new Num(0)
-        }))
+        }, "Checks if a value is in a list",
+            [["list: Arr", "The list to check containment"],
+             ["value: any", "The value to check is in the list"]], "Bool"))
 
         this.symbols.set("filter", new Func((list, fn) => {
             let newList = []
@@ -1568,37 +1614,33 @@ class CalcVarTable {
             }
 
             return new Arr(newList)
-        }))
-
-        this.symbols.set("min", new Func((...items) => {
-            let min = items[0].toNum()
-            for (let item of items) {
-                if (item.toNum().jsValue < min.jsValue) {
-                    min = item
-                }
-            }
-            return min
-        }))
+        }, "Filter items in a list through a filter function",
+          [["list: Arr<T>", "The list to filter"],
+           ["fn: Func(i: T): Bool", "The function to filter each item through"]], "Arr<T>"))
 
         this.symbols.set("int", new Func((n) => {
             return new Num(BigInt(n.jsStr()))
-        }))
+        }, "Convert a number into a js Big Int represented as a Num",
+            [["n: Num", "The number to convert"]], "Num"))
 
         this.symbols.set("num", new Func(n => {
             return n.toNum()
-        }))
-
-        this.symbols.set("pow", new Func((x, y) => {
-            return new Num(Math.pow(x.toNum().jsValue, y.toNum().jsValue))
-        }))
+        }, "Convert an object to a Num",
+        [["obj: any", "The object to convert"]], "Num"))
 
         this.symbols.set("set", new Func((obj, name, val) => {
             obj.setattr(name, val)
             return obj
-        }))
+        }, "Set a property on an object",
+            [["obj: Obj", "The object to set a property for"],
+             ["name: Str", "The name of the property"],
+             ["val: any", "The value to set the property to"]], "Obj"))
+
         this.symbols.set("get", new Func((obj, name) => {
             return obj.getattr(name)
-        }))
+        }, "Get the value of a property on an object",
+            [["obj: Obj", "The object to get the value of"],
+             ["name: Str", "The name of the property"]], "any"))
 
         this.symbols.set("obj", new Func((...items) => {
             if (items.length % 2 !== 0) {
@@ -2230,7 +2272,7 @@ class CalcVarTable {
             const realParams = params.splice(1).map(v => v.jsValue)
             //@ts-ignore
             const fn = window[name]
-            if(fn && typeof fn === 'function') {
+            if (fn && typeof fn === 'function') {
                 return Type.from(fn(...realParams))
             }
             return new Num(3)

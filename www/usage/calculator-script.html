@@ -1,5 +1,53 @@
 <link rel="stylesheet" href="/css/colors.css">
 <link rel="stylesheet" href="/css/general.css">
+<style>
+#functions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--small-gap);
+}
+
+.card {
+    border: 1px solid;
+    border-radius: var(--small-gap);
+    padding: var(--small-gap);
+    color: var(--text-color);
+
+    h3 {
+        text-align: center;
+        border-bottom: 1px solid;
+        color: var(--blue);
+    }
+
+    li::marker {
+        color: var(--blue);
+    }
+
+    params {
+        color: black;
+
+        &::before {
+            content: "(";
+        }
+        &::after {
+            content: ")";
+        }
+
+        type:not(:last-child)::after {
+            color: var(--text-color);
+            content: ", "
+        }
+    }
+
+    type::before {
+        content: ": ";
+        color: var(--blue);
+    }
+    type {
+        color: var(--yellow);
+    }
+}
+</style>
 <script src="/ui/components.js"></script>
 
 <title>Calculator Script</title>
@@ -20,6 +68,9 @@
     iteration into a list, and that is what is returned
 
 <p> Calling a number is the same as multiplication
+
+<p> Most functions try to type juggle into the correct type.
+    Exceptions will be mentioned explicitely
 
 <h2>Unorthadox Syntax</h2>
 <p> <code>expr (=&gt; expr)+</code>: map all items from the lefthand side expr
@@ -56,6 +107,15 @@ arrow.
     rof
     </pre>
 </figure>
+
+<h2>Builtin Functions</h2>
+
+<p> Note: booleans do not exist, instead it is either 1 (true) or 0 (false)</p>
+<input type="search" placeholder="search functions" oninput="searchFn(this)">
+<section id="functions">
+
+</section>
+
 
 <h2>Grammar</h2>
 <pre>
@@ -130,4 +190,70 @@ fi`
     }
 
     script.onchange()
+
+
+function searchFn(inp) {
+    const search = inp.value
+    for(let el of functions.children) {
+        if(el.nodeType !== Node.ELEMENT_NODE) continue
+        el.hidden = false
+    }
+
+    for(let el of functions.children) {
+        if(el.nodeType !== Node.ELEMENT_NODE) continue
+        if(el.innerText.includes(search)) continue
+        el.hidden = true
+    }
+}
+</script>
+
+<script src="/ui/calculator.js"></script>
+<script>
+const tbl = new CalcVarTable
+for(let symbol of tbl.symbols.entries()) {
+    if(!(symbol[1] instanceof Func)) continue
+    const d = document.createElement("div")
+    d.classList.add("card")
+
+    const p = document.createElement("p")
+    p.append(symbol[1].description || "??")
+
+    const paramList = document.createElement("ul")
+    paramList.classList.add("param-list")
+
+    const params = document.createElement("params")
+    params.classList.add("params")
+    for(let [param, desc] of symbol[1].params || []) {
+        let [name, ...ty] = param.split(":")
+        ty = ty.join(":")
+        const n = document.createElement("param-name")
+        n.append(name)
+        const t = document.createElement("type")
+        t.append(ty)
+        params.append(n)
+        params.append(t)
+        paramList.innerHTML += `<li><code>${param.split(":")[0]}</code> ${desc}</li>`
+    }
+
+    // if(params.innerText.endsWith(", ")) {
+    //     params.innerText = params.innerText.replace(/, $/, "")
+    // }
+
+    const rv = document.createElement("type")
+    if(symbol[1].return_) {
+        rv.append(symbol[1].return_)
+    }
+
+
+    const h3 = document.createElement("h3")
+    h3.append(symbol[0])
+    h3.append(params)
+    h3.append(rv)
+
+    d.append(h3)
+    d.append(p)
+    d.append(paramList)
+
+    functions.append(d)
+}
 </script>
