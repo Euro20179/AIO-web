@@ -56,8 +56,6 @@
 <script src="/ui/view-modes/displayEntry.js"></script>
 <script src="/ui/ui.js"></script>
 <script>
-    function updateInfo2() {
-    }
     const urlParams = new URLSearchParams(document.location.search)
     let id = urlParams.get("item-id")
 

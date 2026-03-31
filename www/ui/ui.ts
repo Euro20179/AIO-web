@@ -1843,3 +1843,17 @@ function setViewingAllUI(enabled: boolean) {
         throw new Error("If there is a viewAll element it is not an <input>")
     components.viewAllElem.checked = enabled
 }
+
+function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean = true) {
+    const win = open(`/ui/display.php?item-id=${id}`, target, popup ? "popup=true" : undefined)
+    win?.addEventListener("modes.update-item", e => {
+        api_getEntryAll(id, findInfoEntryById(id).Uid).then((res) => {
+            if(!res) return
+            updateInfo2({
+                [String(id)]: {
+                    ...res
+                }
+            })
+        })
+    })
+}

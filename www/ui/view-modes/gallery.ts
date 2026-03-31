@@ -22,7 +22,7 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             const root = target.getRootNode() as ShadowRoot
             const id = BigInt(root.host.getAttribute("data-item-id") || 0)
             if(!id) return
-            open(`/ui/display.php?item-id=${id}`, "_blank", "popup=true")
+            openDisplayWinUI(id)
         }
     }, item, findUserEntryById(item.ItemId), meta, root)
     return entry

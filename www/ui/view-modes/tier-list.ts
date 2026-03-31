@@ -125,7 +125,7 @@ class TierListMode extends Mode {
         img.onclick = () => {
             const id = BigInt(img.parentElement?.id.split("-")[2] || "0")
             if(!id) return
-            open(`/ui/display.php?item-id=${id}`, "_blank", "popup=true")
+            openDisplayWinUI(id)
         }
 
         li.id = `tier-item-${entry.ItemId}`
@@ -197,8 +197,8 @@ class TierListMode extends Mode {
     }
 
     refresh(id: bigint) {
-        this.sub(findInfoEntryById(id))
-        this.add(findInfoEntryById(id))
+        if(this.sub(findInfoEntryById(id)))
+            this.add(findInfoEntryById(id))
     }
 
     close() {

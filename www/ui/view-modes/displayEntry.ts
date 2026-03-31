@@ -1771,7 +1771,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {
-    return open(`/ui/display.php?item-id=${itemId}`, target, popup ? "popup=true" : undefined)
+    return openDisplayWinUI(itemId, target, popup)
 }
 
 /**
