@@ -9,10 +9,8 @@
                     colorSelector.value = colorscheme || ""
                 } else {
                     if (matchMedia('(prefers-color-scheme: dark)').matches) {
-                        console.log("dark")
                         colorSelector.value = "dark"
                     } else {
-                        console.log("light")
                         colorSelector.value = "light"
                     }
                 }

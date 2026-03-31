@@ -2224,6 +2224,17 @@ class CalcVarTable {
             }
             return new Str(res.trim())
         }))
+
+        this.symbols.set("js_call", new Func((...params: Type[]) => {
+            const name = params[0].toStr().jsStr()
+            const realParams = params.splice(1).map(v => v.jsValue)
+            //@ts-ignore
+            const fn = window[name]
+            if(fn && typeof fn === 'function') {
+                return Type.from(fn(...realParams))
+            }
+            return new Num(3)
+        }))
     }
     delete(name: string) {
         this.symbols.delete(name)

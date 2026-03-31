@@ -8,6 +8,7 @@
     <title>Usage</title>
     <link rel="stylesheet" href="/css/colors.css">
     <link rel="stylesheet" href="/css/general.css">
+    <script src="/ui/components.js"></script>
 </head>
 
 <body>
