@@ -16,6 +16,8 @@ class ScriptMode extends Mode {
     add(entry: InfoEntry) {
         const d = new DisplayMode(this.parent, this.win)
         const e = d.add(entry)
+        d.close()
+        this.parent.append(e)
         e.style.display = "block"
         return e
     }
