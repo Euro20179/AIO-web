@@ -1651,7 +1651,11 @@ class CalcVarTable {
                 obj[items[i].jsStr()] = items[i + 1]
             }
             return new Obj(obj)
-        }))
+        }, `Convert pairs of values to an object, example:
+<pre>obj('a', 'b',
+  'c', 'd')</pre>`,
+            [["...items: ...(TKey, TVal)", "The pairs to convert"]],
+            "Obj<TKey, TVal>"))
 
         const findByid = (id: Type, finder: (id: bigint | "s-rand" | "a-rand") => Type) => {
             const s = id.jsStr()
@@ -1678,12 +1682,12 @@ class CalcVarTable {
         this.symbols.set("confirm", new Func((p) => {
             let pText = p.jsStr()
             return new Num(confirm(pText) ? 1 : 0)
-        }))
+        }, "Open the confirm dialog", [["p: Str", "The prompt"]], "Bool"))
 
         this.symbols.set("ask", new Func((p) => {
             const pText = p.jsStr()
             return new Str(prompt(pText) ?? "")
-        }))
+        }, "Open the prompt dialog", [["p: Str", "The prompt"]], "Str"))
         this.symbols.set("prompt", this.symbols.get("ask") as Type)
 
         this.symbols.set("getall", new Func((of) => {
@@ -1696,7 +1700,8 @@ class CalcVarTable {
                 return new Arr(Object.values(items_getAllEntries()).map(v => new EntryTy(v.meta)))
             }
             return new Arr([])
-        }))
+        }, "Gets all loaded entries of a specific kind (info, user, meta)",
+            [["of: Str", "Can be 'info', 'user', 'meta'"]], "Arr<EntryTy<any>>"))
 
         this.symbols.set("children", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -1707,7 +1712,8 @@ class CalcVarTable {
             let children = [...findDescendants(jsId)]
 
             return new Arr(children.map(v => new EntryTy(v.info)))
-        }))
+        }, "Gets the children of an entry",
+        [["id: Num", "The id to get the children of"]], "Arr<EntryTy<Info>>"))
 
         this.symbols.set("copies", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -1718,7 +1724,8 @@ class CalcVarTable {
             let children = [...findCopies(jsId)]
 
             return new Arr(children.map(v => new EntryTy(v.info)))
-        }))
+        }, "Get the copies of an entry",
+            [["id: Num", "The id to get the copies of"]], "Arr<EntryTy<Info>>"))
 
         this.symbols.set("price", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -1729,7 +1736,8 @@ class CalcVarTable {
             let price = findInfoEntryById(jsId).PurchasePrice || 0
 
             return new Num(price)
-        }))
+        }, "Get the purchase price of an entry",
+            [["id: Num", "The id to get the purchase price of"]], "Num"))
 
         this.symbols.set("rating", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -1740,7 +1748,8 @@ class CalcVarTable {
             let rating = findUserEntryById(jsId).UserRating
 
             return new Num(rating)
-        }))
+        }, "Get the user rating of an entry",
+            [["id: Num", "The id to get the user rating of"]], "Num"))
 
         this.symbols.set("entry", new Func((id) => {
             return findByid(id, i => {
@@ -1755,7 +1764,11 @@ class CalcVarTable {
                         return new EntryTy(findInfoEntryById(i) as InfoEntry)
                 }
             })
-        }))
+        }, "Get an info entry by id",
+            [["id: Num | 's-rand' | 'a-rand'",
+                `The id to get the info entry for,
+                    if s-rand, get a random search result entry,
+                    if a-rand, get a random loaded entry`]], "EntryTy<Info>" ))
 
         this.symbols.set("meta", new Func((id) => {
             return findByid(id, i => {
@@ -1770,7 +1783,9 @@ class CalcVarTable {
                         return new EntryTy(findMetadataById(i) as MetadataEntry)
                 }
             })
-        }))
+        }, "Get a meta entry by id",
+            [["id: Num | 's-rand' | 'a-rand'", "same as entry()"]],
+            "EntryTy<Meta>"))
 
         this.symbols.set("user", new Func((id) => {
             return findByid(id, i => {
@@ -1785,7 +1800,9 @@ class CalcVarTable {
                         return new EntryTy(findUserEntryById(i) as UserEntry)
                 }
             })
-        }))
+        }, "Get a user entry by id",
+            [["id: Num | 's-rand' | 'a-rand'", "same as entry()"]],
+            "EntryTy<User>"))
 
         this.symbols.set("withfmt", new Func((o, fmtStr) => {
             let f = fmtStr.jsStr()
@@ -1833,30 +1850,45 @@ class CalcVarTable {
             }
 
             return new Str(final)
-        }))
+        }, "Format an object with a python-like format string",
+            [["o: any", `The object to format,
+                if o is a Num,
+                convert into an object containing <pre>{
+    user: EntryTy<User>,
+    info: EntryTy<Info>,
+    meta: EntryTy<Meta>
+}</pre>`]], "Str"))
 
         this.symbols.set("serialize", new Func((obj) => {
             return new Str(JSON.stringify(obj.jsValue, (_, v) => typeof v === "bigint" ? String(v) : v))
-        }))
+        }, "Serialize an object into json",
+            [["obj: any", "The object to serialize"]], "Str"))
 
         this.symbols.set("deserialize", new Func(text => {
             return Type.from(api_deserializeJsonl(text.jsStr()).next().value)
-        }))
+        }, "Convert a json string to an object",
+            [["json: Str", "The json to deserialize"]], "any"))
 
         this.symbols.set("clear", new Func(() => {
             return Type.from(ui_modeclear())
-        }))
+        }, "Clears the current mode (including anything added with put())",
+            [], "Bool"))
 
         this.symbols.set("put", new Func((...values) => {
             return Type.from(ui_put(...values.map(v => v instanceof Elem ? v.el : v.jsStr())))
-        }))
+        }, "Attempt to put raw html into the current mode",
+            [["...values: Str | Elem", "The values to put into the page"]],
+            'Str("")'))
 
         this.symbols.set("ua_download", new Func((data, name, ft) => {
             let jsName = name?.jsStr() || "file.dat"
             let fileType = ft?.jsStr() || "text/plain"
             let d = data.jsStr()
             return Type.from(ua_download(d, jsName, fileType))
-        }))
+        }, "Prompt the user to download something",
+            [["data: Str", "The data to download"],
+             ["name: Str", "The name of the file"],
+             ["ft: Str", "The mimetype of the file"]], "Num(0)"))
 
         this.symbols.set("ui_prompt", new Func((prompt, _default, cb) => {
             ui_prompt(prompt.jsStr(), _default.jsStr(), result => {
@@ -1867,7 +1899,11 @@ class CalcVarTable {
                 }
             })
             return new Num(0)
-        }))
+        }, "Use the ui prompt to prompt the user (async)",
+        [["prompt: Str", "The prompt"],
+         ["default: Str", "The default response"],
+         ["cb: Func(result: Str)", "The callback called with the user's response"]],
+          "Num(0)"))
 
         this.symbols.set("ui_askitem", new Func(cb => {
             ui_askitem().then(id => {
@@ -1880,7 +1916,9 @@ class CalcVarTable {
                 cb.call([result])
             })
             return new Num(0)
-        }))
+        }, "Asks the user to select an item",
+            [["cb: Func(result: EntryTy<Info>)",
+                "The callback called with the item the user selected"]], "Num(0)"))
 
         this.symbols.set("ui_addsort", new Func((name, sortFn) => {
             return new Num(
@@ -1892,13 +1930,17 @@ class CalcVarTable {
                     ]).toNum().jsValue
                 )
             )
-        }))
+        }, "Adds a sort to the list of sort methods",
+            [["name: Str", "The name of the sort"],
+             ["sortFn: Func(a: EntryTy<Info>, b: EntryTy<Info>): Num", "The sorting function"]],
+             "Num(0)"))
 
         this.symbols.set("ui_delsort", new Func(name => {
             return new Num(
                 ui_delsort(name.jsStr())
             )
-        }))
+        }, "Deletes a sorting method, returns 1 for method not found",
+            [["name: Str", "The name of the method to delete"]], "None | Num(1)"))
 
         this.symbols.set("ui_createstat", new Func((name, additive, calculator) => {
             return new Num(
@@ -1911,28 +1953,39 @@ class CalcVarTable {
                     ]).toNum().jsValue
                 )
             )
-        }))
+        }, "Creates a statistic",
+            [["name: Str", "The name of the stat"],
+             ["additive: Bool", "Whether the stat is additive or is just a number"],
+             ["calculator: Func(entry: EntryTy<Info>, mult: Num): Num", "The function to calculate the value of the statistic"]],
+             "Num(0)"))
 
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
             return Type.from(ui_setstat(n, v.jsValue))
-        }))
+        }, "Sets the value of a statistic",
+        [["name: Str", "The name of the stat"],
+         ["val: Num", "The value to set the stat to"]], "Num"))
 
         this.symbols.set("ui_delstat", new Func((name) => {
             let n = name.jsStr()
             return Type.from(Number(ui_delstat(n)))
-        }))
+        }, "Deletes a statistic", [["name: Str", "The stat to delete"]], "Bool"))
 
         this.symbols.set("ui_sort", new Func(by => {
             return Type.from(ui_sort(by.jsStr()))
-        }))
+        }, "Sorts The search results by a sorting method",
+            [["by: Str", "The name of the sorting method"]], "Num(0)"))
 
         this.symbols.set("ui_search", new Func((query, cb) => {
             return Type.from(ui_search(query.jsStr(), results => {
                 cb?.call([new Arr(results.map(v => new EntryTy(v.info)))])
             }))
-        }))
+        }, "Simulate a user search v3 search",
+            [["query: Str", "The search query"],
+             ["cb: Func(results: Arr<EntryTy<Info>>)",
+                 "The callback for when the search is completed"]],
+              "Num(0)"))
 
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
@@ -1941,16 +1994,18 @@ class CalcVarTable {
                 return new Str("Invalid mode")
             }
             return Type.from(res)
-        }))
+        }, "Sets the current mode",
+            [["mode: Str", "The name of the mode to set to"]], "Str('Invalid mode') | Num(0)"))
 
         this.symbols.set("ui_sidebarclear", new Func(() => {
             return Type.from(ui_sidebarclear())
-        }))
+        }, "Clear the sidebar", [], "Num(0)"))
 
         this.symbols.set("ui_sidebarreorder", new Func((...items) => {
             let ids = items.map(v => v.toNum().jsValue) as bigint[]
             return Type.from(ui_sidebarreorder(...ids))
-        }))
+        }, "Reorders the sidebar in a specific order",
+            [["...items: Num", "The ids to order the side bar in"]], "Num(0)"))
 
         this.symbols.set("ui_sidebarselect", new Func((id) => {
             const jsId = id.toNum().jsValue
@@ -1963,7 +2018,8 @@ class CalcVarTable {
                 return new Str(`${id} not found`)
             }
             return Type.from(res)
-        }))
+        }, "Select an id from the sidebar",
+            [["id: Num", "The id to select"]], "Str('{id} not found') | Num(0)"))
 
         this.symbols.set("ui_sidebarrender", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -2179,24 +2235,6 @@ class CalcVarTable {
                 cb?.call([es])
             }).catch(console.error)
             return new Num(0)
-        }))
-
-        this.symbols.set("children", new Func(id => {
-            const jsId = id.toNum().jsValue
-            if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
-            }
-
-            return new Arr(findDescendants(jsId).map(v => new EntryTy(v.info)).toArray())
-        }))
-
-        this.symbols.set("copies", new Func(id => {
-            const jsId = id.toNum().jsValue
-            if (typeof jsId !== 'bigint') {
-                return new Str("id is not a bigint")
-            }
-
-            return new Arr(findCopies(jsId).map(v => new EntryTy(v.info)).toArray())
         }))
 
         this.symbols.set("setrating", new Func((...params) => {

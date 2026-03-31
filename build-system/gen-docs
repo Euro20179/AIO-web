@@ -12,6 +12,9 @@ BEGIN {
     param_text = ""
     return_text = ""
     print "<h3>" file "</h3>"
+    if (file ~ /items\.ts$/) {
+        print "<p>Generally updates local state, use api_* functions to update/pull serverside</p>"
+    }
     print "<ul>"
 }
 
@@ -123,6 +126,8 @@ in_doc {
         print "<p class=\"" classList "\"><code>" func_name "</code></p>"
 
         if (doc_text != "") {
+            sub(/@description/, "", doc_text)
+            gsub(/@see/, "<i>See also</i>: ", doc_text)
             print "<p class=\"function-description\">" doc_text "</p>"
         }
 

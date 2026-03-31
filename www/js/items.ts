@@ -1,9 +1,11 @@
 /**
+ * @module items
  * REQUIRES: api.ts
  * DESCRIPTION:
  * contains the global state of all entries, libraries, selected entries, etc..
  * in addition contains functions that interact with the state,
  * such as retrieving and setting entries
+ * generally only updates locally
  */
 
 //TODO:
@@ -141,7 +143,7 @@ class items_Relations {
     }
 
     removeRequires(id: bigint) {
-        if(this.requires.includes(id)) {
+        if (this.requires.includes(id)) {
             this.requires = this.requires.filter(v => v !== id)
         }
     }
@@ -282,52 +284,103 @@ class items_Entry {
 }
 
 /**
- * @description normalizes a metadata rating, returns 0 if there is no rating
+ * normalizes a metadata rating, returns 0 if there is no rating
  */
 function items_getNormalizedRating(meta: MetadataEntry): number {
     return (meta.Rating / meta.RatingMax * 100) || 0
 }
 
+/**
+ * Sets the current library
+ * @param {bigint} id The id of the library to set to (can be 0 for no library)
+ */
 function items_setCurrentLibrary(id: bigint) {
     _globalsNewUi.viewingLibrary = id
 }
 
+/**
+ * Gets the current library
+ * @returns {bigint} the id of the library
+ */
 function items_getCurrentLibrary(): bigint {
     return _globalsNewUi.viewingLibrary
 }
 
+/**
+ * Gets a dictionary of all library ids
+ * @returns {Record<string, InfoEntry>} id: library
+ */
 function items_getLibraries(): Record<string, InfoEntry> {
     return _globalsNewUi.libraries
 }
 
+/**
+ * Adds a library to the list of libraries
+ * @param {InfoEntry} info The library to add
+ */
 function items_setLibrary(info: InfoEntry) {
     _globalsNewUi.libraries[String(info.ItemId)] = info
 }
+
+/**
+ * Removes a library from the list of libraries
+ * @param {string} id The id of the library to remove
+ */
 function items_deleteLibrary(id: string) {
     delete _globalsNewUi.libraries[id]
 }
 
+/**
+ * Add a requirement to an item
+ * @param {bigint} item The item to add a requirement to
+ * @param {bigint} requires The id of the item that is the requirement
+ */
 function items_addRequires(item: bigint, requires: bigint) {
     items_getEntry(item).relations.addRequires(requires)
 }
 
+/**
+ * Add a child to an item
+ * @param {bigint} child The id of the child
+ * @param {bigint} parent The id of the parent
+ */
 function items_addChild(child: bigint, parent: bigint) {
     items_getEntry(parent).relations.addChild(child)
 }
 
+/**
+ * Sets 2 items to be copies of each other
+ * @param {bigint} copy id of item 1
+ * @param {bigint} copyof id of item 2
+ */
 function items_addCopy(copy: bigint, copyof: bigint) {
     items_getEntry(copy).relations.copies.push(copyof)
     items_getEntry(copyof).relations.copies.push(copy)
 }
 
+/**
+ * Removes a requirement from an item
+ * @param {bigint} item The item to remove the requirement from
+ * @param {bigint} requires The id of the requirement to remove.
+ */
 function items_removeRequires(item: bigint, requires: bigint) {
     items_getEntry(item).relations.removeRequires(requires)
 }
 
+/**
+ * Remove a child from an item
+ * @param {bigint} child The child to remove from the parent
+ * @param {bigint} parent The parent to remove the child from
+ */
 function items_removeChild(child: bigint, parent: bigint) {
     items_getEntry(parent).relations.removeChild(child)
 }
 
+/**
+ * Make 2 items no longer copies of each other
+ * @param {bigint} copy item 1
+ * @param {bigint} copyof item 2
+ */
 function items_removeCopy(copy: bigint, copyof: bigint) {
     //relations.removeCopy removes both sides of the copy
     items_getEntry(copy).relations.removeCopy(copyof)
@@ -344,26 +397,53 @@ function items_setResults(items: bigint[]) {
     }
 }
 
+/**
+ * Get the search results list
+ * @returns {items_Entry[]}
+ */
 function items_getResults(): items_Entry[] {
     return _globalsNewUi.results
 }
 
+/**
+ * Get the list of selected items
+ * @returns {InfoEntry[]}
+ */
 function items_getSelected(): InfoEntry[] {
     return _globalsNewUi.selectedEntries
 }
 
+/**
+ * Clears the selected items
+ * (You probably want mode_clearItems() instead, as this function only clears the state, not the visual)
+ */
 function items_clearSelected() {
     _globalsNewUi.selectedEntries = []
 }
 
+/**
+ * Select an item by id
+ * (You probably want mode_selectItem() insted)
+ * @param {bigint} id The id to select
+ */
 function items_selectById(id: bigint): void {
     _globalsNewUi.selectedEntries.push(_globalsNewUi.entries[String(id)].info)
 }
 
+/**
+ * Sets the list of selected items
+ * (you probably want mode_selectItemList() instead)
+ * @param {InfoEntry[]} items The list of items to select
+ */
 function items_setSelected(items: InfoEntry[]) {
     _globalsNewUi.selectedEntries = items
 }
 
+/**
+ * Deselects an item by id
+ * (You probably want mode_deselectItem() instead)
+ * @param {bigint} id The id to deselect
+ */
 function items_deselectById(id: bigint) {
     _globalsNewUi.selectedEntries = _globalsNewUi.selectedEntries.filter(v => v.ItemId !== id)
 }
@@ -384,6 +464,14 @@ function items_setEntries(items: InfoEntry[]) {
     }
 }
 
+/**
+ * Updates an entry by id in the global entries map
+ * Keep in mind this is client side only, and only updates state not visually
+ * @see updateInfo2()
+ * @see api_setItem()
+ * @param {string} id The id to update
+ * @param {{user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry}} with Update the id with this information
+ */
 function items_updateEntryById(id: string, { user, events, meta, info }: Partial<{
     user: UserEntry,
     events: UserEvent[],
@@ -396,6 +484,11 @@ function items_updateEntryById(id: string, { user, events, meta, info }: Partial
     info && (_globalsNewUi.entries[id].info = info)
 }
 
+/**
+ * Delete an entry from the global entries map
+ * @see aio_delete()
+ * @param {bigint} item The id of the item to delete
+ */
 function items_delEntry(item: bigint) {
     delete _globalsNewUi.entries[String(item)]
 }
@@ -445,7 +538,7 @@ async function items_getEntryAny(id: bigint) {
     let val = _globalsNewUi.entries[String(id)]
     if (!(val)) {
         const stuff = await api_getEntryAll(id, 0)
-        if(!stuff) {
+        if (!stuff) {
             throw new Error(`${id} is not an entry`)
         }
         val = _globalsNewUi.entries[String(id)] = new items_Entry(
@@ -455,7 +548,11 @@ async function items_getEntryAny(id: bigint) {
     return val
 }
 
-function items_getAllEntries() {
+/**
+ * Gets the global entries map
+ * @returns {Record<string, items_Entry>}
+ */
+function items_getAllEntries(): Record<string, items_Entry> {
     return _globalsNewUi.entries
 }
 
@@ -503,6 +600,12 @@ function findInfoEntryById(id: bigint): InfoEntry {
     return _globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
 }
 
+/**
+ * Create a generic InfoEntry
+ * @param {bigint} itemId The item id of this entry
+ * @param {number} uid The user id of this entry
+ * @returns {InfoEntry}
+ */
 function genericInfo(itemId: bigint, uid: number): InfoEntry {
     return {
         Uid: uid,
@@ -523,6 +626,12 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
 }
 
 
+/**
+ * Create a generic MetadataEntry
+ * @param {bigint} itemId The item id of this entry
+ * @param {number} uid The user id of this entry
+ * @returns {MetadataEntry}
+ */
 function genericMetadata(itemId: bigint, uid: number): MetadataEntry {
     return {
         Uid: uid,
@@ -539,9 +648,16 @@ function genericMetadata(itemId: bigint, uid: number): MetadataEntry {
         Provider: "",
         ProviderID: "",
         Genres: "",
+        Country: "",
     }
 }
 
+/**
+ * Create a generic UserEntry
+ * @param {bigint} itemId The item id of this entry
+ * @param {number} uid The user id of this entry
+ * @returns {UserEntry}
+ */
 function genericUserEntry(itemId: bigint, uid: number): UserEntry {
     return {
         Uid: uid,
@@ -568,6 +684,12 @@ function items_getAllMeta() {
     return meta
 }
 
+/**
+ * Loads all relations from the api and updates all item's relations
+ * in the global entries map accordingly
+ * @see api_getRelations()
+ * @param {number} uid The uid to refresh relations of
+ */
 async function items_refreshRelations(uid: number) {
     const relations = await api_getRelations(uid)
     for (let id in relations) {
@@ -638,25 +760,51 @@ async function items_refreshMetadata(uid: number) {
     }
 }
 
-function* findDescendants(itemId: bigint) {
+/**
+ * Finds the descendants of an item
+ * @param {bigint} itemId The item to find the descendants of
+ * @returns {Generator<items_Entry>}
+ */
+function* findDescendants(itemId: bigint): Generator<items_Entry> {
     const entry = items_getEntry(itemId)
     yield* entry.relations.findDescendants()
 }
 
-function* findCopies(itemId: bigint) {
+/**
+ * Finds the copies of an item
+ * @param {bigint} itemId The item to find the copies of
+ * @returns {Generator<items_Entry>}
+ */
+function* findCopies(itemId: bigint): Generator<items_Entry> {
     const entry = items_getEntry(itemId)
     yield* entry.relations.findCopies()
 }
 
-function* findRequirements(itemId: bigint) {
+/**
+ * Finds the requirements of an item
+ * @param {bigint} itemId The item to find the requirements of
+ * @returns {Generator<items_Entry>}
+ */
+function* findRequirements(itemId: bigint): Generator<items_Entry> {
     yield* items_getEntry(itemId).relations.findRequirements()
 }
 
+/**
+ * Gets a list of recommenders for an item
+ * @param {bigint} itemId The item to get the recommenders of
+ * @returns {string[]}
+ */
 function items_getRecommendedBy(itemId: bigint): string[] {
     let entry = items_getEntry(itemId)
     return JSON.parse(entry.info.RecommendedBy)
 }
 
+/**
+ * Adds a recommender to an item's list of recommenders in the global entries map
+ * @see newRecommendedByUI()
+ * @param {bigint} itemId The item to add the recommender to
+ * @param {string} recommender The recommender
+ */
 function items_addRecommendedBy(itemId: bigint, recommender: string) {
     let entry = items_getEntry(itemId)
     let r = JSON.parse(entry.info.RecommendedBy)
@@ -664,6 +812,10 @@ function items_addRecommendedBy(itemId: bigint, recommender: string) {
     entry.info.RecommendedBy = JSON.stringify(r)
 }
 
+/**
+ * Loads all events for a user, and updates the global map accordingly
+ * @param {number} uid The user to load the events for
+ */
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
@@ -675,7 +827,12 @@ async function loadUserEvents(uid: number) {
     }
 }
 
-function sortEvents(events: UserEvent[]) {
+/**
+ * Sorts a list of events by timestamp (does not account for BeforeTs)
+ * @param {UserEvent[]} events The list of events to sort
+ * @returns {UserEvent[]}
+ */
+function sortEvents(events: UserEvent[]): UserEvent[] {
     return events.sort((a, b) => {
         let at = a.Timestamp || a.After
         let bt = b.Timestamp || b.After
@@ -862,7 +1019,12 @@ function normalizeRating(rating: number, maxRating: number) {
     return rating / maxRating * 100
 }
 
-function fixThumbnailURL(url: string) {
+/**
+ * If the url is a relative path, make it an absolute path using this server
+ * @param {string} url The url to fix
+ * @returns {string}
+ */
+function fixThumbnailURL(url: string): string {
     //a / url assumes that the aio server is the same as the web server
     if (url.startsWith("/")) {
         return `${AIO}${url}`
@@ -891,10 +1053,20 @@ async function formatToName(format: number): Promise<string> {
     return `${formats[format].toUpperCase()}${out}`
 }
 
+/**
+ * Checks if an item is marked as digitized
+ * @param {number} format The format of the item
+ * @returns {boolean}
+ */
 function items_isDigitized(format: number): boolean {
     return (format & DIGI_MOD) === DIGI_MOD
 }
 
+/**
+ * Converts a format name to a number format
+ * @param {string} name The name to convert
+ * @returns {PRomise<number>}
+ */
 async function nameToFormat(name: string): Promise<number> {
     const DIGI_MOD = 0x1000
     let val = 0
@@ -943,8 +1115,8 @@ function items_reduce<T>(itemId: bigint, includeSelf: boolean, includeChildren: 
         }
     }
     if (includeRequires) {
-        for(let requirement of findRequirements(itemId)) {
-            if(recursive) {
+        for (let requirement of findRequirements(itemId)) {
+            if (recursive) {
                 initial = items_reduce(requirement.ItemId, includeSelf, includeChildren, includeCopies, true, true, reduction, initial)
             } else {
                 initial = reduction(initial, requirement.ItemId)
@@ -982,7 +1154,12 @@ function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildr
     return items_reduce(itemId, includeSelf, includeChildren, includeCopies, includeRequires, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
 }
 
-function items_eventTimeEstimate(event: UserEvent) {
+/**
+ * Estimates a time for an event (not all events have the Timestamp field set)
+ * @param {UserEvent} event The event to estimate the time of occurance
+ * @returns {number}
+ */
+function items_eventTimeEstimate(event: UserEvent): number {
     if (event.Timestamp) {
         return event.Timestamp
     }
@@ -1026,7 +1203,12 @@ function items_compareEventTiming(left: UserEvent | number, right: UserEvent | n
     return l > r ? -1 : 1
 }
 
-function items_eventTSText(event: UserEvent) {
+/**
+ * Converts an event into a string representing the event
+ * @param {UserEvent} event The event
+ * @returns {string}
+ */
+function items_eventTSText(event: UserEvent): string {
     let ts = event.Timestamp
     const afterts = event.After
     const beforets = event.Before
@@ -1052,7 +1234,12 @@ function items_eventTSText(event: UserEvent) {
     return text
 }
 
-function items_eventTSHTML(event: UserEvent) {
+/**
+ * Converts an event to an HTML string that represents it
+ * @param {UserEvent} event The event
+ * @returns {string}
+ */
+function items_eventTSHTML(event: UserEvent): string {
     const ts = event.Timestamp
     const afterts = event.After
     const beforets = event.Before
@@ -1095,11 +1282,22 @@ function items_eventEQ(left: UserEvent, right: UserEvent): boolean {
     return _cononicalizeEvent(left) == _cononicalizeEvent(right)
 }
 
+/**
+ * Checks if an item has a specific art style
+ * @param {InfoEntry} item The item to check
+ * @param {ArtStyle} artStyle The art style
+ */
 function items_hasArtStyle(item: InfoEntry, artStyle: ArtStyle) {
     return (item.ArtStyle & artStyle) === artStyle
 }
 
-function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
+/**
+ * Adds an art style by name to an item
+ * @param {InfoEntry} item The item to add an art style to
+ * @param {ASName} artStyle The art style to add
+ * @returns {InfoEntry}
+ */
+function items_setArtStyle(item: InfoEntry, artStyle: ASName): InfoEntry {
     switch (artStyle) {
         case "Anime":
             item.ArtStyle |= AS_ANIME
@@ -1129,6 +1327,11 @@ function items_setArtStyle(item: InfoEntry, artStyle: ASName) {
     return item
 }
 
+/**
+ * Removes an art style by name to an item
+ * @param {InfoEntry} item The item to remove an art style from
+ * @param {ASName} artStyle The art style to remove
+ */
 function items_unsetArtStyle(item: InfoEntry, artStyle: ASName) {
     switch (artStyle) {
         case "Anime":
@@ -1181,6 +1384,13 @@ function getUserExtra(user: UserEntry, prop: string) {
 }
 
 
+/**
+ * Gets a list of events for items that happened within a time range
+ * @param {InfoEntry[]} items The items to pull events from
+ * @param {number} start The starting unix time stamp
+ * @param {number} end the Ending unix time stamp
+ * @returns {Generator<UserEvent>}
+ */
 function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end: number): Generator<UserEvent> {
     for (let item of items) {
         const events = findUserEventsById(item.ItemId)

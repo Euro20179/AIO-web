@@ -24,7 +24,7 @@
     }
 
     params {
-        color: black;
+        color: var(--text-color);
 
         &::before {
             content: "(";
@@ -216,7 +216,7 @@ for(let symbol of tbl.symbols.entries()) {
     d.classList.add("card")
 
     const p = document.createElement("p")
-    p.append(symbol[1].description || "??")
+    p.innerHTML = symbol[1].description || "??"
 
     const paramList = document.createElement("ul")
     paramList.classList.add("param-list")
