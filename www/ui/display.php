@@ -23,6 +23,7 @@
     tmpl("de-notes");
     tmpl("de-requirements");
     tmpl("de-status-menu");
+    tmpl("de-template-editor");
     tmpl("color-scheme-selector");
     tmpl("confirm-dialog");
 ?>
@@ -80,6 +81,7 @@
         items_setResults([BigInt(id)])
         const m = new DisplayMode(document.body)
         renderDisplayItem.call(m, meta.ItemId)
+        openViewModes.push(m)
     })
 </script>
 

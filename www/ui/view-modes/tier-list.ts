@@ -166,7 +166,7 @@ class TierListMode extends Mode {
         return li
     }
 
-    sub(entry: InfoEntry, ratingMode: "general" | "user" | "" = "") {
+    sub(entry: InfoEntry, ratingMode: "general" | "user" | "" = ""): boolean {
         let mode = ratingMode || this._getMode()
         let [_, tier] = this._findInfo(entry.ItemId, mode)
 
