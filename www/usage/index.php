@@ -28,7 +28,7 @@
             see <a href="<?=get_aio_host()?>/docs#searching">searching docs</a>
         <p>
             A regular search may be followed by 1 or more of <code>-&gt;</code> followed by a <a
-                href="client-filter">client filter</a>
+                href="#client-filter">client filter</a>
         <h4 id="client-filter">Client Filters</h4>
         <p>
             After a regular search, as many <code>-></code> can be used to apply client filters.
