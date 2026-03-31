@@ -1816,6 +1816,8 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
     if (res?.status !== 200) {
         alert(`Failed to ${actionDisplayName}, ${await res?.text()}`)
         return res
+    } else {
+        alert(`${actionDisplayName} successful`)
     }
 
     obj[name] = value
