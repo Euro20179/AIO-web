@@ -273,9 +273,11 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     let frag = document.createDocumentFragment()
 
-    const m = new Mode(frag)
+    const m = new DisplayMode(frag)
 
-    return mode_selectItem(entry, false, m)[0]
+    let res = mode_selectItem(entry, false, m)[0]
+    m.close()
+    return res
 }
 
 /**
