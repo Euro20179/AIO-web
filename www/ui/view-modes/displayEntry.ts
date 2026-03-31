@@ -999,7 +999,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 
             let action = ""
 
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+            const tz = INTL_OPTIONS.timeZone
 
             if (canBegin(user.Status)) {
                 action = "begin"
@@ -1059,7 +1059,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                         }
                     }
 
-                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+                    const tz = INTL_OPTIONS.timeZone
                     return authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media${queryParams}&timezone=${encodeURIComponent(tz)}`)
                 })
                 .then(res => {
@@ -1211,7 +1211,7 @@ function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relat
     let titles = relationships.map(i => i.info.En_Title)
 
     relationships = relationships.sort((a, b) => {
-        return (sequenceNumberGrabber(a.info.En_Title, titles) || 0) - (sequenceNumberGrabber(b.info.En_Title, titles) || 0)
+        return (items_sequenceNumberGrabber(a.info.En_Title, titles) || 0) - (items_sequenceNumberGrabber(b.info.En_Title, titles) || 0)
     })
 
     for (let child of relationships) {
@@ -1425,7 +1425,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             console.warn("#tz-selector must be a <select>")
             return
         }
-        tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone
+        tzEl.value = INTL_OPTIONS.timeZone
     })
 
     //Art Style
@@ -2098,7 +2098,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
     api_createEntry({
         title: item.En_Title,
         "native-title": item.Native_Title,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timezone: INTL_OPTIONS.timeZone,
         format: item.Format,
         price: item.PurchasePrice,
         "art-style": item.ArtStyle,
@@ -2132,6 +2132,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         for (let event of events) {
             promises.push(api_registerEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
         }
+
         Promise.all(promises)
             .then(responses => {
                 for (let res of responses) {
@@ -2140,17 +2141,29 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
                         return
                     }
                 }
+
                 alert(`Coppied: ${item.En_Title}`)
-                items_getAllEntries()[String(itemCopy.ItemId)].info = itemCopy
-                items_getAllEntries()[String(itemCopy.ItemId)].user = userCopy
-                items_getAllEntries()[String(itemCopy.ItemId)].meta = metaCopy
-                for (let event of events) {
-                    let eventCopy = { ...event }
-                    eventCopy.ItemId = itemCopy.ItemId
-                    items_getAllEntries()[String(itemCopy.ItemId)].events.push(eventCopy)
-                }
+
+                items_addItem({
+                    info: itemCopy,
+                    user: userCopy,
+                    meta: metaCopy,
+                    events: events.map(v => {
+                        let e = { ...v }
+                        e.ItemId = metaCopy.ItemId
+                        return e
+                    })
+                })
+
+                items_addCopy(itemCopy.ItemId, item.ItemId)
+
                 mode_selectItem(itemCopy, true, this)
                 renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
             })
             .catch(console.error)
     })

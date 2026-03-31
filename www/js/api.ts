@@ -1,3 +1,9 @@
+/**
+ * @module api
+ * aio api functions
+ * requires: ui/globals.ts
+ */
+
 let formats: { [key: number]: string } = {}
 let _api_as_cache: { [key: number]: string } = {}
 
@@ -423,7 +429,7 @@ async function api_deleteEventV2(eventId: number, uid: number) {
 }
 
 async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string, before: number = 0) {
-    tz ||= Intl.DateTimeFormat().resolvedOptions().timeZone
+    tz ||= INTL_OPTIONS.timeZone
     return await authorizedRequest(`${apiPath}/engagement/register-event?name=${encodeURIComponent(name)}&id=${itemId}&after=${after}&timestamp=${ts}&timezone=${encodeURIComponent(tz)}&before=${before}`)
 }
 

@@ -1185,16 +1185,12 @@ function items_eventTimeEstimate(event: UserEvent): number {
  * @returns 0 if they occured at the same time
  * @returns 1 if left occured BEFORE right
  */
-let options: Intl.ResolvedDateTimeFormatOptions | null = null
 function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): -1 | 0 | 1 {
     let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
     let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
     if ("Temporal" in window) {
-        if (!options) {
-            options = Intl.DateTimeFormat().resolvedOptions()
-        }
-        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, left.TimeZone || options.timeZone)
-        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, right.TimeZone || options.timeZone)
+        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, (left as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
+        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, (right as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
         return Temporal.ZonedDateTime.compare(rightTime, leftTime)
     }
     if (l == r) {
@@ -1400,4 +1396,31 @@ function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end:
             }
         }
     }
+}
+
+/**
+* @description Grabs the sequence number from a string, given a list of all items in the sequence
+* @returns {number | null}
+*/
+function items_sequenceNumberGrabber(text: string, allItems: string[]): number | null {
+    //match sequence indicator (non-word character, vol/ova/e/s)
+    //followed by sequence number (possibly a float)
+    //followed by non-word character
+    //eg: S01
+    //eg: E6.5
+    const regex = /(?:[\W_\-\. EesS]|[Oo][Vv][Aa]|[Vv](?:[Oo][Ll])?\.?)?(\d+(?:\.\d+)?)[\W_\-\. ]?/g
+
+    const matches = text.matchAll(regex).toArray()
+    if (matches[0] == null) {
+        return null
+    }
+    return Number(matches.filter(match => {
+        for (let item of allItems) {
+            if (item === text) continue
+
+            if (item.includes(match[0]))
+                return false
+            return true
+        }
+    })[0][1])
 }

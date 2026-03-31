@@ -1086,7 +1086,7 @@ function newEventUI(form: HTMLFormElement) {
     const timezoneData = data.get("timezone")
     const timezone = (timezoneData
         ? timezoneData.toString()
-        : Intl.DateTimeFormat().resolvedOptions().timeZone
+        : INTL_OPTIONS.timeZone
     ) || ""
 
     let ts = tsStr
@@ -1177,7 +1177,7 @@ async function newEntryUI(form: HTMLFormElement) {
         queryString += `&requires=${requires}`
     }
 
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const tz = INTL_OPTIONS.timeZone
 
     let res = await authorizedRequest(`${apiPath}/add-entry${queryString}&timezone=${encodeURIComponent(tz)}`)
     let text = await res?.text()
