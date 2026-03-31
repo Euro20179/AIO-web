@@ -72,7 +72,7 @@ class TierListMode extends Mode {
     _getMode(): "general" | "user"  | "custom"{
         let modeSelector = this.parent.querySelector("#tierlist-mode")
         let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.parent)
-        if(custom) {
+        if(custom?.value) {
             return "custom"
         }
 
@@ -121,11 +121,20 @@ class TierListMode extends Mode {
         img.src = thumb
         img.alt = entry.En_Title || entry.Native_Title
         img.title = `${img.alt} - ${rating}`
+        img.style.cursor = "pointer"
+        img.onclick = () => {
+            const id = BigInt(img.parentElement?.id.split("-")[2] || "0")
+            if(!id) return
+            open(`/ui/display.php?item-id=${id}`, "_blank", "popup=true")
+        }
 
         li.id = `tier-item-${entry.ItemId}`
         li.append(img)
 
-        if (!(tier !== false)) throw new Error(`No tier for rating: ${rating}`)
+        if (!(tier !== false)) {
+            console.log(entry.ItemId, mode, rating, tier)
+            throw new Error(`No tier for rating: ${rating}`)
+        }
 
         let ul = this.rows[tier]
 
@@ -164,14 +173,14 @@ class TierListMode extends Mode {
         if (!(tier !== false))
             throw new Error("Trying to remove item with an unknown tier")
 
-        let ul = this.rows[tier]
-
-        const li = ul.querySelector(`#tier-item-${entry.ItemId}`)
+        const li = this.parent.querySelector(`#tier-item-${entry.ItemId}`)
 
         if (li !== null) {
             li.remove()
+            return true
         } else {
             console.warn(`${entry.En_Title}:${entry.ItemId} has not been added to the tierlist, not removing`)
+            return false
         }
     }
 
@@ -185,6 +194,11 @@ class TierListMode extends Mode {
         for (const item of entry) {
             this.sub(item, ratingMode)
         }
+    }
+
+    refresh(id: bigint) {
+        this.sub(findInfoEntryById(id))
+        this.add(findInfoEntryById(id))
     }
 
     close() {
