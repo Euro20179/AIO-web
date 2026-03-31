@@ -13,6 +13,7 @@
 
 <?php
     include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
+    tmpl("prompt-dialog");
     tmpl("login-dialog");
     tmpl("display-entry");
     tmpl("de-copies");
@@ -23,9 +24,12 @@
     tmpl("de-requirements");
     tmpl("de-status-menu");
     tmpl("color-scheme-selector");
+    tmpl("confirm-dialog");
 ?>
 
     <login-dialog></login-dialog>
+    <prompt-dialog></prompt-dialog>
+    <confirm-dialog></confirm-dialog>
     <color-scheme-selector style="display: none;"></color-scheme-selector>
 
     <template id="display-entry">

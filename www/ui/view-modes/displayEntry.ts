@@ -2184,7 +2184,7 @@ async function deleteEventByEventId(eventId: number) {
                 final(true)
             })
             .catch(() => {
-                console.log("hi?")
+                console.log("confirmUI() failed")
             })
     })
 
