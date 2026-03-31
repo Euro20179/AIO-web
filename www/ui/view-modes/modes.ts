@@ -216,63 +216,6 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "event-output": EventMode,
         "calendar-output": CalendarMode,
         "tierlist-output": TierListMode,
-        "": class extends Mode {
-            openWins: Record<string, Window | null> = {}
-            constructor() {
-                super(new DocumentFragment)
-                document.getElementById("main-ui")?.classList.add("catalog-mode")
-            }
-
-            add(entry: InfoEntry) {
-                if (this.openWins[String(entry.ItemId)]) {
-                    //dont open another win
-                    return document.createElement("div")
-                }
-
-                this.openWins[String(entry.ItemId)] = displayItemInWindow(entry.ItemId, "_blank", true)
-                return document.createElement("div")
-            }
-
-            sub(entry: InfoEntry) {
-                let win = this.openWins[String(entry.ItemId)]
-                if (win) {
-                    win.close()
-                    delete this.openWins[String(entry.ItemId)]
-                }
-            }
-
-            addList(entries: InfoEntry[]) {
-                if (entries.length !== 1) {
-                    confirmUI(`${entries.length} windows are about to open, are you sure this is ok`)
-                        .then(() => {
-                            for (let entry of entries) {
-                                this.add(entry)
-                            }
-                        })
-                } else {
-                    // there is only one entry due to the if statement
-                    this.add(entries[0])
-                }
-            }
-
-            subList(entries: InfoEntry[]) {
-                for (let entry of entries) {
-                    this.sub(entry)
-                }
-            }
-
-            close() {
-                document.getElementById("main-ui")?.classList.remove("catalog-mode")
-                this.clearSelected()
-            }
-
-            clearSelected() {
-                for (let win in this.openWins) {
-                    this.openWins[win]?.close()
-                }
-                this.openWins = {}
-            }
-        },
     }
 
     const newMode = modes[name as keyof typeof modes]

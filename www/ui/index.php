@@ -137,7 +137,6 @@
                         <option value="gallery-output" title="Gallery mode">🖼︎</option>
                         <option value="script-output" title="Script mode">&lt;></option>
                         <option value="tierlist-output" title="Tierlist mode">S</option>
-                        <option value="" title="No mode">✗</option>
                     </select>
                     <button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>
