@@ -7,7 +7,7 @@ class CalendarMode extends Mode {
 
     selectedTime: [Date, Date]
 
-    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#calendar-output", win)
 
         this.win.document.getElementById("calendar-output")?.classList.add("open")

@@ -3,7 +3,7 @@ class CalcMode extends Mode {
     NAME = "calc-output"
     expressionInput: HTMLTextAreaElement
 
-    constructor(parent?: HTMLElement, win?: Window & typeof globalThis) {
+    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         super(parent || "#calc-items", win)
         this.win.document.getElementById("calc-output")?.classList.add("open")
 

@@ -52,7 +52,7 @@ function util_debounce(cb: Function, timeout: number) {
  */
 function ui_setcss(property: string, value: string): void {
     document.documentElement.style.setProperty(property, value)
-    if(catalogWin) {
+    if (catalogWin) {
         catalogWin.document.documentElement.style.setProperty(property, value)
     }
 }
@@ -275,6 +275,48 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     const m = new DisplayMode(frag)
 
+    let res = mode_selectItem(entry, false, m)[0]
+    m.close()
+    return res
+}
+
+/**
+    * Renders an item in a specific mode
+    * @param {bigint} id The item to render
+    * @param {string} mode The mode to render in, can be
+    * entry-output | graph-output | calc-output | gallery-output | script-output | event-output | calendar-output | tierlist-output
+    * @returns {1 | 2 | HTMLElement} 1 if entry does not exist, 2 if mode does not exist, otherwise the rendered element
+*/
+function ui_render_from(id: bigint, mode: "entry-output" |
+    "graph-output" |
+    "calc-output" |
+    "gallery-output" |
+    "script-output" |
+    "event-output" |
+    "calendar-output" |
+    "tierlist-output"
+): 1 | 2 | HTMLElement {
+    const entry = findInfoEntryById(id)
+
+    if (!entry) {
+        return 1
+    }
+    let frag = document.createDocumentFragment()
+    const modes = {
+        "entry-output": DisplayMode,
+        "graph-output": GraphMode,
+        "calc-output": CalcMode,
+        "gallery-output": GalleryMode,
+        "script-output": ScriptMode,
+        "event-output": EventMode,
+        "calendar-output": CalendarMode,
+        "tierlist-output": TierListMode,
+    }
+    if(!(mode in modes)) {
+        return 2
+    }
+
+    const m = new modes[mode](frag)
     let res = mode_selectItem(entry, false, m)[0]
     m.close()
     return res

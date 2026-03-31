@@ -13,10 +13,7 @@ class TierListMode extends Mode {
 
         this.rows = {}
 
-        let temp = this.parent.querySelector("tier-list")
-
-        if (!(temp instanceof HTMLElement))
-            throw new Error("Could not find the tierlist output HTMLElement")
+        let temp = (this.parent.querySelector("tier-list") || document.createElement("tier-list")) as HTMLElement
 
         let modeSelector = this.parent.querySelector("#tierlist-mode")
         let customExpr = this.parent.querySelector("#tierlist-custom")
@@ -76,8 +73,9 @@ class TierListMode extends Mode {
             return "custom"
         }
 
-        if (!(modeSelector instanceof HTMLSelectElement))
-            throw new Error("mode selector could not be found")
+        if (!(modeSelector instanceof HTMLSelectElement)) {
+            return "general"
+        }
 
         let mode = modeSelector.value
 
