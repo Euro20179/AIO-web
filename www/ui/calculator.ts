@@ -1470,7 +1470,7 @@ class CalcVarTable {
             return new Num(Math.round(n.jsValue))
         }, "Round a num to by decimal places",
             [["n: Num", "the number to round"],
-             ["by: Num", "the scale/number of decimal places to round"]], "Num"))
+            ["by: Num", "the scale/number of decimal places to round"]], "Num"))
 
         this.symbols.set("floor", new Func(n => {
             if (!(n instanceof Num)) {
@@ -1520,8 +1520,8 @@ class CalcVarTable {
             return new Arr(newList)
         }, "Put each item in a list through a function to make a new list",
             [["list: Arr", "The list to map"],
-             ["fn: Func(n: any): any", "the function to map each item through"]],
-                "Arr"))
+            ["fn: Func(n: any): any", "the function to map each item through"]],
+            "Arr"))
 
         this.symbols.set("sort", new Func((list, fn) => {
             if (!(list instanceof Arr)) {
@@ -1531,7 +1531,7 @@ class CalcVarTable {
             return new Arr(list.jsValue.sort((a: Type, b: Type) => fn.call([a, b]).toNum().jsValue))
         }, "Sort a list via a sort function",
             [["list: Arr<T>", "The list to sort"],
-             ["fn: Func(a: any, b: any): Num", "The sorting function, same as the js sort function"]], "Arr<T>"))
+            ["fn: Func(a: any, b: any): Num", "The sorting function, same as the js sort function"]], "Arr<T>"))
 
         this.symbols.set("slice", new Func((list, start, end) => {
             let newList = []
@@ -1551,8 +1551,8 @@ class CalcVarTable {
             return new Arr(newList)
         }, "Slice a list",
             [["list: Arr<T>", "The list to slice"],
-             ["start: Num", "The starting point (inclusive)"],
-             ["end?: Num", "The ending point (exclusive)"]], "Arr<T>"))
+            ["start: Num", "The starting point (inclusive)"],
+            ["end?: Num", "The ending point (exclusive)"]], "Arr<T>"))
 
         this.symbols.set("shuf", new Func((list) => {
             let len = list.len().jsValue
@@ -1589,7 +1589,7 @@ class CalcVarTable {
             return new Num(Math.floor(Math.random() * (h - l) + l))
         }, "Choose an integer within a range (high exclusive, low inclusive)",
             [["low: Num", "The start of the range"],
-             ["high: Num", "The end of the range"]], "Num"))
+            ["high: Num", "The end of the range"]], "Num"))
 
         this.symbols.set("in", new Func((list, value) => {
             let len = list.len().jsValue
@@ -1601,7 +1601,7 @@ class CalcVarTable {
             return new Num(0)
         }, "Checks if a value is in a list",
             [["list: Arr", "The list to check containment"],
-             ["value: any", "The value to check is in the list"]], "Bool"))
+            ["value: any", "The value to check is in the list"]], "Bool"))
 
         this.symbols.set("filter", new Func((list, fn) => {
             let newList = []
@@ -1615,8 +1615,8 @@ class CalcVarTable {
 
             return new Arr(newList)
         }, "Filter items in a list through a filter function",
-          [["list: Arr<T>", "The list to filter"],
-           ["fn: Func(i: T): Bool", "The function to filter each item through"]], "Arr<T>"))
+            [["list: Arr<T>", "The list to filter"],
+            ["fn: Func(i: T): Bool", "The function to filter each item through"]], "Arr<T>"))
 
         this.symbols.set("int", new Func((n) => {
             return new Num(BigInt(n.jsStr()))
@@ -1626,21 +1626,21 @@ class CalcVarTable {
         this.symbols.set("num", new Func(n => {
             return n.toNum()
         }, "Convert an object to a Num",
-        [["obj: any", "The object to convert"]], "Num"))
+            [["obj: any", "The object to convert"]], "Num"))
 
         this.symbols.set("set", new Func((obj, name, val) => {
             obj.setattr(name, val)
             return obj
         }, "Set a property on an object",
             [["obj: Obj", "The object to set a property for"],
-             ["name: Str", "The name of the property"],
-             ["val: any", "The value to set the property to"]], "Obj"))
+            ["name: Str", "The name of the property"],
+            ["val: any", "The value to set the property to"]], "Obj"))
 
         this.symbols.set("get", new Func((obj, name) => {
             return obj.getattr(name)
         }, "Get the value of a property on an object",
             [["obj: Obj", "The object to get the value of"],
-             ["name: Str", "The name of the property"]], "any"))
+            ["name: Str", "The name of the property"]], "any"))
 
         this.symbols.set("obj", new Func((...items) => {
             if (items.length % 2 !== 0) {
@@ -1713,7 +1713,7 @@ class CalcVarTable {
 
             return new Arr(children.map(v => new EntryTy(v.info)))
         }, "Gets the children of an entry",
-        [["id: Num", "The id to get the children of"]], "Arr<EntryTy<Info>>"))
+            [["id: Num", "The id to get the children of"]], "Arr<EntryTy<Info>>"))
 
         this.symbols.set("copies", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -1768,7 +1768,7 @@ class CalcVarTable {
             [["id: Num | 's-rand' | 'a-rand'",
                 `The id to get the info entry for,
                     if s-rand, get a random search result entry,
-                    if a-rand, get a random loaded entry`]], "EntryTy<Info>" ))
+                    if a-rand, get a random loaded entry`]], "EntryTy<Info>"))
 
         this.symbols.set("meta", new Func((id) => {
             return findByid(id, i => {
@@ -1887,8 +1887,8 @@ class CalcVarTable {
             return Type.from(ua_download(d, jsName, fileType))
         }, "Prompt the user to download something",
             [["data: Str", "The data to download"],
-             ["name: Str", "The name of the file"],
-             ["ft: Str", "The mimetype of the file"]], "Num(0)"))
+            ["name: Str", "The name of the file"],
+            ["ft: Str", "The mimetype of the file"]], "Num(0)"))
 
         this.symbols.set("ui_prompt", new Func((prompt, _default, cb) => {
             ui_prompt(prompt.jsStr(), _default.jsStr(), result => {
@@ -1900,10 +1900,10 @@ class CalcVarTable {
             })
             return new Num(0)
         }, "Use the ui prompt to prompt the user (async)",
-        [["prompt: Str", "The prompt"],
-         ["default: Str", "The default response"],
-         ["cb: Func(result: Str)", "The callback called with the user's response"]],
-          "Num(0)"))
+            [["prompt: Str", "The prompt"],
+            ["default: Str", "The default response"],
+            ["cb: Func(result: Str)", "The callback called with the user's response"]],
+            "Num(0)"))
 
         this.symbols.set("ui_askitem", new Func(cb => {
             ui_askitem().then(id => {
@@ -1932,8 +1932,8 @@ class CalcVarTable {
             )
         }, "Adds a sort to the list of sort methods",
             [["name: Str", "The name of the sort"],
-             ["sortFn: Func(a: EntryTy<Info>, b: EntryTy<Info>): Num", "The sorting function"]],
-             "Num(0)"))
+            ["sortFn: Func(a: EntryTy<Info>, b: EntryTy<Info>): Num", "The sorting function"]],
+            "Num(0)"))
 
         this.symbols.set("ui_delsort", new Func(name => {
             return new Num(
@@ -1955,17 +1955,17 @@ class CalcVarTable {
             )
         }, "Creates a statistic",
             [["name: Str", "The name of the stat"],
-             ["additive: Bool", "Whether the stat is additive or is just a number"],
-             ["calculator: Func(entry: EntryTy<Info>, mult: Num): Num", "The function to calculate the value of the statistic"]],
-             "Num(0)"))
+            ["additive: Bool", "Whether the stat is additive or is just a number"],
+            ["calculator: Func(entry: EntryTy<Info>, mult: Num): Num", "The function to calculate the value of the statistic"]],
+            "Num(0)"))
 
         this.symbols.set("ui_setstat", new Func((name, val) => {
             let n = name.jsStr()
             let v = val.toNum()
             return Type.from(ui_setstat(n, v.jsValue))
         }, "Sets the value of a statistic",
-        [["name: Str", "The name of the stat"],
-         ["val: Num", "The value to set the stat to"]], "Num"))
+            [["name: Str", "The name of the stat"],
+            ["val: Num", "The value to set the stat to"]], "Num"))
 
         this.symbols.set("ui_delstat", new Func((name) => {
             let n = name.jsStr()
@@ -1983,9 +1983,9 @@ class CalcVarTable {
             }))
         }, "Simulate a user search v3 search",
             [["query: Str", "The search query"],
-             ["cb: Func(results: Arr<EntryTy<Info>>)",
-                 "The callback for when the search is completed"]],
-              "Num(0)"))
+            ["cb: Func(results: Arr<EntryTy<Info>>)",
+                "The callback for when the search is completed"]],
+            "Num(0)"))
 
         this.symbols.set("ui_setmode", new Func((modeName) => {
             let name = modeName.jsStr()
@@ -2030,7 +2030,8 @@ class CalcVarTable {
             if (res === 1)
                 return new Str(`${id} not found`)
             return Type.from(res)
-        }))
+        }, "Render a sidebar item, but do not display it",
+            [["id: Num", "The id of the item to render"]], "Elem | Str('{id} not found')"))
 
         this.symbols.set("ui_toggle", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -2043,7 +2044,9 @@ class CalcVarTable {
                 return new Str(`${id} not found`)
             }
             return Type.from(res)
-        }))
+        }, "Toggles the selection of an item",
+            [["id: Num", "The id of the item to toggle"]],
+            "Num | Str('{id} not found')"))
 
         this.symbols.set("ui_select", new Func((id) => {
             const jsId = id.toNum().jsValue
@@ -2059,7 +2062,9 @@ class CalcVarTable {
             } else {
                 return Type.from(res)
             }
-        }))
+        }, "Select an item to display",
+            [["id: Num", "The item to select"]],
+            "Str('{id} already selected' | '{id} not found') | Elem"))
 
         this.symbols.set("ui_render", new Func(id => {
             const jsId = id.toNum().jsValue
@@ -2073,7 +2078,9 @@ class CalcVarTable {
             } else {
                 return Type.from(res)
             }
-        }))
+        }, "Render an item as a display item",
+            [["id: Num", "The id of the item to render"]],
+            "Str('{id} not found') | Elem"))
 
         this.symbols.set("ui_deselect", new Func((id) => {
             const jsId = id.toNum().jsValue
