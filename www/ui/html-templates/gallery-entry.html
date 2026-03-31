@@ -4,9 +4,12 @@
         figcaption {
             text-align: center;
         }
+            #thumbnail {
+                cursor: pointer;
+            }
     </style>
     <figure style="text-align: center;">
-        <img id="thumbnail" height=200>
+        <img id="thumbnail" height=200 entry-action="openitem">
         <figcaption>
             <span id="title" put-data="En_Title,Title,info.Native_Title,meta.Native_Title"></span> (<span id="rating" put-data="UserRating"></span>)
         </figcaption>

@@ -1,7 +1,7 @@
 /**
  * @description updates all put-data elements with their respective contents
  */
-function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => any>, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
+function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
     //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
     for (let elem of root.querySelectorAll("[put-data]")) {
         let keys = elem.getAttribute("put-data")?.split(",")
@@ -68,7 +68,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement) => a
             }
             //@ts-ignore
             actionEl[`on${events[i % events.length]}`] = e => {
-                actionFn(e.target as HTMLElement)
+                actionFn(e.target as HTMLElement, e)
             }
         }
     }
