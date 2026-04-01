@@ -31,10 +31,10 @@
     <login-dialog></login-dialog>
     <prompt-dialog></prompt-dialog>
     <confirm-dialog></confirm-dialog>
-    <color-scheme-selector style="display: none;"></color-scheme-selector>
 
     <template id="display-entry">
     </template>
+    <color-scheme-selector style="display: none;"></color-scheme-selector>
     <div id="notifications" style="position: absolute;"></div>
 </body>
 <script>
