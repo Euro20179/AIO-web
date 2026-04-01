@@ -262,6 +262,12 @@ class items_Entry {
     info: InfoEntry
     relations: items_Relations
 
+    /**
+        * Keeps track of if the item is properly loaded from the server
+        * or if it is a fake placeholder item
+    */
+    loaded: boolean
+
     events: UserEvent[]
 
     constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
@@ -272,6 +278,15 @@ class items_Entry {
 
         //items_refreshRelations() must be called to fill all relations
         this.relations = new items_Relations(this.info.ItemId, [], [], [])
+        this.loaded = true
+    }
+
+    static createUnloaded(itemid: bigint) {
+        const info = genericInfo(itemid, 0)
+        info.En_Title = `UNKNOWN <id:${itemid}>`
+        let item = new items_Entry(info)
+        item.loaded = false
+        return item
     }
 
     get fixedThumbnail() {
@@ -522,9 +537,7 @@ function items_getEntry(id: bigint) {
     const val = _globalsNewUi.entries[String(id)]
     if (!(val)) {
         console.error(`${id} is not an entry or is not loaded`)
-        const info = genericInfo(id, 0)
-        info.En_Title = `UNKNOWN <id:${id}>`
-        return _globalsNewUi.entries[String(id)] = new items_Entry(info)
+        return _globalsNewUi.entries[String(id)] = items_Entry.createUnloaded(id)
     }
     return val
 }
@@ -536,7 +549,7 @@ function items_getEntry(id: bigint) {
 */
 async function items_getEntryAny(id: bigint) {
     let val = _globalsNewUi.entries[String(id)]
-    if (!(val)) {
+    if (!(val) || !val.loaded) {
         const stuff = await api_getEntryAll(id, 0)
         if (!stuff) {
             throw new Error(`${id} is not an entry`)

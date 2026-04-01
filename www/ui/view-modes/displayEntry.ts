@@ -1247,7 +1247,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
         `
 }
 
-function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
+async function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
     var relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
 
@@ -1256,10 +1256,10 @@ function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relat
     })
 
     for (let child of relationships) {
-        let meta = findMetadataById(child.ItemId)
+        child = await items_getEntryAny(child.ItemId)
         let el = createClickableEntryUI(child.ItemId)
 
-        el.setAttribute("data-view-count", String(findUserEntryById(child.ItemId).ViewCount))
+        el.setAttribute("data-view-count", String(child.user.ViewCount))
 
         elementParent.append(el)
 
