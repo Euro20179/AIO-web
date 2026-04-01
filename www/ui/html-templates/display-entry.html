@@ -106,25 +106,32 @@
         <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
     </details>
 
-    <div class="flex row wrap" style="gap: 3ch; align-items: center;">
+    <div class="flex row wrap" style="gap: 3ch; column-rule: 1px dashed; align-items: center;">
         <input id="library" type="button" entry-action="chooselibrary"
-            title="Library">
+            toggle-hint="library-hint">
+        <span id="library-hint" popover="hint">Library</span>
+
         <menu aria-label="item type and format" class="flex" style="margin: 0; padding: 0;" id="menu-bar">
-            <select id="type-selector" class="center" style="min-width: 50px;"
-                title="Type"
+
+            <select id="type-selector" style="min-width: 50px;"
+                toggle-hint="type-hint"
                 entry-action="settype" entry-action-trigger="change"> </select>
+            <span id="type-hint" popover='hint'>Media Type</span>
 
             <div class="flex">
-                <select id="format-selector" title="Format"
-                    class="center" style="min-width: 50px;"
+                <select id="format-selector" toggle-hint='format-hint'
+                    style="min-width: 50px;"
                     entry-action="setformat" entry-action-trigger="change"></select>
+                <span id="format-hint" popover='hint'>Media Format</span>
 
                 <div style="align-content: center;" class="flex">
                     <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
                         style="aspect-ratio: 1; height: 10px; align-self: center;">
                     <label for="format-digitized"
-                        title="Whether or not the item is a digitized/digital version of the format"
-                        style="align-self: center;">Digitized </label>
+                        toggle-hint='digitized-hint'
+                        style="align-self: center;">Digitized
+                        <span popover='hint' id='digitized-hint'>Whether or not the item is a digitized/digital version of the format</span>
+                    </label>
                 </div>
             </div>
 
@@ -146,9 +153,13 @@
             </div>
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
             <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
-                <button class="rating styleless-button" id="user-rating" entry-action="setrating"
-                    title="your rating">??</button>
-                <span>(<span class="audience-rating" id="audience-rating" title="audience rating">??</span>)</span>
+                <button class="rating styleless-button" id="user-rating"
+                    toggle-hint='your-rating-hint'
+                    entry-action="setrating">??</button>
+                <span id='your-rating-hint' popover='hint'>Your Rating</span>
+
+                <span>(<span class="audience-rating" id="audience-rating" toggle-hint='audience-rating-hint'>??</span>)</span>
+                <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
                 <button class="cost styleless-button" id="cost"></button>
             </div>
         </hgroup>
@@ -163,7 +174,7 @@
             text-align: center;
         " class="j-center flex">
             <div class="tags" id="tags">
-                <button id="create-tag" title="add tag">+</button>
+                <button id="create-tag" toggle-hint>+ <span popover='hint'>Add Tag</span></button>
             </div>
         </div>
 
@@ -179,7 +190,7 @@
         <div style="
             text-align: center;
         " class="j-center flex"  id="recommended-bys">
-            <button id="create-recommended-by" title="add recommender">+</button>
+            <button id="create-recommended-by">+</button>
         </div>
 
         <textarea

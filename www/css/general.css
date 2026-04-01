@@ -161,6 +161,24 @@
     :is(input, select):required:invalid {
         border-color: var(--error);
     }
+
+    [popover="hint"] {
+        position: absolute;
+
+        margin: 0;
+        margin-block-start: calc(var(--small-gap) / 2);
+
+        top: anchor(bottom);
+        left: anchor(center);
+
+        border: 1px solid currentColor;
+        border-radius: var(--border-roundness);
+        background: var(--text-color);
+        color: var(--main);
+
+        font-style: italic;
+        font-size: 0.8rem;
+    }
 }
 
 @layer utility {

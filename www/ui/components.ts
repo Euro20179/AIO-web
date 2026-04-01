@@ -1,4 +1,26 @@
 /**
+ * Sets up popover=hint elements
+ */
+function setupHintPopovers(root: {
+    querySelectorAll: ( selector: string) => NodeListOf<Element>,
+    querySelector: (selector: string) => Element
+}) {
+    for(let el of root.querySelectorAll("[toggle-hint]")) {
+        const e = el as HTMLElement
+        const toToggle = (el.getAttribute("toggle-hint") ?
+                            root.querySelector(`#${el.getAttribute("toggle-hint")}`)
+                         :  el.querySelector('[popover="hint"]')) as HTMLElement
+        e.onfocus = e.onmouseenter = function() {
+            toToggle.showPopover({source: this})
+        }
+
+        e.onblur = e.onmouseleave = function() {
+            toToggle.hidePopover()
+        }
+    }
+}
+
+/**
  * @description updates all put-data elements with their respective contents
  */
 function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
@@ -118,6 +140,9 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
             output.innerHTML += val
         }
     }
+
+
+    setupHintPopovers(root)
 
     if (settings_get("enable_unsafe"))
         for (let elem of root.querySelectorAll("script")) {

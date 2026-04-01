@@ -95,7 +95,8 @@
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
                     <input type="search" name="search-query" placeholder="search query">
-                    <select name="sort-by" title="sort by">
+                    <span id='sort-by-hint' popover='hint'>Sorting method</span>
+                    <select name="sort-by" toggle-hint='sort-by-hint'>
                         <optgroup label="Misc">
                             <option value="">No Sort</option>
                             <option value="item-id">Item Id</option>
