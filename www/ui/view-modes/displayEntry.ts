@@ -1351,6 +1351,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         let i = 0
         for(let r of items_getRecommendedBy(item.ItemId)) {
             const b = document.createElement("div")
+            const text = document.createElement("span")
             const db = document.createElement("button")
             db.classList.add("delete")
             db.id = "delete-recommended-by"
@@ -1362,7 +1363,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 ui_search(`recommendedBy ~ '%"${r}"%'`)
             }
             b.classList.add("recommender")
-            b.innerHTML = r
+            text.append(r)
+            b.append(text)
             b.append(db)
             db.setAttribute("recommender-idx", String(i))
             el.append(b)

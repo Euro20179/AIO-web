@@ -255,8 +255,9 @@
     }
 
     .recommender {
-        padding-inline: var(--small-gap);
-
+        span {
+            padding-inline: var(--small-gap);
+        }
         #delete-recommended-by {
             display: none;
         }
