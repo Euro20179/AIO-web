@@ -287,9 +287,15 @@ function getCSSProp(name: string, fallback: string) {
 function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let items = list || items_getResults()
 
+    const ls = components.librarySelector
+    if(ls) {
+        items = items.filter(v => String(v.info.Library) === ls.value)
+    }
+
     if (!components.itemFilter) {
         return items.map(v => v.info)
     }
+
 
     let newArr = []
     const search = components.itemFilter.value.toLowerCase()
