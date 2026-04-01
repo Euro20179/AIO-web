@@ -1198,12 +1198,22 @@ function items_eventTimeEstimate(event: UserEvent): number {
  * @returns 0 if they occured at the same time
  * @returns n > 0 if left occured BEFORE right
  */
-function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number, ltz = "", rtz = ""): number{
+function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): number{
     let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
     let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
+    let defaultTZ = INTL_OPTIONS.timeZone === "Etc/Unknown" ?
+                        "Atlantic/Reykjavik"
+                    : INTL_OPTIONS.timeZone
+
     if ("Temporal" in window) {
-        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, ltz || (left as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
-        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, rtz ||(right as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
+        let leftTime = new Temporal.ZonedDateTime(
+            BigInt(l) * 1000000n,
+            (typeof left !== 'number' && left.TimeZone) || defaultTZ
+        )
+        let rightTime = new Temporal.ZonedDateTime(
+            BigInt(r) * 1000000n,
+            (typeof right !== 'number' && right.TimeZone) || defaultTZ
+        )
         return Temporal.ZonedDateTime.compare(rightTime, leftTime)
     }
     if (l == r) {
