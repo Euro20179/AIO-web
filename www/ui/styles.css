@@ -28,7 +28,7 @@
             -webkit-appearance: none;
         }
 
-        -moz-appearance: revert;
+        -moz-appearance: auto;
     }
 
     table {

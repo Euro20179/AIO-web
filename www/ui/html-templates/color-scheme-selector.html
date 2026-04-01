@@ -23,7 +23,10 @@
             opt.value = name
             window["color-scheme"].appendChild(opt)
 
-            const style = document.createElement("style")
+            const style = document.getElementById("color-scheme-style") ||
+                            document.createElement("style")
+
+            style.id = "color-scheme-style"
             style.innerText = `
                 :root:has(#color-scheme > option[value="${name}"]:checked) {
                     ${css_definition}
