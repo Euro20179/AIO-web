@@ -1183,6 +1183,10 @@ class JsObj extends Type {
         return this.jsValue.toString()
     }
 
+    toNum(): Num {
+        return new Num(Number(this.jsValue))
+    }
+
     toStr(): Str {
         return new Str(this.jsStr())
     }
@@ -2401,6 +2405,11 @@ class CalcVarTable {
         }, "Convert an object to a JsObj",
             [["val: any", "The value to get the js value of and wrap in a JsObj"]],
             "JsObj"))
+
+        this.symbols.set("wrap", new Func((val: Type) => {
+            return Type.from(val.jsValue)
+        }, "Converts an object into a scripting object (eg: Str, Num, ...)",
+            [["val: any", "The value to wrap"]], "any"))
     }
     delete(name: string) {
         this.symbols.delete(name)
