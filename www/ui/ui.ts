@@ -1685,34 +1685,48 @@ height: 100%;
 </style>
 </head>
 <body>
-    ${parent.outerHTML}
+<button class="popout">✗</button>
 </body>`)
+
+        //this is where we are going to put the parent back
+        const placeholder = document.createElement("p")
+        placeholder.innerHTML = `Content popped out <button>Focus content</button>`
+        placeholder.querySelector("button")?.addEventListener("click", () => win.focus())
+
+        //create a copy of the parent in the new document
+        const adoptedParent = win.document.importNode(parent, true)
+
+        //replace the parent with the place holder
+        parent.replaceWith(placeholder)
+
+        //move the parent to the other document
+        win.document.body.append(adoptedParent)
+
         //@ts-ignore
         let watcher: CloseWatcher | null = null
         if ("CloseWatcher" in window) {
             //@ts-ignore
             watcher = new win.CloseWatcher
             watcher.onclose = () => {
-                parent.classList.remove("none")
+                placeholder.replaceWith(parent)
                 win.close()
                 watcher.destroy()
             }
         }
 
-        const closePopout = getElementOrThrowUI("button.popout", HTMLElement, win.document.body)
+        const closePopout = getElementUI("button.popout", win.HTMLElement, win.document.body)
         if (closePopout) {
             closePopout.onclick = () => {
+                placeholder.replaceWith(parent)
                 win.close()
-                parent.classList.remove("none")
                 if (watcher) watcher.destroy()
             }
         }
 
         win.onbeforeunload = function() {
+                placeholder.replaceWith(parent)
             if (watcher) watcher.destroy()
-            parent.classList.remove("none")
         }
-        parent.classList.add("none")
     }
 }
 

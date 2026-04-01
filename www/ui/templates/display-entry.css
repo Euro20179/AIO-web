@@ -335,8 +335,6 @@
         &:empty {
             height: fit-content;
         }
-
-        justify-self: center;
     }
 
 
