@@ -1170,6 +1170,37 @@ class Arr extends Type {
     }
 }
 
+class JsObj extends Type {
+    constructor(value: object) {
+        super(value)
+    }
+
+    truthy(): boolean {
+        return Boolean(this.jsValue)
+    }
+
+    jsStr(): string {
+        return this.jsValue.toString()
+    }
+
+    toStr(): Str {
+        return new Str(this.jsStr())
+    }
+
+    call(params: Type[]): Type {
+        return Type.from(this.jsValue(...params.map(v => v.jsValue)))
+    }
+
+    getattr(prop: Type): Type {
+        let k = this.jsValue[prop.toStr().jsValue]
+        //bind it to it's parent otherwise bad things happen
+        if (typeof k == 'function') {
+            k = k.bind(this.jsValue)
+        }
+        return new JsObj(k)
+    }
+}
+
 class Obj extends Type {
     constructor(value: object) {
         super(value)
@@ -2096,19 +2127,22 @@ class CalcVarTable {
             } else {
                 return Type.from("")
             }
-        }))
+        }, "Deselect an item by id",
+            [["id: Num", "The id of the item to deselect"]],
+            "Str('{id} is not selected' | '{id} not found' | '')"))
 
         this.symbols.set("ui_clear", new Func(() => {
             return Type.from(mode_clearItems())
-        }))
+        }, "Clears selected items, also updates stats", [], "Str('undefined')"))
 
         this.symbols.set("ui_setuid", new Func((newUid) => {
             return Type.from(ui_setuid(newUid.toNum().jsStr()))
-        }))
+        }, "Sets the current user id",
+        [["id: Num", "The id of the user to set to"]], "Num"))
 
         this.symbols.set("ui_getuid", new Func(() => {
             return Type.from(ui_getuid())
-        }))
+        }, "Gets the current user id", [], "Num"))
 
         this.symbols.set("ui_setresults", new Func(newResults => {
             if (!(newResults instanceof Arr)) {
@@ -2118,11 +2152,13 @@ class CalcVarTable {
                 .filter((v: Type) => v instanceof EntryTy && probablyInfoEntry(v.jsValue))
                 .map((v: Type) => v.jsValue)
             return Type.from(ui_setresults(results))
-        }))
+        }, "Sets the results to a list of items",
+            [["results: Arr<EntryTy<Info>>", "The items to set as the results"]],
+          "Num(0)"))
 
         this.symbols.set("ui_getresults", new Func(() => {
             return Type.from(ui_getresults())
-        }))
+        }, "Gets the current results", [], "Arr<EntryTy<Info>>"))
 
         this.symbols.set("ui_selected", new Func(() => {
             return Type.from(ui_selected())
@@ -2130,7 +2166,8 @@ class CalcVarTable {
 
         this.symbols.set("js_eval", new Func(text => {
             return Type.from(eval(text.jsStr()))
-        }))
+        }, "Evaluate js",
+        [["code: Str", "The code to eval"]], "any"))
 
         this.symbols.set("elem_on", new Func((root, event, cb) => {
             if (!(root instanceof Elem)) {
@@ -2148,7 +2185,11 @@ class CalcVarTable {
             })
 
             return new Num(0)
-        }))
+        }, "Add an event listener to an Elem",
+        [["root: Elem", "The elemnt to add an event listener to"],
+         ["event: Str", "The event to listen to"],
+         ["cb: Func(e: Obj<Js_Event>)", "The callback to run on the event"]],
+         "Num(0)"))
 
         this.symbols.set("elem_byid", new Func((root, id) => {
             if (!(root instanceof Elem)) {
@@ -2162,7 +2203,9 @@ class CalcVarTable {
                 return new Num(0)
             }
             return new Elem(el)
-        }))
+        }, "Finds an element by id within a root element, returns 0 if element is not found",
+            [["root: Elem", "The root element"],
+            ["id: Str", "The id to look for"]], "Elem | Num(0)"))
 
         this.symbols.set("elem_getshadow", new Func(root => {
             if (!(root instanceof Elem)) {
@@ -2176,7 +2219,8 @@ class CalcVarTable {
             }
             div.replaceChildren(...shadow.children)
             return new Elem(div)
-        }))
+        }, "Get the shadow root of an Elem as a div that contains the children of the shadow root",
+            [["root: Elem", "The element to get the shadow root of"]], "Elem"))
 
         this.symbols.set("elem_setshadow", new Func((root, tobeShadow) => {
             if (!(root instanceof Elem)) {
@@ -2189,7 +2233,9 @@ class CalcVarTable {
             let shadow = root.el.shadowRoot ?? root.el.attachShadow({ mode: "open" })
             shadow.replaceChildren(tobeShadow.el)
             return root
-        }))
+        }, "Sets the shadow root of an element to the contents of an Elem, returns the root that was given",
+            [["root: Elem", "The element to set the shadow root of"],
+             ["contents: Elem", "The contents of the to-be shadow root"]], "Elem"))
 
         this.symbols.set("elem_sethtml", new Func((root, html) => {
             if (!(root instanceof Elem)) {
@@ -2198,26 +2244,31 @@ class CalcVarTable {
             let newHTML = html.jsStr()
             root.el.innerHTML = newHTML
             return new Str(newHTML)
-        }))
+        }, "Sets the inner html of an Elem",
+            [["root: Elem", "The element to set the inner html of"],
+             ["html: Str", "The innerHTML"]], "Str"))
 
         this.symbols.set("elem_getohtml", new Func(root => {
             if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
             return new Str(root.el.outerHTML)
-        }))
+        }, "Gets the outerHTML of an element",
+            [["root: Elem", "The element to get the outer HTML of"]], "Str"))
 
         this.symbols.set("elem_gethtml", new Func(root => {
             if (!(root instanceof Elem)) {
                 return new Str("root must be an element")
             }
             return new Str(root.el.innerHTML)
-        }))
+        }, "Gets the innerHTML of an element",
+            [["root: Elem", "The element to get the innerHTML of"]], "Str"))
 
         this.symbols.set("elem_create", new Func(tagName => {
             let name = tagName.jsStr()
             return new Elem(document.createElement(name))
-        }))
+        }, "Wrapper around document.createElement",
+            [["name: Str", "The tag name"]], "Elem"))
 
         this.symbols.set("elem_append", new Func((parent, child) => {
             if (!(parent instanceof Elem) || !(child instanceof Elem)) {
@@ -2226,7 +2277,9 @@ class CalcVarTable {
 
             parent.el.append(child.el)
             return parent
-        }))
+        }, "Append an Elem to a parent Elem, returns the parent that was given",
+            [["parent: Elem", "The parent to append to"],
+             ["child: Elem", "The child to append to the parent"]], "Elem"))
 
         this.symbols.set("uname2uid", new Func((name, cb) => {
             let u = name.jsStr()
@@ -2234,7 +2287,10 @@ class CalcVarTable {
                 cb.call([new Num(res)])
             })
             return new Num(0)
-        }))
+        }, "Gets the user id of a user by username",
+            [["name: Str", "The user name"],
+            ["cb: Func(id: Num)", "The callback that is called with the user id"]],
+            "Num(0)"))
 
         this.symbols.set("search", new Func((query, cb) => {
             api_queryV3(query.jsStr(), ui_getuid()).then(entries => {
@@ -2242,7 +2298,10 @@ class CalcVarTable {
                 cb?.call([es])
             }).catch(console.error)
             return new Num(0)
-        }))
+        }, "Perform a search v3 through the api directly",
+            [["query: Str", "The search query"],
+            ["cb: Func(Arr<EntryTy<Info>>)", "The callback that is called when the results arrive"]],
+            "Num(0)"))
 
         this.symbols.set("setrating", new Func((...params) => {
             let [itemId, newRating, done] = params;
@@ -2258,7 +2317,12 @@ class CalcVarTable {
                 }
             })
             return new Num(0)
-        }))
+        }, "Sets the rating of an item",
+            [["id: Num", "The id of the item to change the rating of"],
+             ["rating: Num", "The rating to set to"],
+             ["cb?: Func(data: Str, status: Num)",
+                 "The function that is called after the rating is changed"]],
+             "Num(0)"))
 
         this.symbols.set("setentry", new Func((entry) => {
             if (!(entry instanceof EntryTy) || !probablyInfoEntry(entry.jsValue)) {
@@ -2271,7 +2335,8 @@ class CalcVarTable {
                 }
             })
             return new Str("")
-        }))
+        }, "Updates an info entry",
+            [["entry: EntryTy<Info>", "The new data"]], "Str('')"))
 
         this.symbols.set("setmeta", new Func((entry) => {
             if (!(entry instanceof EntryTy) || !probablyMetaEntry(entry.jsValue)) {
@@ -2287,7 +2352,8 @@ class CalcVarTable {
             })
 
             return new Str("")
-        }))
+        },  "Updates a meta entry",
+        [["entry: EntryTy<Meta>", "The new data"]], "Str('')"))
 
         this.symbols.set("setuser", new Func((entry) => {
             if (!(entry instanceof EntryTy) || !probablyUserItem(entry.jsValue)) {
@@ -2302,7 +2368,8 @@ class CalcVarTable {
             })
 
             return new Str("")
-        }))
+        },  "Updates a user entry",
+        [["entry: EntryTy<User>", "The new data"]], "Str('')"))
 
         this.symbols.set("env", new Func(() => {
             let res = ""
@@ -2310,7 +2377,7 @@ class CalcVarTable {
                 res += key + "\n"
             }
             return new Str(res.trim())
-        }))
+        }, "Creates a string containing all variable names", [], "Str"))
 
         this.symbols.set("js_call", new Func((...params: Type[]) => {
             const name = params[0].toStr().jsStr()
@@ -2321,7 +2388,19 @@ class CalcVarTable {
                 return Type.from(fn(...realParams))
             }
             return new Num(3)
-        }))
+        }, "Call a js function with arguments, returns Num(3) if cannot call function",
+            [["...params: any", "The argument to the function"]], "any | Num(3)"))
+
+        this.symbols.set("js", new Func((name: Type) => {
+            return new JsObj(window[name.toStr().jsValue])
+        }, "Get a value from the current js window",
+            [["name: Str", "The name of the value (eg: document)"]], "JsObj"))
+
+        this.symbols.set("jso", new Func((val: Type) => {
+            return new JsObj(val.jsValue)
+        }, "Convert an object to a JsObj",
+            [["val: any", "The value to get the js value of and wrap in a JsObj"]],
+            "JsObj"))
     }
     delete(name: string) {
         this.symbols.delete(name)
