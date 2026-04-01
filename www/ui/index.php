@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,36 +15,41 @@
 <?php
     include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
 
-    tmpl("sidebar-entry");
-    tmpl("new-entry-dialog");
-    tmpl("login-dialog");
-    tmpl("gallery-entry");
-    tmpl("display-entry");
-    tmpl("alert-box");
-    tmpl("tz-datalist");
-    tmpl("color-scheme-selector");
+    foreach([
+        "sidebar-entry",
+        "new-entry-dialog",
+        "login-dialog",
+        "gallery-entry",
+        "display-entry",
+        "alert-box",
+        "tz-datalist",
+        "color-scheme-selector",
 
-    tmpl("de-status-menu");
-    tmpl("de-notes");
-    tmpl("de-description");
-    tmpl("de-requirements");
-    tmpl("de-descendants");
-    tmpl("de-copies");
-    tmpl("de-cost-calculation-modifiers");
-    tmpl("de-template-editor");
-    tmpl("de-recommender");
+        "de-status-menu",
+        "de-notes",
+        "de-description",
+        "de-requirements",
+        "de-descendants",
+        "de-copies",
+        "de-cost-calculation-modifiers",
+        "de-template-editor",
+        "de-recommender",
 
-    tmpl("event-template");
-    tmpl("calendar-template");
-    tmpl("tierlist-template");
-    tmpl("calc-template");
-    tmpl("script-template");
-    tmpl("graph-template");
+        "event-template",
+        "calendar-template",
+        "tierlist-template",
+        "calc-template",
+        "script-template",
+        "graph-template",
+        "calc-entry",
 
-    tmpl("calc-entry");
-    tmpl("new-event-dialog");
-    tmpl("prompt-dialog");
-    tmpl("confirm-dialog");
+        "new-event-dialog",
+        "prompt-dialog",
+        "confirm-dialog",
+    ] as $template_name) {
+        tmpl($template_name);
+    }
+
 ?>
 
     <tz-datalist></tz-datalist>

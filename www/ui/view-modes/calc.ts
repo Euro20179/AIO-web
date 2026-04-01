@@ -1,4 +1,3 @@
-
 class CalcMode extends Mode {
     NAME = "calc-output"
     expressionInput: HTMLTextAreaElement
