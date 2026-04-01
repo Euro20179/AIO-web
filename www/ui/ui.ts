@@ -15,7 +15,8 @@ type StartupUIComponents = {
     sortBySelector: HTMLSelectElement,
     errorOut: HTMLElement,
     searchForm: HTMLFormElement,
-    recommenders: HTMLDataListElement
+    recommenders: HTMLDataListElement,
+    newItemForm: HTMLFormElement,
 }
 
 
@@ -32,7 +33,8 @@ function startupUI({
     librarySelector,
     userSelector,
     sortBySelector,
-    statsOutput
+    statsOutput,
+    newItemForm,
 }: typeof components) {
 
     for (let key in arguments[0]) {
@@ -62,6 +64,7 @@ function startupUI({
     if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
         throw new Error("sort by selector must be a select element")
     }
+
 
     if (statsOutput) {
         statistics.push(new Statistic("results", false, () => getFilteredResultsUI().length))
@@ -105,6 +108,19 @@ function startupUI({
     sortBySelector?.addEventListener("change", function() {
         sortEntriesUI()
     })
+
+    if (newItemForm) {
+        const title = getElementOrThrowUI('[name="title"]', HTMLInputElement, newItemForm)
+        newItemForm.oninput = function() {
+            const location = getElementOrThrowUI('[name="location"]', HTMLInputElement, newItemForm)
+            if (typeof settings.location_generator === 'string') {
+                location.value = settings.location_generator.replaceAll("{}", title.value)
+            } else if (typeof settings.location_generator === 'function') {
+                const info = new FormData(newItemForm)
+                location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
+            }
+        }
+    }
 
     components['itemFilter']?.addEventListener("input", function() {
         const filtered = getFilteredResultsUI()
@@ -1207,20 +1223,6 @@ async function newEntryUI(form: HTMLFormElement) {
         console.error(err)
         alert("Failed to load new item metadata, please reload")
     })
-}
-
-const newItemForm = document.getElementById("new-item-form") as HTMLFormElement
-if (newItemForm) {
-    const title = newItemForm.querySelector('[name="title"]') as HTMLInputElement
-    newItemForm.oninput = function() {
-        const location = newItemForm.querySelector('[name="location"]') as HTMLInputElement
-        if (typeof settings.location_generator === 'string') {
-            location.value = settings.location_generator.replaceAll("{}", title.value)
-        } else if (typeof settings.location_generator === 'function') {
-            const info = new FormData(newItemForm)
-            location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
-        }
-    }
 }
 
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
