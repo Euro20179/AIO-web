@@ -116,8 +116,8 @@
                         <!--     Rating disparity</option> -->
                         <optgroup label="Event">
                             <option value="added">Added</option>
-                            <option value="finished" title="**does not happen clientside">Finished**</option>
-                            <option value="viewing" title="**does not happen clientside">Viewing**</option>
+                            <option value="finished">Finished</option>
+                            <option value="viewing">Viewing</option>
                         </optgroup>
                     </select>
 

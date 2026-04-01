@@ -850,11 +850,21 @@ sorts.set("rating", (a, b) => {
 })
 
 sorts.set("added", (a, b) => {
-    let ae = findUserEventsById(a.ItemId).find(v => v.Event === "Added")
-    let be = findUserEventsById(b.ItemId).find(v => v.Event === "Added")
-    let aAdded = ae?.Timestamp || ae?.After || 0
-    let bAdded = be?.Timestamp || be?.After || 0
-    return bAdded - aAdded
+    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Added")
+    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Added")
+    return items_compareEventTiming(ae || 0, be || 0)
+})
+
+sorts.set("finished", (a, b) => {
+    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Finished")
+    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Finished")
+    return items_compareEventTiming(ae || 0, be || 0)
+})
+
+sorts.set("viewing", (a, b) => {
+    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Viewing")
+    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Viewing")
+    return items_compareEventTiming(ae || 0, be || 0)
 })
 
 sorts.set("general-rating", (a, b) => {
@@ -1181,11 +1191,11 @@ function items_eventTimeEstimate(event: UserEvent): number {
  * Compares 2 event's times
  * @param {UserEvent} left
  * @param {UserEvent} right
- * @returns -1 if left occured AFTER right
+ * @returns n < 0 if left occured AFTER right
  * @returns 0 if they occured at the same time
- * @returns 1 if left occured BEFORE right
+ * @returns n > 0 if left occured BEFORE right
  */
-function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): -1 | 0 | 1 {
+function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): number{
     let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
     let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
     if ("Temporal" in window) {
@@ -1196,7 +1206,7 @@ function items_compareEventTiming(left: UserEvent | number, right: UserEvent | n
     if (l == r) {
         return 0
     }
-    return l > r ? -1 : 1
+    return r - l
 }
 
 /**
