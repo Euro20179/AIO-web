@@ -33,6 +33,7 @@
     tmpl("de-copies");
     tmpl("de-cost-calculation-modifiers");
     tmpl("de-template-editor");
+    tmpl("de-recommender");
 
     tmpl("event-template");
     tmpl("calendar-template");

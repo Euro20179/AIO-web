@@ -279,6 +279,7 @@ for (const name of [
     "de-descendants",
     "de-copies",
     "de-template-editor",
+    "de-recommender",
 
     "calendar-template",
     "event-template",

@@ -1350,25 +1350,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         el.querySelectorAll("div").forEach(div => div.remove())
         let i = 0
         for(let r of items_getRecommendedBy(item.ItemId)) {
-            const b = document.createElement("div")
-            const text = document.createElement("span")
-            const db = document.createElement("button")
-            db.classList.add("delete")
-            db.id = "delete-recommended-by"
-            db.setAttribute("entry-action", "deleterecommendedby")
-            db.innerText = "✗"
-            b.role = "button"
-            b.onclick = function(e) {
-                if (e.target?.getAttribute("recommender-idx")) return
-                ui_search(`recommendedBy ~ '%"${r}"%'`)
-            }
-            b.classList.add("recommender")
-            text.append(r)
-            b.append(text)
-            b.append(db)
-            db.setAttribute("recommender-idx", String(i))
-            el.append(b)
+            const recommender = document.createElement("de-recommender")
+            el.append(recommender)
 
+            const b = getElementOrThrowUI('[role="button"]', this.win.HTMLElement, recommender)
+            b.setAttribute("recommender", r)
+            const db = getElementOrThrowUI("button.delete", this.win.HTMLElement, recommender)
+            db.setAttribute("recommender-idx", String(i))
+
+            const s = getElementOrThrowUI("span", this.win.HTMLElement, recommender)
+            s.append(r)
             i++
         }
     })
