@@ -849,23 +849,13 @@ sorts.set("rating", (a, b) => {
     return bUInfo?.UserRating - aUInfo?.UserRating
 })
 
-sorts.set("added", (a, b) => {
-    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Added")
-    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Added")
-    return items_compareEventTiming(ae || 0, be || 0)
-})
-
-sorts.set("finished", (a, b) => {
-    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Finished")
-    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Finished")
-    return items_compareEventTiming(ae || 0, be || 0)
-})
-
-sorts.set("viewing", (a, b) => {
-    let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === "Viewing")
-    let be = findUserEventsById(b.ItemId).findLast(v => v.Event === "Viewing")
-    return items_compareEventTiming(ae || 0, be || 0)
-})
+for(let event of ["Added", "Finished", "Viewing"]) {
+    sorts.set(event.toLowerCase(), (a, b) => {
+        let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === event)
+        let be = findUserEventsById(b.ItemId).findLast(v => v.Event === event)
+        return items_compareEventTiming(ae || 0, be || 0)
+    })
+}
 
 sorts.set("general-rating", (a, b) => {
     let am = findMetadataById(a.ItemId)
