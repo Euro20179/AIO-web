@@ -129,15 +129,15 @@
                     </div>
                 </div>
                 <div style="justify-self: end;">
-                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='padding-inline: 2ch; height: 100%; text-align: center;'>
-                        <option value="entry-output" title="Normal mode">🏠︎</option>
-                        <option value="graph-output" title="Graph mode">📊︎</option>
-                        <option value="calendar-output" title="Calendar mode">📅︎</option>
+                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center;'>
+                        <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
+                        <option value="graph-output" title="Graph mode">📊︎ Graph</option>
+                        <option value="calendar-output" title="Calendar mode">📅︎ Calendar</option>
                         <option value="event-output" hidden title="Event mode">🗓︎</option>
-                        <option value="calc-output" title="Calc mode">🔢︎</option>
-                        <option value="gallery-output" title="Gallery mode">🖼︎</option>
-                        <option value="script-output" title="Script mode">&lt;></option>
-                        <option value="tierlist-output" title="Tierlist mode">S</option>
+                        <option value="calc-output" title="Calc mode">🔢︎ Calc</option>
+                        <option value="gallery-output" title="Gallery mode">🖼︎ Gallery</option>
+                        <option value="script-output" title="Script mode">&lt;> Script</option>
+                        <option value="tierlist-output" title="Tierlist mode">S Tierlist</option>
                     </select>
                     <button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>

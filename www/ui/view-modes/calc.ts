@@ -52,6 +52,7 @@ class CalcMode extends Mode {
         //run user's code -> updateInfo -> calc updates -> run user's code
         //SOLUTION:
         //DO NOT UPDATE EXPRESSION
+        //this causes a bug where on page load, items data is not refreshed properly
         refreshCalcItem.call(this, findInfoEntryById(id), el)
     }
 
