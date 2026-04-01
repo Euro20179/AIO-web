@@ -1,0 +1,12 @@
+<template id="de-recommender">
+    <div role="button" class="recommender"
+        onclick="ui_search(`recommendedBy ~ '%&quot;${this.getAttribute('recommender')}&quot;%'`)"
+    >
+        <span></span>
+        <button
+            entry-action="deleterecommendedby"
+            id="delete-recommended-by"
+            class="delete"
+        >✗</button>
+    </div>
+</template>
