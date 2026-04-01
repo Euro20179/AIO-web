@@ -69,6 +69,10 @@
 
     select {
         border-width: 1px;
+        border-style: solid;
+        border-radius: var(--border-roundness);
+
+        cursor: pointer;
     }
 
 
@@ -104,14 +108,10 @@
         padding: 5px;
     }
 
-    select {
-        border-style: solid;
-        border-radius: var(--border-roundness);
-    }
-
     button,
     [role="button"],
-    input[type="submit"] {
+    input[type="submit"],
+    input[type="button"] {
         border: 1px solid var(--input-border-color);
         border-radius: var(--border-roundness);
         color: var(--text-color);
