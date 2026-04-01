@@ -1198,12 +1198,12 @@ function items_eventTimeEstimate(event: UserEvent): number {
  * @returns 0 if they occured at the same time
  * @returns n > 0 if left occured BEFORE right
  */
-function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): number{
+function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number, ltz = "", rtz = ""): number{
     let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
     let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
     if ("Temporal" in window) {
-        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, (left as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
-        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, (right as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
+        let leftTime = new Temporal.ZonedDateTime(BigInt(l) * 1000000n, ltz || (left as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
+        let rightTime = new Temporal.ZonedDateTime(BigInt(r) * 1000000n, rtz ||(right as UserEvent).TimeZone || INTL_OPTIONS.timeZone)
         return Temporal.ZonedDateTime.compare(rightTime, leftTime)
     }
     if (l == r) {
@@ -1404,7 +1404,7 @@ function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end:
     for (let item of items) {
         const events = findUserEventsById(item.ItemId)
         for (let ev of events) {
-            if (items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end) >= 0) {
+            if (items_compareEventTiming(ev, start, ev.TimeZone, ev.TimeZone) <= 0 && items_compareEventTiming(ev, end, ev.TimeZone, ev.TimeZone) >= 0) {
                 yield ev
             }
         }

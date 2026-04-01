@@ -156,7 +156,10 @@ class CalendarMode extends Mode {
 
 
         //plus finding the valid events now, lets us sort it once and only once
-        const validEvents = this._getValidEvents(start, end).sort((a, b) => items_compareEventTiming(b, a))
+        const validEvents = this._getValidEvents(start, end).sort((a, b) =>{
+            console.log("a", a, "b", b)
+            return items_compareEventTiming(b, a)
+        })
 
         while (monthGrid.firstElementChild) {
             monthGrid.removeChild(monthGrid.firstElementChild)
