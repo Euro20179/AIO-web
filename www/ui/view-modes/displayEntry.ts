@@ -1255,13 +1255,14 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
         return (items_sequenceNumberGrabber(a.info.En_Title, titles) || 0) - (items_sequenceNumberGrabber(b.info.En_Title, titles) || 0)
     })
 
+    const elements = []
+
     for (let child of relationships) {
         child = await items_getEntryAny(child.ItemId)
         let el = createClickableEntryUI(child.ItemId)
 
         el.setAttribute("data-view-count", String(child.user.ViewCount))
-
-        elementParent.append(el)
+        elements.push(el)
 
         el.addEventListener("contextmenu", e => {
             e.preventDefault()
@@ -1294,6 +1295,8 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
                 })
         })
     }
+
+    elementParent.replaceChildren(...elements)
 }
 
 function updateStatusDisplay(newStatus: string, display: HTMLElement) {
