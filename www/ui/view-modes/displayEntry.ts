@@ -10,9 +10,9 @@ class DisplayMode extends Mode {
         this.win.document.getElementById("entry-output")?.classList.add("open")
         this.displayQueue = []
 
-        if (this.parent instanceof HTMLElement) {
+        if (this.parent instanceof this.win.HTMLElement) {
             this.parent.addEventListener("scroll", (e) => {
-                if (!(this.parent instanceof HTMLElement))
+                if (!(this.parent instanceof this.win.HTMLElement))
                     throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
 
                 if (this.parent.scrollHeight - this.parent.scrollTop > innerHeight + 1000) return

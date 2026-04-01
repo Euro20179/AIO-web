@@ -159,6 +159,8 @@ function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
 const deselectItem = mode_deselectItem
 
 function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
+    if(itemList.length !== 0)
+        setError("")
     items_setSelected(items_getSelected().concat(itemList))
     updateStats && changeResultStatsWithItemListUI(itemList)
     if (itemList.length)
