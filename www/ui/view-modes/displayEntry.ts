@@ -50,6 +50,47 @@ class DisplayMode extends Mode {
      */
     de_actions = { //{{{
         /**
+         * Allows the user to choose a library for this item
+         */
+        chooselibrary: this.displayEntryAction((item) => {
+            const libraries = Object.fromEntries(
+                Object.entries(items_getLibraries())
+                    .map(e => [e[0], items_getEntry(e[1].ItemId)]))
+
+            const container = fillItemListingUI(libraries)
+            selectItemUI({
+                container,
+                onsearch: async function(search) {
+                    let results = await api_queryV4(search, getUidUI())
+                    results = results.filter(v => v.Type == "Library")
+
+                    return fillItemListingUI(Object.fromEntries(
+                        results.map(v => [
+                            String(v.ItemId),
+                            new items_Entry(
+                                v,
+                                findUserEntryById(v.ItemId),
+                                findMetadataById(v.ItemId)
+                            )
+                        ])
+                    ))
+                }
+            }).then(id => {
+                if(!id) return
+                item.Library = id
+                return api_setItem("", item, "Set library of item")
+            })
+            .then((res) => {
+                if(!res) return
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+                alert(`Updated library to ${items_getEntry(item.Library).info.En_Title}`)
+            })
+        }),
+        /**
          * Deletes a tag based on the target's tag-name
         */
         deletetag: this.displayEntryAction((item, root, target) => {
@@ -1345,6 +1386,15 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
+
+    renderComponent("#library", el => {
+        if(!("value" in el)) return
+        if(!item.Library) {
+            el.value = "None"
+            return
+        }
+        el.value = items_getEntry(item.Library).info.En_Title
+    })
 
     renderComponent("#recommended-bys", el => {
         el.querySelectorAll("div").forEach(div => div.remove())

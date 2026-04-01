@@ -1316,7 +1316,7 @@ type SelectItemOptions = Partial<{
 /**
  * lets the user select an item, be sure to use fillItemListingUI first
 */
-async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
+async function selectItemUI(options?: SelectItemOptions): Promise<null |bigint> {
     const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
 
     let f = getElementOrThrowUI("#items-listing-search", HTMLFormElement)
@@ -1344,6 +1344,9 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
                     res(BigInt(id as string))
                 }
             }
+        }
+        popover.onclose = function() {
+            res(null)
         }
         f.onsubmit = function() {
             onsearch(query.value).then(registerFigClickEvents)
