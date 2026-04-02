@@ -1,4 +1,18 @@
 /**
+    * Firefox has a bug where a <select> rendered out of a <template>
+    * does not render the dropdown arrow.
+    * This function fixes that by cloning and rerendering all select elements
+    * within a root.
+*/
+function fuckingInsaneFirefoxHackToMakeSelectAppearNormally(
+    root: ShadowRoot | HTMLElement | DocumentFragment
+) {
+    for(let sel of root.querySelectorAll("select")) {
+        const newSel = sel.cloneNode(true)
+        sel.replaceWith(newSel)
+    }
+}
+/**
  * Sets up popover=hint elements
  */
 function setupHintPopovers(root: {
@@ -191,6 +205,8 @@ customElements.define("display-entry", class extends HTMLElement {
         let content = template.content.cloneNode(true) as HTMLElement
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
+
+        fuckingInsaneFirefoxHackToMakeSelectAppearNormally(root)
         this.root = root
     }
 })
@@ -289,7 +305,10 @@ function _registerElement(name: string) {
             }
 
             let content = this.templ.content.cloneNode(true)
-            this.replaceChildren(content)
+            this.append(content)
+
+            fuckingInsaneFirefoxHackToMakeSelectAppearNormally(this)
+
             this.style.display = "contents"
         }
     })
