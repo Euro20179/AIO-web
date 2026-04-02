@@ -836,6 +836,10 @@ async function loadSearchUI() {
     mode_clearItems()
     if (entries.length === 0) {
         setError("No results")
+        clearSidebar()
+        const g = genericInfo(0n, 0)
+        g.En_Title = "No Results"
+        renderFakeSidebarItem(g)
         return
     }
 

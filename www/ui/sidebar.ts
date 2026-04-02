@@ -192,6 +192,24 @@ async function renderSidebarItemList(items: InfoEntry[], sidebarParent: HTMLElem
 }
 
 /**
+ * Renders a sidebar item with fake data
+ */
+function renderFakeSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems): HTMLElement {
+    let elem = document.createElement("sidebar-entry")
+    let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
+    let img = elem.shadowRoot?.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
+    if(img) {
+        const x = document.createElement("p")
+        x.innerHTML = "X"
+        x.style.fontSize = "2rem"
+        img.replaceWith(x)
+    }
+    title.value = item.En_Title
+    sidebarParent.append(elem)
+    return elem
+}
+
+/**
   * @description below is an itemid that the item gets rendered below
 */
 function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment = sidebarItems, options?: {
