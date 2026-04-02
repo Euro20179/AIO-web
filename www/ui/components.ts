@@ -325,6 +325,7 @@ for (const name of [
     "de-copies",
     "de-template-editor",
     "de-recommender",
+    "de-progress",
 
     "calendar-template",
     "event-template",

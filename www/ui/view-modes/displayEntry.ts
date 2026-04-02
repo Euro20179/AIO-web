@@ -1740,6 +1740,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         multipleProgressEl.innerHTML = ""
 
         if (!/(Re)?Viewing/.test(user.Status)) return
+
+        if(!user.CurrentPosition) {
+            user = { ...user }
+            user.CurrentPosition = "0"
+        }
+
         //for each [P]x[/y] in userPos create a progress element
         //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
         //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
@@ -1754,6 +1760,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             if (!part) continue
             let label = part[1]
 
+            let container = document.createElement("de-progress")
+
+            multipleProgressEl.append(container)
+
             let max =
                 //if there's no label, and no total is given
                 //use the mediaDependant determined length
@@ -1761,34 +1771,30 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                     ? lengthInNumber
                     : (part[3] || "0") //part[3] could be empty string
 
-            let container = document.createElement("figure")
-            container.style.position = "relative"
-            container.style.margin = "0"
-
-            let p = document.createElement("progress")
+            let p = getElementOrThrowUI(
+                "progress",
+                this.win.HTMLProgressElement,
+                container
+            )
             p.max = parseFloat(max)
             p.value = parseFloat(part[2])
-            p.classList.add("entry-progressbar")
-            p.onclick = e => {
-                if (!(e.target instanceof this.win.HTMLElement)) throw new Error("progress bar is not an element?")
-                this.de_actions.setprogress(e.target)
-            }
 
-            let c = document.createElement("figcaption")
-            c.style.position = "absolute"
+            let c = getElementOrThrowUI(
+                ".entry-progressbar-position-label",
+                this.win.HTMLElement,
+                container
+            )
             c.innerText = `${label || ""}${part[2]}`
             if (parseInt(max)) {
                 c.innerText += `/${max}`
             }
 
-            //percentage
-            c.title = `${Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10}%`
-            c.classList.add("entry-progressbar-position-label")
-
-            container.append(p)
-            container.append(c)
-
-            multipleProgressEl.append(container)
+            const upHint = getElementOrThrowUI(
+                "#user-progress-hint",
+                this.win.HTMLElement,
+                container
+            )
+            upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10) || 0}%`
         }
     })
 

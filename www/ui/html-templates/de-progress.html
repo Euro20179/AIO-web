@@ -1,0 +1,18 @@
+<template id="de-progress">
+    <figure style="position: relative; margin: 0;">
+        <progress class="entry-progressbar"
+                toggle-hint="entry-progress-hint"
+                entry-action="setprogress"
+        ></progress>
+
+        <figcaption
+            class="entry-progressbar-position-label"
+            style="position: absolute"
+            toggle-hint="user-progress-hint"
+        >
+        </figcaption>
+
+        <span id="entry-progress-hint" popover="hint">Current Progress</span>
+        <span id="user-progress-hint" popover="hint"></span>
+    </figure>
+</template>

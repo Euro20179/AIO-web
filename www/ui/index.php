@@ -34,6 +34,7 @@
         "de-cost-calculation-modifiers",
         "de-template-editor",
         "de-recommender",
+        "de-progress",
 
         "event-template",
         "calendar-template",
