@@ -8,7 +8,8 @@ function fuckingInsaneFirefoxHackToMakeSelectAppearNormally(
     root: ShadowRoot | HTMLElement | DocumentFragment
 ) {
     for(let sel of root.querySelectorAll("select")) {
-        const newSel = sel.cloneNode(true)
+        const newSel = sel.cloneNode(true) as HTMLSelectElement
+        newSel.value = sel.value
         sel.replaceWith(newSel)
     }
 }
