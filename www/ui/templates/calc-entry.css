@@ -26,3 +26,7 @@
 
     align-self: center;
 }
+
+#expression-output {
+    display: flow;
+}

@@ -824,8 +824,16 @@ async function loadSearchUI() {
     let filters = parseClientsideSearchFiltering(formData)
 
     let entries = filters.useV4
-        ? await api_queryV4(String(filters.newSearch) || "%", Number(formData.get('uid')) || 0, filters.sortBy)
-        : await api_queryV3(String(filters.newSearch) || "#", Number(formData.get("uid")) || 0, filters.sortBy)
+        ? await api_queryV4(
+            String(filters.newSearch) || "%",
+            Number(formData.get('uid')) || 0,
+            filters.sortBy as SortKind
+        )
+        : await api_queryV3(
+            String(filters.newSearch) || "#",
+            Number(formData.get("uid")) || 0,
+            filters.sortBy as SortKind
+        )
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -840,10 +848,7 @@ async function loadSearchUI() {
         const g = genericInfo(0n, 0)
         g.En_Title = "No Results"
         renderFakeSidebarItem(g)
-        return
-    }
-
-    renderSidebar(getFilteredResultsUI(), false)
+    } else renderSidebar(getFilteredResultsUI(), false)
 }
 
 /**
