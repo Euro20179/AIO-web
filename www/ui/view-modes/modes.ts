@@ -218,6 +218,15 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "event-output": EventMode,
         "calendar-output": CalendarMode,
         "tierlist-output": TierListMode,
+
+        "entry": DisplayMode,
+        "graph": GraphMode,
+        "calc": CalcMode,
+        "gallery": GalleryMode,
+        "script": ScriptMode,
+        "event": EventMode,
+        "calendar": CalendarMode,
+        "tierlist": TierListMode,
     }
 
     const newMode = modes[name as keyof typeof modes]
