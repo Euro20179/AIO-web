@@ -1,6 +1,37 @@
 <template id="de-template-editor">
     <dialog id="template-editor-container" style="font-size: 1rem;">
         <h2 style="font-size: revert;" class="center">Template editor</h2>
+
+        <br> <center>
+            <input type="text" placeholder="pull from url"
+                onchange="(function(){
+                    if(!this.value) {
+                        clearInterval(this._i)
+                        this._i = null
+                        return
+                    }
+                    if(this._i) return
+
+                    this._i = setInterval(async () => {
+                        console.log(this.value)
+                        const res = await fetch(this.value)
+                        this.getRootNode()
+                            .getElementById('template-editor')
+                            .value = await res.text()
+                        this.getRootNode()
+                            .getElementById('template-editor')._updatePreview()
+                    }, 1000)
+                }).call(this)"
+                oninput="(function(){
+                    if(this._i) {
+                        clearInterval(this._i)
+                        this._i = null
+                        return
+                    }
+                }).call(this)"
+            />
+        </center> <br>
+
         <div class="flex j-center">
             <button entry-action="save">💾︎</button>
             <button entry-action="previewtemplate" title="preview the template">👁</button>
