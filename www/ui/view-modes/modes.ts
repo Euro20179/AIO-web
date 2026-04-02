@@ -209,6 +209,16 @@ const clearItems = mode_clearItems
 
 //this should ONLY operate within the user specified or current window otherwise it makes no sense
 function mode_setMode(name: string, win: Window & typeof globalThis = window) {
+    name = {
+        "entry": "entry-output",
+        "graph": "graph-output",
+        "calc": "calc-output",
+        "gallery": "gallery-output",
+        "script": "script-output",
+        "event": "event-output",
+        "calendar": "calendar-output",
+        "tierlist": "tierlist-output",
+    }[name] || name
     const modes = {
         "entry-output": DisplayMode,
         "graph-output": GraphMode,
@@ -218,15 +228,6 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "event-output": EventMode,
         "calendar-output": CalendarMode,
         "tierlist-output": TierListMode,
-
-        "entry": DisplayMode,
-        "graph": GraphMode,
-        "calc": CalcMode,
-        "gallery": GalleryMode,
-        "script": ScriptMode,
-        "event": EventMode,
-        "calendar": CalendarMode,
-        "tierlist": TierListMode,
     }
 
     const newMode = modes[name as keyof typeof modes]
