@@ -552,9 +552,14 @@
             width: 100cqi;
             overflow: auto;
 
-            grid-template-areas: "nav stats" "calendar stats";
-            grid-template-columns: 1fr 20cqi;
-            grid-template-rows: 1fr 10fr;
+            @container (width > 1000px) {
+                grid-template-areas: "nav stats" "calendar stats";
+                grid-template-columns: 1fr 20cqi;
+                grid-template-rows: 1fr 10fr;
+            }
+            @container (width < 1001px) {
+                grid-template-areas: "nav" "calendar" "stats";
+            }
 
             #month-nav {
                 grid-area: nav;
