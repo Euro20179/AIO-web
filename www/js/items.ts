@@ -1164,6 +1164,25 @@ function items_findAllEvents(itemId: bigint, includeSelf: boolean, includeChildr
  * @returns {number}
 */
 function items_calculateCost(itemId: bigint, includeSelf: boolean, includeChildren: boolean, includeCopies: boolean, includeRequires: boolean, recursive: boolean): number {
+    if(Math.sumPrecise) {
+        let items = 
+            items_reduce<number[]>(
+                itemId,
+                includeSelf,
+                includeChildren,
+                includeCopies,
+                includeRequires,
+                recursive,
+                (p, c) => {
+                    p.push(findInfoEntryById(c).PurchasePrice)
+                    return p
+                },
+                []
+            )
+        return Math.sumPrecise(
+            items
+        )
+    }
     return items_reduce(itemId, includeSelf, includeChildren, includeCopies, includeRequires, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
 }
 

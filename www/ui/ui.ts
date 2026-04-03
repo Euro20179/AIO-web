@@ -327,6 +327,8 @@ class Statistic {
     additive: boolean
     resetable: boolean = true
 
+    values: number[]
+
     #value: number = 0
     el: HTMLElement
     constructor(name: string, additive: boolean, calculation: StatCalculator) {
@@ -336,6 +338,8 @@ class Statistic {
         this.el = document.createElement("entries-statistic")
         this.el.setAttribute("data-stat-name", this.name)
         components.statsOutput?.append(this.el)
+
+        this.values = []
     }
     set value(v: number) {
         this.#value = v
@@ -346,24 +350,38 @@ class Statistic {
     }
     set(value: number) {
         this.value = value
+        this.values = [value]
     }
     add(value: number) {
-        this.value += value
+        this.values.push(value)
+        if(Math.sumPresice) {
+            this.value = Math.sumPrecise(this.values)
+        } else {
+            this.value += value
+        }
     }
     changeWithItem(item: InfoEntry, mult: number) {
         let value = this.calculation(item, mult)
         if (!this.additive) {
             this.value = value
         } else {
-            this.value += value
+            this.values.push(value)
+            if(Math.sumPrecise)
+                this.value = Math.sumPrecise(this.values)
+            else this.value += value
         }
     }
     changeWithItemList(items: InfoEntry[], mult: number) {
         if (!this.additive) {
             this.value = this.calculation(items[0] || genericInfo(0n, getUidUI()), mult)
         } else {
-            for (let item of items) {
-                this.value += this.calculation(item, mult)
+            this.values = this.values.concat(items.map(v => this.calculation(v, mult)))
+            if(Math.sumPrecise) {
+                this.value = Math.sumPrecise(this.values)
+            } else {
+                for (let item of items) {
+                    this.value += this.calculation(item, mult)
+                }
             }
         }
     }
