@@ -163,24 +163,6 @@
 
                 <p id="error"></p>
 
-                <div id="entry-output" class="overflow">
-                </div>
-
-                <script-template></script-template>
-
-                <tierlist-template></tierlist-template>
-
-                <calendar-template></calendar-template>
-
-                <event-template></event-template>
-
-                <calc-template></calc-template>
-
-                <div id="gallery-output" class="overflow">
-                    <div id="gallery-items"></div>
-                </div>
-
-                <graph-template></graph-template>
             </section>
 
             <alert-box></alert-box>

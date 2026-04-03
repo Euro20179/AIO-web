@@ -8,8 +8,17 @@ class TierListMode extends Mode {
     previousMode = ""
 
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#tierlist-output", win)
-        this.win.document.getElementById("tierlist-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("tierlist-template")
+            c = parent
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = parent.firstElementChild as HTMLElement
+        }
+
+        super(parent, win, c)
 
         this.rows = {}
 
@@ -200,7 +209,8 @@ class TierListMode extends Mode {
     }
 
     close() {
-        this.win.document.getElementById("tierlist-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.clearSelected()
     }
 

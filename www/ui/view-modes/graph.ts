@@ -401,14 +401,6 @@ function makeGraphs(entries: InfoEntry[]) {
     // ratingDisparityGraph(entries)
 }
 
-groupByInput.onchange = function() {
-    makeGraphs(items_getSelected())
-}
-
-groupBySelect.onchange = typeSelection.onchange = function() {
-    makeGraphs(items_getSelected())
-}
-
 function destroyCharts() {
     for (let chName in _charts) {
         let chrt = _charts[chName]
@@ -422,8 +414,28 @@ function destroyCharts() {
 class GraphMode extends Mode {
     NAME = "graph-output"
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#graph-output", win)
-        this.win.document.getElementById("graph-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("graph-template")
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            c = parent
+        }
+        super(parent, win, c)
+
+        groupBySelect =this.win.document.getElementById("group-by") as HTMLSelectElement
+        typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
+
+        groupByInput = this.win.document.getElementById("group-by-expr") as HTMLInputElement
+
+        groupByInput.onchange = function() {
+            makeGraphs(items_getSelected())
+        }
+
+        groupBySelect.onchange = typeSelection.onchange = function() {
+            makeGraphs(items_getSelected())
+        }
 
         destroyCharts()
 
@@ -556,7 +568,8 @@ class GraphMode extends Mode {
     }
 
     close() {
-        this.win.document.getElementById("graph-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
     }
 
     add(entry: InfoEntry) {

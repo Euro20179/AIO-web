@@ -6,8 +6,18 @@ class DisplayMode extends Mode {
     adding: boolean = false
 
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#entry-output", win)
-        this.win.document.getElementById("entry-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("div")
+            parent.classList.add("overflow")
+            parent.id = 'entry-output'
+            console.log("appending")
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            c = parent
+        }
+        super(parent, win, c)
         this.displayQueue = []
 
         if (this.parent instanceof this.win.HTMLElement) {
@@ -36,10 +46,10 @@ class DisplayMode extends Mode {
     }
 
     close() {
-        this.win.document.getElementById("entry-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.displayQueue = []
-        this.clear()
-        this.clearSelected()
+        this.adding = false
     }
 
     /**

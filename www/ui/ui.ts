@@ -629,7 +629,7 @@ function getElementUI<T extends typeof Element>(
     root: { querySelector(selector: string): Element | null } | null = null
 ): InstanceType<T> | null {
     let el = (root || currentDocument()).querySelector(selector)
-    if (!el || !(el instanceof (requiredType as T))) return null
+    if (!el || (requiredType && !(el instanceof (requiredType as T)))) return null
     return el as InstanceType<T>
 }
 

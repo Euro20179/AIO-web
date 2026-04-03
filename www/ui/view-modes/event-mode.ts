@@ -77,8 +77,16 @@ class EventMode extends Mode {
     eventOrder: OrderedEvents
 
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#event-output-table", win)
-        this.win.document.getElementById("event-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("event-template")
+            c = parent
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = parent.firstElementChild as HTMLElement
+        }
+        super(parent, win, c)
         this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
 
         this.eventFilter.onchange = () => {
@@ -120,7 +128,8 @@ class EventMode extends Mode {
 
 
     close() {
-        this.win.document.getElementById("event-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.clearSelected()
     }
 

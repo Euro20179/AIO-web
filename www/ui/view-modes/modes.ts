@@ -2,13 +2,14 @@ class Mode {
     NAME: string = "Mode"
     parent: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
+
+    container: HTMLElement | null
+
     //using string will querySelector on the (win || window)'s document
-    constructor(parent: HTMLElement | DocumentFragment | string, win?: Window & typeof globalThis) {
-        win ||= window
-        this.parent = parent instanceof win.HTMLElement || parent instanceof win.DocumentFragment
-            ? parent
-            : win.document.querySelector(parent) as HTMLElement
-        this.win = win || this.parent.ownerDocument.defaultView
+    constructor(parent: HTMLElement | DocumentFragment, win?: Window & typeof globalThis, container?: HTMLElement | null) {
+        this.win = win ||= window
+        this.container = container || null
+        this.parent = parent
         if (this.win === null) {
             throw new Error("default view (window) is null")
         }

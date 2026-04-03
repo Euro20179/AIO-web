@@ -4,20 +4,27 @@ class ScriptMode extends Mode {
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#script-execute-output", win)
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("script-template")
+            c = parent
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = parent.querySelector(`#script-execute-output`) as HTMLElement
+        }
+        super(parent, win, c)
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
-        this.win.document.getElementById("script-output")?.classList.add("open")
         this.run.onclick = execute.bind(this)
     }
     close() {
-        this.win.document.getElementById("script-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
     }
     add(entry: InfoEntry) {
         const d = new DisplayMode(this.parent, this.win)
         const e = d.add(entry)
-        d.close()
-        this.parent.append(e)
         e.style.display = "block"
         return e
     }

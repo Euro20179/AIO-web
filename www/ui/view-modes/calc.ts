@@ -2,9 +2,21 @@ class CalcMode extends Mode {
     NAME = "calc-output"
     expressionInput: HTMLTextAreaElement
 
+    container: HTMLElement | null
+
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#calc-items", win)
-        this.win.document.getElementById("calc-output")?.classList.add("open")
+        win ||= window
+        let container = null
+        if(!parent) {
+            parent = document.createElement("calc-template")
+            container = parent
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = getElementOrThrowUI("#calc-items", null, parent) as HTMLElement
+        }
+        super(parent, win)
+
+        this.container = container
 
         this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
@@ -13,7 +25,8 @@ class CalcMode extends Mode {
     }
 
     close() {
-        this.win.document.getElementById("calc-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.clearSelected()
     }
 

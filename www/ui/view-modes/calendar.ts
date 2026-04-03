@@ -8,9 +8,16 @@ class CalendarMode extends Mode {
     selectedTime: [Date, Date]
 
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#calendar-output", win)
-
-        this.win.document.getElementById("calendar-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("calendar-template")
+            c = parent
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = parent.firstElementChild as HTMLElement
+        }
+        super(parent, win, c)
 
         this.mode = "month"
 
@@ -91,7 +98,7 @@ class CalendarMode extends Mode {
 
     set mode(value: "day" | "month") {
         this.#mode = value
-        if (this.parent instanceof HTMLElement)
+        if (this.parent instanceof this.win.HTMLElement)
             this.parent.setAttribute("data-mode", this.mode)
     }
 
@@ -101,7 +108,8 @@ class CalendarMode extends Mode {
     }
 
     close() {
-        this.win.document.getElementById("calendar-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.clearSelected()
     }
 

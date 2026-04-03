@@ -31,8 +31,19 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 class GalleryMode extends Mode {
     NAME = "gallery-output"
     constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        super(parent || "#gallery-items", win)
-        this.win.document.getElementById("gallery-output")?.classList.add("open")
+        win ||= window
+        let c = null
+        if(!parent) {
+            parent = document.createElement("div")
+            c = parent
+            parent.classList.add("overflow")
+            parent.id = 'gallery-output'
+            parent.innerHTML = `<div id="gallery-items"></div>`
+            const o = getElementOrThrowUI("#viewing-area", null, win.document)
+            o.append(parent)
+            parent = parent.firstElementChild as HTMLElement
+        }
+        super(parent, win, c)
     }
 
     removeGalleryItem(entry: InfoEntry) {
@@ -84,7 +95,8 @@ class GalleryMode extends Mode {
         this.parent = win.document.getElementById("gallery-items") as HTMLDivElement
     }
     close() {
-        this.win.document.getElementById("gallery-output")?.classList.remove("open")
+        if(this.container)
+            this.container.remove()
         this.clearSelected()
     }
 }
