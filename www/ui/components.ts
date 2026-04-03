@@ -306,7 +306,11 @@ function _registerElement(name: string) {
             }
 
             let content = this.templ.content.cloneNode(true)
-            this.append(content)
+            //this should be replaceContent because
+            //any time this element moves or smth
+            //this callback gets called again, and if we use append()
+            //it will append twice
+            this.replaceChildren(content)
 
             fuckingInsaneFirefoxHackToMakeSelectAppearNormally(this)
 
