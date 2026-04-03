@@ -84,7 +84,7 @@ class EventMode extends Mode {
             c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(output)
-            output = output.firstElementChild as HTMLElement
+            output = output.querySelector("#event-output-table") as HTMLElement
         }
         super(output, win, c)
         this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
