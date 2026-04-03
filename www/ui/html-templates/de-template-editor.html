@@ -15,7 +15,6 @@
                     if(this._i) return
 
                     this._i = setInterval(async () => {
-                        console.log('intervaling')
                         try {
                             var res = await fetch(this.value)
                         } catch(err) {
@@ -45,7 +44,6 @@
                     r.onload = (text) => {
                         this.getRootNode().getElementById('template-editor')
                             .value = r.result
-                        console.log(this.getRootNode().getElementById('template-editor'))
                     }
                     r.readAsText(this.files[0])"
             >
