@@ -1,8 +1,10 @@
 <template id="de-template-editor">
-    <dialog id="template-editor-container" style="font-size: 1rem;">
+    <dialog id="template-editor-container" onclose="
+            clearInterval(this.querySelector(`input[type='text']`)._i)
+        " style="font-size: 1rem;">
         <h2 style="font-size: revert;" class="center">Template editor</h2>
 
-        <br> <center>
+        <div class="j-center flex" style="gap: var(--small-gap)">
             <input type="text" placeholder="pull from url"
                 onchange="(function(){
                     if(!this.value) {
@@ -13,7 +15,14 @@
                     if(this._i) return
 
                     this._i = setInterval(async () => {
-                        const res = await fetch(this.value)
+                        console.log('intervaling')
+                        try {
+                            var res = await fetch(this.value)
+                        } catch(err) {
+                            alert('Could not fetch from the url')
+                            clearInterval(this._i)
+                            this._i = null
+                        }
                         this.getRootNode()
                             .getElementById('template-editor')
                             .value = await res.text()
@@ -29,7 +38,24 @@
                     }
                 }).call(this)"
             />
-        </center> <br>
+
+            <input id="template-file" type="file" hidden
+                oninput="
+                    const r = new FileReader();
+                    r.onload = (text) => {
+                        this.getRootNode().getElementById('template-editor')
+                            .value = r.result
+                        console.log(this.getRootNode().getElementById('template-editor'))
+                    }
+                    r.readAsText(this.files[0])"
+            >
+            <button
+                onclick="
+                    this.getRootNode().getElementById('template-file').click()"
+            >Upload file as template</button>
+        </div>
+
+        <br>
 
         <div class="flex j-center">
             <button entry-action="save">💾︎</button>
