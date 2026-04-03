@@ -1,20 +1,21 @@
 <template id="de-notes">
+    <div style="display: flow-root">
+        <hr>
+        <div class="flex" style="
+            float: right;
+            margin: var(--small-gap) var(--small-gap) 0 0;
+        ">
+            <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())">
+                ✏
+            </button>
 
-<div class="flex" style="
-    float: right;
-    margin: var(--small-gap) var(--small-gap) 0 0;
-">
-    <button onclick="openModalUI('notes-edit-dialog', this.getRootNode())">
-        ✏
-    </button>
+            <button popout-target="notes" class="popout">
+                ↗
+            </button>
+        </div>
 
-    <button popout-target="notes" class="popout">
-        ↗
-    </button>
-</div>
+        <h4>Notes</h4>
 
-<h4>Notes</h4>
-
-<article class="notes" id="notes"></article>
-
+        <article class="notes" id="notes"></article>
+    </div>
 </template>

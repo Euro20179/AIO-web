@@ -312,8 +312,7 @@
         display: grid;
 
         @container (width < 800px) {
-            display: flex;
-            flex-direction: column;
+            display: contents;
         }
 
         @container (width > 799px) {
