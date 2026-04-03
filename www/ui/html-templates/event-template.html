@@ -1,17 +1,23 @@
 <template id="event-template">
 <div id="event-output" class="overflow flex column">
-    <button onclick="mode_setMode('calendar-output')">Calendar</button>
-    <div class="flex column">
+    <div style="
+        display: grid;
+        grid-template-rows: max-content max-content auto;
+        height: 100cqb;
+    ">
+        <button onclick="mode_setMode('calendar-output')">Calendar</button>
         <label>Filter events <input type="search" id="event-filter"></label>
-        <table id="event-output-table">
-            <thead>
-                <tr>
-                    <th>For</th>
-                    <th>Event</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-        </table>
+        <div class="overflow" height="100%">
+            <table id="event-output-table">
+                <thead>
+                    <tr>
+                        <th>For</th>
+                        <th>Event</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
 </div>
 
