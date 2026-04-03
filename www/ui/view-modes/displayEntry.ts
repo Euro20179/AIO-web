@@ -673,7 +673,7 @@ class DisplayMode extends Mode {
                 preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
             }
 
-            templEditor._updatePreview = templEditor.onkeyup = () => {
+            templEditor._updatePreview = templEditor.oninput = () => {
                 preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
                 preview.self.mode_deselectItem(item, false)
                 preview.self.mode_selectItem(item, false)

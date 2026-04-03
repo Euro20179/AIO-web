@@ -13,7 +13,6 @@
                     if(this._i) return
 
                     this._i = setInterval(async () => {
-                        console.log(this.value)
                         const res = await fetch(this.value)
                         this.getRootNode()
                             .getElementById('template-editor')
