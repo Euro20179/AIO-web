@@ -310,9 +310,12 @@
 
     #description-and-notes {
         display: grid;
+
         @container (width < 800px) {
-            grid-template-rows: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
         }
+
         @container (width > 799px) {
             gap: var(--small-gap);
             grid-template-columns: 1fr 1fr;
