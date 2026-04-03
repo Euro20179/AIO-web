@@ -3,17 +3,17 @@ class ScriptMode extends Mode {
     NAME = "script-output"
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("script-template")
-            c = parent
+        if(!output) {
+            output = document.createElement("script-template")
+            c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            parent = parent.querySelector(`#script-execute-output`) as HTMLElement
+            o.append(output)
+            output = output.querySelector(`#script-execute-output`) as HTMLElement
         }
-        super(parent, win, c)
+        super(output, win, c)
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
         this.run.onclick = execute.bind(this)
@@ -23,13 +23,13 @@ class ScriptMode extends Mode {
             this.container.remove()
     }
     add(entry: InfoEntry) {
-        const d = new DisplayMode(this.parent, this.win)
+        const d = new DisplayMode(this.output, this.win)
         const e = d.add(entry)
         e.style.display = "block"
         return e
     }
     sub(entry: InfoEntry) {
-        this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)?.remove()
+        this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)?.remove()
     }
     addList(entries: InfoEntry[]) {
         for (let e of entries) {
@@ -44,16 +44,16 @@ class ScriptMode extends Mode {
 
     clear() {
         mode_clearItems()
-        if (this.parent instanceof this.win.HTMLElement) {
-            this.parent.innerHTML = ""
+        if (this.output instanceof this.win.HTMLElement) {
+            this.output.innerHTML = ""
         } else
-            while (this.parent.children.length) {
-                this.parent.children[0].remove()
+            while (this.output.children.length) {
+                this.output.children[0].remove()
             }
     }
 
     clearSelected() {
-        for (let elem of this.parent.querySelectorAll(`[data-item-id]`)) {
+        for (let elem of this.output.querySelectorAll(`[data-item-id]`)) {
             elem.remove()
         }
     }
@@ -62,19 +62,19 @@ class ScriptMode extends Mode {
         this.win.close()
         this.run = win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
-        this.parent = win.document.getElementById("script-execute-output") as HTMLDivElement
+        this.output = win.document.getElementById("script-execute-output") as HTMLDivElement
         this.run.onclick = execute.bind(this)
     }
 
     put(html: string | HTMLElement | ShadowRoot) {
         if (typeof html === 'string') {
-            if (this.parent instanceof DocumentFragment) {
-                this.parent.append(html)
+            if (this.output instanceof DocumentFragment) {
+                this.output.append(html)
             } else {
-                this.parent.innerHTML += html
+                this.output.innerHTML += html
             }
         } else {
-            this.parent.append(html)
+            this.output.append(html)
         }
     }
 }
@@ -103,8 +103,8 @@ function execute(this: ScriptMode) {
 
     const value = parseExpression(script, tbl)
     if (value instanceof Elem) {
-        this.parent.append(value.el)
+        this.output.append(value.el)
     } else {
-        this.parent.append(value.jsStr())
+        this.output.append(value.jsStr())
     }
 }

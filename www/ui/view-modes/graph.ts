@@ -413,16 +413,16 @@ function destroyCharts() {
 
 class GraphMode extends Mode {
     NAME = "graph-output"
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("graph-template")
+        if(!output) {
+            output = document.createElement("graph-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            c = parent
+            o.append(output)
+            c = output
         }
-        super(parent, win, c)
+        super(output, win, c)
 
         groupBySelect =this.win.document.getElementById("group-by") as HTMLSelectElement
         typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement

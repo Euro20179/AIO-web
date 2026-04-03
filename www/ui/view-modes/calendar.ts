@@ -7,17 +7,17 @@ class CalendarMode extends Mode {
 
     selectedTime: [Date, Date]
 
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("calendar-template")
-            c = parent
+        if(!output) {
+            output = document.createElement("calendar-template")
+            c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            parent = parent.firstElementChild as HTMLElement
+            o.append(output)
+            output = output.firstElementChild as HTMLElement
         }
-        super(parent, win, c)
+        super(output, win, c)
 
         this.mode = "month"
 
@@ -36,7 +36,7 @@ class CalendarMode extends Mode {
         this.onResize()
         this.win.addEventListener("resize", this.onResize.bind(this))
 
-        this.parent.querySelector("#month-prev")?.addEventListener("click", e => {
+        this.output.querySelector("#month-prev")?.addEventListener("click", e => {
             let prevMonth = this.selectedTime[0].getMonth() - 1
             let year = this.selectedTime[0].getFullYear()
             if (prevMonth === -1) {
@@ -48,7 +48,7 @@ class CalendarMode extends Mode {
             this._render()
         })
 
-        this.parent.querySelector("#month-next")?.addEventListener("click", e => {
+        this.output.querySelector("#month-next")?.addEventListener("click", e => {
             let nextMonth = this.selectedTime[0].getMonth() + 1
             let year = this.selectedTime[0].getFullYear()
             if (nextMonth === 12) {
@@ -60,19 +60,19 @@ class CalendarMode extends Mode {
             this._render()
         })
 
-        this.parent.querySelector("#time-start")?.addEventListener("change", e => {
+        this.output.querySelector("#time-start")?.addEventListener("change", e => {
             const d = new Date(e.target.value)
             this._setStart(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()))
             this._render()
         })
 
-        this.parent.querySelector("#time-end")?.addEventListener("change", e => {
+        this.output.querySelector("#time-end")?.addEventListener("change", e => {
             const d = new Date(e.target.value)
             this._setEnd(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()))
             this._render()
         })
 
-        this.parent.querySelector("#event-filter")?.addEventListener("input", e => {
+        this.output.querySelector("#event-filter")?.addEventListener("input", e => {
             this._render()
         })
 
@@ -83,12 +83,12 @@ class CalendarMode extends Mode {
 
     _setStart(date: Date) {
         this.selectedTime[0] = date
-        const startIn = this.parent.querySelector("#time-start") as HTMLInputElement
+        const startIn = this.output.querySelector("#time-start") as HTMLInputElement
         startIn.value = date.toISOString().slice(0, 10)
     }
     _setEnd(date: Date) {
         this.selectedTime[1] = date
-        const endIn = this.parent.querySelector("#time-end") as HTMLInputElement
+        const endIn = this.output.querySelector("#time-end") as HTMLInputElement
         endIn.value = date.toISOString().slice(0, 10)
     }
 
@@ -98,8 +98,8 @@ class CalendarMode extends Mode {
 
     set mode(value: "day" | "month") {
         this.#mode = value
-        if (this.parent instanceof this.win.HTMLElement)
-            this.parent.setAttribute("data-mode", this.mode)
+        if (this.output instanceof this.win.HTMLElement)
+            this.output.setAttribute("data-mode", this.mode)
     }
 
     onResize() {
@@ -132,7 +132,7 @@ class CalendarMode extends Mode {
         const eventFilter = getElementUI(
             "#event-filter",
             this.win.HTMLInputElement,
-            this.parent
+            this.output
         )
 
         if (eventFilter) {
@@ -190,7 +190,7 @@ class CalendarMode extends Mode {
             monthGrid.appendChild(d)
         }
 
-        const eventTotalsTable = this.parent.querySelector("#event-totals")
+        const eventTotalsTable = this.output.querySelector("#event-totals")
         while (eventTotalsTable?.firstElementChild) {
             eventTotalsTable.removeChild(eventTotalsTable.firstElementChild)
         }
@@ -221,7 +221,7 @@ class CalendarMode extends Mode {
         if (this.mode === "day") {
             return this._renderDay()
         } else {
-            const output = this.parent.querySelector("#month-display") as HTMLElement | null
+            const output = this.output.querySelector("#month-display") as HTMLElement | null
             if (!output) return document.createElement("div")
 
             const months = output.querySelector("#months") as HTMLDivElement
@@ -313,7 +313,7 @@ class CalendarMode extends Mode {
     chwin(win: Window & typeof globalThis) {
         this.win.close()
         this.win = win
-        this.parent = win.document.getElementById("calendar-output") as HTMLCanvasElement
+        this.output = win.document.getElementById("calendar-output") as HTMLCanvasElement
         this._setupWin()
     }
 }

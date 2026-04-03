@@ -5,27 +5,26 @@ class DisplayMode extends Mode {
 
     adding: boolean = false
 
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("div")
-            parent.classList.add("overflow")
-            parent.id = 'entry-output'
-            console.log("appending")
+        if(!output) {
+            output = document.createElement("div")
+            output.classList.add("overflow")
+            output.id = 'entry-output'
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            c = parent
+            o.append(output)
+            c = output
         }
-        super(parent, win, c)
+        super(output, win, c)
         this.displayQueue = []
 
-        if (this.parent instanceof this.win.HTMLElement) {
-            this.parent.addEventListener("scroll", (e) => {
-                if (!(this.parent instanceof this.win.HTMLElement))
+        if (this.output instanceof this.win.HTMLElement) {
+            this.output.addEventListener("scroll", (e) => {
+                if (!(this.output instanceof this.win.HTMLElement))
                     throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
 
-                if (this.parent.scrollHeight - this.parent.scrollTop > innerHeight + 1000) return
+                if (this.output.scrollHeight - this.output.scrollTop > innerHeight + 1000) return
 
                 if (this.displayQueue.length) {
                     const item = this.displayQueue.shift()
@@ -245,7 +244,7 @@ class DisplayMode extends Mode {
          * with requires filled in as the current item
          */
         newrequires: this.displayEntryAction(item => {
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const requiresIdEl = getElementOrThrowUI(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
 
             requiresIdEl.value = String(item.ItemId)
@@ -277,7 +276,7 @@ class DisplayMode extends Mode {
          * Creates a new item with the parentId set to the current item
          */
         newchild: this.displayEntryAction((item) => {
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
@@ -309,7 +308,7 @@ class DisplayMode extends Mode {
          * Creates a new item with copyOf set to the current item
          */
         newcopy: this.displayEntryAction((item) => {
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.parent.ownerDocument)
+            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
@@ -674,7 +673,7 @@ class DisplayMode extends Mode {
 
             const urlParams = new URLSearchParams(location.search)
             urlParams.set("item-id", String(item.ItemId))
-            const preview = this.parent.ownerDocument.open(location.pathname + "?" + urlParams.toString(), "_blank", "popup=true")
+            const preview = this.output.ownerDocument.open(location.pathname + "?" + urlParams.toString(), "_blank", "popup=true")
             if (!preview) return
 
             preview.onload = () => {
@@ -815,7 +814,7 @@ class DisplayMode extends Mode {
         let newOutput = win.document.getElementById("entry-output")
         if (!newOutput) return
 
-        this.parent = newOutput
+        this.output = newOutput
 
         if (!(newOutput instanceof HTMLElement)) return
 
@@ -832,7 +831,7 @@ class DisplayMode extends Mode {
     }
 
     refresh(id: bigint) {
-        let el = this.parent.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+        let el = this.output.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
         if (el)
             refreshDisplayItem.call(this, id)
@@ -870,14 +869,14 @@ class DisplayMode extends Mode {
     }
 
     put(html: string | HTMLElement | ShadowRoot) {
-        this.parent.append(html)
+        this.output.append(html)
     }
 
     clearSelected() {
         this.displayQueue.length = 0
         this.adding = false
         // displayEntryIntersected.clear()
-        for (let child of this.parent.querySelectorAll("display-entry")) {
+        for (let child of this.output.querySelectorAll("display-entry")) {
             const itemId = child.getAttribute("data-item-id")
             if (!itemId) continue
             removeDisplayItem.call(this, BigInt(itemId))
@@ -885,7 +884,7 @@ class DisplayMode extends Mode {
     }
 
     clear() {
-        for (let child of this.parent.childNodes) {
+        for (let child of this.output.childNodes) {
             if (child.nodeName === 'DISPLAY-ENTRY') continue
             child.remove()
         }
@@ -1895,7 +1894,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }
 
-    this.parent.append(el)
+    this.output.append(el)
 
     hookActionButtons(root, itemId)
 
@@ -2031,13 +2030,13 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
 function removeDisplayItem(this: DisplayMode, itemId: bigint) {
     // displayEntryIntersected.delete(String(itemId))
-    const el = this.parent.querySelector(`[data-item-id="${itemId}"]`)
+    const el = this.output.querySelector(`[data-item-id="${itemId}"]`)
     if (!el) return
     el.remove()
 }
 
 function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
-    let el = this.parent.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
+    let el = this.output.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
     if (!info) return
 
@@ -2067,7 +2066,7 @@ function _fetchLocationBackup(this: DisplayMode, itemId: bigint) {
     let provider = item.Type === "Show" ? "sonarr" : "radarr"
     alert(`Using ${provider} to find location`)
 
-    const popover = this.parent.ownerDocument.getElementById("items-listing") as HTMLDivElement
+    const popover = this.output.ownerDocument.getElementById("items-listing") as HTMLDivElement
 
     async function onfetchLocation(res: Response | null) {
         if (!res) {

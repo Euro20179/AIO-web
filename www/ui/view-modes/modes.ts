@@ -1,15 +1,24 @@
 class Mode {
     NAME: string = "Mode"
-    parent: HTMLElement | DocumentFragment
+    output: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
 
     container: HTMLElement | null
 
-    //using string will querySelector on the (win || window)'s document
-    constructor(parent: HTMLElement | DocumentFragment, win?: Window & typeof globalThis, container?: HTMLElement | null) {
+    // Explainer for output vs container
+    // The output is where information goes, the container is where the information + ui chrome is displayed
+    // If an output is not provided the container is created by the mode, and removed on close()
+    // This is the case because if an output is provided, the chrome is expected to be provided by the caller.
+
+    /**
+        * @param {HTMLElement | DocumentFragment} output The element that information gets put into in the mode, if not provided a container is created by the mode
+        * @param {Window & typeof globalThis} win The window where the mode is (defaults to parent window)
+        * @param {HTMLElement | null} container The container containing the output, if provided, it will be removed from the DOM on Mode.close()
+    */
+    constructor(output: HTMLElement | DocumentFragment, win?: Window & typeof globalThis, container?: HTMLElement | null) {
         this.win = win ||= window
         this.container = container || null
-        this.parent = parent
+        this.output = output
         if (this.win === null) {
             throw new Error("default view (window) is null")
         }

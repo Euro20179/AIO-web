@@ -7,25 +7,25 @@ class TierListMode extends Mode {
 
     previousMode = ""
 
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("tierlist-template")
-            c = parent
+        if(!output) {
+            output = document.createElement("tierlist-template")
+            c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            parent = parent.firstElementChild as HTMLElement
+            o.append(output)
+            output = output.firstElementChild as HTMLElement
         }
 
-        super(parent, win, c)
+        super(output, win, c)
 
         this.rows = {}
 
-        let temp = (this.parent.querySelector("tier-list") || document.createElement("tier-list")) as HTMLElement
+        let temp = (this.output.querySelector("tier-list") || document.createElement("tier-list")) as HTMLElement
 
-        let modeSelector = this.parent.querySelector("#tierlist-mode")
-        let customExpr = this.parent.querySelector("#tierlist-custom")
+        let modeSelector = this.output.querySelector("#tierlist-mode")
+        let customExpr = this.output.querySelector("#tierlist-custom")
 
         if (modeSelector instanceof this.win.HTMLSelectElement) {
             this.previousMode = modeSelector.value
@@ -76,8 +76,8 @@ class TierListMode extends Mode {
     }
 
     _getMode(): "general" | "user"  | "custom"{
-        let modeSelector = this.parent.querySelector("#tierlist-mode")
-        let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.parent)
+        let modeSelector = this.output.querySelector("#tierlist-mode")
+        let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
         if(custom?.value) {
             return "custom"
         }
@@ -104,7 +104,7 @@ class TierListMode extends Mode {
         } else if (mode === "user") {
             rating = user.UserRating
         } else /*custom*/ {
-            let customExprEl = getElementOrThrowUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.parent)
+            let customExprEl = getElementOrThrowUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
             const expr = customExprEl.value
             let item = findInfoEntryById(id)
             let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
@@ -180,7 +180,7 @@ class TierListMode extends Mode {
         if (!(tier !== false))
             throw new Error("Trying to remove item with an unknown tier")
 
-        const li = this.parent.querySelector(`#tier-item-${entry.ItemId}`)
+        const li = this.output.querySelector(`#tier-item-${entry.ItemId}`)
 
         if (li !== null) {
             li.remove()

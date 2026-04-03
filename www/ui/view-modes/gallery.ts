@@ -30,29 +30,29 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
 
 class GalleryMode extends Mode {
     NAME = "gallery-output"
-    constructor(parent?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!parent) {
-            parent = document.createElement("div")
-            c = parent
-            parent.classList.add("overflow")
-            parent.id = 'gallery-output'
-            parent.innerHTML = `<div id="gallery-items"></div>`
+        if(!output) {
+            output = document.createElement("div")
+            c = output
+            output.classList.add("overflow")
+            output.id = 'gallery-output'
+            output.innerHTML = `<div id="gallery-items"></div>`
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(parent)
-            parent = parent.firstElementChild as HTMLElement
+            o.append(output)
+            output = output.firstElementChild as HTMLElement
         }
-        super(parent, win, c)
+        super(output, win, c)
     }
 
     removeGalleryItem(entry: InfoEntry) {
-        let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
         el?.remove()
     }
 
     add(entry: InfoEntry) {
-        return renderGalleryItem(entry, this.parent)
+        return renderGalleryItem(entry, this.output)
     }
 
     sub(entry: InfoEntry) {
@@ -61,7 +61,7 @@ class GalleryMode extends Mode {
 
     addList(entry: InfoEntry[]) {
         for (let item of entry) {
-            renderGalleryItem(item, this.parent)
+            renderGalleryItem(item, this.output)
         }
     }
 
@@ -73,18 +73,18 @@ class GalleryMode extends Mode {
 
     refresh(id: bigint) {
         const entry = items_getEntry(id)
-        let el = this.parent.querySelector(`[data-item-id="${entry.ItemId}"]`)
+        let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
         if(!el) {
             console.error("Failed to refresh gallery item")
             return
         }
         const frag = new DocumentFragment()
         renderGalleryItem(entry.info, frag)
-        this.parent.replaceChild(frag, el)
+        this.output.replaceChild(frag, el)
     }
 
     clearSelected() {
-        for (let child of this.parent.querySelectorAll(`[data-item-id]`)) {
+        for (let child of this.output.querySelectorAll(`[data-item-id]`)) {
             child.remove()
         }
     }
@@ -92,7 +92,7 @@ class GalleryMode extends Mode {
     chwin(win: Window & typeof globalThis) {
         this.win.close()
         this.win = win
-        this.parent = win.document.getElementById("gallery-items") as HTMLDivElement
+        this.output = win.document.getElementById("gallery-items") as HTMLDivElement
     }
     close() {
         if(this.container)
