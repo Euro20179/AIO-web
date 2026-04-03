@@ -1711,9 +1711,12 @@ height: 100%;
 }
 </style>
 </head>
-<body>
-<button class="popout">✗</button>
+<body style='margin: var(--small-gap);'>
+<div style='float: right; align-content: center;' class='flex' id='settings'>
+    <button class="popout" style='float: right;'>✗</button>
+</div>
 </body>`)
+
 
         //this is where we are going to put the parent back
         const placeholder = document.createElement("p")
