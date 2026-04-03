@@ -2,41 +2,35 @@
     <dialog id="template-editor-container" onclose="
             clearInterval(this.querySelector(`input[type='text']`)._i)
         " style="font-size: 1rem;">
+        <script>
+            async function _updateTemplate() {
+                try {
+                    var res = await fetch(this.value)
+                } catch(err) {
+                    alert('Could not fetch from the url')
+                    clearInterval(this._i)
+                    this._i = null
+                }
+                this.getRootNode()
+                    .getElementById('template-editor')
+                    .value = await res.text()
+                this.getRootNode()
+                    .getElementById('template-editor')._updatePreview()
+            }
+        </script>
         <h2 style="font-size: revert;" class="center">Template editor</h2>
 
         <div class="j-center flex" style="gap: var(--small-gap)">
-            <input type="text" placeholder="pull from url"
-                onchange="(function(){
-                    if(!this.value) {
-                        clearInterval(this._i)
-                        this._i = null
-                        return
-                    }
-                    if(this._i) return
-
-                    this._i = setInterval(async () => {
-                        try {
-                            var res = await fetch(this.value)
-                        } catch(err) {
-                            alert('Could not fetch from the url')
-                            clearInterval(this._i)
-                            this._i = null
-                        }
-                        this.getRootNode()
-                            .getElementById('template-editor')
-                            .value = await res.text()
-                        this.getRootNode()
-                            .getElementById('template-editor')._updatePreview()
-                    }, 1000)
-                }).call(this)"
-                oninput="(function(){
-                    if(this._i) {
-                        clearInterval(this._i)
-                        this._i = null
-                        return
-                    }
-                }).call(this)"
+            <input id="template-url" type="text" placeholder="pull from url"
+                onchange="_updateTemplate.call(this)"
             />
+            <button
+                onclick="_updateTemplate.call(
+                    this.getRootNode().querySelector('#template-url')
+                )"
+            >
+                Update
+            </button>
 
             <input id="template-file" type="file" hidden
                 oninput="
