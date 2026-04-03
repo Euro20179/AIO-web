@@ -314,7 +314,7 @@ function _registerElement(name: string) {
 
             fuckingInsaneFirefoxHackToMakeSelectAppearNormally(this)
 
-            this.style.display = "contents"
+            this.style.display ||= "contents"
         }
     })
 }

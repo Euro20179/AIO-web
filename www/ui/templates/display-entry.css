@@ -308,6 +308,17 @@
         width: auto;
     }
 
+    #description-and-notes {
+        display: grid;
+        @container (width < 800px) {
+            grid-template-rows: 1fr 1fr;
+        }
+        @container (width > 799px) {
+            gap: var(--small-gap);
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
     :is(#description, #notes) {
         overflow: auto auto;
 

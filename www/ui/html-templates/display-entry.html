@@ -78,35 +78,40 @@
 </dialog>
 
 <div class="root" id="root">
-    <details class="hamburger-menu" style="
-            display: flex;
-            flex-direction: column;
-            float: right;
-            margin-inline: var(--small-gap);
-        ">
-        <summary>Actions</summary>
-        <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
-            <!-- this gets filled with de_item_interaction settings -->
-        </menu>
-    </details>
 
-    <details id="art-selectors">
-        <summary>Art Styles</summary>
-        <label for="is-Anime"><input type="checkbox" id="is-Anime" entry-action="toggleartstyle" entry-action-trigger="change">
-            Anime</label>
-        <label for="is-Cartoon"><input type="checkbox" id="is-Cartoon" entry-action="toggleartstyle" entry-action-trigger="change">
-            Cartoon</label>
-        <label for="is-Handdrawn"><input type="checkbox" id="is-Handdrawn" entry-action="toggleartstyle" entry-action-trigger="change">
-            Hand drawn</label>
-        <label for="is-Digital"><input type="checkbox" id="is-Digital" entry-action="toggleartstyle" entry-action-trigger="change">
-            Digitally drawn </label>
-        <label for="is-CGI"><input type="checkbox" name="is-CGI" id="is-cgi" entry-action="toggleartstyle" entry-action-trigger="change"> Cgi</label>
-        <label for="is-2D"><input type="checkbox" name="is-2D" id="is-2D" entry-action="toggleartstyle" entry-action-trigger="change"> 2D</label>
-        <label for="is-3D"><input type="checkbox" name="is-3D" id="is-3D" entry-action="toggleartstyle" entry-action-trigger="change"> 3D</label>
-        <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
-    </details>
+    <div class="flex wrap" style="float: right; gap: var(--small-gap);">
+        <details class="hamburger-menu" style="
+                display: flex;
+                flex-direction: column;
+                margin-inline: var(--small-gap);
+            ">
+            <summary>Actions</summary>
+            <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
+                <!-- this gets filled with de_item_interaction settings -->
+            </menu>
+        </details>
 
-    <menu aria-label="General item settings" class="flex" style="margin: 0; padding: 0;" id="menu-bar">
+        <details id="art-selectors">
+            <summary>Art Styles</summary>
+            <label for="is-Anime"><input type="checkbox" id="is-Anime" entry-action="toggleartstyle" entry-action-trigger="change">
+                Anime</label>
+            <label for="is-Cartoon"><input type="checkbox" id="is-Cartoon" entry-action="toggleartstyle" entry-action-trigger="change">
+                Cartoon</label>
+            <label for="is-Handdrawn"><input type="checkbox" id="is-Handdrawn" entry-action="toggleartstyle" entry-action-trigger="change">
+                Hand drawn</label>
+            <label for="is-Digital"><input type="checkbox" id="is-Digital" entry-action="toggleartstyle" entry-action-trigger="change">
+                Digitally drawn </label>
+            <label for="is-CGI"><input type="checkbox" name="is-CGI" id="is-cgi" entry-action="toggleartstyle" entry-action-trigger="change"> Cgi</label>
+            <label for="is-2D"><input type="checkbox" name="is-2D" id="is-2D" entry-action="toggleartstyle" entry-action-trigger="change"> 2D</label>
+            <label for="is-3D"><input type="checkbox" name="is-3D" id="is-3D" entry-action="toggleartstyle" entry-action-trigger="change"> 3D</label>
+            <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
+        </details>
+
+        <de-cost-calculation-modifiers>
+        </de-cost-calculation-modifiers>
+    </div>
+
+    <menu aria-label="Display and item settings" class="flex" style="margin: 0; padding: 0;" id="menu-bar">
 
         <input id="library" type="button" entry-action="chooselibrary"
             toggle-hint="library-hint">
@@ -135,8 +140,6 @@
         </div>
 
     </menu>
-    <de-cost-calculation-modifiers>
-    </de-cost-calculation-modifiers>
 
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
@@ -224,15 +227,17 @@
 
     </div>
 
-    <section>
-        <hr>
-        <de-notes></de-notes>
-    </section>
+    <div id="description-and-notes">
+        <section>
+            <hr>
+            <de-description></de-description>
+        </section>
 
-    <section>
-        <hr>
-        <de-description></de-description>
-    </section>
+        <section>
+            <hr>
+            <de-notes></de-notes>
+        </section>
+    </div>
 
     <div id="relationship-display">
         <hr>
