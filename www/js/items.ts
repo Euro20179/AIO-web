@@ -1473,6 +1473,7 @@ function items_countryOfOrigin2Flag(origin: string) {
         "JP": "🇯🇵",
         "Canada": "🇨🇦",
         "United States": "🇺🇸",
+        "USA": "🇺🇸",
         "United Kingdom": "🇬🇧",
         "South Korea": "🇰🇷",
         "Netherlands": "🇳🇱",
