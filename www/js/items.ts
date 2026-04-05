@@ -1475,7 +1475,11 @@ function items_countryOfOrigin2Flag(origin: string) {
         "United States": "🇺🇸",
         "United Kingdom": "🇬🇧",
         "South Korea": "🇰🇷",
-        "Netherlands": "🇳🇱"
+        "Netherlands": "🇳🇱",
+        "Ireland": "🇮🇪",
+        "France": "🇫🇷",
+        "Belgium": "🇧🇪",
+        "Sweden": "🇸🇪"
     }
     let str = ""
     for(let o of origin.split(",")) {
