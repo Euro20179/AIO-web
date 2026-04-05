@@ -27,6 +27,12 @@
         color: var(--error);
         border-color: var(--error);
     }
+
+    .hamburger-menu {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
 }
 
 @layer components {
@@ -64,10 +70,6 @@
     }
 
     #art-selectors {
-        float: right;
-        display: flex;
-        flex-direction: column;
-
         label {
             text-wrap: nowrap;
         }
