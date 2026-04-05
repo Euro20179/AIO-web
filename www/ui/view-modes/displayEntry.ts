@@ -1614,6 +1614,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
         displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
 
+        if(meta.Country) {
+            let flags = items_countryOfOrigin2Flag(meta.Country)
+            displayEntryTitle.title += ` (${meta.Country})`
+            displayEntryTitle.setAttribute("data-country-origin-flag", flags)
+        }
+
         //format
         formatToName(item.Format).then(name => {
             displayEntryTitle?.setAttribute("data-format-name", name)

@@ -1466,3 +1466,20 @@ function items_sequenceNumberGrabber(text: string, allItems: string[]): number |
         }
     })[0][1])
 }
+
+function items_countryOfOrigin2Flag(origin: string) {
+    const flags = {
+        "Japan": "🇯🇵",
+        "JP": "🇯🇵",
+        "United States": "🇺🇸",
+        "United Kingdom": "🇬🇧",
+        "South Korea": "🇰🇷",
+        "Netherlands": "🇳🇱"
+    }
+    let str = ""
+    for(let o of origin.split(",")) {
+        o = o.trim()
+        str += (flags[o as keyof typeof flags] || o) + " "
+    }
+    return str.trim()
+}
