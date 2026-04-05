@@ -6,29 +6,33 @@
         </a>
     </summary>
 
-    <label for="include-self-in-cost">
-        <input type="checkbox" id="include-self-in-cost" checked>
-        Self
-    </label>
+    <menu aria-label="Related item inclusions"
+            aria-description="Select kinds of related items that should be included in the cost, and events table"
+            class="grid row p-0 m-0">
+        <label for="include-self-in-cost">
+            <input type="checkbox" id="include-self-in-cost" checked>
+            Self
+        </label>
 
-    <label for="include-children-in-cost">
-        <input type="checkbox" id="include-children-in-cost">
-        Children
-    </label>
+        <label for="include-children-in-cost">
+            <input type="checkbox" id="include-children-in-cost">
+            Children
+        </label>
 
-    <label for="include-copies-in-cost">
-        <input type="checkbox" id="include-copies-in-cost">
-        Copies
-    </label>
+        <label for="include-copies-in-cost">
+            <input type="checkbox" id="include-copies-in-cost">
+            Copies
+        </label>
 
-    <label for="include-requires-in-cost">
-        <input type="checkbox" id="include-requires-in-cost">
-        Requires
-    </label>
+        <label for="include-requires-in-cost">
+            <input type="checkbox" id="include-requires-in-cost">
+            Requires
+        </label>
 
-    <label for="include-recusively-in-cost">
-        <input type="checkbox" id="include-recusively-in-cost">
-        Recursive
-    </label>
+        <label for="include-recusively-in-cost">
+            <input type="checkbox" id="include-recusively-in-cost">
+            Recursive
+        </label>
+    </menu>
 </details>
 </template>
