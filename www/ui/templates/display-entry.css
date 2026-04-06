@@ -113,11 +113,14 @@
         width: fit-content;
 
         #thumbnail {
-            max-width: min(20cqw, 300px);
+            max-width: 90cqi;
         }
     }
 
     #thumbnail-fig {
+        container-type: inline-size;
+        container-name: thumbnail-fig;
+        width: clamp(20ch, 30cqi, 30ch);
         float: left;
         margin: 0 var(--small-gap) 0 0;
 
