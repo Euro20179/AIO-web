@@ -112,7 +112,7 @@
 
 
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <menu aria-label="Display and item settings" class="flex j-center m-0 p-0" id="menu-bar">
+        <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
 
             <input id="library" type="button" entry-action="chooselibrary"
                 toggle-hint="library-hint">
@@ -123,13 +123,13 @@
                 entry-action="settype" entry-action-trigger="change"> </select>
             <span id="type-hint" popover='hint'>Media Type</span>
 
-            <div class="flex">
+            <div class="flex wrap">
                 <select id="format-selector" toggle-hint='format-hint'
                     style="min-width: 50px;"
                     entry-action="setformat" entry-action-trigger="change"></select>
                 <span id="format-hint" popover='hint'>Media Format</span>
 
-                <div style="align-content: center;" class="flex">
+                <div class="flex wrap">
                     <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
                         style="aspect-ratio: 1; height: 10px; align-self: center;">
                     <label for="format-digitized"
