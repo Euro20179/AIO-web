@@ -89,7 +89,7 @@ async function main() {
         //prevents error with embeded credentials
         location.hash ||= "#";
         const settings = await getSettings(Number(localStorage.getItem("userUID")));
-        doUIStartupScript(settings.UIStartupScript, settings.StartupLang);
+        doUserStartupUI(settings);
     }
 
     fillFormatSelectionUI(

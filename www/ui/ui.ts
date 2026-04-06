@@ -1631,7 +1631,21 @@ function updatePageInfoWithItemUI(item: InfoEntry) {
 }
 
 type StartupLang = "javascript" | "aiol" | ""
-function doUIStartupScript(script: string, lang: StartupLang) {
+function doUserStartupUI(settings: UserSettings) {
+    const script = settings.UIStartupScript
+    const lang = settings.StartupLang
+
+    for(let key in settings) {
+        if(key.startsWith("template-")) {
+            if(!settings[key as keyof typeof settings]) continue
+            const tmpl = key.split("template-")[1]
+            const tmplEl = currentDocument().getElementById(tmpl)
+            if(!tmplEl) continue
+            console.log("Yep", key)
+            tmplEl.innerHTML = settings[key as keyof typeof settings]
+        }
+    }
+
     if (script === "") return
 
     if (lang == "aiol" || lang == "") {

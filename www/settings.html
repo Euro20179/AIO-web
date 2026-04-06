@@ -7,6 +7,19 @@
     <title>Settings</title>
     <link href="/css/colors.css" rel="stylesheet">
     <link href="/css/general.css" rel="stylesheet">
+
+    <style>
+        form label:has(textarea){
+            display: flex;
+            flex-direction: column;
+        }
+
+        #forms {
+            display: flex;
+            flex-direction: column;
+            gap: 3cap;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,35 +29,102 @@
     </p>
     <h3 id="status"></h3>
 
-    <form method="get" action="javascript:void(0)">
-        <input name="setting" value="StartupLang" type="hidden">
-        <label for="startup-lang">Startup script language</label>
-        <select id="startup-lang" name="value" onchange="done(this.form)">
-            <option value="javascript">javascript</option>
-            <option value="aiol">aiol</option>
-        </select>
-    </form>
+    <section id="forms">
+        <h3>Startup Script</h3>
+        <form method="get" action="javascript:void(0)">
+            <input name="setting" value="StartupLang" type="hidden">
+            <label for="startup-lang">Startup script language</label>
+            <select id="startup-lang" name="value" onchange="done(this.form)">
+                <option value="javascript">javascript</option>
+                <option value="aiol">aiol</option>
+            </select>
+        </form>
 
-    <form method="get" action="javascript:void(0)" id="script-form">
-        <input name="setting" value="UIStartupScript" type="hidden">
-        <label for="startup-script">Startup script</label>
-        <textarea id="startup-script" onchange="done(this.form)" rows="40" cols="80" form="script-form"
-            name="value"></textarea>
-    </form>
+        <form method="get" action="javascript:void(0)" id="script-form">
+            <input name="setting" value="UIStartupScript" type="hidden">
+            <label for="startup-script">Startup script
+                <textarea id="startup-script" onchange="done(this.form)" rows="40" cols="80" form="script-form"
+                    name="value"></textarea>
+            </label>
+        </form>
+
+        <h3>Many, Many Templates</h3>
+    </section>
 </body>
+
 <script src="/js/api.js"></script>
 <script src="/ui/ui.js"></script>
+<script src="/ui/components.js"></script>
 
 <script>
-
     const urlData = new URLSearchParams(document.location.search)
     const uid = Number(urlData.get("uid") || prompt("uid"))
+
+    function setupComponentForm(component, defaultTemplate = "") {
+        let form = document.getElementById(`template-${component}`)
+        if(form) {
+            form.querySelector(`[name="value"]`).value = defaultTemplate
+            return
+        } else {
+            form = document.createElement("form")
+        }
+        form.id = `template-${component}`
+        form.action = "javascript:void(0)"
+
+        const label = document.createElement("label")
+        label.innerHTML  = `Template for <code>${component}</code>`
+        const te = document.createElement("textarea")
+        const settingIn = document.createElement("input")
+        settingIn.name = "setting"
+        settingIn.value = `template-${component}`
+        settingIn.type = 'hidden'
+        te.name = "value"
+        if(defaultTemplate == "") {
+            fetch(`/ui/html-templates/${component}.html`).then(res => res.text())
+            .then(text => {
+                const p = new DOMParser
+                const d = p.parseFromString(text, "text/html")
+                te.value = d.querySelector("template").innerHTML
+            })
+        } else {
+            te.value = defaultTemplate
+        }
+        te.onchange = function() {
+            done(this.form)
+        }
+        te.rows="40"
+        te.cols="80"
+        label.append(te)
+        form.append(settingIn, label)
+
+        const del = document.createElement("button")
+        del.onclick = function() {
+            fetch(`/settings/delete/?uid=${uid}&setting=template-${component}`,{
+                method: "DELETE"
+            }).then(res => {
+                if(res.status !== 200) return
+                alert(`${component} setting deleted, reset to default`)
+            })
+        }
+        del.innerText = `🗑 ${component}`
+
+        window.forms.append(form, del)
+    }
+    for(let component of component_templates.concat(["display-entry"])) {
+        setupComponentForm(component)
+    }
 
     fetch(`/settings/get?uid=${uid}`)
         .then(res => res.json())
         .then(settings => {
             window['startup-script'].value = settings["UIStartupScript"]
             window['startup-lang'].value = settings['StartupLang']
+
+            for(let setting in settings) {
+                if(setting.startsWith("template-")) {
+                    setupComponentForm(setting.split("template-")[1], settings[setting])
+                }
+            }
         })
 
     function alert(text) {
@@ -55,6 +135,7 @@
         authorizedRequest(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}&uid=${uid}`)
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
+
 </script>
 
 </html>

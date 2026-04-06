@@ -319,7 +319,7 @@ function _registerElement(name: string) {
     })
 }
 
-for (const name of [
+const component_templates = [
     "de-status-menu",
     "de-cost-calculation-modifiers",
     "de-notes",
@@ -346,6 +346,8 @@ for (const name of [
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
-]) {
+]
+
+for (const name of component_templates) {
     _registerElement(name)
 }

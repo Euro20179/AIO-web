@@ -68,4 +68,20 @@ function set_setting($uid, $key, $value) {
 
     file_put_contents("$root/$uid/settings.json", $data);
 }
+
+function del_setting($uid, $key) {
+    $root = settingsroot();
+    $settings = get_settings($uid, false);
+
+    unset($settings[$key]);
+
+    $data = json_encode($settings);
+
+    if (!is_dir("$root/$uid")) {
+        error_log("MAKING $root/$uid");
+        mkdir("$root/$uid");
+    }
+
+    file_put_contents("$root/$uid/settings.json", $data);
+}
 ?>
