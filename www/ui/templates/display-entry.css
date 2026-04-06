@@ -122,10 +122,8 @@
 
         font-size: min(1em, 3cqw);
 
-        max-width: 30cqw;
+        max-width: 30cqi;
         overflow: auto auto;
-
-        width: min-width;
 
         hr {
             width: 100%;
@@ -134,11 +132,8 @@
         }
 
         @container entry (width < 450px) {
-            float: none;
-
             display: flex;
             flex-direction: row;
-            max-width: revert;
             flex-wrap: wrap;
             justify-content: center;
         }
