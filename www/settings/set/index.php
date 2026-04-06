@@ -1,6 +1,12 @@
 <?php
 include "../../lib/util.php";
 
+if($_SERVER['REQUEST_METHOD'] != "POST") {
+    http_response_code(405);
+    exit();
+}
+
+
 if (array_key_exists("auth", $_GET)) {
     $auth = $_GET["auth"];
 } else if (array_key_exists("HTTP_AUTHORIZATION", $_SERVER)) {
@@ -25,8 +31,9 @@ if (!array_key_exists("uid", $_GET)) {
 
 $params = array("setting", "value");
 $fail = false;
+parse_str(file_get_contents("php://input"), $qs_data);
 foreach ($params as $param) {
-    if (!array_key_exists($param, $_GET)) {
+    if (!array_key_exists($param, $qs_data)) {
         http_response_code(400);
         header("Content-Type: text/markdown");
         echo "Expected url parameter: `$param`\r\n";
@@ -40,5 +47,5 @@ if ($fail) {
 
 
 $uid = $_GET["uid"];
-set_setting($uid, $_GET["setting"], $_GET["value"]);
+set_setting($uid, $qs_data["setting"], $qs_data["value"]);
 ?>

@@ -68,6 +68,7 @@
         } else {
             form = document.createElement("form")
         }
+        form.method = "POST"
         form.id = `template-${component}`
         form.action = "javascript:void(0)"
 
@@ -139,7 +140,14 @@
     }
     function done(form) {
         const data = new FormData(form)
-        authorizedRequest(`/settings/set?setting=${encodeURIComponent(data.get("setting"))}&value=${encodeURIComponent(data.get("value"))}&uid=${uid}`)
+        const params = new URLSearchParams({setting: data.get("setting"), value: data.get("value")})
+        authorizedRequest(`/settings/set?uid=${uid}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: params.toString()
+        })
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
 

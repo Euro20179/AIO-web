@@ -11,8 +11,6 @@ if (array_key_exists("auth", $_GET)) {
     exit();
 }
 
-error_log("auth");
-error_log($auth);
 if (!ckauth($auth)) {
     http_response_code(401);
     exit();
