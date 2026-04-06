@@ -703,6 +703,33 @@ class DisplayMode extends Mode {
         }),
 
         /**
+         * Asks the user to set the number of minutes they've spent
+         * on the current item
+         */
+         setviewminutes: this.displayEntryAction(async (item) => {
+            let count = await promptNumber("The number of minutes you've spent viewing this entry", 'Not a number, minutes spent')
+            if (count === null) return
+
+            authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&minutes=${count}`)
+                .then(res => res?.text())
+                .then(alert)
+                .then(() => {
+                    let user = findUserEntryById(item.ItemId)
+                    if (!user) {
+                        refreshInfo(getUidUI()).then(() => {
+                            refreshDisplayItem.call(this, item.ItemId)
+                        })
+                    } else {
+                        user.Minutes = count
+                        updateInfo2({
+                            [String(item.ItemId)]: { user }
+                        })
+                    }
+                })
+                .catch(console.error)
+         }),
+
+        /**
          * Asks the user to set the view count of the current item
          */
         setviewcount: this.displayEntryAction(async (item) => {
@@ -719,7 +746,7 @@ class DisplayMode extends Mode {
                             refreshDisplayItem.call(this, item.ItemId)
                         })
                     } else {
-                        user.ViewCount = Number(count)
+                        user.ViewCount = count
                         updateInfo2({
                             [String(item.ItemId)]: { user }
                         })
@@ -1693,24 +1720,19 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     let type = item.Type
 
     //View count
-    let viewCount = user.ViewCount
-    if (viewCount || user.Minutes) {
-        renderComponent("#view-count", viewCountEl => {
-            const user = findUserEntryById(item.ItemId)
-            let mins = user.Minutes
-                || Number(viewCount) * Number(mediaDependant[`${type}-length`] || 0)
+    renderComponent("#view-time", viewCountEl => {
+        const user = findUserEntryById(item.ItemId)
+        let mins = user.Minutes
+            || Number(user.ViewCount) * Number(mediaDependant[`${type}-length`] || 0)
 
-            viewCountEl.title = String(mins) + " minutes"
+        viewCountEl.title = String(mins) + " minutes"
 
-            let minutesRounded = String(Math.round(mins / 0.6) / 100 || "unknown")
-            if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
-                user.Minutes = mins
-                api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
-            }
-            viewCountEl.setAttribute("data-time-spent", minutesRounded)
-            viewCountEl.innerText = String(viewCount)
-        })
-    }
+        if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
+            user.Minutes = mins
+            api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
+        }
+        viewCountEl.innerText = String((mins / 60).toFixed(2))
+    })
 
     renderComponent("#media-info", mediaInfoTbl => {
         //remove the <Media>- part from the key looks ugly

@@ -210,8 +210,13 @@
             </div>
 
             <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-                <button id="view-count" class="view-count center styleless-button" style="margin: 0 auto; display: block;" entry-action="setviewcount"
-                    put-data="ViewCount"></button>
+                <p class="m-0 center">
+                    Viewed
+                    <button id="view-count" class="view-count center styleless-button" entry-action="setviewcount"
+                        put-data="ViewCount"></button>
+                    Times
+                    (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
+                </p>
 
                 <figure class="entry-progress">
                     <div class="viewing relative">
