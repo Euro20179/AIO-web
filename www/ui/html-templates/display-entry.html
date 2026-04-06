@@ -110,39 +110,38 @@
         </de-cost-calculation-modifiers>
     </div>
 
-    <menu aria-label="Display and item settings" class="flex" style="margin: 0; padding: 0;" id="menu-bar">
-
-        <input id="library" type="button" entry-action="chooselibrary"
-            toggle-hint="library-hint">
-        <span id="library-hint" popover="hint">Library</span>
-
-        <select id="type-selector" style="min-width: 50px;"
-            toggle-hint="type-hint"
-            entry-action="settype" entry-action-trigger="change"> </select>
-        <span id="type-hint" popover='hint'>Media Type</span>
-
-        <div class="flex">
-            <select id="format-selector" toggle-hint='format-hint'
-                style="min-width: 50px;"
-                entry-action="setformat" entry-action-trigger="change"></select>
-            <span id="format-hint" popover='hint'>Media Format</span>
-
-            <div style="align-content: center;" class="flex">
-                <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
-                    style="aspect-ratio: 1; height: 10px; align-self: center;">
-                <label for="format-digitized"
-                    toggle-hint='digitized-hint'
-                    style="align-self: center;">Digitized
-                    <span popover='hint' id='digitized-hint'>Whether or not the item is a digitized/digital version of the format</span>
-                </label>
-            </div>
-        </div>
-
-    </menu>
 
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <!-- <div class="grid" style="grid-auto-flow: column; grid-template-columns: repeat(auto-fit, minmax(3ch, 1fr));"> -->
-        <!-- </div> -->
+        <menu aria-label="Display and item settings" class="flex j-center m-0 p-0" id="menu-bar">
+
+            <input id="library" type="button" entry-action="chooselibrary"
+                toggle-hint="library-hint">
+            <span id="library-hint" popover="hint">Library</span>
+
+            <select id="type-selector" style="min-width: 50px;"
+                toggle-hint="type-hint"
+                entry-action="settype" entry-action-trigger="change"> </select>
+            <span id="type-hint" popover='hint'>Media Type</span>
+
+            <div class="flex">
+                <select id="format-selector" toggle-hint='format-hint'
+                    style="min-width: 50px;"
+                    entry-action="setformat" entry-action-trigger="change"></select>
+                <span id="format-hint" popover='hint'>Media Format</span>
+
+                <div style="align-content: center;" class="flex">
+                    <input type="checkbox" placeholder="digitized" entry-action="setdigitization" id="format-digitized"
+                        style="aspect-ratio: 1; height: 10px; align-self: center;">
+                    <label for="format-digitized"
+                        toggle-hint='digitized-hint'
+                        style="align-self: center;">Digitized
+                        <span popover='hint' id='digitized-hint'>Whether or not the item is a digitized/digital version of the format</span>
+                    </label>
+                </div>
+            </div>
+
+        </menu>
+
         <input type="file" hidden id="thumbnail-file-upload">
 
         <button class="styleless-button" entry-action="setthumbnail">
@@ -183,12 +182,14 @@
     </figure>
 
     <div id="misc-info" class="flex row wrap j-center">
-        <hgroup class="flex column center">
-            <div class="flex j-center">
-                <h4 class="m-0" id="on-format" style="align-self: center;"></h4>
-                <h1 class="m-0 title center" id="main-title"></h1>
-                <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
+        <hgroup class="flex column center" style="max-width: 50cqb;">
+            <div>
+                <span id="on-format"></span>
+                <span id="media-type"></span>
+                <h1 class="m-0 title center inline" id="main-title"></h1>
+                <span id="country-origin"></span>
             </div>
+            <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
 
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
 
@@ -213,7 +214,7 @@
                 (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
             </p>
 
-            <figure class="entry-progress">
+            <figure class="entry-progress" style="width: 50%; margin: 0 auto;">
                 <div class="viewing relative">
                     <div id="multiple-progress">
                     </div>

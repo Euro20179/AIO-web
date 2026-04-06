@@ -286,6 +286,10 @@
         display: block;
     }
 
+    .inline {
+        display: inline;
+    }
+
     .none {
         display: none;
     }

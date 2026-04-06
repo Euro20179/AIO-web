@@ -1561,12 +1561,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         })
     })
 
-    renderComponent("#on-format", async (onFormat) => {
-        if (!(await formatToName(item.Format)).startsWith("UNOWNED")) {
-            onFormat.innerHTML = formatToSymbolUI(item.Format)
-        }
-    })
-
 
     renderComponent("#format-digitized", () => {
         const digitized = el.getElementById("format-digitized")
@@ -1627,6 +1621,25 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     let formatIcon = formatToSymbolUI(item.Format)
+    renderComponent("#on-format", async (onFormat) => {
+        const name = await formatToName(item.Format)
+        if (!(name).startsWith("UNOWNED")) {
+            onFormat.title = name
+            onFormat.innerHTML = formatToSymbolUI(item.Format)
+        }
+    })
+
+    renderComponent("#media-type", el => {
+        el.innerText = typeIcon
+        el.title = item.Type
+    })
+    renderComponent("#country-origin", el => {
+        if(meta.Country) {
+            let flags = items_countryOfOrigin2Flag(meta.Country)
+            el.title = ` (${meta.Country})`
+            el.innerText =  flags
+        }
+    })
     renderComponent("#main-title", displayEntryTitle => {
         displayEntryTitle.innerText = meta.Title || item.En_Title
         //only set the title of the heading to the user's title if the metadata title exists

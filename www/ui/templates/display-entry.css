@@ -358,16 +358,9 @@
     }
 
     #main-title {
-        &::after {
-            font-size: 0.5em;
-            content: " " attr(data-country-origin-flag)
-        }
         &[data-owner]::after {
+            font-size: 0.5em;
             content: " "  attr(data-country-origin-flag) "  (owner: " attr(data-owner) ")";
-        }
-
-        &::before {
-            content: attr(data-type-icon) " ";
         }
     }
 
