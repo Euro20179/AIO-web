@@ -34,6 +34,10 @@
             document.body.append(style)
         }
 
+
+        function color_scheme_set_scheme(name) {
+            window['color-scheme'].value = name
+        }
         /*
         IMPORTANT:
         registering dark/light here wont do because ui.ts needs to switch it to

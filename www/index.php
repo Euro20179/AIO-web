@@ -81,6 +81,7 @@
         <button onclick="signinUI()">Login</button>
         <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
         <a href="/create-account.php"><button>Create account</button></a>
+        <button onclick="delete_account()">Delete account</button>
     </nav>
 
     <header>
@@ -108,6 +109,17 @@
     </footer>
 
     <script>
+
+        function delete_account() {
+            if(!confirm("Are you sure you want to delete your account")) {
+                return;
+            }
+            localStorage.removeItem("userAuth")
+            authorizedRequest(`${AIO}/account/delete`, {
+                ["signin-reason"]: "Sign in to delete your account",
+                method: "DELETE"
+            })
+        }
 
         function userFilter(inp) {
             const search = inp.value.toLowerCase()
