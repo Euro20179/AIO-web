@@ -199,11 +199,10 @@
 
         @container (width >=70ch) {
             justify-self: end;
+
         }
-
-        width: 50px;
-        aspect-ratio: 1 / 1;
-
+        height: 100%;
+        min-width: 50px; /*otherwise this button gets *way* too narrow*/
     }
 
     #search-area {
