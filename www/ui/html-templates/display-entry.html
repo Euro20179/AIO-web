@@ -148,15 +148,6 @@
             <img src="" alt="" class="thumbnail" id="thumbnail">
         </button>
 
-        <div id="genres" style="margin-bottom: calc(var(--small-gap) / 2);" class="flex wrap j-center"></div>
-
-        <div style="
-            text-align: center;
-        " class="j-center flex">
-            <div class="tags" id="tags">
-                <button id="create-tag" toggle-hint>+ <span popover='hint'>Add Tag</span></button>
-            </div>
-        </div>
 
         <table class="media-info" id="media-info"></table>
 
@@ -228,9 +219,18 @@
 
     <de-notes></de-notes>
 
+    <div style="
+        text-align: center;
+    " class="flex wrap">
+        <div class="tags" id="tags">
+            <button id="create-tag" toggle-hint>+ <span popover='hint'>Add Tag</span></button>
+        </div>
+    </div>
+
     <div id="description-and-notes">
         <section>
             <de-description></de-description>
+            <div id="genres" style="margin-bottom: calc(var(--small-gap) / 2);" class="flex wrap"></div>
         </section>
 
         <section>
