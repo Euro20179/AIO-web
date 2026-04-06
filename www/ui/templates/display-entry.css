@@ -59,7 +59,7 @@
     #menu-bar {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(10ch, 1fr));
-        gap: var(--small-gap);
+        gap: min(1cqi, var(--small-gap));
         column-rule: currentColor 1px dashed;
 
         margin-bottom: var(--small-gap);
@@ -71,7 +71,6 @@
         & > :last-child {
             grid-column: span 2;
             justify-self: center;
-            flex-wrap: wrap;
         }
     }
 
