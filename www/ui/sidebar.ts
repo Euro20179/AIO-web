@@ -257,6 +257,7 @@ function renderSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Documen
     const btn = elem.shadowRoot.querySelector("button") as HTMLButtonElement
     btn.addEventListener("mousedown", e => {
         if (e.button === 1 || e.button === 0) {
+            elem.focus()
             handleMouse(e.button, e.altKey, e.ctrlKey)
             e.preventDefault()
         }
