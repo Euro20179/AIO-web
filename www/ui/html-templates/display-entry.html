@@ -145,25 +145,6 @@
         <!-- </div> -->
         <input type="file" hidden id="thumbnail-file-upload">
 
-        <hgroup class="flex column center">
-            <h1 class="m-0 title center" id="main-title"></h1>
-            <div class="flex wrap j-center" style="gap: var(--small-gap);">
-                <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
-                <h4 class="m-0" id="on-format"></h4>
-            </div>
-            <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
-            <div style="justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
-                <button class="rating styleless-button" id="user-rating"
-                    toggle-hint='your-rating-hint'
-                    entry-action="setrating">??</button>
-                <span id='your-rating-hint' popover='hint'>Your Rating</span>
-
-                <span>(<span class="audience-rating" id="audience-rating" toggle-hint='audience-rating-hint'>??</span>)</span>
-                <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
-                <button class="cost styleless-button" id="cost"></button>
-            </div>
-        </hgroup>
-
         <button class="styleless-button" entry-action="setthumbnail">
             <img src="" alt="" class="thumbnail" id="thumbnail">
         </button>
@@ -201,35 +182,50 @@
         ></textarea>
     </figure>
 
-    <div>
-        <div id="misc-info" class="flex row wrap j-center">
-
-            <div class="tables flex column" id="event-table-area">
-                <input type="search" placeholder="filter events" id="user-actions-filter">
-                <table class="user-actions" id="user-actions"></table>
+    <div id="misc-info" class="flex row wrap j-center">
+        <hgroup class="flex column center">
+            <div class="flex j-center">
+                <h4 class="m-0" id="on-format" style="align-self: center;"></h4>
+                <h1 class="m-0 title center" id="main-title"></h1>
+                <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
             </div>
 
-            <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-                <p class="m-0 center">
-                    Viewed
-                    <button id="view-count" class="view-count center styleless-button" entry-action="setviewcount"
-                        put-data="ViewCount"></button>
-                    Times
-                    (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
-                </p>
+            <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
 
-                <figure class="entry-progress">
-                    <div class="viewing relative">
-                        <div id="multiple-progress">
-                        </div>
+            <div style="flex-grow: 1;justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
+                <button class="rating styleless-button" id="user-rating"
+                    toggle-hint='your-rating-hint'
+                    entry-action="setrating">??</button>
+                <span id='your-rating-hint' popover='hint'>Your Rating</span>
+
+                <span style="align-self: center;">(<span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'>??</span>)</span>
+                <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
+                <button class="cost styleless-button" id="cost"></button>
+            </div>
+        </hgroup>
+
+        <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
+            <p class="m-0 center">
+                Viewed
+                <button id="view-count" class="view-count center styleless-button" entry-action="setviewcount"
+                    put-data="ViewCount"></button>
+                Times
+                (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
+            </p>
+
+            <figure class="entry-progress">
+                <div class="viewing relative">
+                    <div id="multiple-progress">
                     </div>
-                </figure>
+                </div>
+            </figure>
 
-                <de-status-menu></de-status-menu>
-            </div>
+            <de-status-menu></de-status-menu>
         </div>
 
     </div>
+
+    <de-notes></de-notes>
 
     <div id="description-and-notes">
         <section>
@@ -237,7 +233,12 @@
         </section>
 
         <section>
-            <de-notes></de-notes>
+            <hr>
+            <div class="tables flex column" id="event-table-area">
+                <input type="search" placeholder="filter events" id="user-actions-filter">
+                <button popout-target="user-actions" class="popout">↗</button>
+                <table class="user-actions" id="user-actions"></table>
+            </div>
         </section>
     </div>
 
