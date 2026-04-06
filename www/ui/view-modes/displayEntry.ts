@@ -1764,12 +1764,17 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     el.host.setAttribute("data-user-status", user.Status)
 
     //Media dependant
-    const lengthInNumber =
-        mediaDependant[`${type}-episodes`]
-        || mediaDependant[`${type}-volumes`]
-        || mediaDependant[`${type}-chapters`]
-        || mediaDependant[`${type}-page-count`]
-        || 0
+    let lengthInNumber: 0 | string = 0
+    for(let key in mediaDependant) {
+        if(
+            key.endsWith("episodes")
+            || key.endsWith(`volumes`)
+            || key.endsWith(`chapters`)
+            || key.endsWith(`page-count`)
+        ) {
+            lengthInNumber = mediaDependant[key]
+        }
+    }
 
     renderComponent("#entry-progressbar", progressEl => {
         if (!("max" in progressEl &&
@@ -1781,7 +1786,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     renderComponent("#entry-progressbar-position-label", captionEl => {
         captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
-        captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber) * 1000) / 10}%`
+        captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber || '0') * 1000) / 10}%`
     })
 
     renderComponent("#multiple-progress", multipleProgressEl => {
