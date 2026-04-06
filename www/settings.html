@@ -115,7 +115,14 @@
     }
 
     fetch(`/settings/get?uid=${uid}`)
-        .then(res => res.json())
+        .then(res => {
+            if(res.status === 401) {
+                alert("You are not logged in, redirecting to login page")
+                location = `/login?location=/settings.html?uid=${uid}`
+                return
+            }
+            return res.json()
+        })
         .then(settings => {
             window['startup-script'].value = settings["UIStartupScript"]
             window['startup-lang'].value = settings['StartupLang']
