@@ -19,6 +19,27 @@
             flex-direction: column;
             gap: 3cap;
         }
+
+        #notifications {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--main);
+            padding: 2em;
+
+            .notification {
+                border: 1px solid;
+                padding: 3em;
+                background: var(--main);
+            }
+
+            &:not(:has(.notification)){
+                h4 {
+                    display: none;
+                }
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -27,7 +48,10 @@
     <p>
         <a href="/usage/">助けてよ</a>
     </p>
-    <h3 id="status"></h3>
+
+    <div id="notifications">
+        <h4>Notification</h4>
+    </div>
 
     <section id="forms">
         <h3>Startup Script</h3>
@@ -52,6 +76,7 @@
     </section>
 </body>
 
+<script src="/ui/globals.js"></script>
 <script src="/js/api.js"></script>
 <script src="/ui/ui.js"></script>
 <script src="/ui/components.js"></script>
@@ -59,6 +84,8 @@
 <script>
     const urlData = new URLSearchParams(document.location.search)
     const uid = Number(urlData.get("uid") || prompt("uid"))
+
+    const forms = document.getElementById("forms")
 
     function setupComponentForm(component, defaultTemplate = "") {
         let form = document.getElementById(`template-${component}`)
@@ -110,7 +137,7 @@
         }
         del.innerText = `🗑 ${component}`
 
-        window.forms.append(form, del)
+        forms.append(form, del)
     }
     for(let component of component_templates.concat(["display-entry"])) {
         setupComponentForm(component)
@@ -136,9 +163,6 @@
             }
         })
 
-    function alert(text) {
-        status.innerText = text
-    }
     function done(form) {
         const data = new FormData(form)
         const params = new URLSearchParams({setting: data.get("setting"), value: data.get("value")})
