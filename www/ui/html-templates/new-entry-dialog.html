@@ -1,8 +1,11 @@
 <template id="new-entry-dialog">
 <dialog id="new-entry" popover>
     <h3>New Entry</h3>
-    <button onclick="closeModalUI('new-entry')"
-        style="position: absolute; height: 2em; top: 5px; right: 5px; aspect-ratio: 1;">X</button>
+
+    <form action="javascript:void(0)">
+        <button formmethod="dialog">X</button>
+    </form>
+
     <form id="new-item-form" method="dialog" action="javascript:void(0)">
         <div class="flex wrap" style="width: 100%;">
             <input type="text" placeholder="title" name="title" required style="flex-grow: 1; max-width: 100%;">

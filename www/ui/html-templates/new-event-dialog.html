@@ -1,7 +1,8 @@
 <template id="new-event-dialog">
 <dialog id="new-event-form" popover>
-    <button onclick="closeModalUI('new-event-form')"
-        style="position: absolute; top: 0; right: 0; margin: var(--small-gap);">X</button>
+    <form action="javascript:void(0)">
+        <button formmethod="dialog">X</button>
+    </form>
 
     <form action="javascript:void(0)" onsubmit="newEventUI(this)" class="block">
         <input type="hidden" name="itemid">

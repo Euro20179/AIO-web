@@ -144,6 +144,18 @@
         * {
             font-size: inherit;
         }
+
+        > :where(form:has(> button[formmethod="dialog"]), button) {
+            position: absolute;
+            top: 1ch;
+            right: 1ch;
+        }
+
+        button[formmethod="dialog"]{
+            height: 2cap;
+            aspect-ratio: 1;
+            padding: 0;
+        }
     }
 
     dialog::backdrop {

@@ -11,15 +11,18 @@
 <de-template-editor></de-template-editor>
 
 <dialog id="notes-edit-dialog" popover>
-    <button onclick="closeModalUI('notes-edit-dialog', this.getRootNode())"
-        style="position: absolute; top: 1ch; right: 1ch;">X</button>
+    <form action="javascript:void(0)">
+        <button formmethod="dialog">X</button>
+    </form>
     <p class="center">Notes save automatically</p>
     <textarea id="notes-edit-box" rows="10" cols="80"></textarea>
 </dialog>
 
 <dialog id="item-identification-form" popover>
-    <button style="position: absolute; top: 0; right: 0"
-        onclick="closeModalUI('item-identification-form', this.getRootNode())">X</button>
+    <form action="javascript:void(0)">
+        <button formmethod="dialog">X</button>
+    </form>
+
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
             <option value="anilist">Anilist</option>
