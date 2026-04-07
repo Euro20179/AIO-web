@@ -346,6 +346,7 @@ const component_templates = [
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
+    "close-button"
 ]
 
 for (const name of component_templates) {

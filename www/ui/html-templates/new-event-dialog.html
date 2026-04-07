@@ -1,8 +1,6 @@
 <template id="new-event-dialog">
 <dialog id="new-event-form" popover>
-    <form action="javascript:void(0)">
-        <button formmethod="dialog">X</button>
-    </form>
+    <close-button></close-button>
 
     <form action="javascript:void(0)" onsubmit="newEventUI(this)" class="block">
         <input type="hidden" name="itemid">

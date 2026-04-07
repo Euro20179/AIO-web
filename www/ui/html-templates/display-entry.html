@@ -11,17 +11,13 @@
 <de-template-editor></de-template-editor>
 
 <dialog id="notes-edit-dialog" popover>
-    <form action="javascript:void(0)">
-        <button formmethod="dialog">X</button>
-    </form>
+    <close-button></close-button>
     <p class="center">Notes save automatically</p>
     <textarea id="notes-edit-box" rows="10" cols="80"></textarea>
 </dialog>
 
 <dialog id="item-identification-form" popover>
-    <form action="javascript:void(0)">
-        <button formmethod="dialog">X</button>
-    </form>
+    <close-button></close-button>
 
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
@@ -55,6 +51,7 @@
 </dialog>
 
 <dialog id="display-info-object-editor-popup" popover style="width: 80vmin; aspect-ratio: 1 / 1;">
+    <close-button></close-button>
     <div class="flex j-center" style="gap: var(--small-gap);">
         <button id="save-object-editor" style="align-self: center; height: fit-content;"
             entry-action="saveobject">💾︎</button>

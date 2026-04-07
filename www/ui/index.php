@@ -24,6 +24,7 @@
         "alert-box",
         "tz-datalist",
         "color-scheme-selector",
+        "close-button",
 
         "de-status-menu",
         "de-notes",
@@ -58,6 +59,8 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="items-listing" popover>
+        <close-button></close-button>
+
         <center>
             <h3>Find Item</h3>
         </center>
