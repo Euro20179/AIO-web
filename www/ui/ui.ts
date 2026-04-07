@@ -1279,6 +1279,29 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
     ))
 }
 
+function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
+    const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
+    itemsFillDiv.innerHTML = ""
+
+    const container = document.createElement("div")
+    container.classList.add("grid")
+    container.classList.add("center")
+    container.style.gridTemplateColumns = "1fr 1fr 1fr"
+
+    for(let id in items) {
+        let el = items[id]
+        if(el.tagName !== "FIGURE") {
+            const f = document.createElement("figure")
+            f.append(el)
+            el = f
+        }
+        el.setAttribute("data-item-id", id)
+        container.append(el)
+    }
+    itemsFillDiv.append(container)
+    return container
+}
+
 function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
     const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
@@ -1354,6 +1377,7 @@ type SelectItemOptions = Partial<{
 async function selectItemUI(options?: SelectItemOptions): Promise<null |bigint> {
     const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
 
+
     let f = getElementOrThrowUI("#items-listing-search", HTMLFormElement)
     let query = getElementOrThrowUI('[name="items-listing-search"]', HTMLInputElement, f)
 
@@ -1375,13 +1399,14 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null |bigint> 
             for (let fig of container.querySelectorAll("figure")) {
                 const id = fig.getAttribute("data-item-id")
                 fig.onclick = () => {
-                    popover.close(String(id))
-                    res(BigInt(id as string))
+                    popover.close(id as string)
                 }
             }
         }
         popover.onclose = function() {
-            res(null)
+            if(popover.returnValue) {
+                res(BigInt(popover.returnValue))
+            } else res(null)
         }
         f.onsubmit = function() {
             onsearch(query.value).then(registerFigClickEvents)
@@ -1641,7 +1666,6 @@ function doUserStartupUI(settings: UserSettings) {
             const tmpl = key.split("template-")[1]
             const tmplEl = currentDocument().getElementById(tmpl)
             if(!tmplEl) continue
-            console.log("Yep", key)
             tmplEl.innerHTML = settings[key as keyof typeof settings]
         }
     }

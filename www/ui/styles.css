@@ -552,12 +552,15 @@
             overflow: auto;
 
             @container (width > 1000px) {
-                grid-template-areas: "nav stats" "calendar stats";
+                grid-template-areas: "nav stats"
+                                "calendar stats"
+                                "calculator stats";
+
                 grid-template-columns: 1fr 20cqi;
                 grid-template-rows: 1fr 10fr;
             }
             @container (width < 1001px) {
-                grid-template-areas: "nav" "calendar" "stats";
+                grid-template-areas: "nav" "calendar" "stats" "calculator";
             }
 
             #month-nav {
@@ -599,7 +602,7 @@
                 right: 0;
 
                 /*otherwise does not scroll to show all events*/
-                height: 100cqb;
+                height: 100%;
                 
                 #total-events::before {
                     content: "Event total: "
