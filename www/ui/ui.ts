@@ -1438,8 +1438,9 @@ async function signinUI(reason: string): Promise<string> {
 
     loginPopover.showModal()
     return await new Promise((res, rej) => {
-        const form = getElementOrThrowUI("form", HTMLFormElement, loginPopover)
+        const form = getElementOrThrowUI("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
+            alert(1)
             let data = new FormData(form)
             let username = data.get("username")
             let password = data.get("password")
