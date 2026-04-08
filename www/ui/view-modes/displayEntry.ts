@@ -872,7 +872,7 @@ class DisplayMode extends Mode {
             //such as in the case when we are still adding, but mode_clearItems()
             //is called
             for (let i = 0; i < entry.length && this.adding; i++) {
-                if ("scheduler" in window && i % 20 === 0 && i !== 0) {
+                if ("scheduler" in window && i % 10 === 0 && i !== 0) {
                     //@ts-ignore
                     await window.scheduler.yield()
                 } else if (i > 5 && !("scheduler" in window)) {
