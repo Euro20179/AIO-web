@@ -1433,7 +1433,7 @@ function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end:
     for (let item of items) {
         const events = findUserEventsById(item.ItemId)
         for (let ev of events) {
-            if (items_compareEventTiming(ev, start, ev.TimeZone, ev.TimeZone) <= 0 && items_compareEventTiming(ev, end, ev.TimeZone, ev.TimeZone) >= 0) {
+            if (items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end, ev.TimeZone, ev.TimeZone) >= 0) {
                 yield ev
             }
         }

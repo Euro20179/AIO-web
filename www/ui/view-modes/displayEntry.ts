@@ -1463,16 +1463,20 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         for (let btnCls in buttons) {
             let btnData = buttons[btnCls as keyof typeof buttons]
             const btn = document.createElement("button")
-            btn.innerText = btnData.text
+            btn.setAttribute("toggle-hint", "")
+            btn.append(btnData.text)
+
+            if ("title" in btnData) {
+                const hint = document.createElement("span")
+                hint.setAttribute("popover", "hint")
+                hint.append(btnData.title)
+                btn.append(hint)
+            }
 
             if ("attributes" in btnData) {
                 for (let attr in btnData.attributes) {
                     btn.setAttribute(attr, btnData.attributes[attr as keyof typeof btnData.attributes])
                 }
-            }
-
-            if ("title" in btnData) {
-                btn.title = btnData.title
             }
 
             if ("action" in btnData) {
@@ -1792,7 +1796,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#multiple-progress", multipleProgressEl => {
         //even if the status != (Re)?Viewing,
         //we should still clear all progress bars
-        multipleProgressEl.innerHTML = ""
+        // multipleProgressEl.innerHTML = ""
 
         if (!/(Re)?Viewing/.test(user.Status)) return
 
@@ -1800,6 +1804,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             user = { ...user }
             user.CurrentPosition = "0"
         }
+
+        multipleProgressEl.innerHTML = ""
 
         //for each [P]x[/y] in userPos create a progress element
         //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
@@ -1809,7 +1815,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         const parts =
             user.CurrentPosition.split(/,\s*|\s+/)
                 .map(v => v.trim())
-                .map(v => v.match(/(\D)?(\d+)(?:\/(\d+))?/))
+                .map(v => v.match(/(\D)?(\d+(?:\.\d+)?)(?:\/(\d+))?/))
 
         for (let part of parts) {
             if (!part) continue
@@ -1831,7 +1837,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 this.win.HTMLProgressElement,
                 container
             )
-            p.max = parseFloat(max)
+            p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 
             let c = getElementOrThrowUI(

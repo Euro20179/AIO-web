@@ -159,10 +159,11 @@ function sidebarEntryOpenOne(item: InfoEntry) {
  * selects the nth sidebar entry, where n starts at 1
  */
 function sidebarSelectNth(n: number) {
-    const el = sidebarItems.querySelector(`:nth-child(${n})`)
+    const el = getElementUI(`:nth-child(${n})`, HTMLElement, sidebarItems)
     if (!el) return
     const id = BigInt(el.getAttribute("data-entry-id") || 0)
     if (id == 0n) return
+    el.focus()
 
     mode_selectItem(findInfoEntryById(id))
 }

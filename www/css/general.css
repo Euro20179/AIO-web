@@ -163,14 +163,21 @@
         border-color: var(--error);
     }
 
+    @position-try --bottom-left {
+        top: anchor(bottom);
+        right: anchor(center);
+        position-area: bottom left;
+    }
+
     [popover="hint"] {
         position: absolute;
+        position-try-fallbacks: --bottom-left;
+        top: anchor(bottom);
+        left: anchor(center);
+        position-area: bottom right;
 
         margin: 0;
         margin-block-start: calc(var(--small-gap) / 2);
-
-        top: anchor(bottom);
-        left: anchor(center);
 
         border: 1px solid currentColor;
         border-radius: var(--border-roundness);
