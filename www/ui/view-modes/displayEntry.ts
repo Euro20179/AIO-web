@@ -1464,13 +1464,25 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             let btnData = buttons[btnCls as keyof typeof buttons]
             const btn = document.createElement("button")
             btn.setAttribute("toggle-hint", "")
-            btn.append(btnData.text)
+
+            if("text" in btnData) {
+                const txt = document.createElement("span")
+                txt.append(btnData.text)
+                btn.append(txt)
+            }
+
 
             if ("title" in btnData) {
                 const hint = document.createElement("span")
                 hint.setAttribute("popover", "hint")
                 hint.append(btnData.title)
                 btn.append(hint)
+            }
+
+            if("shortTitle" in btnData) {
+                const st = document.createElement('span')
+                st.append(btnData.shortTitle)
+                btn.append(st)
             }
 
             if ("attributes" in btnData) {

@@ -92,6 +92,9 @@
         button {
             aspect-ratio: 1 / 1;
             height: 35px;
+
+            display: flex;
+            justify-content: space-between;
         }
     }
 
@@ -280,7 +283,11 @@
         grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
         gap: calc(var(--small-gap) / 2);
 
-        padding: 0
+        padding: 0;
+        button {
+            display: flex;
+            gap: 1ch;
+        }
     }
 
     #descriptors {

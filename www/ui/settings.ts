@@ -74,12 +74,14 @@ background: var(--red)
         close:  {
             text: "X",
             action: "close",
-            title: "remove item from inspection area"
+            title: "remove item from inspection area",
+            shortTitle: "close"
         },
 
         identify: {
             text: "🔍︎",
             title: "identify item",
+            shortTitle: "identify",
             attributes: {
                 onclick: "openModalUI('item-identification-form', this.getRootNode())"
             }
@@ -89,17 +91,19 @@ background: var(--red)
             action: "refresh",
             title: "refresh metadata",
             text: "🗘",
+            shortTitle: "metadata",
         },
 
         ['fetch-location']: {
             action: "fetchlocation",
             title: "find location",
-            text: "📍︎"
+            shortTitle: "locate"
         },
 
         ['toggle-object-editor']: {
             text: "✏",
             title: "Raw object editor",
+            shortTitle: "edit",
             attributes: {
                 onclick: "openModalUI('display-info-object-editor-popup', this.getRootNode())"
             }
@@ -108,13 +112,15 @@ background: var(--red)
         ['edit-styles']: {
             action: "editstyles",
             title: "edit item's stylesheet",
-            text: "🖌"
+            text: "🖌",
+            shortTitle: "style"
         },
 
         ['edit-template']: {
             action: "toggle",
             title: "edit item's html template",
             text: "<>",
+            shortTitle: "template",
             attributes: {
                 ['elem-id']: "template-editor-container"
             }
@@ -123,7 +129,8 @@ background: var(--red)
         ['delete']: {
             action: "delete",
             title: "permanently delete item",
-            text: "🗑"
+            text: "🗑",
+            shortTitle: "delete"
         }
     },
 } as const
