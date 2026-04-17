@@ -16,8 +16,25 @@ class CalcMode extends Mode {
 
         this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
-        const sortButton = this.output.querySelector(`#calc-sorter`)
-        sortButton?.addEventListener("click", sortCalcDisplay.bind(this))
+        const sortButton = getElementUI(`#calc-sorter`, this.win.HTMLElement)
+        if(sortButton) {
+            sortButton.onclick =() => {
+                this.sortCalcDisplay()
+            }
+        }
+    }
+
+    sortCalcDisplay(this: CalcMode) {
+        let elements = [...this.output.querySelectorAll(`[data-item-id]`)]
+        elements.sort((a, b) => {
+            let exprA = /**@type {string}*/(a.getAttribute("data-expression-output"))
+            let exprB = /**@type {string}*/(b.getAttribute("data-expression-output"))
+            return Number(exprB) - Number(exprA)
+        })
+        this.clearSelected()
+        for (let elem of elements) {
+            this.output.append(elem)
+        }
     }
 
     close() {
@@ -148,15 +165,3 @@ function renderCalcItem(this: CalcMode, item: InfoEntry): HTMLElement {
     return el
 }
 
-function sortCalcDisplay(this: CalcMode) {
-    let elements = [...this.output.querySelectorAll(`[data-item-id]`)]
-    elements.sort((a, b) => {
-        let exprA = /**@type {string}*/(a.getAttribute("data-expression-output"))
-        let exprB = /**@type {string}*/(b.getAttribute("data-expression-output"))
-        return Number(exprB) - Number(exprA)
-    })
-    this.clearSelected()
-    for (let elem of elements) {
-        this.output.append(elem)
-    }
-}
