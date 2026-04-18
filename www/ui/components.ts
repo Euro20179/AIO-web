@@ -1,5 +1,5 @@
 /**
-    * Firefox has a bug where a <select> rendered out of a <template>
+    * Firefox has a bug where a select rendered out of a template
     * does not render the dropdown arrow.
     * This function fixes that by cloning and rerendering all select elements
     * within a root.
