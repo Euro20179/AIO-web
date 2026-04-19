@@ -24,8 +24,10 @@
     tmpl("de-requirements");
     tmpl("de-status-menu");
     tmpl("de-template-editor");
+    tmpl("de-recommender");
     tmpl("color-scheme-selector");
     tmpl("confirm-dialog");
+    tmpl("close-button");
 ?>
 
     <login-dialog></login-dialog>
