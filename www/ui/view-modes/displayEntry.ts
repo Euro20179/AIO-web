@@ -1857,15 +1857,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 this.win.HTMLElement,
                 container
             )
-            c.innerText = `${label || ""}${part[2]}`
+            const node = document.createTextNode(`${label || ""}${part[2]}`)
             if (parseInt(max)) {
-                c.innerText += `/${max}`
+                node.appendData( `/${max}`)
             }
+            c.append(node)
 
             const upHint = getElementOrThrowUI(
                 "#user-progress-hint",
                 this.win.HTMLElement,
-                container
+                c
             )
             upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10) || 0}%`
         }
