@@ -1329,6 +1329,23 @@ function items_hasArtStyle(item: InfoEntry, artStyle: ArtStyle) {
     return (item.ArtStyle & artStyle) === artStyle
 }
 
+function items_artStyle2Int(artStyles: ASName[]): number {
+    let res = 0
+    for(let as_ of artStyles) {
+        res |= {
+            "2d": AS_2D,
+            "cgi": AS_CGI,
+            "digital": AS_DIGITAL,
+            "handrawn": AS_HANDRAWN,
+            "cartoon": AS_CARTOON,
+            "3d": AS_3D,
+            "anime": AS_ANIME,
+            "liveaction": AS_LIVE_ACTION,
+        }[as_.toLowerCase()] || 0
+    }
+    return res
+}
+
 /**
  * Adds an art style by name to an item
  * @param {InfoEntry} item The item to add an art style to

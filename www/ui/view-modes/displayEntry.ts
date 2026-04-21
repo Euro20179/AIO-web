@@ -1827,7 +1827,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         const parts =
             user.CurrentPosition.split(/,\s*|\s+/)
                 .map(v => v.trim())
-                .map(v => v.match(/(\D)?(\d+(?:\.\d+)?)(?:\/(\d+))?/))
+                .map(v => v.match(/(\D*)(\d+(?:\.\d+)?)(?:\/(\d+))?/))
 
         for (let part of parts) {
             if (!part) continue
