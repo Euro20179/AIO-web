@@ -1045,23 +1045,6 @@ function changeDisplayItemData(this: DisplayMode, item: InfoEntry, user: UserEnt
     el.setAttribute("data-item-id", String(item.ItemId))
 }
 
-function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
-    let html = `
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-            `
-
-    for (let key in data) {
-        html += `<tr><td>${key}</td><td>${data[key]}</td></tr>`
-    }
-    html += "</tbody>"
-    root.innerHTML = html
-}
 
 function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 

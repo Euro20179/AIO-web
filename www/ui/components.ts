@@ -1,3 +1,19 @@
+function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
+    const tbl = document.createElement("table")
+    const thead = tbl.createTHead()
+    const hr = thead.insertRow()
+    hr.innerHTML = `<th>Name <th> Value`
+    const tbody = tbl.createTBody()
+    for (let key in data) {
+        const tr = tbody.insertRow()
+        const ktd = tr.insertCell()
+        ktd.innerText = key
+        const vtd = tr.insertCell()
+        vtd.innerText = data[key]
+    }
+    root.innerHTML = tbl.outerHTML
+}
+
 /**
     * Firefox has a bug where a select rendered out of a template
     * does not render the dropdown arrow.

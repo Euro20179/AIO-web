@@ -37,7 +37,8 @@ async function main() {
         errorOut: document.getElementById("error"),
         searchForm: getElementOrThrowUI("#sidebar-form", HTMLFormElement),
         recommenders,
-        newItemForm: getElementOrThrowUI("#new-item-form", HTMLFormElement)
+        newItemForm: getElementOrThrowUI("#new-item-form", HTMLFormElement),
+        promptDialog: getElementOrThrowUI("#prompt", HTMLDialogElement)
     });
 
     const urlParams = new URLSearchParams(document.location.search);
