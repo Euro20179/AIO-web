@@ -575,13 +575,13 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
  * @param {string} [_default] - Optional default value for the prompt
  * @returns {Promise<string | null>} the user's response
  */
-async function promptUI(html?: string, _default?: string, uselist?: string): Promise<string | null> {
+async function promptUI(html?: string, _default?: string, uselist?: string, defaultValue: string = ""): Promise<string | null> {
     const pEl = getElementOrThrowUI("#prompt", HTMLDialogElement)
 
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
     const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
-    submission.value = ""
+    submission.value = defaultValue
 
     if (uselist)
         submission.setAttribute("list", uselist)

@@ -759,11 +759,11 @@ class DisplayMode extends Mode {
          * Asks the user to set the current position of the current item
          */
         setprogress: this.displayEntryAction(async (item, root) => {
-            let newEp = await promptUI("Current position")
+            const user = findUserEntryById(item.ItemId) as UserEntry
+            let newEp = await promptUI("Current position", undefined, undefined, user.CurrentPosition)
             if (!newEp) return
 
             await api_setPos(item.ItemId, String(newEp))
-            const user = findUserEntryById(item.ItemId) as UserEntry
             user.CurrentPosition = String(newEp)
             updateInfo2({
                 [String(item.ItemId)]: { user }
@@ -1841,7 +1841,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 //if there's no label, and no total is given
                 //use the mediaDependant determined length
                 !label && part[3] === undefined
-                    ? lengthInNumber
+                    ? (lengthInNumber || "0")
                     : (part[3] || "0") //part[3] could be empty string
 
             let p = getElementOrThrowUI(
