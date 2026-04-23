@@ -1714,7 +1714,7 @@ type UserSettings = {
 }
 
 async function getSettings(uid: number): Promise<UserSettings> {
-    let res = await authorizedRequest(`/settings/get?uid=${uid}`)
+    let res = await authorizedRequest(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
     if (res === null || res.status !== 200) {
         console.error(res?.status)
         return { UIStartupScript: "", StartupLang: "" }
