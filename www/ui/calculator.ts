@@ -2469,7 +2469,7 @@ class Interpreter {
         if (node.operator.ty === "Add") {
             return right.toNum()
         } else if (node.operator.ty === 'Not') {
-            return new Num(Number(!right.toNum().truthy()))
+            return new Num(Number(!right.truthy()))
         } else {
             return right.mul(new Num(-1))
         }

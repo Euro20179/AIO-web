@@ -16,6 +16,11 @@ class ScriptMode extends Mode {
         super(output, win, c)
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
+        this.scriptBox.onkeydown = (e) => {
+            if(e.ctrlKey && e.key === 'Enter') {
+                this.run.click()
+            }
+        }
         this.run.onclick = execute.bind(this)
     }
     close() {
