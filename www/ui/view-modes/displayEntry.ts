@@ -838,12 +838,18 @@ class DisplayMode extends Mode {
         }
         this.win = win
 
-        let newOutput = win.document.getElementById("entry-output")
-        if (!newOutput) return
+        let newOutput = win.document.createElement("div")
+        newOutput.classList.add("overflow")
+        newOutput.id = 'entry-output'
+
+        const imported = win.document.importNode(this.output, true)
+        newOutput.replaceChildren(...imported.childNodes)
+        this.container = newOutput
+
+        win.document.getElementById("viewing-area")?.append(newOutput)
+
 
         this.output = newOutput
-
-        if (!(newOutput instanceof HTMLElement)) return
 
         newOutput.addEventListener("scroll", (e) => {
             if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return

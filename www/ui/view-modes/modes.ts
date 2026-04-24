@@ -118,8 +118,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
             mode_clearItems()
             items_setSelected(selected)
             mode.chwin?.(newWin)
-            newWin.addEventListener("aio-items-rendered", () => {
-                newWin.mode_setMode(mode.NAME)
+            newWin.self.addEventListener("aio-items-rendered", () => {
                 mode_clearItems()
                 mode_selectItemList(selected, true, mode)
             })

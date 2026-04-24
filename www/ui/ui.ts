@@ -275,6 +275,10 @@ function currentDocument() {
     return catalogWin?.document || document
 }
 
+function currentWindow() {
+    return catalogWin?.document.defaultView || window
+}
+
 function toggleUI(id: string, on?: '' | "none") {
     const elem = document.getElementById(id) as HTMLElement | null
     if (!elem) return
@@ -621,11 +625,11 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
   * @param html {string} the html to put in the confirmation box
   */
 async function confirmUI(html: string) {
-    const cEl = getElementOrThrowUI("#confirm", HTMLDialogElement)
+    const cEl = getElementOrThrowUI("#confirm", currentWindow().HTMLDialogElement)
     const close = cEl.querySelector("button:first-child") as HTMLButtonElement
-    const cancel = getElementOrThrowUI("#cancel", HTMLButtonElement, cEl)
-    const ok = getElementOrThrowUI("#ok", HTMLButtonElement, cEl)
-    const root = getElementOrThrowUI("[root]", HTMLElement, cEl)
+    const cancel = getElementOrThrowUI("#cancel", currentWindow().HTMLButtonElement, cEl)
+    const ok = getElementOrThrowUI("#ok", currentWindow().HTMLButtonElement, cEl)
+    const root = getElementOrThrowUI("[root]", currentWindow().HTMLElement, cEl)
     root.innerHTML = html || "<p>CONFIRM</p>"
 
     cEl.showModal()
@@ -1628,6 +1632,7 @@ function openCatalogModeUI() {
     urlParams.set("display", "true")
     urlParams.set("no-select", "true")
     urlParams.set("no-startup", "true")
+    urlParams.set("no-mode", "true")
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     catalogWin = open(newURL, "_blank", "popup=true")
     if (catalogWin) {
