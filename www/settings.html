@@ -108,7 +108,7 @@
         settingIn.type = 'hidden'
         te.name = "value"
         if(defaultTemplate == "") {
-            fetch(`/ui/html-templates/${component}.html`).then(res => res.text())
+            fetch(`${location.protocol}//${location.host}/ui/html-templates/${component}.html`).then(res => res.text())
             .then(text => {
                 const p = new DOMParser
                 const d = p.parseFromString(text, "text/html")
@@ -143,7 +143,7 @@
         setupComponentForm(component)
     }
 
-    fetch(`/settings/get?uid=${uid}`)
+    fetch(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
         .then(res => {
             if(res.status === 401) {
                 alert("You are not logged in, redirecting to login page")
