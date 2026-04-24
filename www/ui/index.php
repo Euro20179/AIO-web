@@ -87,8 +87,8 @@
             <nav id="search-area" aria-label="search and information">
 
                 <div class="flex">
-                    <div class="grid row">
-                        <a href="javascript:openSettingsUI()" id="help-link">⚙</a>
+                    <div class="grid row" style="grid-template-rows: 1fr 1fr;">
+                        <button onclick="openSettingsUI()">⚙</button>
                         <button onclick="openModalUI('script-select')">run</button>
                     </div>
 
