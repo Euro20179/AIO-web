@@ -844,12 +844,15 @@ class DisplayMode extends Mode {
 
         const imported = win.document.importNode(this.output, true)
         newOutput.replaceChildren(...imported.childNodes)
+
+        if(this.container)
+            this.container.remove()
+
         this.container = newOutput
 
         win.document.getElementById("viewing-area")?.append(newOutput)
 
 
-        this.output.remove()
         this.output = newOutput
 
         newOutput.addEventListener("scroll", (e) => {
