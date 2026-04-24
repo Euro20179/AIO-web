@@ -1,15 +1,5 @@
-:host(sidebar-entry)::before {
-    float: left;
-}
-
-@media (width < 800px) {
-    :host(sidebar-entry)::before {
-        content: ''
-    }
-}
-
 :host(sidebar-entry) {
-    @media (width < 800px) {
+    @container body (width < 800px) {
         border-left: 1px solid var(--text-color);
         border-right: 1px solid var(--text-color);
     }
@@ -28,7 +18,7 @@
 
         font-size: 0.9em;
 
-        @media (width < 800px) {
+        @container body (width < 800px) {
             width: 25vw;
             height: min-content;
             aspect-ratio: initial;
@@ -41,7 +31,7 @@
 
         border-style: none;
 
-        @media (width >=800px) {
+        @container body (width >=800px) {
             text-align: center;
         }
     }
@@ -52,12 +42,12 @@
 
         contain: inline-size;
 
-        @media (width >=800px) {
+        @container body (width >=800px) {
             display: grid;
             justify-items: center;
         }
 
-        @media (width < 800px) {
+        @container body (width < 800px) {
             display: grid;
             justify-items: center;
 
@@ -72,7 +62,7 @@
             border: none;
             background: transparent;
 
-            @media (width < 800px) {
+            @container body (width < 800px) {
                 min-height: revert;
             }
         }
@@ -85,7 +75,7 @@
         max-height: 70cqi;
         max-width: 100cqi;
 
-        @media (width < 800px) {
+        @container body (width < 800px) {
             justify-self: center;
         }
     }
