@@ -43,6 +43,8 @@
 
         overflow: auto auto;
 
+        max-height: 100%;
+
         @container (aspect-ratio < 1) {
             width: 100%;
         }
