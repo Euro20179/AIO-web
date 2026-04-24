@@ -25,6 +25,7 @@
     tmpl("de-status-menu");
     tmpl("de-template-editor");
     tmpl("de-recommender");
+    tmpl("de-progress");
     tmpl("color-scheme-selector");
     tmpl("confirm-dialog");
     tmpl("close-button");
@@ -82,8 +83,13 @@
         items_addItem({meta, events, info, user})
         items_setResults([BigInt(id)])
         const m = new DisplayMode(document.body)
-        renderDisplayItem.call(m, meta.ItemId)
         openViewModes.push(m)
+        updateInfo2({
+            [id]: {
+                info, user, events, meta
+            }
+        })
+        renderDisplayItem.call(m, meta.ItemId)
     })
 </script>
 

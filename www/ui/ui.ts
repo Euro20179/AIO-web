@@ -1952,6 +1952,14 @@ function setViewingAllUI(enabled: boolean) {
 function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean = true) {
     const win = open(`/ui/display.php?item-id=${id}`, target, popup ? "popup=true" : undefined)
     win?.addEventListener("modes.update-item", e => {
+        var i = setInterval(() => {
+            let btn = win?.document.querySelector("display-entry")?.shadowRoot?.querySelector("[entry-action='close']")
+            if(!btn) return
+            clearInterval(i)
+            if(!(btn instanceof win?.self.HTMLButtonElement)) return
+            (btn).onclick = function() { win.close() }
+        }, 100)
+
         api_getEntryAll(id, findInfoEntryById(id).Uid).then((res) => {
             if(!res) return
             updateInfo2({
