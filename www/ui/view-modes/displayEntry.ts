@@ -849,6 +849,7 @@ class DisplayMode extends Mode {
         win.document.getElementById("viewing-area")?.append(newOutput)
 
 
+        this.output.remove()
         this.output = newOutput
 
         newOutput.addEventListener("scroll", (e) => {
