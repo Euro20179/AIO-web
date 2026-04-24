@@ -10,6 +10,7 @@ BEGIN {
     func_name = ""
     doc_text = ""
     param_text = ""
+    sig_text = ""
     return_text = ""
     print "<h3>" file "</h3>"
     if (file ~ /items\.ts$/) {
@@ -24,6 +25,7 @@ BEGIN {
     func_name = ""
     doc_text = ""
     param_text = ""
+    sig_text = ""
     return_text = ""
     is_deprecated = 0
     next
@@ -71,7 +73,9 @@ in_doc {
             param_name_pos = param_type_end + 1
             param_text = param_text "<span class=\"parameter-item\">"
             param_text = param_text "<span class=\"parameter-name\"><code>" $param_name_pos "</code></span>"
+            sig_text = sig_text "<span class=\"parameter-name\">" $param_name_pos "</span>"
             param_text = param_text "<span class=\"parameter-type\">(" param_type ")</span>"
+            sig_text = sig_text "<span class=\"parameter-type\">" param_type "</span>"
             desc = ""
             for (i = 4 + param_type_end - 2; i <= NF; i++) {
                 desc = desc " " $i
@@ -81,6 +85,7 @@ in_doc {
         } else {
             param_text = param_text "<span class=\"parameter-item\">"
             param_text = param_text "<span class=\"parameter-name\"><code>" $2 "</code></span>"
+            sig_text = sig_text "<span class=\"parameter-name\">" $2 "</span>"
             desc = ""
             for (i = 3; i <= NF; i++) {
                 desc = desc " " $i
@@ -123,7 +128,13 @@ in_doc {
         if (unstable && !private) classList = classList " unstable"
         if (is_deprecated) classList = classList " deprecated"
 
-        print "<p class=\"" classList "\"><code>" func_name "</code></p>"
+        print "<p class=\"" classList "\"><code>" func_name
+        if (sig_text != "") {
+            print "(" sig_text ")"
+        } else {
+            print "()"
+        }
+        print "</code></p>"
 
         if (doc_text != "") {
             sub(/@description/, "", doc_text)
@@ -156,6 +167,7 @@ in_doc {
     func_name = ""
     doc_text = ""
     param_text = ""
+    sig_text = ""
     return_text = ""
     is_deprecated = 0
 }

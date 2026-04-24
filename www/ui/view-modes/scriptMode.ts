@@ -76,7 +76,12 @@ class ScriptMode extends Mode {
             if (this.output instanceof DocumentFragment) {
                 this.output.append(html)
             } else {
-                this.output.innerHTML += html
+                let frag = new DocumentFragment
+                frag.append(document.createElement("div"))
+                if(frag.firstElementChild) {
+                    frag.firstElementChild.innerHTML = html
+                    this.output.append(...frag.firstElementChild.childNodes)
+                }
             }
         } else {
             this.output.append(html)

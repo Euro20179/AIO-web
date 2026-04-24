@@ -27,6 +27,23 @@
             text-decoration-thickness: 0.1em;
         }
 
+        .function-name span {
+            font-size: 0.8em;
+        }
+
+        .function-name .parameter-name::after {
+            content: ":"
+        }
+
+        .function-name .parameter-type:not(:last-of-type)::after {
+            color: var(--text-color);
+            content: ", "
+        }
+
+        #function-search {
+            font-size: inherit;
+        }
+
         .unstable::after {
             content: " (unstable)";
         }
