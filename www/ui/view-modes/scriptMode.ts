@@ -38,7 +38,7 @@ class ScriptMode extends Mode {
     }
     addList(entries: InfoEntry[]) {
         for (let e of entries) {
-            this.sub(e)
+            this.add(e)
         }
     }
     subList(entries: InfoEntry[]) {
