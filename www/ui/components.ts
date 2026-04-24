@@ -126,38 +126,6 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
         }
     }
 
-    //put-tbl, for raw objects such as user.Extra
-    for (let elem of root.querySelectorAll("[put-tbl]")) {
-        let requestedObj = elem.getAttribute("put-tbl") || ""
-
-        switch (requestedObj) {
-            case "user.Extra":
-            case "Extra":
-                mkGenericTbl(elem as HTMLElement, JSON.parse(user.Extra))
-                break
-            case "Datapoints":
-            case "meta.Datapoints":
-                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.Datapoints))
-                break
-            case "MediaDependant":
-            case "meta.MediaDependant":
-                mkGenericTbl(elem as HTMLElement, JSON.parse(meta.MediaDependant))
-                break
-            case "info":
-                mkGenericTbl(elem as HTMLElement, item)
-                break
-            case "user":
-                mkGenericTbl(elem as HTMLElement, user)
-                break
-            case "meta":
-                mkGenericTbl(elem as HTMLElement, meta)
-                break
-            default:
-                elem.append(`Invalid object: ${requestedObj}`)
-
-        }
-    }
-
     function renderVal(val: Type | string, output: HTMLElement) {
         if (val instanceof Elem) {
             output.append(val.el)
