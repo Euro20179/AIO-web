@@ -6,6 +6,7 @@ const TT = {
     Sub: "-",
     Mul: "*",
     Div: "/",
+    Not: "!",
     Lparen: "(",
     Rparen: ")",
     Lbracket: "[",
@@ -588,7 +589,7 @@ class Parser {
     l_unop() {
         let tok = this.curTok()
         let right
-        while ("+-".includes(tok?.value)) {
+        while ("+-!".includes(tok?.value)) {
             this.next()
             right ||= this.atom()
             right = new LUnOpNode(right, tok)
@@ -2467,6 +2468,8 @@ class Interpreter {
         let right = this.interpretNode(node.right)
         if (node.operator.ty === "Add") {
             return right.toNum()
+        } else if (node.operator.ty === 'Not') {
+            return new Num(Number(!right.toNum().truthy()))
         } else {
             return right.mul(new Num(-1))
         }
