@@ -11,7 +11,7 @@ class TierListMode extends Mode {
         win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("tierlist-template")
+            output = win.document.createElement("tierlist-template")
             c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(output)
@@ -82,7 +82,7 @@ class TierListMode extends Mode {
             return "custom"
         }
 
-        if (!(modeSelector instanceof HTMLSelectElement)) {
+        if (!(modeSelector instanceof this.win.HTMLSelectElement)) {
             return "general"
         }
 
@@ -123,8 +123,8 @@ class TierListMode extends Mode {
         let mode = this._getMode()
         let [rating, tier] = this._findInfo(entry.ItemId, mode)
 
-        let li = document.createElement("li")
-        let img = document.createElement("img")
+        let li = this.win.document.createElement("li")
+        let img = this.win.document.createElement("img")
         img.src = thumb
         img.alt = entry.En_Title || entry.Native_Title
         img.title = `${img.alt} - ${rating}`
