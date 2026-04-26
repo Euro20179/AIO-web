@@ -33,8 +33,6 @@ class CalendarMode extends Mode {
      * sets everything up in the current window
      */
     _setupWin() {
-        this.onResize()
-        this.win.addEventListener("resize", this.onResize.bind(this))
 
         this.output.querySelector("#month-prev")?.addEventListener("click", e => {
             let prevMonth = this.selectedTime[0].getMonth() - 1
@@ -100,11 +98,6 @@ class CalendarMode extends Mode {
         this.#mode = value
         if (this.output instanceof this.win.HTMLElement)
             this.output.setAttribute("data-mode", this.mode)
-    }
-
-    onResize() {
-        // this.canv.width = this.canv.parentElement?.clientWidth || 100
-        // this.canv.height = this.canv.parentElement?.clientHeight || 100
     }
 
     close() {
@@ -310,10 +303,15 @@ class CalendarMode extends Mode {
         this.selectedItems = []
     }
 
+    mkcontainer() {
+        return document.createElement("calendar-template")
+    }
+
     chwin(win: Window & typeof globalThis) {
-        this.win.close()
-        this.win = win
-        this.output = win.document.getElementById("calendar-output") as HTMLCanvasElement
+        const container = super.chwin.call(this, win)
+        this.output = container.firstElementChild as HTMLElement
+        this.output.setAttribute("data-mode", "month")
         this._setupWin()
+        return container
     }
 }

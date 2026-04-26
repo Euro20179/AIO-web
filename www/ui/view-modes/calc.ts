@@ -5,7 +5,7 @@ class CalcMode extends Mode {
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let container = null
-        if(!output) {
+        if (!output) {
             output = document.createElement("calc-template")
             container = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
@@ -17,11 +17,15 @@ class CalcMode extends Mode {
         this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
         const sortButton = getElementUI(`#calc-sorter`, this.win.HTMLElement)
-        if(sortButton) {
-            sortButton.onclick =() => {
+        if (sortButton) {
+            sortButton.onclick = () => {
                 this.sortCalcDisplay()
             }
         }
+    }
+
+    mkcontainer(): HTMLElement {
+        return document.createElement("calc-template")
     }
 
     sortCalcDisplay(this: CalcMode) {
@@ -38,7 +42,7 @@ class CalcMode extends Mode {
     }
 
     close() {
-        if(this.container)
+        if (this.container)
             this.container.remove()
         this.clearSelected()
     }
@@ -96,11 +100,13 @@ class CalcMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        this.win.close()
-        this.win = win
-        this.output = win.document.getElementById("calc-items") as HTMLDivElement
+        const container = super.chwin.call(this, win)
+
+        this.output = getElementOrThrowUI("#calc-items", null, container) as HTMLElement
         this.expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
+
+        return container
     }
 }
 

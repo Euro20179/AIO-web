@@ -158,9 +158,12 @@ class EventMode extends Mode {
         this._reRenderEventTable()
     }
 
+    mkcontainer() {
+        return document.createElement("event-template")
+    }
+
     chwin(win: Window & typeof globalThis) {
-        this.win.close()
-        this.win = win
+        const container = super.chwin.call(this, win)
         this.output = win.document.getElementById("event-output-table") as HTMLTableElement
         this.eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
         this.eventFilter.onchange = () => {
@@ -168,7 +171,7 @@ class EventMode extends Mode {
 
             this._reRenderEventTable()
         }
-
+        return container
     }
 
     clearSelected() {

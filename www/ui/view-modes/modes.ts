@@ -31,7 +31,26 @@ class Mode {
     //and also clearing the selected items (clearSelected())
     close(): any { }
     clearSelected(): any { }
-    chwin?(win: Window): any { }
+    mkcontainer(): HTMLElement { return document.createElement("div") }
+    chwin(win: Window & typeof globalThis): HTMLElement {
+        if (this.win !== window) {
+            this.win.close()
+        }
+
+        this.win = win
+
+        let newOutput = this.mkcontainer()
+        const imported = win.document.importNode(this.output, true)
+        newOutput.append(...imported.childNodes)
+        if(this.container) {
+            this.container.remove()
+        }
+        this.container = newOutput
+
+        win.document.getElementById("viewing-area")?.append(newOutput)
+
+        return newOutput
+    }
     refresh?(id: bigint): any { }
     put?(html: string | HTMLElement | ShadowRoot): any { }
 }

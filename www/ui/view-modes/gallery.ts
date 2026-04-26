@@ -46,6 +46,14 @@ class GalleryMode extends Mode {
         super(output, win, c)
     }
 
+    mkcontainer() {
+        const c = document.createElement("div")
+        c.innerHTML = '<div id="gallery-items"></div>'
+        c.id = 'gallery-output'
+        c.classList.add("overflow")
+        return c
+    }
+
     removeGalleryItem(entry: InfoEntry) {
         let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
         el?.remove()
@@ -90,9 +98,10 @@ class GalleryMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        this.win.close()
+        const container = super.chwin.call(this, win)
         this.win = win
         this.output = win.document.getElementById("gallery-items") as HTMLDivElement
+        return container
     }
     close() {
         if(this.container)

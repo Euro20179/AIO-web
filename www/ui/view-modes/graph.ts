@@ -416,7 +416,7 @@ class GraphMode extends Mode {
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!output) {
+        if (!output) {
             output = document.createElement("graph-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(output)
@@ -424,7 +424,7 @@ class GraphMode extends Mode {
         }
         super(output, win, c)
 
-        groupBySelect =this.win.document.getElementById("group-by") as HTMLSelectElement
+        groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
         typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
 
         groupByInput = this.win.document.getElementById("group-by-expr") as HTMLInputElement
@@ -568,7 +568,7 @@ class GraphMode extends Mode {
     }
 
     close() {
-        if(this.container)
+        if (this.container)
             this.container.remove()
     }
 
@@ -593,8 +593,12 @@ class GraphMode extends Mode {
         destroyCharts()
     }
 
+    mkcontainer() {
+        return document.createElement("graph-template")
+    }
+
     chwin(win: Window & typeof globalThis) {
-        this.win.close()
+        const container = super.chwin.call(this, win)
 
         destroyCharts()
         this.win = win
@@ -610,5 +614,7 @@ class GraphMode extends Mode {
             makeGraphs(items_getSelected())
         }
         makeGraphs(items_getSelected())
+
+        return container
     }
 }

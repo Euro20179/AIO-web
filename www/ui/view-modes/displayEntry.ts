@@ -833,25 +833,7 @@ class DisplayMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        if (win === window) {
-            this.win.close()
-        }
-        this.win = win
-
-        let newOutput = win.document.createElement("div")
-        newOutput.classList.add("overflow")
-        newOutput.id = 'entry-output'
-
-        const imported = win.document.importNode(this.output, true)
-        newOutput.replaceChildren(...imported.childNodes)
-
-        if(this.container)
-            this.container.remove()
-
-        this.container = newOutput
-
-        win.document.getElementById("viewing-area")?.append(newOutput)
-
+        const newOutput = super.chwin.call(this, win)
 
         this.output = newOutput
 
@@ -865,6 +847,7 @@ class DisplayMode extends Mode {
                 }
             }
         })
+        return newOutput
     }
 
     refresh(id: bigint) {

@@ -23,6 +23,9 @@ class ScriptMode extends Mode {
         }
         this.run.onclick = execute.bind(this)
     }
+    mkcontainer() {
+        return document.createElement("script-template")
+    }
     close() {
         if(this.container)
             this.container.remove()
@@ -63,12 +66,14 @@ class ScriptMode extends Mode {
         }
     }
 
-    chwin(win: Window & typeof globalThis) {
-        this.win.close()
-        this.run = win.document.getElementById("script-execute") as HTMLButtonElement
-        this.scriptBox = win.document.getElementById("script") as HTMLTextAreaElement
-        this.output = win.document.getElementById("script-execute-output") as HTMLDivElement
+    chwin(win: Window & typeof globalThis): HTMLElement {
+        const container = super.chwin.call(this, win)
+        console.log(container.childNodes)
+        this.run = container.querySelector("#script-execute") as HTMLButtonElement
+        this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
+        this.output = container.querySelector("#script-execute-output") as HTMLDivElement
         this.run.onclick = execute.bind(this)
+        return container
     }
 
     put(html: string | HTMLElement | ShadowRoot) {

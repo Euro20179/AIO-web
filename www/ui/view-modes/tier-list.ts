@@ -3,6 +3,7 @@ class TierListMode extends Mode {
 
     rows: Record<string, HTMLUListElement>
 
+    //@ts-ignore
     tierlistEl: HTMLElement
 
     previousMode = ""
@@ -10,7 +11,7 @@ class TierListMode extends Mode {
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         win ||= window
         let c = null
-        if(!output) {
+        if (!output) {
             output = win.document.createElement("tierlist-template")
             c = output
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
@@ -22,35 +23,25 @@ class TierListMode extends Mode {
 
         this.rows = {}
 
-        let temp = (this.output.querySelector("tier-list") || document.createElement("tier-list")) as HTMLElement
+        this._setup()
+    }
+
+    _setup() {
+        const tierListStyles = settings_get("tierlist_styles")
 
         let modeSelector = this.output.querySelector("#tierlist-mode")
         let customExpr = this.output.querySelector("#tierlist-custom")
 
         if (modeSelector instanceof this.win.HTMLSelectElement) {
             this.previousMode = modeSelector.value
-
-            modeSelector.onchange = () => {
-                let items = items_getSelected()
-                this.clearSelected()
-                this.addList(items)
-
-                this.previousMode = modeSelector.value
-            }
+            modeSelector.onchange = this._modeSelector.bind(this)
         }
 
-        if(customExpr instanceof this.win.HTMLTextAreaElement) {
-            customExpr.oninput = () => {
-                let items = items_getSelected()
-                this.clearSelected()
-                this.addList(items)
-            }
+        if (customExpr instanceof this.win.HTMLTextAreaElement) {
+            customExpr.oninput = this._customExpr.bind(this)
         }
 
-        this.tierlistEl = temp
-
-        const tierListStyles = settings_get("tierlist_styles")
-
+        this.tierlistEl = this.output.querySelector("tier-list") || document.createElement("tier-list")
         while (this.tierlistEl.childNodes.length) {
             this.tierlistEl.firstChild?.remove()
         }
@@ -72,13 +63,28 @@ class TierListMode extends Mode {
             this.rows[tier[0]] = ul
             this.tierlistEl.append(ul)
         }
-
     }
 
-    _getMode(): "general" | "user"  | "custom"{
+    _modeSelector(e: Event) {
+        let items = items_getSelected()
+        this.clearSelected()
+        this.addList(items)
+
+        if(e.target && "value" in e.target) {
+            this.previousMode = e.target.value as string
+        }
+    }
+
+    _customExpr() {
+        let items = items_getSelected()
+        this.clearSelected()
+        this.addList(items)
+    }
+
+    _getMode(): "general" | "user" | "custom" {
         let modeSelector = this.output.querySelector("#tierlist-mode")
         let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
-        if(custom?.value) {
+        if (custom?.value) {
             return "custom"
         }
 
@@ -99,7 +105,7 @@ class TierListMode extends Mode {
         let meta = findMetadataById(id)
 
         let rating
-        if(mode === "general") {
+        if (mode === "general") {
             rating = items_getNormalizedRating(meta)
         } else if (mode === "user") {
             rating = user.UserRating
@@ -131,7 +137,7 @@ class TierListMode extends Mode {
         img.style.cursor = "pointer"
         img.onclick = () => {
             const id = BigInt(img.parentElement?.id.split("-")[2] || "0")
-            if(!id) return
+            if (!id) return
             openDisplayWinUI(id)
         }
 
@@ -204,12 +210,12 @@ class TierListMode extends Mode {
     }
 
     refresh(id: bigint) {
-        if(this.sub(findInfoEntryById(id)))
+        if (this.sub(findInfoEntryById(id)))
             this.add(findInfoEntryById(id))
     }
 
     close() {
-        if(this.container)
+        if (this.container)
             this.container.remove()
         this.clearSelected()
     }
@@ -218,5 +224,16 @@ class TierListMode extends Mode {
         for (let li of this.tierlistEl.querySelectorAll('li')) {
             li.remove()
         }
+    }
+
+    mkcontainer(): HTMLElement {
+        return this.win.document.createElement("tierlist-template")
+    }
+
+    chwin(win: Window & typeof globalThis): HTMLElement {
+        const container = super.chwin.call(this, win)
+        this.output = container.firstElementChild as HTMLElement
+        this._setup()
+        return container
     }
 }
