@@ -69,23 +69,26 @@ class OrderedEvents {
 //this is because if we remove from eventOrder, we can't add them back
 
 
-class EventMode extends Mode {
+class EventMode implements Mode {
     NAME = "event-output"
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
 
     eventFilter: HTMLInputElement
     excludedEvents: UserEvent[]
     eventOrder: OrderedEvents
 
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if(!output) {
-            c = document.createElement("event-template")
+            ({container: c, output} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(c)
-            output = c.querySelector("#event-output-table") as HTMLElement
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
         this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
 
         this.eventFilter.onchange = () => {
@@ -157,12 +160,17 @@ class EventMode extends Mode {
         this._reRenderEventTable()
     }
 
+    mkcontainers() {
+        const c = this.mkcontainer()
+        return { container: c, output: getElementOrThrowUI("#event-output-table", null, c)}
+    }
+
     mkcontainer() {
         return document.createElement("event-template")
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
         this.output = win.document.getElementById("event-output-table") as HTMLTableElement
         this.eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
         this.eventFilter.onchange = () => {

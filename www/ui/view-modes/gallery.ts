@@ -28,21 +28,26 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
     return entry
 }
 
-class GalleryMode extends Mode {
+class GalleryMode implements Mode {
     NAME = "gallery-output"
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if(!output) {
-            c = document.createElement("div")
-            c.classList.add("overflow")
-            c.id = 'gallery-output'
-            c.innerHTML = `<div id="gallery-items"></div>`
+            ({output, container: c} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(c)
-            output = c.firstElementChild as HTMLElement
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
+    }
+
+    mkcontainers() {
+        const c = this.mkcontainer()
+        return { container: c, output: c.firstElementChild as HTMLElement }
     }
 
     mkcontainer() {
@@ -97,7 +102,7 @@ class GalleryMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
         this.win = win
         this.output = win.document.getElementById("gallery-items") as HTMLDivElement
         return container

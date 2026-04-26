@@ -411,17 +411,22 @@ function destroyCharts() {
     }
 }
 
-class GraphMode extends Mode {
+class GraphMode implements Mode {
     NAME = "graph-output"
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
+
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if (!output) {
-            output = c = document.createElement("graph-template")
+            ({output, container: c} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(c)
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
 
         groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
         typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
@@ -592,12 +597,17 @@ class GraphMode extends Mode {
         destroyCharts()
     }
 
+    mkcontainers() {
+        const c = this.mkcontainer()
+        return { container: c, output: c}
+    }
+
     mkcontainer() {
         return document.createElement("graph-template")
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
 
         destroyCharts()
         this.win = win

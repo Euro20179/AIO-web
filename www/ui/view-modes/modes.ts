@@ -19,9 +19,6 @@ class Mode {
         this.win = win ||= window
         this.container = container || null
         this.output = output
-        if (this.win === null) {
-            throw new Error("default view (window) is null")
-        }
     }
     add(entry: InfoEntry): HTMLElement { return document.createElement("div") }
     sub(entry: InfoEntry): any { }
@@ -32,6 +29,9 @@ class Mode {
     close(): any { }
     clearSelected(): any { }
     mkcontainer(): HTMLElement { return document.createElement("div") }
+    mkcontainers(): { container: HTMLElement, output: HTMLElement} {
+        return { container: this.mkcontainer(), output: document.createElement("div") }
+    }
     chwin(win: Window & typeof globalThis): HTMLElement {
         if (this.win !== window) {
             this.win.close()
@@ -261,6 +261,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const newMode = modes[name as keyof typeof modes]
     try {
         let newModes = []
+        console.log(openViewModes)
         for (const mode of openViewModes) {
             if (mode.win === win) {
                 mode.close()
@@ -273,6 +274,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         openViewModes.push(m as Mode)
         m.addList(items_getSelected())
     } catch (err) {
+        console.error(err)
     }
 
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement

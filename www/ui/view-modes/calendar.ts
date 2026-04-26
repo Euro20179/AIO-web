@@ -1,5 +1,8 @@
-class CalendarMode extends Mode {
+class CalendarMode implements Mode {
     NAME = "calendar-output"
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
 
     #mode: "day" | "month"
 
@@ -8,7 +11,7 @@ class CalendarMode extends Mode {
     selectedTime: [Date, Date]
 
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if(!output) {
             c = document.createElement("calendar-template")
@@ -16,7 +19,8 @@ class CalendarMode extends Mode {
             o.append(c)
             output = c.firstElementChild as HTMLElement
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
 
         this.mode = "month"
 
@@ -302,12 +306,16 @@ class CalendarMode extends Mode {
         this.selectedItems = []
     }
 
+    mkcontainers() {
+        const c = this.mkcontainer()
+        return { container: c, output: c.firstElementChild as HTMLElement }
+    }
     mkcontainer() {
         return document.createElement("calendar-template")
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
         this.output = container.firstElementChild as HTMLElement
         this.output.setAttribute("data-mode", "month")
         this._setupWin()

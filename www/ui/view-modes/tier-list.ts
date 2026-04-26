@@ -1,5 +1,8 @@
-class TierListMode extends Mode {
+class TierListMode implements Mode {
     NAME = "tierlist-output"
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
 
     rows: Record<string, HTMLUListElement>
 
@@ -9,16 +12,17 @@ class TierListMode extends Mode {
     previousMode = ""
 
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if (!output) {
-            c = win.document.createElement("tierlist-template")
+            ({container: c, output} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(c)
             output = c.firstElementChild as HTMLElement
         }
 
-        super(output, win, c)
+        this.output = output
+        this.container = c
 
         this.rows = {}
 
@@ -225,12 +229,19 @@ class TierListMode extends Mode {
         }
     }
 
+    mkcontainers() {
+        const c = this.mkcontainer()
+        let frag = new DocumentFragment
+        frag.append(c)
+        return { container: c, output: c.firstElementChild as HTMLElement }
+    }
+
     mkcontainer(): HTMLElement {
         return this.win.document.createElement("tierlist-template")
     }
 
     chwin(win: Window & typeof globalThis): HTMLElement {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
         this.output = container.firstElementChild as HTMLElement
         this._setup()
         return container

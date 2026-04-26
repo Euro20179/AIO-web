@@ -666,10 +666,10 @@ function getElementUI<T extends typeof Element>(
     return el as InstanceType<T>
 }
 
-function getElementOrThrowUI<T extends typeof Element>(
+function getElementOrThrowUI<T extends typeof HTMLElement>(
     selector: string,
     requiredType: T | null = null,
-    root: { querySelector(selector: string): Element | null } | null = null
+    root: { querySelector(selector: string): HTMLElement | null } | null = null
 ): InstanceType<T> {
     let el = getElementUI(selector, requiredType, root)
     if (!(el)) {

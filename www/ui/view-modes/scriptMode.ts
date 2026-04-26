@@ -1,18 +1,24 @@
 
-class ScriptMode extends Mode {
+class ScriptMode implements Mode {
     NAME = "script-output"
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
+
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
+
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if(!output) {
-            c = document.createElement("script-template")
+            ({container: c, output} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(c)
-            output = c.querySelector(`#script-execute-output`) as HTMLElement
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
+
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
         this.scriptBox.onkeydown = (e) => {
@@ -22,9 +28,17 @@ class ScriptMode extends Mode {
         }
         this.run.onclick = execute.bind(this)
     }
+
+    mkcontainers() {
+        const c = this.mkcontainer()
+        document.body.append(c)
+        return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }
+    }
+
     mkcontainer() {
         return document.createElement("script-template")
     }
+
     close() {
         if(this.container)
             this.container.remove()
@@ -66,7 +80,7 @@ class ScriptMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis): HTMLElement {
-        const container = super.chwin.call(this, win)
+        const container = Mode.prototype.chwin.call(this, win)
         console.log(container.childNodes)
         this.run = container.querySelector("#script-execute") as HTMLButtonElement
         this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement

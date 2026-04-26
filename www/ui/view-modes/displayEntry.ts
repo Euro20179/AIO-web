@@ -1,22 +1,25 @@
-class DisplayMode extends Mode {
+class DisplayMode implements Mode {
     NAME = "entry-output"
 
     displayQueue: InfoEntry[]
 
     adding: boolean = false
 
+    output: HTMLElement | DocumentFragment
+    win: Window & typeof globalThis
+    container: HTMLElement | null
+
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        win ||= window
+        this.win = win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("div")
-            output.classList.add("overflow")
-            output.id = 'entry-output'
+            ({output, container: c} = this.mkcontainers())
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
             o.append(output)
             c = output
         }
-        super(output, win, c)
+        this.output = output
+        this.container = c
         this.displayQueue = []
 
         if (this.output instanceof this.win.HTMLElement) {
@@ -34,6 +37,18 @@ class DisplayMode extends Mode {
                 }
             })
         }
+    }
+
+    mkcontainers() {
+        const c = this.mkcontainer()
+        return { container: c, output: c }
+    }
+
+    mkcontainer() {
+        const c = document.createElement("div")
+        c.classList.add("overflow")
+        c.id = 'entry-output'
+        return c
     }
 
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
@@ -833,7 +848,7 @@ class DisplayMode extends Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const newOutput = super.chwin.call(this, win)
+        const newOutput = Mode.prototype.chwin.call(this, win)
 
         this.output = newOutput
 
