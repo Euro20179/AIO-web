@@ -417,10 +417,9 @@ class GraphMode extends Mode {
         win ||= window
         let c = null
         if (!output) {
-            output = document.createElement("graph-template")
+            output = c = document.createElement("graph-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            c = output
+            o.append(c)
         }
         super(output, win, c)
 

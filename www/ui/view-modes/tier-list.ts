@@ -12,11 +12,10 @@ class TierListMode extends Mode {
         win ||= window
         let c = null
         if (!output) {
-            output = win.document.createElement("tierlist-template")
-            c = output
+            c = win.document.createElement("tierlist-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            output = output.firstElementChild as HTMLElement
+            o.append(c)
+            output = c.firstElementChild as HTMLElement
         }
 
         super(output, win, c)

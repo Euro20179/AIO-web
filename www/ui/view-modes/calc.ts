@@ -6,10 +6,9 @@ class CalcMode extends Mode {
         win ||= window
         let container = null
         if (!output) {
-            output = document.createElement("calc-template")
-            container = output
+            container = document.createElement("calc-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
+            o.append(container)
             output = getElementOrThrowUI("#calc-items", null, output) as HTMLElement
         }
         super(output, win, container)

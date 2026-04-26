@@ -34,14 +34,13 @@ class GalleryMode extends Mode {
         win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("div")
-            c = output
-            output.classList.add("overflow")
-            output.id = 'gallery-output'
-            output.innerHTML = `<div id="gallery-items"></div>`
+            c = document.createElement("div")
+            c.classList.add("overflow")
+            c.id = 'gallery-output'
+            c.innerHTML = `<div id="gallery-items"></div>`
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            output = output.firstElementChild as HTMLElement
+            o.append(c)
+            output = c.firstElementChild as HTMLElement
         }
         super(output, win, c)
     }

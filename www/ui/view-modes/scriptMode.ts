@@ -7,11 +7,10 @@ class ScriptMode extends Mode {
         win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("script-template")
-            c = output
+            c = document.createElement("script-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            output = output.querySelector(`#script-execute-output`) as HTMLElement
+            o.append(c)
+            output = c.querySelector(`#script-execute-output`) as HTMLElement
         }
         super(output, win, c)
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement

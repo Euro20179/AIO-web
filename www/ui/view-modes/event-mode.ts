@@ -80,11 +80,10 @@ class EventMode extends Mode {
         win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("event-template")
-            c = output
+            c = document.createElement("event-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            output = output.querySelector("#event-output-table") as HTMLElement
+            o.append(c)
+            output = c.querySelector("#event-output-table") as HTMLElement
         }
         super(output, win, c)
         this.eventFilter = document.getElementById("event-filter") as HTMLInputElement

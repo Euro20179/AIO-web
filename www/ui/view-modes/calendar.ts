@@ -11,11 +11,10 @@ class CalendarMode extends Mode {
         win ||= window
         let c = null
         if(!output) {
-            output = document.createElement("calendar-template")
-            c = output
+            c = document.createElement("calendar-template")
             const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
-            output = output.firstElementChild as HTMLElement
+            o.append(c)
+            output = c.firstElementChild as HTMLElement
         }
         super(output, win, c)
 
