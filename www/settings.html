@@ -129,7 +129,7 @@
         const del = document.createElement("button")
         del.onclick = function() {
             if(!confirm(`Are you sure you want to delete your customized ${component}`)) return
-            fetch(`/settings/delete/?uid=${uid}&setting=template-${component}`,{
+            fetch(`${location.protocol}//${location.host}/settings/delete?uid=${uid}&setting=template-${component}`,{
                 method: "DELETE"
             }).then(res => {
                 if(res.status !== 200) return
