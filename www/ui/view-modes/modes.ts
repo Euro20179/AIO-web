@@ -30,9 +30,9 @@ class Mode {
     clearSelected(): any { }
     mkcontainer(): HTMLElement { return document.createElement("div") }
     //responsible for creating the container, output, and putting them on the page
-    mkcontainers(): { container: HTMLElement, output: HTMLElement } {
+    mkcontainers(into: HTMLElement): { container: HTMLElement, output: HTMLElement } {
         const container = this.mkcontainer()
-        this.win.document.body.append(container)
+        into.append(container)
         container.append(document.createElement("div"))
         return { container: container, output: getElementOrThrowUI("div", null, container) }
     }
@@ -47,7 +47,7 @@ class Mode {
 
         this.win = win
 
-        let { output: newOutput, container } = this.mkcontainers()
+        let { output: newOutput, container } = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document))
         const imported = win.document.importNode(this.output, true)
         newOutput.replaceChildren(...imported.childNodes)
         this.output = newOutput

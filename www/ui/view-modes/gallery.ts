@@ -37,16 +37,15 @@ class GalleryMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({output, container: c} = this.mkcontainers())
+            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: getElementOrThrowUI(":first-child", null, c)}
     }
 
@@ -104,7 +103,7 @@ class GalleryMode implements Mode {
     chwin(win: Window & typeof globalThis) {
         const container = Mode.prototype.chwin.call(this, win)
         this.win = win
-        this.output = win.document.getElementById("gallery-items") as HTMLDivElement
+        this.output = container.querySelector("#gallery-items") as HTMLDivElement
         return container
     }
     close() {

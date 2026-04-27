@@ -9,7 +9,7 @@ class CalcMode implements Mode {
         this.win = win ||= window
         let container = null
         if (!output) {
-            ({output, container} = this.mkcontainers());
+            ({output, container} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)));
         }
         this.output = output
         this.container = container
@@ -24,10 +24,9 @@ class CalcMode implements Mode {
         }
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return {
             container: c,
             output: getElementOrThrowUI("#calc-items", null, c)
@@ -113,7 +112,7 @@ class CalcMode implements Mode {
         const container = Mode.prototype.chwin.call(this, win)
 
         this.output = getElementOrThrowUI("#calc-items", null, container) as HTMLElement
-        this.expressionInput = win.document.getElementById("calc-expression") as HTMLTextAreaElement
+        this.expressionInput = container.querySelector("#calc-expression") as HTMLTextAreaElement
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
 
         return container

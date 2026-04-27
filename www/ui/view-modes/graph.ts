@@ -421,7 +421,7 @@ class GraphMode implements Mode {
         this.win = win ||= window
         let c = null
         if (!output) {
-            ({output, container: c} = this.mkcontainers())
+            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -595,10 +595,9 @@ class GraphMode implements Mode {
         destroyCharts()
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: c}
     }
 
@@ -611,10 +610,10 @@ class GraphMode implements Mode {
 
         destroyCharts()
         this.win = win
-        groupBySelect = win.document.getElementById("group-by") as HTMLSelectElement
-        typeSelection = win.document.getElementById("chart-type") as HTMLSelectElement
+        groupBySelect = container.querySelector("#group-by") as HTMLSelectElement
+        typeSelection = container.querySelector("#chart-type") as HTMLSelectElement
 
-        groupByInput = win.document.getElementById("group-by-expr") as HTMLInputElement
+        groupByInput = container.querySelector("#group-by-expr") as HTMLInputElement
         groupByInput.onchange = function() {
             makeGraphs(items_getSelected())
         }

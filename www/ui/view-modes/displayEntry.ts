@@ -13,7 +13,7 @@ class DisplayMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({output, container: c} = this.mkcontainers())
+            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
             c = output
         }
         this.output = output
@@ -37,10 +37,9 @@ class DisplayMode implements Mode {
         }
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: c }
     }
 

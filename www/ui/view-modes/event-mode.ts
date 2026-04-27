@@ -83,7 +83,7 @@ class EventMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({container: c, output} = this.mkcontainers())
+            ({container: c, output} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -160,10 +160,9 @@ class EventMode implements Mode {
         this._reRenderEventTable()
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: getElementOrThrowUI("#event-output-table", null, c)}
     }
 
@@ -173,8 +172,8 @@ class EventMode implements Mode {
 
     chwin(win: Window & typeof globalThis) {
         const container = Mode.prototype.chwin.call(this, win)
-        this.output = win.document.getElementById("event-output-table") as HTMLTableElement
-        this.eventFilter = win.document.getElementById("event-filter") as HTMLInputElement
+        this.output = container.querySelector("#event-output-table") as HTMLTableElement
+        this.eventFilter = container.querySelector("#event-filter") as HTMLInputElement
         this.eventFilter.onchange = () => {
             if (this.eventFilter.value === "") return
 

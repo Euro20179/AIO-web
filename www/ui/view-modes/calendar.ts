@@ -14,7 +14,7 @@ class CalendarMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({container: c, output} = this.mkcontainers())
+            ({container: c, output} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -298,10 +298,9 @@ class CalendarMode implements Mode {
         this.selectedItems = []
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: getElementOrThrowUI(":first-child", null, c)}
     }
     mkcontainer() {

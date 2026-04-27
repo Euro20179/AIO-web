@@ -12,7 +12,7 @@ class ScriptMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({container: c, output} = this.mkcontainers())
+            ({container: c, output} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -27,10 +27,9 @@ class ScriptMode implements Mode {
         this.run.onclick = execute.bind(this)
     }
 
-    mkcontainers() {
+    mkcontainers(into: HTMLElement) {
         const c = this.mkcontainer()
-        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
-        o.append(c)
+        into.append(c)
         return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }
     }
 
