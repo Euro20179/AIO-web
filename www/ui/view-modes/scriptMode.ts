@@ -59,7 +59,9 @@ class ScriptMode implements Mode {
     }
 
     add(entry: InfoEntry) {
-        const d = new DisplayMode(this.output, this.win)
+        const modeSelect = getElementUI("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
+        const newMode = mode_name2cls(modeSelect)
+        const d: Mode = new newMode(this.output, this.win)
         const e = d.add(entry)
         e.style.display = "block"
         this.renderedModes.set(entry.ItemId, d)

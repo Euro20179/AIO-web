@@ -248,9 +248,7 @@ function mode_clearItems(updateStats: boolean = true) {
 //just in case
 const clearItems = mode_clearItems
 
-
-//this should ONLY operate within the user specified or current window otherwise it makes no sense
-function mode_setMode(name: string, win: Window & typeof globalThis = window) {
+function mode_name2cls(name: string) {
     name = {
         "entry": "entry-output",
         "graph": "graph-output",
@@ -272,7 +270,12 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         "tierlist-output": TierListMode,
     }
 
-    const newMode = modes[name as keyof typeof modes]
+    return modes[name as keyof typeof modes]
+}
+
+//this should ONLY operate within the user specified or current window otherwise it makes no sense
+function mode_setMode(name: string, win: Window & typeof globalThis = window) {
+    const newMode = mode_name2cls(name)
     try {
         let newModes = []
         for (const mode of openViewModes) {

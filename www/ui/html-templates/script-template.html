@@ -4,6 +4,7 @@
         <a href="/usage/js_api_docs.html">Usage</a>
     </p>
     <div id="script-root">
+
         <div class="flex" style="grid-area: run-button;">
             <button id="script-execute">▶</button>
             <div class="flex column">
@@ -13,6 +14,10 @@
                 <label for="script-js-mode">js mode <input type="checkbox" id="script-js-mode"
                         style="vertical-align: middle;"></label>
             </div>
+            <select id="script-select-view" style='height: 100%; text-align: center;'>
+                <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
+                <option value="gallery-output" title="Gallery mode">🖼︎ Gallery</option>
+            </select>
         </div>
         <textarea id="script"></textarea>
         <output id="script-execute-output" style="font-family: monospace"></output>
