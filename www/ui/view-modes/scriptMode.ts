@@ -112,7 +112,7 @@ class ScriptMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis): HTMLElement {
-        const container = Mode.prototype.chwin.call(this, win)
+        const container = ModePrimitives.chwin.call(this, win)
         this.run = container.querySelector("#script-execute") as HTMLButtonElement
         this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
         this.output = container.querySelector("#script-execute-output") as HTMLDivElement

@@ -172,7 +172,7 @@ class EventMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = Mode.prototype.chwin.call(this, win)
+        const container = ModePrimitives.chwin.call(this, win)
         this.output = container.querySelector("#event-output-table") as HTMLTableElement
         this.eventFilter = container.querySelector("#event-filter") as HTMLInputElement
         this.eventFilter.onchange = () => {

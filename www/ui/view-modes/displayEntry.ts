@@ -851,7 +851,7 @@ class DisplayMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const newOutput = Mode.prototype.chwin.call(this, win)
+        const newOutput = ModePrimitives.chwin.call(this, win)
 
         this.output = newOutput
 

@@ -309,7 +309,7 @@ class CalendarMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = Mode.prototype.chwin.call(this, win)
+        const container = ModePrimitives.chwin.call(this, win)
         this.output = container.firstElementChild as HTMLElement
         this.output.setAttribute("data-mode", "month")
         this._setupWin()

@@ -237,7 +237,7 @@ class TierListMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis): HTMLElement {
-        const container = Mode.prototype.chwin.call(this, win)
+        const container = ModePrimitives.chwin.call(this, win)
         this.output = container.firstElementChild as HTMLElement
         this._setup()
         return container

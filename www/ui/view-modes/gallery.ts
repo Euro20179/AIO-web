@@ -101,7 +101,7 @@ class GalleryMode implements Mode {
     }
 
     chwin(win: Window & typeof globalThis) {
-        const container = Mode.prototype.chwin.call(this, win)
+        const container = ModePrimitives.chwin.call(this, win)
         this.win = win
         this.output = container.querySelector("#gallery-items") as HTMLDivElement
         return container

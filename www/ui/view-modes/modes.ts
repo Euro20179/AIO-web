@@ -1,42 +1,25 @@
-class Mode {
-    NAME: string = "Mode"
+interface Mode {
     output: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
-
     container: HTMLElement | null
-
-    // Explainer for output vs container
-    // The output is where information goes, the container is where the information + ui chrome is displayed
-    // If an output is not provided the container is created by the mode, and removed on close()
-    // This is the case because if an output is provided, the chrome is expected to be provided by the caller.
-
-    /**
-        * @param {HTMLElement | DocumentFragment} output The element that information gets put into in the mode, if not provided a container is created by the mode
-        * @param {Window & typeof globalThis} win The window where the mode is (defaults to parent window)
-        * @param {HTMLElement | null} container The container containing the output, if provided, it will be removed from the DOM on Mode.close()
-    */
-    constructor(output: HTMLElement | DocumentFragment, win?: Window & typeof globalThis, container?: HTMLElement | null) {
-        this.win = win ||= window
-        this.container = container || null
-        this.output = output
-    }
-    add(entry: InfoEntry): HTMLElement { return document.createElement("div") }
-    sub(entry: InfoEntry): any { }
-    addList(entry: InfoEntry[]): any { }
-    subList(entry: InfoEntry[]): any { }
+    add(entry: InfoEntry): HTMLElement
+    sub(entry: InfoEntry): any
+    addList(entry: InfoEntry[]): any
+    subList(entry: InfoEntry[]): any
     ///Responsible for removing the open class from the output element
     //and also clearing the selected items (clearSelected())
-    close(): any { }
-    clearSelected(): any { }
-    mkcontainer(): HTMLElement { return document.createElement("div") }
+    close(): any
+    clearSelected(): any
+    mkcontainer(): HTMLElement
     //responsible for creating the container, output, and putting them on the page
-    mkcontainers(into: HTMLElement): { container: HTMLElement, output: HTMLElement } {
-        const container = this.mkcontainer()
-        into.append(container)
-        container.append(document.createElement("div"))
-        return { container: container, output: getElementOrThrowUI("div", null, container) }
-    }
-    chwin(win: Window & typeof globalThis): HTMLElement {
+    mkcontainers(into: HTMLElement): {output: HTMLElement, container: HTMLElement }
+    chwin(win: Window & typeof globalThis): HTMLElement
+    refresh?(id: bigint): any
+    put?(html: string | HTMLElement | ShadowRoot): any
+}
+
+const ModePrimitives = {
+    chwin(this: Mode, win: Window & typeof globalThis): HTMLElement {
         if (this.win !== window) {
             this.win.close()
         }
@@ -55,8 +38,6 @@ class Mode {
 
         return container
     }
-    refresh?(id: bigint): any { }
-    put?(html: string | HTMLElement | ShadowRoot): any { }
 }
 
 let openViewModes: Mode[] = []
@@ -167,22 +148,21 @@ function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mo
 //just in case
 const selectItem = mode_selectItem
 
-
 var mode_refreshItem = function() {
-    let to = 0
+    let toForItems = new Map
     return function(item: bigint) {
         const refresh = () => {
-            to = 0
+            toForItems.delete(item)
             for (const mode of openViewModes) {
                 if (mode.refresh) {
                     mode.refresh(item)
                 }
             }
         }
-        if(to !== 0) {
-            clearTimeout(to)
+        if(toForItems.has(item)) {
+            clearTimeout(toForItems.get(item))
         }
-        to = setTimeout(refresh, 40)
+        toForItems.set(item, setTimeout(refresh, 40))
     }
 }()
 
