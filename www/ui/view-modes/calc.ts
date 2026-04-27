@@ -53,6 +53,7 @@ class CalcMode implements Mode {
     close() {
         if (this.container)
             this.container.remove()
+        else this.clearSelected()
         this.clearSelected()
     }
 

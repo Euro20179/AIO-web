@@ -8,6 +8,9 @@ class ScriptMode implements Mode {
     win: Window & typeof globalThis
     container: HTMLElement | null
 
+    renderedModes: Map<bigint, Mode>
+
+
     constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
         this.win = win ||= window
         let c = null
@@ -16,6 +19,8 @@ class ScriptMode implements Mode {
         }
         this.output = output
         this.container = c
+
+        this.renderedModes = new Map
 
         this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
         this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
@@ -37,24 +42,43 @@ class ScriptMode implements Mode {
         return document.createElement("script-template")
     }
 
+    refresh(id: bigint) {
+        for(let [id, mode] of this.renderedModes.entries()) {
+            console.log(id, mode)
+            mode.refresh?.(id)
+        }
+    }
+
     close() {
         if(this.container)
             this.container.remove()
+        else {
+            this.clearSelected()
+            this.clear()
+        }
     }
+
     add(entry: InfoEntry) {
         const d = new DisplayMode(this.output, this.win)
         const e = d.add(entry)
         e.style.display = "block"
+        this.renderedModes.set(entry.ItemId, d)
         return e
     }
+
     sub(entry: InfoEntry) {
-        this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)?.remove()
+        console.log('closing')
+        const mode = this.renderedModes.get(entry.ItemId)
+        if(mode) mode.close()
+        this.renderedModes.delete(entry.ItemId)
     }
+
     addList(entries: InfoEntry[]) {
         for (let e of entries) {
             this.add(e)
         }
     }
+
     subList(entries: InfoEntry[]) {
         for (let e of entries) {
             this.sub(e)
@@ -62,7 +86,14 @@ class ScriptMode implements Mode {
     }
 
     clear() {
+        for(let mode of this.renderedModes.values()) {
+            if("clear" in mode)
+                //@ts-ignore
+                mode.clear()
+        }
+
         mode_clearItems()
+
         if (this.output instanceof this.win.HTMLElement) {
             this.output.innerHTML = ""
         } else
@@ -72,9 +103,10 @@ class ScriptMode implements Mode {
     }
 
     clearSelected() {
-        for (let elem of this.output.querySelectorAll(`[data-item-id]`)) {
-            elem.remove()
+        for(let mode of this.renderedModes.values()) {
+            mode.clearSelected()
         }
+        this.renderedModes = new Map
     }
 
     chwin(win: Window & typeof globalThis): HTMLElement {
@@ -83,6 +115,10 @@ class ScriptMode implements Mode {
         this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
         this.output = container.querySelector("#script-execute-output") as HTMLDivElement
         this.run.onclick = execute.bind(this)
+        for(let mode of this.renderedModes.values()) {
+            mode.win = win
+            mode.output = this.output
+        }
         return container
     }
 

@@ -572,6 +572,7 @@ class GraphMode implements Mode {
     close() {
         if (this.container)
             this.container.remove()
+        else this.clearSelected()
     }
 
     add(entry: InfoEntry) {

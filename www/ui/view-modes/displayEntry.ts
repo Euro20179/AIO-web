@@ -61,6 +61,10 @@ class DisplayMode implements Mode {
     close() {
         if(this.container)
             this.container.remove()
+        else {
+            this.clearSelected()
+            this.clear()
+        }
         this.displayQueue = []
         this.adding = false
     }
