@@ -72,7 +72,6 @@
 
                 const t1Time = Temporal.ZonedDateTime.from(`${t1}[${tz1 || "UTC"}]`)
                 const t2Time = Temporal.ZonedDateTime.from(`${t2}[${tz2 || "UTC"}]`)
-                console.log(t1Time.timeZone, t1Time)
                 const since = t2Time.withTimeZone(t1Time.timeZoneId).since(t1Time, {
                     largestUnit: "years"
                 }).abs()
@@ -105,7 +104,6 @@
                 const event = events.find(e => e.EventId == eventId)
                 const unix = items_eventTimeEstimate(event)
                 const inst = Temporal.Instant.fromEpochMilliseconds(unix)
-                console.log(inst.toString())
                 this.form.elements.namedItem(outputDatetimeLocalName).value =
                     inst.toString().split(':').slice(0, -1).join(":")
                 this.form.elements

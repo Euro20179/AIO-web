@@ -16,9 +16,6 @@ class TierListMode implements Mode {
         let c = null
         if (!output) {
             ({container: c, output} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
-            output = c.firstElementChild as HTMLElement
         }
 
         this.output = output
@@ -148,7 +145,6 @@ class TierListMode implements Mode {
         li.append(img)
 
         if (!(tier !== false)) {
-            console.log(entry.ItemId, mode, rating, tier)
             throw new Error(`No tier for rating: ${rating}`)
         }
 
@@ -231,9 +227,9 @@ class TierListMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
-        let frag = new DocumentFragment
-        frag.append(c)
-        return { container: c, output: c.firstElementChild as HTMLElement }
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
+        return { container: c, output: getElementOrThrowUI(":first-child", null, c)}
     }
 
     mkcontainer(): HTMLElement {

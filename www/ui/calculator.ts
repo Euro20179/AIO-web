@@ -2690,7 +2690,6 @@ class Interpreter {
 
     FuncDefNode(node: FuncDefNode) {
         const closure = this.symbolTable.copy()
-        console.log("CLOSING: ", closure.get("i"))
 
         let fun = new Func((...items) => {
             for (let i = 0; i < items.length; i++) {

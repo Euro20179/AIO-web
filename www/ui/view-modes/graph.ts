@@ -422,8 +422,6 @@ class GraphMode implements Mode {
         let c = null
         if (!output) {
             ({output, container: c} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
         }
         this.output = output
         this.container = c
@@ -599,6 +597,8 @@ class GraphMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
         return { container: c, output: c}
     }
 

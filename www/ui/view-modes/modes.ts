@@ -29,27 +29,31 @@ class Mode {
     close(): any { }
     clearSelected(): any { }
     mkcontainer(): HTMLElement { return document.createElement("div") }
-    mkcontainers(): { container: HTMLElement, output: HTMLElement} {
-        return { container: this.mkcontainer(), output: document.createElement("div") }
+    //responsible for creating the container, output, and putting them on the page
+    mkcontainers(): { container: HTMLElement, output: HTMLElement } {
+        const container = this.mkcontainer()
+        this.win.document.body.append(container)
+        container.append(document.createElement("div"))
+        return { container: container, output: getElementOrThrowUI("div", null, container) }
     }
     chwin(win: Window & typeof globalThis): HTMLElement {
         if (this.win !== window) {
             this.win.close()
         }
 
-        this.win = win
-
-        let newOutput = this.mkcontainer()
-        const imported = win.document.importNode(this.output, true)
-        newOutput.append(...imported.childNodes)
-        if(this.container) {
+        if (this.container) {
             this.container.remove()
         }
-        this.container = newOutput
 
-        win.document.getElementById("viewing-area")?.append(newOutput)
+        this.win = win
 
-        return newOutput
+        let { output: newOutput, container } = this.mkcontainers()
+        const imported = win.document.importNode(this.output, true)
+        newOutput.replaceChildren(...imported.childNodes)
+        this.output = newOutput
+        this.container = container
+
+        return container
     }
     refresh?(id: bigint): any { }
     put?(html: string | HTMLElement | ShadowRoot): any { }
@@ -123,23 +127,22 @@ function mode_isSelected(id: bigint) {
 }
 
 function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
+    const refresh = () => {
+        for (let item of items_getSelected()) {
+            mode_refreshItem(item.ItemId)
+        }
+    }
     if (newWin === window) {
         if (mode.chwin) {
             mode.chwin(window)
-            let selected = items_getSelected()
-            mode_clearItems()
-            mode_selectItemList(selected, true, mode)
+            refresh()
         }
     }
     else {
         newWin.addEventListener("DOMContentLoaded", () => {
-            let selected = items_getSelected()
-            mode_clearItems()
-            items_setSelected(selected)
             mode.chwin?.(newWin)
             newWin.self.addEventListener("aio-items-rendered", () => {
-                mode_clearItems()
-                mode_selectItemList(selected, true, mode)
+                refresh()
             })
         })
     }
@@ -179,7 +182,7 @@ function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
         mode.sub(item)
     }
 
-    if(items_getSelected().length === 0) {
+    if (items_getSelected().length === 0) {
         setError("No items selected")
     }
 }
@@ -187,7 +190,7 @@ function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
 const deselectItem = mode_deselectItem
 
 function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
-    if(itemList.length !== 0)
+    if (itemList.length !== 0)
         setError("")
     items_setSelected(items_getSelected().concat(itemList))
     updateStats && changeResultStatsWithItemListUI(itemList)
@@ -261,7 +264,6 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const newMode = modes[name as keyof typeof modes]
     try {
         let newModes = []
-        console.log(openViewModes)
         for (const mode of openViewModes) {
             if (mode.win === win) {
                 mode.close()

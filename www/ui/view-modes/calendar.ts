@@ -14,10 +14,7 @@ class CalendarMode implements Mode {
         this.win = win ||= window
         let c = null
         if(!output) {
-            c = document.createElement("calendar-template")
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
-            output = c.firstElementChild as HTMLElement
+            ({container: c, output} = this.mkcontainers())
         }
         this.output = output
         this.container = c
@@ -161,7 +158,6 @@ class CalendarMode implements Mode {
 
         //plus finding the valid events now, lets us sort it once and only once
         const validEvents = this._getValidEvents(start, end).sort((a, b) =>{
-            console.log("a", a, "b", b)
             return items_compareEventTiming(b, a)
         })
 
@@ -308,7 +304,9 @@ class CalendarMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
-        return { container: c, output: c.firstElementChild as HTMLElement }
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
+        return { container: c, output: getElementOrThrowUI(":first-child", null, c)}
     }
     mkcontainer() {
         return document.createElement("calendar-template")

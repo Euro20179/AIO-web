@@ -38,8 +38,6 @@ class GalleryMode implements Mode {
         let c = null
         if(!output) {
             ({output, container: c} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
         }
         this.output = output
         this.container = c
@@ -47,7 +45,9 @@ class GalleryMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
-        return { container: c, output: c.firstElementChild as HTMLElement }
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
+        return { container: c, output: getElementOrThrowUI(":first-child", null, c)}
     }
 
     mkcontainer() {

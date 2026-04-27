@@ -13,8 +13,6 @@ class ScriptMode implements Mode {
         let c = null
         if(!output) {
             ({container: c, output} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
         }
         this.output = output
         this.container = c
@@ -31,7 +29,8 @@ class ScriptMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
-        document.body.append(c)
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
         return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }
     }
 
@@ -81,7 +80,6 @@ class ScriptMode implements Mode {
 
     chwin(win: Window & typeof globalThis): HTMLElement {
         const container = Mode.prototype.chwin.call(this, win)
-        console.log(container.childNodes)
         this.run = container.querySelector("#script-execute") as HTMLButtonElement
         this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
         this.output = container.querySelector("#script-execute-output") as HTMLDivElement

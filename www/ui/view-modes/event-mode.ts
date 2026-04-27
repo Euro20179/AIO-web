@@ -84,8 +84,6 @@ class EventMode implements Mode {
         let c = null
         if(!output) {
             ({container: c, output} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(c)
         }
         this.output = output
         this.container = c
@@ -162,6 +160,8 @@ class EventMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
         return { container: c, output: getElementOrThrowUI("#event-output-table", null, c)}
     }
 

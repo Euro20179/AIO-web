@@ -10,8 +10,6 @@ class CalcMode implements Mode {
         let container = null
         if (!output) {
             ({output, container} = this.mkcontainers());
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(container)
         }
         this.output = output
         this.container = container
@@ -28,7 +26,8 @@ class CalcMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
-        document.body.append(c)
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
         return {
             container: c,
             output: getElementOrThrowUI("#calc-items", null, c)

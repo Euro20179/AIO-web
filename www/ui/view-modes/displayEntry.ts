@@ -14,8 +14,6 @@ class DisplayMode implements Mode {
         let c = null
         if(!output) {
             ({output, container: c} = this.mkcontainers())
-            const o = getElementOrThrowUI("#viewing-area", null, win.document)
-            o.append(output)
             c = output
         }
         this.output = output
@@ -41,6 +39,8 @@ class DisplayMode implements Mode {
 
     mkcontainers() {
         const c = this.mkcontainer()
+        const o = getElementOrThrowUI("#viewing-area", null, this.win.document)
+        o.append(c)
         return { container: c, output: c }
     }
 
@@ -1835,11 +1835,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                     ? (lengthInNumber || "0")
                     : (part[3] || "0") //part[3] could be empty string
 
-            let p = getElementOrThrowUI(
+            let p = getElementUI(
                 "progress",
                 this.win.HTMLProgressElement,
                 container
             )
+            if(!p) break
             p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 
