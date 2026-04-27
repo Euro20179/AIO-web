@@ -130,17 +130,13 @@ class CalendarMode implements Mode {
 
         if (eventFilter) {
             validEvents = validEvents.filter(e => {
-                const symbols = makeSymbolsTableFromObj({
-                    ...e,
-                    "Planned": e.Event === "Planned",
-                    "Viewing": e.Event === "Viewing",
-                    "Finished": e.Event === "Finished",
-                    "Paused": e.Event === "Paused",
-                    "ReViewing": e.Event === "ReViewing",
-                    "Added": e.Event === "Added",
-                    "Dropped": e.Event === "Dropped",
-                    "Purchased": e.Event === "Purchased",
-                })
+                const symbols = makeSymbolsTableFromObj(e)
+                for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+                    let is = e.Event === status
+                    const n = new Num(Number(is))
+                    symbols.set(status.toLowerCase(), n)
+                    symbols.set(status.toLowerCase(), n)
+                }
                 return parseExpression(eventFilter.value, symbols).truthy()
             })
         }

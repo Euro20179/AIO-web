@@ -107,7 +107,9 @@ class EventMode implements Mode {
             let tbl = makeSymbolsTableFromObj(event)
             for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
                 let is = event.Event === status
-                tbl.set(status.toLowerCase(), new Num(Number(is)))
+                const n = new Num(Number(is))
+                tbl.set(status.toLowerCase(), n)
+                tbl.set(status.toLowerCase(), n)
             }
             let res = parseExpression(script, tbl)
             if (!res.truthy()) {
