@@ -167,13 +167,24 @@ function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mo
 //just in case
 const selectItem = mode_selectItem
 
-function mode_refreshItem(item: bigint) {
-    for (const mode of openViewModes) {
-        if (mode.refresh) {
-            mode.refresh(item)
+
+var mode_refreshItem = function() {
+    let to = 0
+    return function(item: bigint) {
+        const refresh = () => {
+            to = 0
+            for (const mode of openViewModes) {
+                if (mode.refresh) {
+                    mode.refresh(item)
+                }
+            }
         }
+        if(to !== 0) {
+            clearTimeout(to)
+        }
+        to = setTimeout(refresh, 40)
     }
-}
+}()
 
 function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
     items_deselectById(item.ItemId)

@@ -865,7 +865,7 @@ class DisplayMode implements Mode {
     }
 
     refresh(id: bigint) {
-        let el = this.output.ownerDocument.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+        let el = this.output.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
         //only refresh if the item is on screen
         if (el)
             refreshDisplayItem.call(this, id)
@@ -2092,7 +2092,7 @@ function removeDisplayItem(this: DisplayMode, itemId: bigint) {
 }
 
 function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
-    let el = this.output.ownerDocument.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
+    let el = this.output.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
     if (!info) return
 
