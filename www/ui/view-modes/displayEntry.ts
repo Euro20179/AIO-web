@@ -7,6 +7,37 @@ type DisplayMode = {
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any): (target: HTMLElement) => any
 } & Mode
 
+
+// de_actions is kinda insane
+// this function (_mkde_actions) is unecessary but is here to just allow me to collapse the object away
+// de_actions gets assigned to the DisplayMode prototype
+// each function has the (item, root, target) signature
+// during the construction of an instance, that instance's de_actions property
+// is set to a proxy of the prototype's de_actions that middle-mans the getting
+// of a property from de_actions so that it can apply displayEntryAction to it
+// before returning it.
+// displayEntryAction essentially acts as a decorator in this step that
+// gets the root, and item from just an element (within the shadow root),
+// then calls the original de_actions function
+//
+// Another thing displayEntryAction does is bind the current instance
+// to the function from de_actions that is going to be called.
+//
+// The function that displayEntryAction returns has the 'correct' signature
+// because it lines up with requried by updateDeclarativeDSL
+//
+// Changing the signature of the individual de_acitons would simply result
+// in boiler plate where item, and root are gotten in each individual function.
+// It would still also require having a way to bind the current instance
+// to each individual action, which previously was done by simply just having
+// a de_actions for each instance which felt unecessary, so now we just proxy
+// the prototype!
+//
+// If updateDeclarativeDSL existed from the start, I likely would've chosen the
+// boilerplate, however de_actions came first with it's weird behavior of needing
+// to be attatched to an instance of displaymode, so i don't feel the need
+// to update it
+
 function _mkde_actions() {// {{{
     /**
      * Actions can be put onto elements with the entry-action attribute
@@ -59,7 +90,7 @@ function _mkde_actions() {// {{{
         /**
          * Deletes a tag based on the target's tag-name
         */
-        deletetag: function(item, root, target) {
+        deletetag: function(item, _root, target) {
             const tag = target.getAttribute("tag-name")
             if (!tag) {
                 console.warn("The target with entry-aciton=deletetag has no tag-name")
@@ -84,7 +115,7 @@ function _mkde_actions() {// {{{
         /**
          * deletes a recommender from the list of recommended bys
          */
-        deleterecommendedby: function(item, root, target) {
+        deleterecommendedby: function(item, _root, target) {
             const r = target.getAttribute("recommender-idx")
             if (!r) {
                 console.warn("The target with entry-action=deleterecommendedby has no recommender-idx attribute")
@@ -276,7 +307,7 @@ function _mkde_actions() {// {{{
          * Updates the custom styles with the value of this element
          * **NOTE**: DOES NOT SAVE
          */
-        updatecustomstyles: function(item, root, target) {
+        updatecustomstyles: function(_item, root, target) {
             const customStyles = root.getElementById("custom-styles")
             if (!(customStyles instanceof this.win.HTMLStyleElement)) {
                 throw new Error("custom-styles must be a style element in order to update it")
@@ -383,7 +414,7 @@ function _mkde_actions() {// {{{
         /**
          * Sets the thumbnail of the current item to the value of this element
          */
-        setthumbnail: function(item, _, target) {
+        setthumbnail: function(_item, _, target) {
             const fileUpload = target.getRootNode().getElementById("thumbnail-file-upload")
             if (!fileUpload || !("value" in fileUpload)) return
 
@@ -414,7 +445,7 @@ function _mkde_actions() {// {{{
          * Toggles a display item with id of the value of
          * the elem-id attribute on this element
          */
-        toggle: function(item, root, elem) {
+        toggle: function(_item, root, elem) {
             let id = elem.getAttribute("elem-id")
             if (!id) return
             let toShow = root.getElementById(id)
@@ -601,7 +632,7 @@ function _mkde_actions() {// {{{
         /**
          * Toggles the hiddenness of the #style-editor element
          */
-        editstyles: function(item, root, elem) {
+        editstyles: function(item, root, _elem) {
             const styleEditor = root.getElementById("style-editor")
             if (!styleEditor) return
             if ("value" in styleEditor) {
@@ -613,7 +644,7 @@ function _mkde_actions() {// {{{
         /**
          * Toggles the hiddenness of the #template-editor element
          */
-        edittemplate: function(item, root, elem) {
+        edittemplate: function(_item, root, _elem) {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor) return
 
@@ -715,7 +746,7 @@ function _mkde_actions() {// {{{
         /**
          * Asks the user to set the current position of the current item
          */
-        setprogress: async function(item, root) {
+        setprogress: async function(item, _root) {
             const user = findUserEntryById(item.ItemId) as UserEntry
             let newEp = await promptUI("Current position", undefined, undefined, user.CurrentPosition)
             if (!newEp) return
@@ -773,7 +804,7 @@ function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment,
     })
 
     if (this.output instanceof this.win.HTMLElement) {
-        this.output.addEventListener("scroll", (e) => {
+        this.output.addEventListener("scroll", () => {
             if (!(this.output instanceof this.win.HTMLElement))
                 throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
 
@@ -859,7 +890,7 @@ DisplayMode.prototype.chwin = function(this: DisplayMode, win: Window & typeof g
 
     this.output = newOutput
 
-    newOutput.addEventListener("scroll", (e) => {
+    newOutput.addEventListener("scroll", () => {
         if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
 
         if (this.displayQueue.length) {
@@ -992,7 +1023,7 @@ async function itemIdentification(form: HTMLFormElement) {
         })
 }
 
-async function titleIdentification(provider: string, search: string, selectionElemOutput: HTMLElement): Promise<string | null> {
+async function titleIdentification(provider: string, search: string, _selectionElemOutput: HTMLElement): Promise<string | null> {
     let res = await api_identify(search, provider)
     if (!res) {
         return null
@@ -1094,7 +1125,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 })
                 .then(res => {
                     if (res && res.status === 200) {
-                        updateStatusDisplay(action, shadowRoot)
+                        updateStatusDisplay(action, shadowRoot.querySelector("#status-selector"))
                     } else if (!res) {
                         alert("Could not update status")
                         return ""
@@ -1138,7 +1169,7 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
                 })
                 .then(res => {
                     if (res && res.status === 200) {
-                        updateStatusDisplay(action, shadowRoot)
+                        updateStatusDisplay(action, shadowRoot.querySelector("#status-selector"))
                     } else if (!res) {
                         alert("Could not update status")
                         return ""
@@ -1411,7 +1442,7 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
 /**
  * @description updates special-case legacy elements
  */
-async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, events: UserEvent[], el: ShadowRoot) {
+async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, _events: UserEvent[], el: ShadowRoot) {
     const renderComponent = (query: string,
         fill: (element: HTMLElement, itemId: bigint) => any) => {
         for (let l of el.querySelectorAll(query)) {

@@ -238,7 +238,7 @@ function mode_clearItems(updateStats: boolean = true) {
 //just in case
 const clearItems = mode_clearItems
 
-const mode_map = () => new Map<string, Function>([
+const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void>([
     ["entry-output", DisplayMode],
     ["graph-output", GraphMode],
     ["calc-output", CalcMode],
@@ -263,7 +263,7 @@ function mode_name2cls(name: string) {
     return mode_map().get(name)
 }
 
-function mode_cls2name(cls: Function) {
+function mode_cls2name(cls: (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void) {
     let map = new Map(mode_map().entries().map(([k, v]) => [v, k]))
     return map.get(cls)
 }
@@ -271,6 +271,8 @@ function mode_cls2name(cls: Function) {
 //this should ONLY operate within the user specified or current window otherwise it makes no sense
 function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const newMode = mode_name2cls(name)
+    if(!newMode) return
+
     try {
         let newModes = []
         for (const mode of openViewModes) {
@@ -281,7 +283,7 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
             }
         }
         openViewModes = newModes
-        const m = new newMode(undefined, win)
+        const m = new (newMode as any)(undefined, win)
         openViewModes.push(m as Mode)
         m.addList(items_getSelected())
     } catch (err) {

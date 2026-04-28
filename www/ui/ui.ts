@@ -143,7 +143,7 @@ function startupUI({
     })
 
     if (viewAllElem instanceof HTMLInputElement)
-        viewAllElem.addEventListener("change", e => {
+        viewAllElem.addEventListener("change", _ => {
             resetStatsUI()
             if (!viewAllElem.checked) {
                 mode_clearItems(false)
@@ -173,7 +173,7 @@ function startupUI({
         newWindow.addEventListener("click", () => {
             const mode = mode_getFirstModeInWindow(catalogWin || window)
             if (!mode) return
-            const name = mode_cls2name(mode.constructor)
+            const name = mode_cls2name(mode.constructor as any)
             if (name)
                 openWindow(name)
             else {
@@ -640,7 +640,7 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
 
     root.innerHTML = html || "<p>prompt</p>"
     pEl.showModal()
-    return await new Promise((res, rej) => {
+    return await new Promise((res) => {
         pEl.onclose = () => {
             res(pEl.returnValue ?? _default ?? null)
         }
@@ -1444,7 +1444,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 
     popover.showModal()
 
-    return await new Promise((res, rej) => {
+    return await new Promise((res) => {
         function registerFigClickEvents(container: HTMLElement) {
             for (let fig of container.querySelectorAll("figure")) {
                 const id = fig.getAttribute("data-item-id")
@@ -1475,7 +1475,7 @@ async function signinUI(reason: string): Promise<string> {
 
     //if the popover is already open, something already called this function for the user to sign in
     if (loginPopover.open) {
-        return await new Promise((res, rej) => {
+        return await new Promise((res) => {
             //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
             setInterval(() => {
                 let auth = getUserAuth()
@@ -1487,7 +1487,7 @@ async function signinUI(reason: string): Promise<string> {
     }
 
     loginPopover.showModal()
-    return await new Promise((res, rej) => {
+    return await new Promise((res) => {
         const form = getElementOrThrowUI("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             alert(1)
@@ -1671,7 +1671,7 @@ function openCatalogModeUI() {
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     catalogWin = open(newURL, "_blank", "popup=true")
     if (catalogWin) {
-        catalogWin.addEventListener("beforeunload", (e) => {
+        catalogWin.addEventListener("beforeunload", () => {
             closeCatalogModeUI()
         })
         const thisMode = mode_getFirstModeInWindow(window)
@@ -1770,7 +1770,7 @@ async function getSettings(uid: number): Promise<UserSettings> {
  *
  * WARNING: interactive elements may not work in the popout window
  */
-function popoutUI(popoutTarget: HTMLElement, event: keyof WindowEventMap = "click") {
+function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "click") {
 
     const toPop = popoutTarget.getAttribute("popout-target")
     let parent = popoutTarget.parentElement
@@ -1834,7 +1834,7 @@ height: 100%;
             }
         }
 
-        const closePopout = getElementUI("button.popout", win.HTMLElement, win.document.body)
+        const closePopout = getElementUI("button.popout", win.self.HTMLElement, win.document.body)
         if (closePopout) {
             closePopout.onclick = () => {
                 placeholder.replaceWith(parent)
@@ -1991,7 +1991,7 @@ function setViewingAllUI(enabled: boolean) {
 
 function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean = true) {
     const win = open(`/ui/display.php?item-id=${id}`, target, popup ? "popup=true" : undefined)
-    win?.addEventListener("modes.update-item", e => {
+    win?.addEventListener("modes.update-item", _ => {
         var i = setInterval(() => {
             let btn = win?.document.querySelector("display-entry")?.shadowRoot?.querySelector("[entry-action='close']")
             if (!btn) return
