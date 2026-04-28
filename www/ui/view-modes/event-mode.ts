@@ -80,7 +80,7 @@ type EventMode = {
 
 function EventMode(this: EventMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-    this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
+    this.eventFilter = (this.container || this.win.document).querySelector("#event-filter") as HTMLInputElement
 
     this.eventFilter.onchange = () => {
         if (this.eventFilter.value === "") return

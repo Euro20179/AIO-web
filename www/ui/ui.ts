@@ -66,7 +66,7 @@ function startupUI({
         throw new Error("sort by selector must be a select element")
     }
 
-    if(!(components["promptDialog"] instanceof HTMLDialogElement)) {
+    if (!(components["promptDialog"] instanceof HTMLDialogElement)) {
         throw new Error("prompt dialog must be a dialog element")
     }
 
@@ -155,8 +155,8 @@ function startupUI({
             }
         })
 
-    if (newWindow)
-        newWindow.onclick = function() {
+    if (newWindow) {
+        const openWindow = (modeName: string) => {
             let urlParams = new URLSearchParams(location.search)
             urlParams.set("display", "true")
             urlParams.set("no-select", "true")
@@ -165,17 +165,47 @@ function startupUI({
             const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
             const win = open(newURL, "_blank", "popup=true")
             if (!win) return
-            const mode = mode_getFirstModeInWindow(catalogWin || window)
-            if (!mode) return
             win.onload = () => {
-                const name = mode_cls2name(mode.constructor)
-                if(name)
-                    mode_setMode(name, win as Window & typeof globalThis)
-                else {
-                    throw new Error(`Unable to determine current mode name from mode class: ${mode.constructor.name}`)
-                }
+                mode_setMode(modeName, win as Window & typeof globalThis)
             }
         }
+
+        newWindow.addEventListener("click", () => {
+            const mode = mode_getFirstModeInWindow(catalogWin || window)
+            if (!mode) return
+            const name = mode_cls2name(mode.constructor)
+            if (name)
+                openWindow(name)
+            else {
+                throw new Error(`Unable to determine current mode name from mode class: ${mode.constructor.name}`)
+            }
+        })
+
+        if (viewToggle) {
+            newWindow.addEventListener("contextmenu", function(e) {
+                e.preventDefault()
+
+                const list = document.createElement("datalist")
+                list.id = "mode-list"
+                const modes = viewToggle.querySelectorAll(":where(option, optgroup)")
+                    .values()
+                    .map(v => v.cloneNode(true))
+                list.append(...modes)
+                document.body.append(list)
+
+                promptUI(
+                    "Choose a mode to open in a new window",
+                    undefined,
+                    list.id
+                ).then(choice => {
+                    if (choice && mode_map().has(choice)) {
+                        openWindow(choice)
+                    }
+                    list.remove()
+                })
+            })
+        }
+    }
 }
 
 /**
@@ -302,7 +332,7 @@ function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let items = list || items_getResults()
 
     const ls = components.librarySelector
-    if(ls) {
+    if (ls) {
         items = items.filter(v => String(v.info.Library) === ls.value)
     }
 
@@ -368,7 +398,7 @@ class Statistic {
     }
     add(value: number) {
         this.values.push(value)
-        if(Math.sumPresice) {
+        if (Math.sumPresice) {
             this.value = Math.sumPrecise(this.values)
         } else {
             this.value += value
@@ -380,7 +410,7 @@ class Statistic {
             this.value = value
         } else {
             this.values.push(value)
-            if(Math.sumPrecise)
+            if (Math.sumPrecise)
                 this.value = Math.sumPrecise(this.values)
             else this.value += value
         }
@@ -390,7 +420,7 @@ class Statistic {
             this.value = this.calculation(items[0] || genericInfo(0n, getUidUI()), mult)
         } else {
             this.values = this.values.concat(items.map(v => this.calculation(v, mult)))
-            if(Math.sumPrecise) {
+            if (Math.sumPrecise) {
                 this.value = Math.sumPrecise(this.values)
             } else {
                 for (let item of items) {
@@ -413,7 +443,7 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
         }
     } else {
         //@ts-ignore
-        if(window.shortcuts) {
+        if (window.shortcuts) {
             window.shortcuts.nnoremap(key, true, false, /^[A-Z]$/.test(key), run)
         }
     }
@@ -507,7 +537,7 @@ for (let i = 0; i < 10; i++) {
     })
 }
 
-if(window.shortcuts) {
+if (window.shortcuts) {
     let curkey = window.shortcuts
     addEventListener("keydown", e => {
         if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
@@ -591,7 +621,7 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
  */
 async function promptUI(html?: string, _default?: string, uselist?: string, defaultValue: string = ""): Promise<string | null> {
     const pEl = components["promptDialog"]
-    if(!pEl) {
+    if (!pEl) {
         const parser = new DOMParser
         const doc = parser.parseFromString(html || "", "text/html")
         html = doc.documentElement.outerText
@@ -1308,9 +1338,9 @@ function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
     container.classList.add("center")
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
 
-    for(let id in items) {
+    for (let id in items) {
         let el = items[id]
-        if(el.tagName !== "FIGURE") {
+        if (el.tagName !== "FIGURE") {
             const f = document.createElement("figure")
             f.append(el)
             el = f
@@ -1394,7 +1424,7 @@ type SelectItemOptions = Partial<{
 /**
  * lets the user select an item, be sure to use fillItemListingUI first
 */
-async function selectItemUI(options?: SelectItemOptions): Promise<null |bigint> {
+async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
     const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
 
 
@@ -1424,7 +1454,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null |bigint> 
             }
         }
         popover.onclose = function() {
-            if(popover.returnValue) {
+            if (popover.returnValue) {
                 res(BigInt(popover.returnValue))
             } else res(null)
         }
@@ -1682,12 +1712,12 @@ function doUserStartupUI(settings: UserSettings) {
     const script = settings.UIStartupScript
     const lang = settings.StartupLang
 
-    for(let key in settings) {
-        if(key.startsWith("template-")) {
-            if(!settings[key as keyof typeof settings]) continue
+    for (let key in settings) {
+        if (key.startsWith("template-")) {
+            if (!settings[key as keyof typeof settings]) continue
             const tmpl = key.split("template-")[1]
             const tmplEl = currentDocument().getElementById(tmpl)
-            if(!tmplEl) continue
+            if (!tmplEl) continue
             tmplEl.innerHTML = settings[key as keyof typeof settings]
         }
     }
@@ -1814,7 +1844,7 @@ height: 100%;
         }
 
         win.onbeforeunload = function() {
-                placeholder.replaceWith(parent)
+            placeholder.replaceWith(parent)
             if (watcher) watcher.destroy()
         }
     }
@@ -1837,7 +1867,7 @@ async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
 
 async function newRecommendedByUI(itemId: bigint) {
     let newRecommendedBy = await promptUI("Names (, separated)", "", "recommended-by")
-    if(!newRecommendedBy) return
+    if (!newRecommendedBy) return
 
     let r = newRecommendedBy.split(",")
     try {
@@ -1847,13 +1877,13 @@ async function newRecommendedByUI(itemId: bigint) {
         )
 
         var res = await api_setItem("", info, "Update recommended by")
-        if(res?.status !== 200) return ""
+        if (res?.status !== 200) return ""
         updateInfo2({
             [String(itemId)]: {
                 info
             }
         })
-    } catch(err) {
+    } catch (err) {
         console.error(err)
     }
 }
@@ -1910,16 +1940,16 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
     const ty =
         probablyMetaEntry(obj) ?
             "meta"
-        : probablyUserItem(obj) ?
-            "user"
-        : "info"
+            : probablyUserItem(obj) ?
+                "user"
+                : "info"
 
     const path =
         ty === "meta" ?
             "metadata/"
-        : ty === "user" ?
-            "engagement/"
-        : ""
+            : ty === "user" ?
+                "engagement/"
+                : ""
 
     try {
         var res = await api_setItem(path, cpy, actionDisplayName)
@@ -1941,9 +1971,9 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
         [String(obj.ItemId)]:
             ty === "meta" ?
                 { meta: obj as MetadataEntry }
-            : ty === "user" ?
-                { user: obj as UserEntry }
-            : { info: obj as InfoEntry }
+                : ty === "user" ?
+                    { user: obj as UserEntry }
+                    : { info: obj as InfoEntry }
     })
 
     return res
@@ -1964,14 +1994,14 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
     win?.addEventListener("modes.update-item", e => {
         var i = setInterval(() => {
             let btn = win?.document.querySelector("display-entry")?.shadowRoot?.querySelector("[entry-action='close']")
-            if(!btn) return
+            if (!btn) return
             clearInterval(i)
-            if(!(btn instanceof win?.self.HTMLButtonElement)) return
+            if (!(btn instanceof win?.self.HTMLButtonElement)) return
             (btn).onclick = function() { win.close() }
         }, 100)
 
         api_getEntryAll(id, findInfoEntryById(id).Uid).then((res) => {
-            if(!res) return
+            if (!res) return
             updateInfo2({
                 [String(id)]: {
                     ...res
