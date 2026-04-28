@@ -1,13 +1,18 @@
 type CalcMode = {
-    expressionInput: HTMLTextAreaElement
+    expressionInput: HTMLTextAreaElement | null
     sortCalcDisplay(): any
 } & Mode
 
 function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
-    this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement
-    this.expressionInput.onchange = _updateEachCalcItem.bind(this)
+    let exprInput = getElementUI("#calc-expression", this.win.HTMLTextAreaElement, this.container)
+
+    if(exprInput){
+        this.expressionInput = exprInput
+        this.expressionInput.onchange = _updateEachCalcItem.bind(this)
+    }
+
     const sortButton = getElementUI(`#calc-sorter`, this.win.HTMLElement)
     if (sortButton) {
         sortButton.onclick = () => {
@@ -16,7 +21,7 @@ function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?:
     }
 }
 
-CalcMode.prototype.mkcontainers = function(this: CalcMode, into: HTMLElement) {
+CalcMode.prototype.mkcontainers = function(this: CalcMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return {
@@ -106,7 +111,7 @@ function _updateEachCalcItem(this: CalcMode) {
 }
 
 function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
-    let expr = this.expressionInput.value
+    let expr = this.expressionInput?.value
 
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)

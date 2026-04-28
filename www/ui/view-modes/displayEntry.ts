@@ -822,7 +822,7 @@ function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment,
 
 DisplayMode.prototype.de_actions = _mkde_actions()
 
-DisplayMode.prototype.mkcontainers = function(this: DisplayMode, into: HTMLElement) {
+DisplayMode.prototype.mkcontainers = function(this: DisplayMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: c }

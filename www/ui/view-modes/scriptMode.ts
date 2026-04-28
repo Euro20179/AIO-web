@@ -21,7 +21,7 @@ function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, w
     this.run.onclick = execute.bind(this)
 }
 
-ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement) {
+ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }

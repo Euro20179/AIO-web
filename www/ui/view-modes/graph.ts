@@ -414,13 +414,7 @@ function destroyCharts() {
 type GraphMode = Mode
 
 function GraphMode(this: GraphMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-    this.win = win ||= window
-    let c = null
-    if (!output) {
-        ({ output, container: c } = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
-    }
-    this.output = output
-    this.container = c
+    ModePrimitives.setup.call(this, output, win)
 
     groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
     typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
@@ -592,7 +586,7 @@ GraphMode.prototype.clearSelected = function(this: GraphMode, ) {
     destroyCharts()
 }
 
-GraphMode.prototype.mkcontainers = function(this: GraphMode, into: HTMLElement) {
+GraphMode.prototype.mkcontainers = function(this: GraphMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: c }

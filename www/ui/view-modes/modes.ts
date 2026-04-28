@@ -13,18 +13,18 @@ interface Mode {
     clearSelected(): any
     mkcontainer(): HTMLElement
     //responsible for creating the container, output, and putting them on the page
-    mkcontainers(into: HTMLElement): {output: HTMLElement, container: HTMLElement }
+    mkcontainers(into: HTMLElement | DocumentFragment): {output: HTMLElement, container: HTMLElement }
     chwin(win: Window & typeof globalThis): HTMLElement
     refresh?(id: bigint): any
     put?(html: string | HTMLElement | ShadowRoot): any
 }
 
 const ModePrimitives = {
-    setup(this: Mode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    setup(this: Mode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis, containerPlacement?: HTMLElement | DocumentFragment) {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
+            ({output, container: c} = this.mkcontainers(containerPlacement || getElementOrThrowUI("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c

@@ -33,7 +33,12 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
         customExpr.oninput = this._customExpr.bind(this)
     }
 
-    this.tierlistEl = this.output.querySelector("tier-list") || document.createElement("tier-list")
+    const tle = getElementUI("tier-list", this.win.HTMLElement, this.output)
+    if(!tle) {
+        this.tierlistEl = document.createElement("tier-list")
+        this.output.append(this.tierlistEl)
+    } else this.tierlistEl = tle
+
     while (this.tierlistEl.childNodes.length) {
         this.tierlistEl.firstChild?.remove()
     }
@@ -144,7 +149,6 @@ TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTM
 
     const els = ul.querySelectorAll("li")
 
-
     if (els.length === 0) {
         ul.append(li)
     } else {
@@ -218,7 +222,7 @@ TierListMode.prototype.clearSelected = function(this: TierListMode, ) {
     }
 }
 
-TierListMode.prototype.mkcontainers = function(this: TierListMode, into: HTMLElement) {
+TierListMode.prototype.mkcontainers = function(this: TierListMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: getElementOrThrowUI(":first-child", null, c) }

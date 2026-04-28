@@ -294,7 +294,7 @@ CalendarMode.prototype.clearSelected = function(this: CalendarMode, ) {
     this.selectedItems = []
 }
 
-CalendarMode.prototype.mkcontainers = function(this: CalendarMode, into: HTMLElement) {
+CalendarMode.prototype.mkcontainers = function(this: CalendarMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: getElementOrThrowUI(":first-child", null, c) }

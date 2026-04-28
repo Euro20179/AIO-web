@@ -36,7 +36,7 @@ function GalleryMode(this: GalleryMode, output?: HTMLElement | DocumentFragment,
     ModePrimitives.setup.call(this, output, win)
 }
 
-GalleryMode.prototype.mkcontainers = function(this: GalleryMode, into: HTMLElement) {
+GalleryMode.prototype.mkcontainers = function(this: GalleryMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
     return { container: c, output: getElementOrThrowUI(":first-child", null, c) }
