@@ -59,7 +59,7 @@
             border-color: var(--input-border-color);
         }
 
-        &:focus {
+        &:focus-visible, &:active {
             outline: 3px solid var(--green);
             /* making it transparent keeps
              * the box size the same avoiding relayout*/
@@ -219,9 +219,9 @@
         font: inherit;
         padding: unset;
 
-        &:focus {
-            outline: none;
-            border: 3px solid var(--green);
+        &:focus-visible, &:active {
+            outline: 3px solid var(--green);
+            border-color: transparent;
         }
     }
 

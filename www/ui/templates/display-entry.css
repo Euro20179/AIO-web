@@ -514,8 +514,9 @@
         }
 
         :not(img) {
-            height: fit-content;
+            height: 100%;
             align-self: center;
+            min-width: fit-content;
         }
     }
 

@@ -121,25 +121,14 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
 }
 
 TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTMLElement {
-    let thumb = fixThumbnailURL(findMetadataById(entry.ItemId).Thumbnail)
-
     let mode = this._getMode()
     let [rating, tier] = this._findInfo(entry.ItemId, mode)
 
     let li = this.win.document.createElement("li")
-    let img = this.win.document.createElement("img")
-    img.src = thumb
-    img.alt = entry.En_Title || entry.Native_Title
-    img.title = `${img.alt} - ${rating}`
-    img.style.cursor = "pointer"
-    img.onclick = () => {
-        const id = BigInt(img.parentElement?.id.split("-")[2] || "0")
-        if (!id) return
-        openDisplayWinUI(id)
-    }
+    const btn = mkClickableEntry(entry.ItemId)
 
     li.id = `tier-item-${entry.ItemId}`
-    li.append(img)
+    li.append(btn)
 
     if (!(tier !== false)) {
         throw new Error(`No tier for rating: ${rating}`)
