@@ -11,8 +11,7 @@ type CalendarMode = {
 } & Mode
 
 function CalendarMode(this: CalendarMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-    ModePrimitives.setup.call(this, output, win)
-    this.NAME = "calendar-output";
+    ModePrimitives.setup.call(this, output, win);
 
     (function(this: CalendarMode) {
         let mode = "month"

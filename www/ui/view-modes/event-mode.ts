@@ -79,7 +79,6 @@ type EventMode = {
 
 
 function EventMode(this: EventMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-    this.NAME = "event-output"
     ModePrimitives.setup.call(this, output, win)
     this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
 

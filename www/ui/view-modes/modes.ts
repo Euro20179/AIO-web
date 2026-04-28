@@ -238,6 +238,17 @@ function mode_clearItems(updateStats: boolean = true) {
 //just in case
 const clearItems = mode_clearItems
 
+const mode_map = () => new Map<string, Function>([
+    ["entry-output", DisplayMode],
+    ["graph-output", GraphMode],
+    ["calc-output", CalcMode],
+    ["gallery-output", GalleryMode],
+    ["script-output", ScriptMode],
+    ["event-output", EventMode],
+    ["calendar-output", CalendarMode],
+    ["tierlist-output", TierListMode],
+])
+
 function mode_name2cls(name: string) {
     name = {
         "entry": "entry-output",
@@ -249,18 +260,12 @@ function mode_name2cls(name: string) {
         "calendar": "calendar-output",
         "tierlist": "tierlist-output",
     }[name] || name
-    const modes = {
-        "entry-output": DisplayMode,
-        "graph-output": GraphMode,
-        "calc-output": CalcMode,
-        "gallery-output": GalleryMode,
-        "script-output": ScriptMode,
-        "event-output": EventMode,
-        "calendar-output": CalendarMode,
-        "tierlist-output": TierListMode,
-    }
+    return mode_map().get(name)
+}
 
-    return modes[name as keyof typeof modes]
+function mode_cls2name(cls: Function) {
+    let map = new Map(mode_map().entries().map(([k, v]) => [v, k]))
+    return map.get(cls)
 }
 
 //this should ONLY operate within the user specified or current window otherwise it makes no sense

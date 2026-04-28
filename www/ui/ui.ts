@@ -168,7 +168,12 @@ function startupUI({
             const mode = mode_getFirstModeInWindow(catalogWin || window)
             if (!mode) return
             win.onload = () => {
-                mode_setMode(mode.NAME, win as Window & typeof globalThis)
+                const name = mode_cls2name(mode.constructor)
+                if(name)
+                    mode_setMode(name, win as Window & typeof globalThis)
+                else {
+                    throw new Error(`Unable to determine current mode name from mode class: ${mode.constructor.name}`)
+                }
             }
         }
 }

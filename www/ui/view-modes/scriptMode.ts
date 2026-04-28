@@ -8,7 +8,6 @@ type ScriptMode = {
 
 function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-    this.NAME = 'script-output'
 
     this.renderedModes = new Map
 

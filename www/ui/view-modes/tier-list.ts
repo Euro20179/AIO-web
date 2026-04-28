@@ -13,7 +13,6 @@ type TierListMode = {
 
 function TierListMode(this: TierListMode, output?: HTMLElement | DocumentFragment, win ?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-    this.NAME = "tierlist-output"
     this.rows = {}
 
     this._setup()

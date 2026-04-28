@@ -4,7 +4,6 @@ type CalcMode = {
 } & Mode
 
 function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-    this.NAME = "calc-output"
     ModePrimitives.setup.call(this, output, win)
 
     this.expressionInput = this.win.document.getElementById("calc-expression") as HTMLTextAreaElement

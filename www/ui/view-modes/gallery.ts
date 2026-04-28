@@ -34,7 +34,6 @@ type GalleryMode = {
 
 function GalleryMode(this: GalleryMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-    this.NAME = "gallery-output"
 }
 
 GalleryMode.prototype.mkcontainers = function(this: GalleryMode, into: HTMLElement) {

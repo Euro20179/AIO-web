@@ -762,7 +762,6 @@ function _mkde_actions() {// {{{
 
 function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-    this.NAME = "entry-output"
 
     this.displayQueue = []
 
