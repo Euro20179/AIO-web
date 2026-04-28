@@ -17,6 +17,7 @@ interface Mode {
     chwin(win: Window & typeof globalThis): HTMLElement
     refresh?(id: bigint): any
     put?(html: string | HTMLElement | ShadowRoot): any
+    clear?(): any
 }
 
 const ModePrimitives = {
