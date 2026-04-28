@@ -250,6 +250,7 @@ const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment,
 ])
 
 function mode_name2cls(name: string) {
+    let ogName = name
     name = {
         "entry": "entry-output",
         "graph": "graph-output",
@@ -260,7 +261,11 @@ function mode_name2cls(name: string) {
         "calendar": "calendar-output",
         "tierlist": "tierlist-output",
     }[name] || name
-    return mode_map().get(name)
+    let val = mode_map().get(name)
+    if(!val) {
+        throw new Error(`${ogName} is not a mode`)
+    }
+    return val
 }
 
 function mode_cls2name(cls: (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void) {

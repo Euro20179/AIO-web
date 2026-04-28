@@ -39,6 +39,10 @@ ScriptMode.prototype.refresh = function(this: ScriptMode, id: bigint) {
 }
 
 ScriptMode.prototype.close = function(this: ScriptMode, ) {
+    for(let mode of this.renderedModes.values()) {
+        mode.close()
+    }
+
     if (this.container)
         this.container.remove()
     else {
@@ -52,6 +56,7 @@ ScriptMode.prototype.add = function(this: ScriptMode, entry: InfoEntry) {
     const newMode = mode_name2cls(modeSelect)
     const d: Mode = this.renderedModes.has(modeSelect) ?
                             this.renderedModes.get(modeSelect)
+                            //@ts-ignore
                         : new newMode(this.output, this.win)
     const e = d.add(entry)
     e.style.display = "block"
