@@ -288,7 +288,8 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
         console.error(err)
     }
 
-    let toggle = document.getElementById("view-toggle") as HTMLSelectElement
-    toggle.value = name
+    let toggle = win.document.getElementById("view-toggle") as HTMLSelectElement
+    if(toggle)
+        toggle.value = name
 }
 
