@@ -2,6 +2,7 @@ interface Mode {
     output: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
     container: HTMLElement | null
+    NAME: string
     add(entry: InfoEntry): HTMLElement
     sub(entry: InfoEntry): any
     addList(entry: InfoEntry[]): any
@@ -19,6 +20,15 @@ interface Mode {
 }
 
 const ModePrimitives = {
+    setup(this: Mode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+        this.win = win ||= window
+        let c = null
+        if(!output) {
+            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
+        }
+        this.output = output
+        this.container = c
+    },
     chwin(this: Mode, win: Window & typeof globalThis): HTMLElement {
         if (this.win !== window) {
             this.win.close()

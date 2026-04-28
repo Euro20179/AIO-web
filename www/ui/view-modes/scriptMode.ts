@@ -1,144 +1,131 @@
-
-class ScriptMode implements Mode {
-    NAME = "script-output"
+type ScriptMode = {
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
-
-    output: HTMLElement | DocumentFragment
-    win: Window & typeof globalThis
-    container: HTMLElement | null
-
     renderedModes: Map<bigint, Mode>
 
+    clear(): any
+} & Mode
 
-    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        this.win = win ||= window
-        let c = null
-        if(!output) {
-            ({container: c, output} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
-        }
-        this.output = output
-        this.container = c
+function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    ModePrimitives.setup.call(this, output, win)
+    this.NAME = 'script-output'
 
-        this.renderedModes = new Map
+    this.renderedModes = new Map
 
-        this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
-        this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
-        this.scriptBox.onkeydown = (e) => {
-            if(e.ctrlKey && e.key === 'Enter') {
-                this.run.click()
-            }
-        }
-        this.run.onclick = execute.bind(this)
-    }
-
-    mkcontainers(into: HTMLElement) {
-        const c = this.mkcontainer()
-        into.append(c)
-        return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }
-    }
-
-    mkcontainer() {
-        return document.createElement("script-template")
-    }
-
-    refresh(id: bigint) {
-        for(let [id, mode] of this.renderedModes.entries()) {
-            console.log(id, mode)
-            mode.refresh?.(id)
+    this.run = this.win.document.getElementById("script-execute") as HTMLButtonElement
+    this.scriptBox = this.win.document.getElementById("script") as HTMLTextAreaElement
+    this.scriptBox.onkeydown = (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            this.run.click()
         }
     }
+    this.run.onclick = execute.bind(this)
+}
 
-    close() {
-        if(this.container)
-            this.container.remove()
-        else {
-            this.clearSelected()
-            this.clear()
+ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement) {
+    const c = this.mkcontainer()
+    into.append(c)
+    return { container: c, output: getElementOrThrowUI('#script-execute-output', null, c) as HTMLDivElement }
+}
+
+ScriptMode.prototype.mkcontainer = function(this: ScriptMode, ) {
+    return document.createElement("script-template")
+}
+
+ScriptMode.prototype.refresh = function(this: ScriptMode, id: bigint) {
+    for (let [id, mode] of this.renderedModes.entries()) {
+        mode.refresh?.(id)
+    }
+}
+
+ScriptMode.prototype.close = function(this: ScriptMode, ) {
+    if (this.container)
+        this.container.remove()
+    else {
+        this.clearSelected()
+        this.clear()
+    }
+}
+
+ScriptMode.prototype.add = function(this: ScriptMode, entry: InfoEntry) {
+    const modeSelect = getElementUI("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
+    const newMode = mode_name2cls(modeSelect)
+    const d: Mode = new newMode(this.output, this.win)
+    const e = d.add(entry)
+    e.style.display = "block"
+    this.renderedModes.set(entry.ItemId, d)
+    return e
+}
+
+ScriptMode.prototype.sub = function(this: ScriptMode, entry: InfoEntry) {
+    const mode = this.renderedModes.get(entry.ItemId)
+    if (mode) mode.close()
+    this.renderedModes.delete(entry.ItemId)
+}
+
+ScriptMode.prototype.addList = function(this: ScriptMode, entries: InfoEntry[]) {
+    for (let e of entries) {
+        this.add(e)
+    }
+}
+
+ScriptMode.prototype.subList = function(this: ScriptMode, entries: InfoEntry[]) {
+    for (let e of entries) {
+        this.sub(e)
+    }
+}
+
+ScriptMode.prototype.clear = function(this: ScriptMode, ) {
+    for (let mode of this.renderedModes.values()) {
+        if ("clear" in mode)
+            //@ts-ignore
+            mode.clear()
+    }
+
+    mode_clearItems()
+
+    if (this.output instanceof this.win.HTMLElement) {
+        this.output.innerHTML = ""
+    } else
+        while (this.output.children.length) {
+            this.output.children[0].remove()
         }
+}
+
+ScriptMode.prototype.clearSelected = function(this: ScriptMode, ) {
+    for (let mode of this.renderedModes.values()) {
+        mode.clearSelected()
     }
+    this.renderedModes = new Map
+}
 
-    add(entry: InfoEntry) {
-        const modeSelect = getElementUI("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
-        const newMode = mode_name2cls(modeSelect)
-        const d: Mode = new newMode(this.output, this.win)
-        const e = d.add(entry)
-        e.style.display = "block"
-        this.renderedModes.set(entry.ItemId, d)
-        return e
+ScriptMode.prototype.chwin = function(this: ScriptMode, win: Window & typeof globalThis): HTMLElement {
+    const container = ModePrimitives.chwin.call(this, win)
+    this.run = container.querySelector("#script-execute") as HTMLButtonElement
+    this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
+    this.output = container.querySelector("#script-execute-output") as HTMLDivElement
+    this.run.onclick = execute.bind(this)
+    for (let mode of this.renderedModes.values()) {
+        mode.win = win
+        mode.output = this.output
     }
+    return container
+}
 
-    sub(entry: InfoEntry) {
-        console.log('closing')
-        const mode = this.renderedModes.get(entry.ItemId)
-        if(mode) mode.close()
-        this.renderedModes.delete(entry.ItemId)
-    }
-
-    addList(entries: InfoEntry[]) {
-        for (let e of entries) {
-            this.add(e)
-        }
-    }
-
-    subList(entries: InfoEntry[]) {
-        for (let e of entries) {
-            this.sub(e)
-        }
-    }
-
-    clear() {
-        for(let mode of this.renderedModes.values()) {
-            if("clear" in mode)
-                //@ts-ignore
-                mode.clear()
-        }
-
-        mode_clearItems()
-
-        if (this.output instanceof this.win.HTMLElement) {
-            this.output.innerHTML = ""
-        } else
-            while (this.output.children.length) {
-                this.output.children[0].remove()
-            }
-    }
-
-    clearSelected() {
-        for(let mode of this.renderedModes.values()) {
-            mode.clearSelected()
-        }
-        this.renderedModes = new Map
-    }
-
-    chwin(win: Window & typeof globalThis): HTMLElement {
-        const container = ModePrimitives.chwin.call(this, win)
-        this.run = container.querySelector("#script-execute") as HTMLButtonElement
-        this.scriptBox = container.querySelector("#script") as HTMLTextAreaElement
-        this.output = container.querySelector("#script-execute-output") as HTMLDivElement
-        this.run.onclick = execute.bind(this)
-        for(let mode of this.renderedModes.values()) {
-            mode.win = win
-            mode.output = this.output
-        }
-        return container
-    }
-
-    put(html: string | HTMLElement | ShadowRoot) {
-        if (typeof html === 'string') {
-            if (this.output instanceof DocumentFragment) {
-                this.output.append(html)
-            } else {
-                let frag = new DocumentFragment
-                frag.append(document.createElement("div"))
-                if(frag.firstElementChild) {
-                    frag.firstElementChild.innerHTML = html
-                    this.output.append(...frag.firstElementChild.childNodes)
-                }
-            }
-        } else {
+ScriptMode.prototype.put = function(this: ScriptMode, html: string | HTMLElement | ShadowRoot) {
+    if (typeof html === 'string') {
+        if (this.output instanceof DocumentFragment) {
             this.output.append(html)
+        } else {
+            let frag = new DocumentFragment
+            frag.append(document.createElement("div"))
+            if (frag.firstElementChild) {
+                frag.firstElementChild.innerHTML = html
+                this.output.append(...frag.firstElementChild.childNodes)
+            }
         }
+    } else {
+        this.output.append(html)
     }
 }
 

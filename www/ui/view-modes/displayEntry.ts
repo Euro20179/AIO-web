@@ -1,85 +1,24 @@
-class DisplayMode implements Mode {
-    NAME = "entry-output"
-
+type DisplayMode = {
     displayQueue: InfoEntry[]
+    adding: boolean
+    de_actions: ReturnType<typeof _mkde_actions>
 
-    adding: boolean = false
+    clear(): any
+    displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any): (target: HTMLElement) => any
+} & Mode
 
-    output: HTMLElement | DocumentFragment
-    win: Window & typeof globalThis
-    container: HTMLElement | null
-
-    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        this.win = win ||= window
-        let c = null
-        if(!output) {
-            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
-            c = output
-        }
-        this.output = output
-        this.container = c
-        this.displayQueue = []
-
-        if (this.output instanceof this.win.HTMLElement) {
-            this.output.addEventListener("scroll", (e) => {
-                if (!(this.output instanceof this.win.HTMLElement))
-                    throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
-
-                if (this.output.scrollHeight - this.output.scrollTop > innerHeight + 1000) return
-
-                if (this.displayQueue.length) {
-                    const item = this.displayQueue.shift()
-                    if (item?.ItemId) {
-                        renderDisplayItem.call(this, item.ItemId)
-                    }
-                }
-            })
-        }
-    }
-
-    mkcontainers(into: HTMLElement) {
-        const c = this.mkcontainer()
-        into.append(c)
-        return { container: c, output: c }
-    }
-
-    mkcontainer() {
-        const c = document.createElement("div")
-        c.classList.add("overflow")
-        c.id = 'entry-output'
-        return c
-    }
-
-    displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any) {
-        return function(this: DisplayMode, target: HTMLElement) {
-            let id = getIdFromDisplayElement(target)
-            let item;
-            (item = findInfoEntryById(id)) && func.call(this, item, target.getRootNode() as ShadowRoot, target)
-        }.bind(this)
-    }
-
-    close() {
-        if(this.container)
-            this.container.remove()
-        else {
-            this.clearSelected()
-            this.clear()
-        }
-        this.displayQueue = []
-        this.adding = false
-    }
-
+function _mkde_actions() {// {{{
     /**
      * Actions can be put onto elements with the entry-action attribute
      * **this element** refers to the element that the action is on
      * **current item** refers to the item that the
          * &lt;display-entry&gt; element parent is displaying
      */
-    de_actions = { //{{{
+    return { //{{{
         /**
          * Allows the user to choose a library for this item
          */
-        chooselibrary: this.displayEntryAction((item) => {
+        chooselibrary: function(item) {
             const libraries = Object.fromEntries(
                 Object.entries(items_getLibraries())
                     .map(e => [e[0], items_getEntry(e[1].ItemId)]))
@@ -103,24 +42,24 @@ class DisplayMode implements Mode {
                     ))
                 }
             }).then(id => {
-                if(!id) return
+                if (!id) return
                 item.Library = id
                 return api_setItem("", item, "Set library of item")
             })
-            .then((res) => {
-                if(!res) return
-                updateInfo2({
-                    [String(item.ItemId)]: {
-                        info: item
-                    }
+                .then((res) => {
+                    if (!res) return
+                    updateInfo2({
+                        [String(item.ItemId)]: {
+                            info: item
+                        }
+                    })
+                    alert(`Updated library to ${items_getEntry(item.Library).info.En_Title}`)
                 })
-                alert(`Updated library to ${items_getEntry(item.Library).info.En_Title}`)
-            })
-        }),
+        },
         /**
          * Deletes a tag based on the target's tag-name
         */
-        deletetag: this.displayEntryAction((item, root, target) => {
+        deletetag: function(item, root, target) {
             const tag = target.getAttribute("tag-name")
             if (!tag) {
                 console.warn("The target with entry-aciton=deletetag has no tag-name")
@@ -140,66 +79,66 @@ class DisplayMode implements Mode {
                         })
                     })
                 })
-        }),
+        },
 
         /**
          * deletes a recommender from the list of recommended bys
          */
-         deleterecommendedby: this.displayEntryAction((item, root, target) => {
-             const r = target.getAttribute("recommender-idx")
-             if(!r) {
-                 console.warn("The target with entry-action=deleterecommendedby has no recommender-idx attribute")
-                 alert("This button is not hooked up to a recommender-idx")
-                 return
-             }
+        deleterecommendedby: function(item, root, target) {
+            const r = target.getAttribute("recommender-idx")
+            if (!r) {
+                console.warn("The target with entry-action=deleterecommendedby has no recommender-idx attribute")
+                alert("This button is not hooked up to a recommender-idx")
+                return
+            }
 
-             let idx = Number(r)
-             let recs = items_getRecommendedBy(item.ItemId).filter((_, i) => i !== idx)
-             item.RecommendedBy = JSON.stringify(recs)
-             api_setItem("", item, "Remove recommender").then(() => {
-                 updateInfo2({
-                     [String(item.ItemId)]: {
-                         info: item
-                     }
-                 })
-             })
-         }),
+            let idx = Number(r)
+            let recs = items_getRecommendedBy(item.ItemId).filter((_, i) => i !== idx)
+            item.RecommendedBy = JSON.stringify(recs)
+            api_setItem("", item, "Remove recommender").then(() => {
+                updateInfo2({
+                    [String(item.ItemId)]: {
+                        info: item
+                    }
+                })
+            })
+        },
 
         /**
          * Deletes the item
          */
-        delete: this.displayEntryAction(item => deleteEntryUI(item)),
+        delete: function(item) { return deleteEntryUI(item) },
 
         /**
          * Overwrites the metadata
          */
-        refresh: this.displayEntryAction((item, root) => overwriteEntryMetadataUI(root, item)),
+        refresh: function(item, root) {return overwriteEntryMetadataUI(root, item) },
 
         /**
          * Attempts to set the location
          */
-        fetchlocation: this.displayEntryAction((item) => _fetchLocation.call(this, item.ItemId)),
+        fetchlocation: function(item) {return _fetchLocation.call(this, item.ItemId) },
 
         /**
          * Saves changes to styles and the template
          */
-        save: this.displayEntryAction((item, root) => saveItemChanges(root, item.ItemId)),
+        save: function(item, root) {return saveItemChanges(root, item.ItemId) },
 
         /**
          * Deselects the current item
          */
-        close: this.displayEntryAction(item => mode_deselectItem(item)),
+        close: function(item) {return  mode_deselectItem(item)},
 
         /**
          * Creates a copy of the current item
          */
-        copythis: this.displayEntryAction(item => copyThis.call(this, item)),
+        copythis: function(item) { return copyThis.call(this, item)},
 
         /**
          * Adds a copy fo the current object. The copy taht is added
          * is the copy with the id that is the value of this element
          */
-        selectnewcopy: this.displayEntryAction(item => {
+        selectnewcopy: function(item) {
             selectItemUI().then(id => {
                 if (!id) {
                     alert("Could not add copy")
@@ -213,13 +152,13 @@ class DisplayMode implements Mode {
                     })
                 })
             })
-        }),
+        },
 
         /**
          * Adds a child to the current object. The child that is added
          * is the child with the id that is the value of this element
          */
-        addchild: this.displayEntryAction((item, _, target) => {
+        addchild: function(item, _, target) {
             if (!("value" in target)) {
                 throw new Error("add child button has no value")
             }
@@ -233,13 +172,13 @@ class DisplayMode implements Mode {
                     [String(target.value)]: { info: child }
                 })
             })
-        }),
+        },
 
         /**
          * Lets the user select an item to be added as a requirement of
          * the current item
          */
-        selectnewrequirement: this.displayEntryAction(item => {
+        selectnewrequirement: function(item ){
             selectItemUI().then(id => {
                 if (!id) {
                     alert("Could not add requirement")
@@ -255,25 +194,25 @@ class DisplayMode implements Mode {
                     })
                 })
             })
-        }),
+        },
 
         /**
          * Opens the new entry dialog
          * with requires filled in as the current item
          */
-        newrequires: this.displayEntryAction(item => {
+        newrequires: function(item ){
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const requiresIdEl = getElementOrThrowUI(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
 
             requiresIdEl.value = String(item.ItemId)
             newEntryDialog.showModal()
-        }),
+        },
 
         /**
          * Lets the user select an item to be added as a child of
          * the current item
          */
-        selectnewchild: this.displayEntryAction(item => {
+        selectnewchild: function(item ){
             selectItemUI().then(id => {
                 if (!id) {
                     alert("Could not set child")
@@ -288,23 +227,23 @@ class DisplayMode implements Mode {
                     })
                 })
             })
-        }),
+        },
 
         /**
          * Creates a new item with the parentId set to the current item
          */
-        newchild: this.displayEntryAction((item) => {
+        newchild: function(item) {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
-        }),
+        },
 
         /**
          * Sets the requirement
          */
-        setrequired: this.displayEntryAction(function(item) {
+        setrequired: function(item) {
             let id = item.ItemId
 
             fillItemListingUI(items_getAllMeta())
@@ -320,24 +259,24 @@ class DisplayMode implements Mode {
                     }
                 })
             })
-        }),
+        },
 
         /**
          * Creates a new item with copyOf set to the current item
          */
-        newcopy: this.displayEntryAction((item) => {
+        newcopy: function(item) {
             const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
             const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
-        }),
+        },
 
         /**
          * Updates the custom styles with the value of this element
          * **NOTE**: DOES NOT SAVE
          */
-        updatecustomstyles: this.displayEntryAction((item, root, target) => {
+        updatecustomstyles: function(item, root, target) {
             const customStyles = root.getElementById("custom-styles")
             if (!(customStyles instanceof this.win.HTMLStyleElement)) {
                 throw new Error("custom-styles must be a style element in order to update it")
@@ -347,16 +286,16 @@ class DisplayMode implements Mode {
 
             customStyles.innerText = String(target.value)
 
-        }),
+        },
 
         /**
          * Updates the status of the current item with the value of this element
          */
-        updatestatus: this.displayEntryAction((item, _, target) => {
+        updatestatus: function(item, _, target) {
             if (!(target instanceof this.win.HTMLSelectElement)) return
 
             updateStatusUI(item.ItemId, target.value as UserStatus)
-        }),
+        },
 
         /**
          * Updates the cost, and event list
@@ -364,13 +303,13 @@ class DisplayMode implements Mode {
          * This is called togglerelationinclude because it's supposed to be
          * called by the "include" checkboxes
          */
-        togglerelationinclude: this.displayEntryAction((item, root) => {
+        togglerelationinclude: function(item, root) {
             updateCostDisplay.call(this, root, item.ItemId)
-            for(let el of root.querySelectorAll("#user-actions")) {
-                if(!(el instanceof this.win.HTMLTableElement)) continue
+            for (let el of root.querySelectorAll("#user-actions")) {
+                if (!(el instanceof this.win.HTMLTableElement)) continue
                 updateEventsDisplay.call(this, root, el, item.ItemId)
             }
-        }),
+        },
 
         /**
          * Sets the current object table to the value of this element
@@ -383,7 +322,7 @@ class DisplayMode implements Mode {
          * + meta
          * + entry
          */
-        setobjtable: this.displayEntryAction((item, root, target) => {
+        setobjtable: function(item, root, target) {
             if (!("value" in target)) {
                 throw new Error("set object table element has no value")
             }
@@ -415,13 +354,13 @@ class DisplayMode implements Mode {
                     break
 
             }
-        }),
+        },
 
         /**
          * Toggles the art style of the current item,
          * the value of this element is used as the art style to toggle
          */
-        toggleartstyle: this.displayEntryAction((item, _, target) => {
+        toggleartstyle: function(item, _, target) {
             if (!("checked" in target)) return
 
             const as = target.id.slice(3) as ASName
@@ -439,23 +378,23 @@ class DisplayMode implements Mode {
                     }
                 })
             })
-        }),
+        },
 
         /**
          * Sets the thumbnail of the current item to the value of this element
          */
-        setthumbnail: this.displayEntryAction((item, _, target) => {
+        setthumbnail: function(item, _, target) {
             const fileUpload = target.getRootNode().getElementById("thumbnail-file-upload")
             if (!fileUpload || !("value" in fileUpload)) return
 
             fileUpload.click()
-        }),
+        },
 
         /**
          * Toggles the digitization of the current item based on
          * the checked state of this element
          */
-        setdigitization: this.displayEntryAction((item, _, target) => {
+        setdigitization: function(item, _, target) {
             if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
                 item.Format |= DIGI_MOD
@@ -469,13 +408,13 @@ class DisplayMode implements Mode {
                     }
                 })
             })
-        }),
+        },
 
         /**
          * Toggles a display item with id of the value of
          * the elem-id attribute on this element
          */
-        toggle: this.displayEntryAction((item, root, elem) => {
+        toggle: function(item, root, elem) {
             let id = elem.getAttribute("elem-id")
             if (!id) return
             let toShow = root.getElementById(id)
@@ -489,12 +428,12 @@ class DisplayMode implements Mode {
             } else {
                 toShow.hidden = !toShow.hidden
             }
-        }),
+        },
 
         /**
          * Sets the format of the current item to the value of this element
          */
-        setformat: this.displayEntryAction((item, _, target) => {
+        setformat: function(item, _, target) {
             if (!("value" in target)) return
             api_listFormats().then(formats => {
                 if (!Object.keys(formats).includes(String(target.value))) return
@@ -508,12 +447,12 @@ class DisplayMode implements Mode {
                     }
                 })
             })
-        }),
+        },
 
         /**
          * Sets the type of the current item to the value of this element
          */
-        settype: this.displayEntryAction((item, _, target) => {
+        settype: function(item, _, target) {
             if (!("value" in target)) return
             api_listTypes().then(types => {
                 if (!types.includes(target.value as EntryType)) return
@@ -527,13 +466,13 @@ class DisplayMode implements Mode {
                     }
                 })
             })
-        }),
+        },
 
         //TODO: this function is a disaster, each edited object should probably get its own save function
         /**
          * Saves the current object table
          */
-        saveobject: this.displayEntryAction((item, root) => {
+        saveobject: function(item, root) {
             const tbl = root.getElementById("display-info-object-tbl")
 
             const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
@@ -632,7 +571,7 @@ class DisplayMode implements Mode {
                     [strId]: { meta: into as MetadataEntry }
                 })
             }
-        }),
+        },
 
         /**
          * Creates a new field in the current object table
@@ -641,7 +580,7 @@ class DisplayMode implements Mode {
          * + meta
          * + entry
          */
-        newobjectfield: this.displayEntryAction(async (item, root) => {
+        newobjectfield: async function (item, root) {
             const name = await promptUI("Field name")
             if (!name) return
 
@@ -657,35 +596,35 @@ class DisplayMode implements Mode {
 
             const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
             updateObjectTbl(obj, objectTbl, false)
-        }),
+        },
 
         /**
          * Toggles the hiddenness of the #style-editor element
          */
-        editstyles: this.displayEntryAction((item, root, elem) => {
+        editstyles: function(item, root, elem) {
             const styleEditor = root.getElementById("style-editor")
             if (!styleEditor) return
             if ("value" in styleEditor) {
                 styleEditor.value = getUserExtra(findUserEntryById(item.ItemId), "styles")
             }
             styleEditor.hidden = !styleEditor.hidden
-        }),
+        },
 
         /**
          * Toggles the hiddenness of the #template-editor element
          */
-        edittemplate: this.displayEntryAction((item, root, elem) => {
+        edittemplate: function(item, root, elem) {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor) return
 
             templEditor.hidden = !templEditor.hidden
-        }),
+        },
 
         /**
          * Opens a preview window to display what the custom template will
          * look like
          */
-        previewtemplate: this.displayEntryAction(function(item, root) {
+        previewtemplate: function(item, root) {
             const templEditor = root.getElementById("template-editor")
             if (!templEditor || !(templEditor instanceof this.win.HTMLTextAreaElement)) return
 
@@ -705,12 +644,12 @@ class DisplayMode implements Mode {
                 preview.self.mode_deselectItem(item, false)
                 preview.self.mode_selectItem(item, false)
             }
-        }),
+        },
 
         /**
          * Copy user info to another item
          */
-        copyto: this.displayEntryAction(async (item) => {
+        copyto: async function(item) {
             let id = await promptNumber("Copy user info to (item id)", "Not a number, mmust be item id number", BigInt)
             if (id === null) return
             let idInt = BigInt(id)
@@ -718,13 +657,13 @@ class DisplayMode implements Mode {
             api_copyUserInfo(item.ItemId, idInt)
                 .then(res => res?.text())
                 .then(console.log)
-        }),
+        },
 
         /**
          * Asks the user to set the number of minutes they've spent
          * on the current item
          */
-         setviewminutes: this.displayEntryAction(async (item) => {
+        setviewminutes: async function(item) {
             let count = await promptNumber("The number of minutes you've spent viewing this entry", 'Not a number, minutes spent')
             if (count === null) return
 
@@ -745,12 +684,12 @@ class DisplayMode implements Mode {
                     }
                 })
                 .catch(console.error)
-         }),
+        },
 
         /**
          * Asks the user to set the view count of the current item
          */
-        setviewcount: this.displayEntryAction(async (item) => {
+        setviewcount: async function(item) {
             let count = await promptNumber("New view count", 'Not a number, view count')
             if (count === null) return
 
@@ -771,12 +710,12 @@ class DisplayMode implements Mode {
                     }
                 })
                 .catch(console.error)
-        }),
+        },
 
         /**
          * Asks the user to set the current position of the current item
          */
-        setprogress: this.displayEntryAction(async (item, root) => {
+        setprogress: async function(item, root) {
             const user = findUserEntryById(item.ItemId) as UserEntry
             let newEp = await promptUI("Current position", undefined, undefined, user.CurrentPosition)
             if (!newEp) return
@@ -786,12 +725,12 @@ class DisplayMode implements Mode {
             updateInfo2({
                 [String(item.ItemId)]: { user }
             })
-        }),
+        },
 
         /**
          * Asks teh user to set the rating of the current item
          */
-        setrating: this.displayEntryAction(async (item) => {
+        setrating: async function(item) {
             let user = findUserEntryById(item.ItemId)
             if (!user) {
                 alert("Failed to get current rating")
@@ -817,46 +756,29 @@ class DisplayMode implements Mode {
                     reloadEventsUI(item.ItemId)
                 })
                 .catch(console.error)
-        }),
-    } as const //}}}
+        },
+    } as Record<string, (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any> //}}}
+}// }}}
 
-    add(entry: InfoEntry) {
-        const el = renderDisplayItem.call(this, entry.ItemId)
+function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    ModePrimitives.setup.call(this, output, win)
+    this.NAME = "entry-output"
 
-        //shortcut: <c-s-a-MouseLeft>
-        //replicate what happens when the template editor button is clicked
-        //this way if the user locks themselves out of the template editor
-        //they can always do this
-        el.onmousedown = (e) => {
-            if (e.ctrlKey && e.altKey && e.shiftKey && e.button === 0) {
-                e.preventDefault()
-                const toShow = el.shadowRoot?.querySelector("#template-editor-container")
-                if (!toShow || !(toShow instanceof this.win.HTMLElement)) return
-                if (toShow instanceof this.win.HTMLDialogElement) {
-                    if (toShow.open) {
-                        toShow.close()
-                    } else {
-                        toShow.showModal()
-                    }
-                } else {
-                    toShow.hidden = !toShow.hidden
-                }
-            }
-        }
-        return el
-    }
+    this.displayQueue = []
 
-    sub(entry: InfoEntry) {
-        removeDisplayItem.call(this, entry.ItemId)
-    }
+    this.de_actions = new Proxy(this.de_actions, {
+        get: (target, p, receiver) => {
+            const fn = Reflect.get(target, p, receiver)
+            return this.displayEntryAction(fn)
+        },
+    })
 
-    chwin(win: Window & typeof globalThis) {
-        const newOutput = ModePrimitives.chwin.call(this, win)
+    if (this.output instanceof this.win.HTMLElement) {
+        this.output.addEventListener("scroll", (e) => {
+            if (!(this.output instanceof this.win.HTMLElement))
+                throw new Error("this.parent mutated into a DocumentFragment when it was previously an HTMLElement")
 
-        this.output = newOutput
-
-        newOutput.addEventListener("scroll", (e) => {
-            if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
+            if (this.output.scrollHeight - this.output.scrollTop > innerHeight + 1000) return
 
             if (this.displayQueue.length) {
                 const item = this.displayQueue.shift()
@@ -865,67 +787,149 @@ class DisplayMode implements Mode {
                 }
             }
         })
-        return newOutput
     }
+}
 
-    refresh(id: bigint) {
-        let el = this.output.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
-        //only refresh if the item is on screen
-        if (el)
-            refreshDisplayItem.call(this, id)
+DisplayMode.prototype.de_actions = _mkde_actions()
+
+DisplayMode.prototype.mkcontainers = function(this: DisplayMode, into: HTMLElement) {
+    const c = this.mkcontainer()
+    into.append(c)
+    return { container: c, output: c }
+}
+
+DisplayMode.prototype.mkcontainer = function(this: DisplayMode,) {
+    const c = document.createElement("div")
+    c.classList.add("overflow")
+    c.id = 'entry-output'
+    return c
+}
+
+DisplayMode.prototype.displayEntryAction = function(this: DisplayMode, func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any): (target: HTMLElement) => any {
+    return function(this: DisplayMode, target: HTMLElement) {
+        let id = getIdFromDisplayElement(target)
+        let item;
+        (item = findInfoEntryById(id)) && func.call(this, item, target.getRootNode() as ShadowRoot, target)
+    }.bind(this)
+}
+
+DisplayMode.prototype.close = function(this: DisplayMode,) {
+    if (this.container)
+        this.container.remove()
+    else {
+        this.clearSelected()
+        this.clear()
     }
+    this.displayQueue = []
+    this.adding = false
+}
 
-    addList(entry: InfoEntry[]) {
-        this.adding = true;
-        (async () => {
-            //We need to keep track of whether or not we're adding so that
-            //it can be canceled
-            //such as in the case when we are still adding, but mode_clearItems()
-            //is called
-            for (let i = 0; i < entry.length && this.adding; i++) {
-                if ("scheduler" in window && i % 10 === 0 && i !== 0) {
-                    //@ts-ignore
-                    await window.scheduler.yield()
-                } else if (i > 5 && !("scheduler" in window)) {
-                    this.displayQueue.push(entry[i])
+
+DisplayMode.prototype.add = function(this: DisplayMode, entry: InfoEntry) {
+    const el = renderDisplayItem.call(this, entry.ItemId)
+
+    //shortcut: <c-s-a-MouseLeft>
+    //replicate what happens when the template editor button is clicked
+    //this way if the user locks themselves out of the template editor
+    //they can always do this
+    el.onmousedown = (e) => {
+        if (e.ctrlKey && e.altKey && e.shiftKey && e.button === 0) {
+            e.preventDefault()
+            const toShow = el.shadowRoot?.querySelector("#template-editor-container")
+            if (!toShow || !(toShow instanceof this.win.HTMLElement)) return
+            if (toShow instanceof this.win.HTMLDialogElement) {
+                if (toShow.open) {
+                    toShow.close()
                 } else {
-                    renderDisplayItem.call(this, entry[i].ItemId)
+                    toShow.showModal()
                 }
+            } else {
+                toShow.hidden = !toShow.hidden
             }
-
-            this.adding = false
-        })()
-    }
-
-    subList(entry: InfoEntry[]) {
-        const itemIdsToRemove = entry.map(v => v.ItemId)
-        this.displayQueue = this.displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
-
-        for (let item of entry) {
-            removeDisplayItem.call(this, item.ItemId)
         }
     }
+    return el
+}
 
-    put(html: string | HTMLElement | ShadowRoot) {
-        this.output.append(html)
-    }
+DisplayMode.prototype.sub = function(this: DisplayMode, entry: InfoEntry) {
+    removeDisplayItem.call(this, entry.ItemId)
+}
 
-    clearSelected() {
-        this.displayQueue.length = 0
+DisplayMode.prototype.chwin = function(this: DisplayMode, win: Window & typeof globalThis) {
+    const newOutput = ModePrimitives.chwin.call(this, win)
+
+    this.output = newOutput
+
+    newOutput.addEventListener("scroll", (e) => {
+        if (newOutput.scrollHeight - newOutput.scrollTop > innerHeight + 1000) return
+
+        if (this.displayQueue.length) {
+            const item = this.displayQueue.shift()
+            if (item?.ItemId) {
+                renderDisplayItem.call(this, item.ItemId)
+            }
+        }
+    })
+    return newOutput
+}
+
+DisplayMode.prototype.refresh = function(this: DisplayMode, id: bigint) {
+    let el = this.output.querySelector(`display-entry[data-item-id="${id}"]`) as HTMLElement
+    //only refresh if the item is on screen
+    if (el)
+        refreshDisplayItem.call(this, id)
+}
+
+DisplayMode.prototype.addList = function(this: DisplayMode, entry: InfoEntry[]) {
+    this.adding = true;
+    (async () => {
+        //We need to keep track of whether or not we're adding so that
+        //it can be canceled
+        //such as in the case when we are still adding, but mode_clearItems()
+        //is called
+        for (let i = 0; i < entry.length && this.adding; i++) {
+            if ("scheduler" in window && i % 10 === 0 && i !== 0) {
+                //@ts-ignore
+                await window.scheduler.yield()
+            } else if (i > 5 && !("scheduler" in window)) {
+                this.displayQueue.push(entry[i])
+            } else {
+                renderDisplayItem.call(this, entry[i].ItemId)
+            }
+        }
+
         this.adding = false
-        // displayEntryIntersected.clear()
-        for (let child of this.output.querySelectorAll("display-entry")) {
-            const itemId = child.getAttribute("data-item-id")
-            if (!itemId) continue
-            removeDisplayItem.call(this, BigInt(itemId))
-        }
-    }
+    })()
+}
 
-    clear() {
-        for (let child of this.output.childNodes) {
-            if (child.nodeName === 'DISPLAY-ENTRY') continue
-            child.remove()
-        }
+DisplayMode.prototype.subList = function(this: DisplayMode, entry: InfoEntry[]) {
+    const itemIdsToRemove = entry.map(v => v.ItemId)
+    this.displayQueue = this.displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
+
+    for (let item of entry) {
+        removeDisplayItem.call(this, item.ItemId)
+    }
+}
+
+DisplayMode.prototype.put = function(this: DisplayMode, html: string | HTMLElement | ShadowRoot) {
+    this.output.append(html)
+}
+
+DisplayMode.prototype.clearSelected = function(this: DisplayMode,) {
+    this.displayQueue.length = 0
+    this.adding = false
+    // displayEntryIntersected.clear()
+    for (let child of this.output.querySelectorAll("display-entry")) {
+        const itemId = child.getAttribute("data-item-id")
+        if (!itemId) continue
+        removeDisplayItem.call(this, BigInt(itemId))
+    }
+}
+
+DisplayMode.prototype.clear = function(this: DisplayMode,) {
+    for (let child of this.output.childNodes) {
+        if (child.nodeName === 'DISPLAY-ENTRY') continue
+        child.remove()
     }
 }
 
@@ -1220,7 +1224,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
 
     const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
         .filter(v => {
-            if(!eventFilter) return true
+            if (!eventFilter) return true
             return v.Event.includes(eventFilter) ||
                 findInfoEntryById(v.ItemId).En_Title.includes(eventFilter)
         })
@@ -1231,8 +1235,8 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     let tbodyHTML = ""
 
 
-    for(let event of eventsToLookAt) {
-        if(event.ItemId !== itemId) {
+    for (let event of eventsToLookAt) {
+        if (event.ItemId !== itemId) {
             hasNonSelfEvent = true
         }
     }
@@ -1240,8 +1244,8 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     for (let event of eventsToLookAt) {
         tbodyHTML += `<tr>`
 
-        if(hasNonSelfEvent) {
-            if(event.ItemId !== itemId) {
+        if (hasNonSelfEvent) {
+            if (event.ItemId !== itemId) {
                 tbodyHTML += `<td>${findInfoEntryById(event.ItemId).En_Title}</td>`
             } else {
                 tbodyHTML += `<td><b>self</b></td>`
@@ -1421,8 +1425,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     meta = await findMetadataByIdAtAllCosts(meta.ItemId)
 
     renderComponent("#library", el => {
-        if(!("value" in el)) return
-        if(!item.Library) {
+        if (!("value" in el)) return
+        if (!item.Library) {
             el.value = "None"
             return
         }
@@ -1432,7 +1436,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#recommended-bys", el => {
         el.querySelectorAll("div").forEach(div => div.remove())
         let i = 0
-        for(let r of items_getRecommendedBy(item.ItemId)) {
+        for (let r of items_getRecommendedBy(item.ItemId)) {
             const recommender = document.createElement("de-recommender")
             el.append(recommender)
 
@@ -1459,7 +1463,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             const btn = document.createElement("button")
             btn.setAttribute("toggle-hint", "")
 
-            if("text" in btnData) {
+            if ("text" in btnData) {
                 const txt = document.createElement("span")
                 txt.append(btnData.text)
                 btn.append(txt)
@@ -1473,7 +1477,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 btn.append(hint)
             }
 
-            if("shortTitle" in btnData) {
+            if ("shortTitle" in btnData) {
                 const st = document.createElement('span')
                 st.append(btnData.shortTitle)
                 btn.append(st)
@@ -1644,10 +1648,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         el.title = item.Type
     })
     renderComponent("#country-origin", el => {
-        if(meta.Country) {
+        if (meta.Country) {
             let flags = items_countryOfOrigin2Flag(meta.Country)
             el.title = ` (${meta.Country})`
-            el.innerText =  flags
+            el.innerText = flags
         }
     })
     renderComponent("#main-title", displayEntryTitle => {
@@ -1664,7 +1668,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
         displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
 
-        if(meta.Country) {
+        if (meta.Country) {
             let flags = items_countryOfOrigin2Flag(meta.Country)
             displayEntryTitle.title += ` (${meta.Country})`
             displayEntryTitle.setAttribute("data-country-origin-flag", flags)
@@ -1775,8 +1779,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Media dependant
     let lengthInNumber: 0 | string = 0
-    for(let key in mediaDependant) {
-        if(
+    for (let key in mediaDependant) {
+        if (
             key.endsWith("episodes")
             || key.endsWith(`volumes`)
             || key.endsWith(`chapters`)
@@ -1806,7 +1810,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
         if (!/(Re)?Viewing/.test(user.Status)) return
 
-        if(!user.CurrentPosition) {
+        if (!user.CurrentPosition) {
             user = { ...user }
             user.CurrentPosition = "0"
         }
@@ -1843,7 +1847,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 this.win.HTMLProgressElement,
                 container
             )
-            if(!p) break
+            if (!p) break
             p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 
@@ -1854,7 +1858,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             )
             const node = document.createTextNode(`${label || ""}${part[2]}`)
             if (parseInt(max)) {
-                node.appendData( `/${max}`)
+                node.appendData(`/${max}`)
             }
             c.append(node)
 
@@ -1882,7 +1886,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Events
     renderComponent("#user-actions", tbl => {
-        if(!(tbl instanceof this.win.HTMLTableElement)) return
+        if (!(tbl instanceof this.win.HTMLTableElement)) return
         updateEventsDisplay.call(this, el, tbl, user.ItemId)
     })
 
@@ -2075,10 +2079,10 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
     })
 
     renderComponent("#user-actions-filter", el => {
-        if(!("value" in el)) return
+        if (!("value" in el)) return
         el.oninput = (e) => {
             renderComponent("#user-actions", eventsTbl => {
-                if(!(eventsTbl instanceof this.win.HTMLTableElement)) return
+                if (!(eventsTbl instanceof this.win.HTMLTableElement)) return
                 updateEventsDisplay.call(this, root, eventsTbl, itemId, String(el.value))
             })
         }
