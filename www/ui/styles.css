@@ -53,6 +53,7 @@
 }
 
 @layer components {
+
     #main-ui {/* {{{ */
         height: 100%;
         flex-grow: 1;

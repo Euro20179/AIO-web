@@ -1,7 +1,8 @@
 @layer components {
     #tierlist-output {
-        img {
+        entry-image {
             height: 80px;
+            display: inline-block;
         }
 
         ul {

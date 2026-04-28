@@ -48,6 +48,8 @@
         "new-event-dialog",
         "prompt-dialog",
         "confirm-dialog",
+
+        "entry-image"
     ] as $template_name) {
         tmpl($template_name);
     }

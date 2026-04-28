@@ -195,6 +195,40 @@ customElements.define("display-entry", class extends HTMLElement {
         this.root = root
     }
 })
+customElements.define("entry-image", class extends HTMLElement {
+    root: ShadowRoot
+    static observedAttributes = ["entry-id", "height", "width"]
+
+    constructor() {
+        super()
+        let tmpl = document.getElementById("entry-image") as HTMLTemplateElement
+        let content = tmpl.content.cloneNode(true) as HTMLElement
+        this.root = this.attachShadow({ mode: "open" })
+        this.root.appendChild(content)
+    }
+
+    connectedCallback() {
+        this.root.querySelector("button")?.addEventListener("click", () => {
+            const id = BigInt(this.getAttribute("entry-id") || "0") || 0n
+            if(id) {
+                openDisplayWinUI(id)
+            }
+        })
+    }
+
+    attributeChangedCallback(name: string, ov: string, nv: string) {
+        switch(name) {
+            case "entry-id": {
+                const img = this.root.querySelector("img")
+                if(!img) return
+                    const entry = items_getEntry(BigInt(nv))
+                img.src = entry.fixedThumbnail
+                img.alt = entry.info.En_Title || entry.info.Native_Title
+                break;
+            }
+        }
+    }
+})
 
 const sidebarStyles = new CSSStyleSheet
 //gets replaced with colors.css, general.css, sidebar-entry.css in that order
