@@ -172,28 +172,28 @@
         </div>
     </div>
 
-    <script src="/js/chart.js"></script>
-    <script src="/ui/components.js"></script>
-    <script src="/config.js"></script>
-    <script src="/js/items.js"></script>
-    <script src="/js/api.js"></script>
-    <script src="/js/notes-parser.js"></script>
-    <script src="/ui/js_api.js"></script>
-    <script src="/ui/calculator.js"></script>
-    <script src="/ui/globals.js"></script>
-    <script src="/ui/sidebar.js"></script>
-    <script src="/ui/settings.js"></script>
-    <script src="/ui/view-modes/modes.js"></script>
-    <script src="/ui/view-modes/tier-list.js"></script>
-    <script src="/ui/view-modes/calendar.js"></script>
-    <script src="/ui/view-modes/graph.js"></script>
-    <script src="/ui/view-modes/displayEntry.js"></script>
-    <script src="/ui/view-modes/calc.js"></script>
-    <script src="/ui/view-modes/gallery.js"></script>
-    <script src="/ui/view-modes/scriptMode.js"></script>
-    <script src="/ui/view-modes/event-mode.js"></script>
-    <script src="/ui/shortcuts.js"></script>
-    <script src="/ui/ui.js"></script>
+    <script src="/js/chart.js" defer></script>
+    <script src="/ui/components.js" defer></script>
+    <script src="/config.js" defer></script>
+    <script src="/js/items.js" defer></script>
+    <script src="/js/api.js" defer></script>
+    <script src="/js/notes-parser.js" defer></script>
+    <script src="/ui/js_api.js" defer></script>
+    <script src="/ui/calculator.js" defer></script>
+    <script src="/ui/globals.js" defer></script>
+    <script src="/ui/sidebar.js" defer></script>
+    <script src="/ui/settings.js" defer></script>
+    <script src="/ui/view-modes/modes.js" defer></script>
+    <script src="/ui/view-modes/tier-list.js" defer></script>
+    <script src="/ui/view-modes/calendar.js" defer></script>
+    <script src="/ui/view-modes/graph.js" defer></script>
+    <script src="/ui/view-modes/displayEntry.js" defer></script>
+    <script src="/ui/view-modes/calc.js" defer></script>
+    <script src="/ui/view-modes/gallery.js" defer></script>
+    <script src="/ui/view-modes/scriptMode.js" defer></script>
+    <script src="/ui/view-modes/event-mode.js" defer></script>
+    <script src="/ui/shortcuts.js" defer></script>
+    <script src="/ui/ui.js" defer></script>
     <!-- defer because document needs to load first -->
     <script src="/ui/index.js" defer></script>
 </body>
