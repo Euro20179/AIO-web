@@ -126,6 +126,7 @@ TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTM
 
     let li = this.win.document.createElement("li")
     const btn = mkClickableEntry(entry.ItemId)
+    btn.title = `${entry.En_Title || entry.Native_Title} - (${findUserEntryById(entry.ItemId).UserRating})`
 
     li.id = `tier-item-${entry.ItemId}`
     li.append(btn)
