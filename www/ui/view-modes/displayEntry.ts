@@ -1323,7 +1323,10 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
 
     for (let child of relationships) {
         child = await items_getEntryAny(child.ItemId)
-        let el = createClickableEntryUI(child.ItemId)
+        let el = createClickableEntryUI(
+            child.ItemId,
+            () => mode_toggleItem(findInfoEntryById(child.ItemId))
+        )
 
         el.setAttribute("data-view-count", String(child.user.ViewCount))
         elements.push(el)

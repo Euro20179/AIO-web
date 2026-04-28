@@ -212,8 +212,30 @@ function startupUI({
  * Creates an element that the user can click to
  * open that element in the current mode
  */
-function createClickableEntryUI(itemid: bigint): HTMLElement {
-    return mkClickableEntry(itemid, () => mode_toggleItem(findInfoEntryById(itemid)))
+function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
+    if(!openfn) openfn = () => {
+        openDisplayWinUI(id)
+    }
+
+    const btn = document.createElement("button")
+    const entry = items_getEntry(id)
+    const t = entry.fixedThumbnail
+
+    const alt = entry.info.En_Title || entry.info.Native_Title
+
+    if(t) {
+        const img = document.createElement("img")
+        img.src = t
+        img.alt = alt
+        btn.append(img)
+        btn.classList.add("styleless-button")
+    } else {
+        btn.append(alt)
+    }
+
+    btn.addEventListener("click", () => openfn())
+
+    return btn
 }
 
 function setError(text: string) {
