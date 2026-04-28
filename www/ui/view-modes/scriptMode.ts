@@ -1,7 +1,8 @@
 type ScriptMode = {
     run: HTMLButtonElement
     scriptBox: HTMLTextAreaElement
-    renderedModes: Map<bigint, Mode>
+
+    renderedModes: Map<string, Mode>
 
     clear(): any
 } & Mode
@@ -32,7 +33,7 @@ ScriptMode.prototype.mkcontainer = function(this: ScriptMode, ) {
 }
 
 ScriptMode.prototype.refresh = function(this: ScriptMode, id: bigint) {
-    for (let [id, mode] of this.renderedModes.entries()) {
+    for(let mode of this.renderedModes.values()) {
         mode.refresh?.(id)
     }
 }
@@ -49,17 +50,19 @@ ScriptMode.prototype.close = function(this: ScriptMode, ) {
 ScriptMode.prototype.add = function(this: ScriptMode, entry: InfoEntry) {
     const modeSelect = getElementUI("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
     const newMode = mode_name2cls(modeSelect)
-    const d: Mode = new newMode(this.output, this.win)
+    const d: Mode = this.renderedModes.has(modeSelect) ?
+                            this.renderedModes.get(modeSelect)
+                        : new newMode(this.output, this.win)
     const e = d.add(entry)
     e.style.display = "block"
-    this.renderedModes.set(entry.ItemId, d)
+    this.renderedModes.set(modeSelect, d)
     return e
 }
 
 ScriptMode.prototype.sub = function(this: ScriptMode, entry: InfoEntry) {
-    const mode = this.renderedModes.get(entry.ItemId)
-    if (mode) mode.close()
-    this.renderedModes.delete(entry.ItemId)
+    for(let mode of this.renderedModes.values()) {
+        mode.sub(entry)
+    }
 }
 
 ScriptMode.prototype.addList = function(this: ScriptMode, entries: InfoEntry[]) {
