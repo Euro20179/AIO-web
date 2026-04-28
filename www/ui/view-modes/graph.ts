@@ -411,219 +411,214 @@ function destroyCharts() {
     }
 }
 
-class GraphMode implements Mode {
-    NAME = "graph-output"
-    output: HTMLElement | DocumentFragment
-    win: Window & typeof globalThis
-    container: HTMLElement | null
+type GraphMode = Mode
 
-    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        this.win = win ||= window
-        let c = null
-        if (!output) {
-            ({output, container: c} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
+function GraphMode(this: GraphMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    this.win = win ||= window
+    let c = null
+    if (!output) {
+        ({ output, container: c } = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
+    }
+    this.output = output
+    this.container = c
+
+    groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
+    typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
+
+    groupByInput = this.win.document.getElementById("group-by-expr") as HTMLInputElement
+
+    groupByInput.onchange = function() {
+        makeGraphs(items_getSelected())
+    }
+
+    groupBySelect.onchange = typeSelection.onchange = function() {
+        makeGraphs(items_getSelected())
+    }
+
+    destroyCharts()
+
+    const addChart = this.win.document.getElementById("add-chart")
+
+    if (addChart)
+        addChart.onsubmit = () => {
+            chartAddChart.call(this)
         }
-        this.output = output
-        this.container = c
 
-        groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
-        typeSelection = this.win.document.getElementById("chart-type") as HTMLSelectElement
+    ChartManager.call(this, "watch-time-by-year", async (entries) => {
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [years, data] = await organizeData(entries, sortBy.value)
 
-        groupByInput = this.win.document.getElementById("group-by-expr") as HTMLInputElement
-
-        groupByInput.onchange = function() {
-            makeGraphs(items_getSelected())
-        }
-
-        groupBySelect.onchange = typeSelection.onchange = function() {
-            makeGraphs(items_getSelected())
-        }
-
-        destroyCharts()
-
-        const addChart = this.win.document.getElementById("add-chart")
-
-        if (addChart)
-            addChart.onsubmit = () => {
-                chartAddChart.call(this)
-            }
-
-        ChartManager.call(this, "watch-time-by-year", async (entries) => {
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [years, data] = await organizeData(entries, sortBy.value)
-
-            let watchTimes = data
-                .map(v => {
-                    return v.map(i => {
-                        let watchCount = items_getAllEntries()[String(i.ItemId)].user.ViewCount
-                        let thisMeta = items_getAllEntries()[String(i.ItemId)].meta
-                        let watchTime = getWatchTime(watchCount, thisMeta)
-                        return watchTime / 60
-                    }).reduce((p, c) => p + c, 0)
-                });
-
-            return mkXTypeChart(getCtx2.call(this, "watch-time-by-year"), years, watchTimes, "Watch time")
-        })
-
-        ChartManager.call(this, "adj-rating-by-year", async (entries) => {
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [years, data] = await organizeData(entries, sortBy.value)
-
-            let items = data
-            let totalItems = 0
-            let totalRating = 0
-            for (let item of items) {
-                totalItems += item.length
-                totalRating += item.reduce((p, c) => p + items_getAllEntries()[String(c.ItemId)].user.UserRating, 0)
-            }
-            let avgItems = totalItems / items.length
-            let generalAvgRating = totalRating / totalItems
-            const ratings = data
-                .map(v => {
-                    let ratings = v.map(i => {
-                        let thisUser = items_getAllEntries()[String(i.ItemId)].user
-                        return thisUser.UserRating
-                    })
-                    let totalRating = ratings
-                        .reduce((p, c) => (p + c), 0)
-
-                    let avgRating = totalRating / v.length
-                    // let min = Math.min(...ratings)
-
-                    return (avgRating - generalAvgRating) + (v.length - avgItems)
-
-                    // return (avgRating + v.length / (Math.log10(avgItems) / avgItems)) + min
-                })
-
-            return mkXTypeChart(getCtx2.call(this, "adj-rating-by-year"), years, ratings, 'adj ratings')
-        })
-
-        ChartManager.call(this, "cost-by-format", async (entries) => {
-            entries = entries.filter(v => v.PurchasePrice > 0)
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [labels, data] = await organizeData(entries, sortBy.value)
-            let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
-
-            return mkXTypeChart(getCtx2.call(this, "cost-by-format"), labels, totals, "Cost by")
-        })
-
-        ChartManager.call(this, "rating-by-year", async (entries) => {
-            const rbyCtx = getCtx2.call(this, "rating-by-year")
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [years, data] = await organizeData(entries, sortBy.value)
-            const ratings = data
-                .map(v => v
-                    .map(i => {
-                        let thisUser = items_getAllEntries()[String(i.ItemId)].user
-                        return thisUser.UserRating
-                    })
-                    .reduce((p, c, i) => (p * i + c) / (i + 1), 0)
-                )
-
-            return mkXTypeChart(rbyCtx, years, ratings, 'ratings')
-        })
-
-        ChartManager.call(this, "general-rating-by-year", async (entries) => {
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [years, data] = await organizeData(entries, sortBy.value)
-            const ratings = data.map(v => {
+        let watchTimes = data
+            .map(v => {
                 return v.map(i => {
-                    let meta = findMetadataById(i.ItemId)
-                    let rating = meta?.Rating
-                    let max = meta?.RatingMax
-                    if (rating && max) {
-                        return (rating / max) * 100
-                    }
-                    return 0
-                }).reduce((p, c, i) => (p * i + c) / (i + 1), 0)
-            })
-            return mkXTypeChart(getCtx2.call(this, "general-rating-by-year"), years, ratings, "general ratings")
-        })
-
-        ChartManager.call(this, "rating-disparity-graph", async (entries) => {
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            let [years, data] = await organizeData(entries, sortBy.value)
-            const disparity = data.map(v => {
-                return v.map(i => {
-                    let meta = findMetadataById(i.ItemId)
-                    let user = findUserEntryById(i.ItemId)
-                    let rating = meta?.Rating
-                    let max = meta?.RatingMax
-                    if (rating && max) {
-                        let general = (rating / max) * 100
-                        return (user?.UserRating || 0) - general
-                    }
-                    return user?.UserRating || 0
+                    let watchCount = items_getAllEntries()[String(i.ItemId)].user.ViewCount
+                    let thisMeta = items_getAllEntries()[String(i.ItemId)].meta
+                    let watchTime = getWatchTime(watchCount, thisMeta)
+                    return watchTime / 60
                 }).reduce((p, c) => p + c, 0)
+            });
+
+        return mkXTypeChart(getCtx2.call(this, "watch-time-by-year"), years, watchTimes, "Watch time")
+    })
+
+    ChartManager.call(this, "adj-rating-by-year", async (entries) => {
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [years, data] = await organizeData(entries, sortBy.value)
+
+        let items = data
+        let totalItems = 0
+        let totalRating = 0
+        for (let item of items) {
+            totalItems += item.length
+            totalRating += item.reduce((p, c) => p + items_getAllEntries()[String(c.ItemId)].user.UserRating, 0)
+        }
+        let avgItems = totalItems / items.length
+        let generalAvgRating = totalRating / totalItems
+        const ratings = data
+            .map(v => {
+                let ratings = v.map(i => {
+                    let thisUser = items_getAllEntries()[String(i.ItemId)].user
+                    return thisUser.UserRating
+                })
+                let totalRating = ratings
+                    .reduce((p, c) => (p + c), 0)
+
+                let avgRating = totalRating / v.length
+                // let min = Math.min(...ratings)
+
+                return (avgRating - generalAvgRating) + (v.length - avgItems)
+
+                // return (avgRating + v.length / (Math.log10(avgItems) / avgItems)) + min
             })
-            return mkXTypeChart(getCtx2.call(this, "rating-disparity-graph"), years, disparity, "Rating disparity")
+
+        return mkXTypeChart(getCtx2.call(this, "adj-rating-by-year"), years, ratings, 'adj ratings')
+    })
+
+    ChartManager.call(this, "cost-by-format", async (entries) => {
+        entries = entries.filter(v => v.PurchasePrice > 0)
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [labels, data] = await organizeData(entries, sortBy.value)
+        let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
+
+        return mkXTypeChart(getCtx2.call(this, "cost-by-format"), labels, totals, "Cost by")
+    })
+
+    ChartManager.call(this, "rating-by-year", async (entries) => {
+        const rbyCtx = getCtx2.call(this, "rating-by-year")
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [years, data] = await organizeData(entries, sortBy.value)
+        const ratings = data
+            .map(v => v
+                .map(i => {
+                    let thisUser = items_getAllEntries()[String(i.ItemId)].user
+                    return thisUser.UserRating
+                })
+                .reduce((p, c, i) => (p * i + c) / (i + 1), 0)
+            )
+
+        return mkXTypeChart(rbyCtx, years, ratings, 'ratings')
+    })
+
+    ChartManager.call(this, "general-rating-by-year", async (entries) => {
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [years, data] = await organizeData(entries, sortBy.value)
+        const ratings = data.map(v => {
+            return v.map(i => {
+                let meta = findMetadataById(i.ItemId)
+                let rating = meta?.Rating
+                let max = meta?.RatingMax
+                if (rating && max) {
+                    return (rating / max) * 100
+                }
+                return 0
+            }).reduce((p, c, i) => (p * i + c) / (i + 1), 0)
         })
+        return mkXTypeChart(getCtx2.call(this, "general-rating-by-year"), years, ratings, "general ratings")
+    })
 
-        ChartManager.call(this, "by-year", async (entries) => {
-            let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
-            const ctx = getCtx2.call(this, "by-year")
-            let [years, data] = await organizeData(entries, sortBy.value)
-            const counts = data.map(v => v.length)
-
-            return mkXTypeChart(ctx, years, counts, '#items')
+    ChartManager.call(this, "rating-disparity-graph", async (entries) => {
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let [years, data] = await organizeData(entries, sortBy.value)
+        const disparity = data.map(v => {
+            return v.map(i => {
+                let meta = findMetadataById(i.ItemId)
+                let user = findUserEntryById(i.ItemId)
+                let rating = meta?.Rating
+                let max = meta?.RatingMax
+                if (rating && max) {
+                    let general = (rating / max) * 100
+                    return (user?.UserRating || 0) - general
+                }
+                return user?.UserRating || 0
+            }).reduce((p, c) => p + c, 0)
         })
-    }
+        return mkXTypeChart(getCtx2.call(this, "rating-disparity-graph"), years, disparity, "Rating disparity")
+    })
 
-    close() {
-        if (this.container)
-            this.container.remove()
-        else this.clearSelected()
-    }
+    ChartManager.call(this, "by-year", async (entries) => {
+        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        const ctx = getCtx2.call(this, "by-year")
+        let [years, data] = await organizeData(entries, sortBy.value)
+        const counts = data.map(v => v.length)
 
-    add(entry: InfoEntry) {
+        return mkXTypeChart(ctx, years, counts, '#items')
+    })
+}
+
+GraphMode.prototype.close = function(this: GraphMode) {
+    if (this.container)
+        this.container.remove()
+    else this.clearSelected()
+}
+
+GraphMode.prototype.add = function(this: GraphMode, entry: InfoEntry) {
+    makeGraphs(items_getSelected())
+    return this.win.document.getElementById("graph-output") as HTMLElement
+}
+
+GraphMode.prototype.sub = function(this: GraphMode, entry: InfoEntry) {
+    makeGraphs(items_getSelected())
+}
+
+GraphMode.prototype.addList = function(this: GraphMode, entries: InfoEntry[]) {
+    makeGraphs(items_getSelected())
+}
+
+GraphMode.prototype.subList = function(this: GraphMode, entries: InfoEntry[]) {
+    destroyCharts()
+}
+
+GraphMode.prototype.clearSelected = function(this: GraphMode, ) {
+    destroyCharts()
+}
+
+GraphMode.prototype.mkcontainers = function(this: GraphMode, into: HTMLElement) {
+    const c = this.mkcontainer()
+    into.append(c)
+    return { container: c, output: c }
+}
+
+GraphMode.prototype.mkcontainer = function(this: GraphMode, ) {
+    return document.createElement("graph-template")
+}
+
+GraphMode.prototype.chwin = function(this: GraphMode, win: Window & typeof globalThis) {
+    const container = ModePrimitives.chwin.call(this, win)
+
+    destroyCharts()
+    this.win = win
+    groupBySelect = container.querySelector("#group-by") as HTMLSelectElement
+    typeSelection = container.querySelector("#chart-type") as HTMLSelectElement
+
+    groupByInput = container.querySelector("#group-by-expr") as HTMLInputElement
+    groupByInput.onchange = function() {
         makeGraphs(items_getSelected())
-        return this.win.document.getElementById("graph-output") as HTMLElement
     }
 
-    sub(entry: InfoEntry) {
+    groupBySelect.onchange = typeSelection.onchange = function() {
         makeGraphs(items_getSelected())
     }
+    makeGraphs(items_getSelected())
 
-    addList(entries: InfoEntry[]) {
-        makeGraphs(items_getSelected())
-    }
-
-    subList(entries: InfoEntry[]) {
-        destroyCharts()
-    }
-
-    clearSelected() {
-        destroyCharts()
-    }
-
-    mkcontainers(into: HTMLElement) {
-        const c = this.mkcontainer()
-        into.append(c)
-        return { container: c, output: c}
-    }
-
-    mkcontainer() {
-        return document.createElement("graph-template")
-    }
-
-    chwin(win: Window & typeof globalThis) {
-        const container = ModePrimitives.chwin.call(this, win)
-
-        destroyCharts()
-        this.win = win
-        groupBySelect = container.querySelector("#group-by") as HTMLSelectElement
-        typeSelection = container.querySelector("#chart-type") as HTMLSelectElement
-
-        groupByInput = container.querySelector("#group-by-expr") as HTMLInputElement
-        groupByInput.onchange = function() {
-            makeGraphs(items_getSelected())
-        }
-
-        groupBySelect.onchange = typeSelection.onchange = function() {
-            makeGraphs(items_getSelected())
-        }
-        makeGraphs(items_getSelected())
-
-        return container
-    }
+    return container
 }

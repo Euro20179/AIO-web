@@ -68,123 +68,117 @@ class OrderedEvents {
 //keep track of the ones we dont want then dont render those
 //this is because if we remove from eventOrder, we can't add them back
 
-
-class EventMode implements Mode {
-    NAME = "event-output"
-    output: HTMLElement | DocumentFragment
-    win: Window & typeof globalThis
-    container: HTMLElement | null
-
+type EventMode = {
     eventFilter: HTMLInputElement
     excludedEvents: UserEvent[]
     eventOrder: OrderedEvents
 
-    constructor(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
-        this.win = win ||= window
-        let c = null
-        if(!output) {
-            ({container: c, output} = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document)))
-        }
-        this.output = output
-        this.container = c
-        this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
+    _reRenderEventTable(): any,
+    _filterEvents(script: string): any
+} & Mode
 
-        this.eventFilter.onchange = () => {
-            if (this.eventFilter.value === "") return
 
-            this._reRenderEventTable()
-        }
+function EventMode(this: EventMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+    this.NAME = "event-output"
+    ModePrimitives.setup.call(this, output, win)
+    this.eventFilter = document.getElementById("event-filter") as HTMLInputElement
 
-        this.excludedEvents = []
+    this.eventFilter.onchange = () => {
+        if (this.eventFilter.value === "") return
 
-        this.eventOrder = new OrderedEvents()
+        this._reRenderEventTable()
     }
 
-    _filterEvents(script: string) {
+    this.excludedEvents = []
+
+    this.eventOrder = new OrderedEvents()
+}
+
+EventMode.prototype._filterEvents = function(this: EventMode, script: string) {
+    this.excludedEvents.length = 0
+
+    for (let event of this.eventOrder.list()) {
+        let tbl = makeSymbolsTableFromObj(event)
+        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+            let is = event.Event === status
+            const n = new Num(Number(is))
+            tbl.set(status.toLowerCase(), n)
+            tbl.set(status.toLowerCase(), n)
+        }
+        let res = parseExpression(script, tbl)
+        if (!res.truthy()) {
+            this.excludedEvents.push(event)
+        }
+    }
+}
+
+EventMode.prototype._reRenderEventTable = function(this: EventMode, ) {
+    if (this.eventFilter.value) {
+        this._filterEvents(this.eventFilter.value)
+    } else {
         this.excludedEvents.length = 0
-
-        for (let event of this.eventOrder.list()) {
-            let tbl = makeSymbolsTableFromObj(event)
-            for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
-                let is = event.Event === status
-                const n = new Num(Number(is))
-                tbl.set(status.toLowerCase(), n)
-                tbl.set(status.toLowerCase(), n)
-            }
-            let res = parseExpression(script, tbl)
-            if (!res.truthy()) {
-                this.excludedEvents.push(event)
-            }
-        }
     }
-    _reRenderEventTable() {
-        if (this.eventFilter.value) {
-            this._filterEvents(this.eventFilter.value)
-        } else {
-            this.excludedEvents.length = 0
-        }
-        let header = this.output.firstElementChild as HTMLTableRowElement
-        let rest = this.eventOrder.buildElementLists(this.excludedEvents)
-        this.output.replaceChildren(header, ...rest)
+    let header = this.output.firstElementChild as HTMLTableRowElement
+    let rest = this.eventOrder.buildElementLists(this.excludedEvents)
+    this.output.replaceChildren(header, ...rest)
+}
+
+
+EventMode.prototype.close = function(this: EventMode, ) {
+    if (this.container)
+        this.container.remove()
+    else this.clearSelected()
+    this.clearSelected()
+}
+
+EventMode.prototype.add = function(this: EventMode, entry: InfoEntry) {
+    this.eventOrder.addList(...findUserEventsById(entry.ItemId))
+    this._reRenderEventTable()
+    return document.createElement("div")
+}
+
+EventMode.prototype.addList = function(this: EventMode, entry: InfoEntry[]) {
+    for (let e of entry) {
+        this.eventOrder.addList(...findUserEventsById(e.ItemId))
     }
+    this._reRenderEventTable()
+}
 
+EventMode.prototype.sub = function(this: EventMode, entry: InfoEntry) {
+    this.eventOrder.removeList(...findUserEventsById(entry.ItemId))
+    this._reRenderEventTable()
+}
 
-    close() {
-        if(this.container)
-            this.container.remove()
-        else this.clearSelected()
-        this.clearSelected()
+EventMode.prototype.subList = function(this: EventMode, entry: InfoEntry[]) {
+    for (let e of entry) {
+        this.eventOrder.removeList(...findUserEventsById(e.ItemId))
     }
+    this._reRenderEventTable()
+}
 
-    add(entry: InfoEntry) {
-        this.eventOrder.addList(...findUserEventsById(entry.ItemId))
-        this._reRenderEventTable()
-        return document.createElement("div")
-    }
+EventMode.prototype.mkcontainers = function(this: EventMode, into: HTMLElement) {
+    const c = this.mkcontainer()
+    into.append(c)
+    return { container: c, output: getElementOrThrowUI("#event-output-table", null, c) }
+}
 
-    addList(entry: InfoEntry[]) {
-        for (let e of entry) {
-            this.eventOrder.addList(...findUserEventsById(e.ItemId))
-        }
-        this._reRenderEventTable()
-    }
+EventMode.prototype.mkcontainer = function(this: EventMode, ) {
+    return document.createElement("event-template")
+}
 
-    sub(entry: InfoEntry) {
-        this.eventOrder.removeList(...findUserEventsById(entry.ItemId))
-        this._reRenderEventTable()
-    }
+EventMode.prototype.chwin = function(this: EventMode, win: Window & typeof globalThis) {
+    const container = ModePrimitives.chwin.call(this, win)
+    this.output = container.querySelector("#event-output-table") as HTMLTableElement
+    this.eventFilter = container.querySelector("#event-filter") as HTMLInputElement
+    this.eventFilter.onchange = () => {
+        if (this.eventFilter.value === "") return
 
-    subList(entry: InfoEntry[]) {
-        for (let e of entry) {
-            this.eventOrder.removeList(...findUserEventsById(e.ItemId))
-        }
-        this._reRenderEventTable()
-    }
-
-    mkcontainers(into: HTMLElement) {
-        const c = this.mkcontainer()
-        into.append(c)
-        return { container: c, output: getElementOrThrowUI("#event-output-table", null, c)}
-    }
-
-    mkcontainer() {
-        return document.createElement("event-template")
-    }
-
-    chwin(win: Window & typeof globalThis) {
-        const container = ModePrimitives.chwin.call(this, win)
-        this.output = container.querySelector("#event-output-table") as HTMLTableElement
-        this.eventFilter = container.querySelector("#event-filter") as HTMLInputElement
-        this.eventFilter.onchange = () => {
-            if (this.eventFilter.value === "") return
-
-            this._reRenderEventTable()
-        }
-        return container
-    }
-
-    clearSelected() {
-        this.eventOrder.clear()
         this._reRenderEventTable()
     }
+    return container
+}
+
+EventMode.prototype.clearSelected = function(this: EventMode, ) {
+    this.eventOrder.clear()
+    this._reRenderEventTable()
 }
