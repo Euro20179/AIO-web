@@ -1661,10 +1661,17 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
  */
 let catalogWin: Window | null = null
 
-function isCatalogModeUI() {
+/**
+ * checks if the catalog window is open
+ * @returns {boolean}
+ */
+function isCatalogModeUI(): boolean {
     return catalogWin !== null
 }
 
+/**
+ * opens the catalog window
+ */
 function openCatalogModeUI() {
     let mainUI = document.getElementById("main-ui")
     if (!mainUI || mainUI.classList.contains("catalog-mode")) return
@@ -1689,6 +1696,9 @@ function openCatalogModeUI() {
     }
 }
 
+/**
+ * closes the catalog window
+ */
 function closeCatalogModeUI() {
     if (!catalogWin) {
         console.warn("Catalog window is not open")

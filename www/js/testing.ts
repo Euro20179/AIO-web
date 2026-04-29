@@ -15,12 +15,16 @@ function dotests() {
             ] of tests) {
                 testCounts.set(groupName, (testCounts.get(groupName) || 0n) + 1n);
                 const pf = passFails.get(groupName) || { pass: 0n, fail: 0n }
-                if (comp(left(), right())) {
+                let l, r;
+                if (comp(l = left(), r = right())) {
                     passFails.set(groupName, {
                         pass: pf.pass + 1n,
                         fail: pf.fail
                     })
-                    console.info("%s %c[✓]", name, "background: limegreen; color: black")
+                    const args = comp === call
+                                    ? ["%s %O %O %c[✓]", name, l, r, "background: limegreen; color: black"]
+                                    : ["%s %O %c[✓]", name, l, "background: limegreen; color: black"]
+                    console.info.apply(null, args)
                 } else {
                     passFails.set(groupName, {
                         pass: pf.pass,
@@ -115,6 +119,13 @@ function dotests() {
                 return Boolean(userScripts.get("TESTING SCRIPT")) &&
                         Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
             })]
+        ]),
+
+        ui: mktestgroup("ui", [
+            ["open catalog mode", r(openCatalogModeUI), call, l(isCatalogModeUI)],
+            ["get current doc", r(currentDocument), eq, r(() => catalogWin?.document)],
+            ["get current window", r(currentWindow), eq, r(() => catalogWin)],
+            ["close catalog mode", r(closeCatalogModeUI), not(call), l(isCatalogModeUI)]
         ])
     } as const
 
