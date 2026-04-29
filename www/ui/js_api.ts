@@ -446,10 +446,12 @@ function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEnt
  * - adds the new option to the sort-by element
  * @param {string} name - Name of the sorting option
  * @param {function(InfoEntry,InfoEntry): number} sortFN - Sorting function
- * @returns 0 on success
+ * @returns 0 on success, 1 on fail
  */
 function ui_addsort(name: string, sortFN: ((a: InfoEntry, b: InfoEntry) => number)): number {
-    const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+    const sortBySelector = components['sortBySelector']
+    if(!sortBySelector) return 1
+
     let opt = sortBySelector.querySelector(`option[value="${name}"]`) as HTMLOptionElement | null
     if (!(opt instanceof HTMLOptionElement)) {
         opt = document.createElement("option") as HTMLOptionElement
