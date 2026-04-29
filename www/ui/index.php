@@ -178,6 +178,7 @@
     <script src="/js/items.js" defer></script>
     <script src="/js/api.js" defer></script>
     <script src="/js/notes-parser.js" defer></script>
+    <script src="/js/testing.js" defer></script>
     <script src="/ui/js_api.js" defer></script>
     <script src="/ui/calculator.js" defer></script>
     <script src="/ui/globals.js" defer></script>
