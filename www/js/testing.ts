@@ -72,7 +72,7 @@ function dotests() {
         return (left: any, right: any) => !cmp(left, right)
     }
 
-    function nop(left: any, right: Function) { 
+    function call(left: any, right: Function) { 
         return right()
     }
 
@@ -95,12 +95,25 @@ function dotests() {
                 return ui_selected().map(v => v.ItemId)
             }), deq, l([1n]) ],
 
-            [ "ui_addsort", r(ui_addsort, "TEST", () => 1), nop, l(() => {
+            [ "ui_addsort", r(ui_addsort, "TEST", () => 1), call, l(() => {
                 return Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
             })],
 
-            ["ui_delsort", r(ui_delsort, "TEST"), nop, l(() => {
+            ["ui_delsort", r(ui_delsort, "TEST"), call, l(() => {
                 return !Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
+            })],
+
+            ["ui_seterr", r(ui_seterr, "TESTING ERROR"), call, l(() => {
+                const err = components.errorOut
+                if(!err) return true
+                return err.getAttribute("data-error") === "TESTING ERROR"
+            })],
+
+            ["ui_newscript", r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"), call, l(() => {
+                const scriptSelect = getElementUI("#script-select", HTMLElement)
+                if(!scriptSelect) return false
+                return Boolean(userScripts.get("TESTING SCRIPT")) &&
+                        Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
             })]
         ])
     } as const
