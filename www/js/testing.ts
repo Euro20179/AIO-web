@@ -121,7 +121,7 @@ function dotests() {
             })]
         ]),
 
-        ui: mktestgroup("ui", [
+        catalog: mktestgroup("catalog", [
             ["open catalog mode", r(openCatalogModeUI), call, l(isCatalogModeUI)],
             ["get current doc", r(currentDocument), eq, r(() => catalogWin?.document)],
             ["get current window", r(currentWindow), eq, r(() => catalogWin)],

@@ -1,6 +1,11 @@
 type SidebarMode = {
     itemsOnScreen: Set<HTMLElement>
     observer: IntersectionObserver
+
+    _resizeTO: number
+    _setToNone: boolean
+
+    resizeHandler(): any
     focusNthItem(n: number): any
     selectFocusedItem(): any
     focusNextItem(backward: boolean): any
@@ -23,32 +28,34 @@ function SidebarMode(this: SidebarMode, output?: HTMLElement | DocumentFragment,
     //@ts-ignore
     addEventListener("modes.update-item", this.modesUpdateHandler)
 
-    let resizeTO = 0
-    let setToNone = false
-    addEventListener("resize", () => {
-        if (!setToNone) {
-            for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
-                if (this.itemsOnScreen.has(sidebarEntry)) continue
-                sidebarEntry.style.display = 'none'
-            }
-            setToNone = true
-        }
-
-        if (resizeTO) {
-            clearTimeout(resizeTO)
-        }
-        resizeTO = setTimeout(() => {
-            setToNone = false
-            resizeTO = 0
-            for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
-                if (this.itemsOnScreen.has(sidebarEntry)) continue
-                sidebarEntry.style.display = ''
-            }
-        }, 200)
-    })
+    this._resizeTO = 0
+    this._setToNone = false
+    this.win.addEventListener("resize", this.resizeHandler)
 }
 
 SidebarMode.prototype.NAME = 'sidebar-list'
+
+SidebarMode.prototype.resizeHandler = function() {
+    if (!this._setToNone) {
+        for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
+            if (this.itemsOnScreen.has(sidebarEntry)) continue
+            sidebarEntry.style.display = 'none'
+        }
+        this._setToNone = true
+    }
+
+    if (this._resizeTO) {
+        clearTimeout(this._resizeTO)
+    }
+    this._resizeTO = setTimeout(() => {
+        this._setToNone = false
+        this._resizeTO = 0
+        for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
+            if (this.itemsOnScreen.has(sidebarEntry)) continue
+            sidebarEntry.style.display = ''
+        }
+    }, 200)
+}
 
 SidebarMode.prototype.mkobserver = function(this: SidebarMode) {
     if (this.output instanceof this.win.HTMLElement) {
@@ -80,7 +87,7 @@ SidebarMode.prototype.add = function(this: SidebarMode, item: InfoEntry) {
 
 SidebarMode.prototype.addList = function(this: SidebarMode, items: InfoEntry[]) {
     console.log(items);
-    (async() => {
+    (async () => {
         for (let i = 0; i < items.length; i++) {
             if (i !== 0 && i % 20 == 0 && "scheduler" in window) {
                 //@ts-ignore
@@ -108,6 +115,7 @@ SidebarMode.prototype.close = function(this: SidebarMode) {
     this.observer.disconnect()
     //@ts-ignore
     removeEventListener("modes.update-item", this.modesUpdateHandler)
+    this.win.removeEventListener("resize", this.resizeHandler)
 }
 
 SidebarMode.prototype.chwin = function(this: SidebarMode, win: Window & typeof globalThis) {
