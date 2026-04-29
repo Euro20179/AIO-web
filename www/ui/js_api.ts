@@ -587,3 +587,82 @@ async function aio_delete(item: bigint) {
     sidebarSelectNth(1)
     return 0
 }
+
+/**
+ * Given a Date, convert it to a UTC timestamp
+ * @param {Date} date
+ * @returns {number}
+ */
+function time_utcDate(date: Date): number {
+    return Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        date.getUTCHours(),
+        date.getUTCMinutes(),
+        date.getUTCSeconds(),
+        date.getUTCMilliseconds(),
+    )
+}
+
+/**
+ * Converts an Temporal.ZonedDateTime parsable date, and timezone and converts
+ * it to a utc timestamp
+ * @param {string} date
+ * @param {string} timezone
+ * @returns {number}
+ */
+function time_zoneddate2utc(date: string, timezone: string): number {
+    let offset: string
+
+    //calculate an offset for each time
+    //because, depending on daylight savings
+    //the offset can be different depending on time of year!
+    if ("Temporal" in window) {
+        let t = Temporal.ZonedDateTime.from(date + `[${timezone}]`)
+        offset = t.offset
+    } else {
+        //NOTE:
+        //even within the same location eg America/Los_Angeles
+        //the date may need to convert timezones (eg: PST -> PDT)
+        //this may lead to 1 hours differences if the user inputs an old date
+        //which is correct because we're converting from the current timezone
+        //to the one used on that old date
+        //
+        //Users should migrate to a browser that uses real dates
+        offset = Intl.DateTimeFormat("en", {
+            timeZone: timezone,
+            timeZoneName: "longOffset"
+        }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
+    }
+
+    return date
+        ? time_utcDate(new Date(date + offset))
+        : 0
+}
+
+/**
+ * compares 2 timestamps from 2 timezones
+ * DOES t2 - t1 NOT t1 - t2
+ * @param {bigint} t1 - time in nanoseconds
+ * @param {string} t1zone - t1's timezone
+ * @param {bigint} t2 - time in nanoseconds
+ * @param {string} t2zone - t2's timezone
+ */
+function time_compare(t1: bigint, t1zone: string, t2: bigint, t2zone: string) {
+    if ("Temporal" in window) {
+        let leftTime = new Temporal.ZonedDateTime(
+            t1 * 1000000n,
+            t1zone 
+        )
+        let rightTime = new Temporal.ZonedDateTime(
+            t2 * 1000000n,
+            t2zone
+        )
+        return Temporal.ZonedDateTime.compare(rightTime, leftTime)
+    }
+    if (t1 == t2) {
+        return 0
+    }
+    return t2 - t1
+}

@@ -27,6 +27,11 @@ const components: {
     [k in keyof StartupUIComponents]?: StartupUIComponents[k] | null
 } = {}
 
+/**
+ * should be called when the ui starts up.
+ * sets up the mapping of components to use throughout the ui
+ * @param {Partial<Record<string, HTMLElement>>} components
+ */
 function startupUI({
     newWindow,
     viewToggle,
@@ -105,7 +110,7 @@ function startupUI({
     })
 
     userSelector?.addEventListener("change", function() {
-        refreshInfo(getUidUI()).then(() => loadSearchUI())
+        refreshInfoUI(getUidUI()).then(() => loadSearchUI())
         if (components.recommenders)
             fillRecommendedListUI(components.recommenders, getUidUI())
     })
@@ -213,7 +218,7 @@ function startupUI({
  * open that element in the current mode
  */
 function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
-    if(!openfn) openfn = () => {
+    if (!openfn) openfn = () => {
         openDisplayWinUI(id)
     }
 
@@ -223,7 +228,7 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
 
     const alt = entry.info.En_Title || entry.info.Native_Title
 
-    if(t) {
+    if (t) {
         const img = document.createElement("img")
         img.src = t
         img.alt = alt
@@ -238,11 +243,30 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
     return btn
 }
 
+/**
+ * Sets the error text
+ * @param {string} text
+ */
 function setError(text: string) {
     if (text == "") {
         components.errorOut?.removeAttribute("data-error")
     } else {
         components.errorOut?.setAttribute("data-error", text)
+    }
+}
+
+/**
+ * sets the error text, then sets it back IF it was not set by another caller
+ * @param {string} initial - the error to set to before the task starts
+ * @param {string} onend - the error to set to after the task ends
+ * @returns {Function} - the caller shall call this function when whatever they are doing has finished in order to set the error back
+ */
+function setErrorWhileUI(initial: string, onend: string): Function {
+    setError(initial)
+    return () => {
+        if(components.errorOut?.getAttribute("data-error") === initial) {
+            setError(onend)
+        }
     }
 }
 
@@ -258,7 +282,17 @@ async function reloadEventsUI(itemId: bigint) {
         })
 }
 
-async function refreshInfo(uid: number) {
+/**
+ * calls: loadLibraries(), loadInfoEntries(), loadUserEvents(), items_refreshMetadata()
+ * only returns the result of [loadUserEvents, items_refreshMetadata]
+ * side effects:
+ * - causes items' state to be set
+ * - fills the library dropdown
+ * - sets the error to "Loading items", then ""
+ * - updates all loaded entries
+ * @returns {Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>]>}
+ */
+async function refreshInfoUI(uid: number): Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>]> {
     await Promise.all([
         loadLibraries(uid),
         loadInfoEntries(uid),
@@ -269,19 +303,35 @@ async function refreshInfo(uid: number) {
     ])
 }
 
-async function loadLibraries(uid: number) {
+/**
+ * Loads all libraries
+ * side effects:
+ * - update item state
+ * - update library dropdown menu
+ *
+ * @param {number} uid - the user to load libraries from (cannot be 0)
+ * @returns {Promise<void>}
+ */
+async function loadLibraries(uid: number): Promise<void> {
     await items_loadLibraries(uid)
     updateLibraryDropdown()
 }
 
+/**
+ * loads info, and user entries
+ * side effects:
+ * - update item state
+ * - sets error to a loading state while loading, and "" when done
+ */
 async function loadInfoEntries(uid: number) {
     setError("Loading items")
 
     await items_refreshInfoEntries(uid)
 
-    setError("")
+    const reset = setErrorWhileUI("Loading user info", "")
 
     items_refreshUserEntries(uid).then(() => {
+        reset()
         updateInfo2(items_getAllEntries())
     })
 
@@ -297,6 +347,14 @@ function openSettingsUI(uid: number | null = null) {
     open(`/settings.html?uid=${uid || getUidUI()}`, '_blank')
 }
 
+/**
+ * Adds a new sorting option
+ * Side effects:
+ * - adds the new option to the sort-by element
+ * @param {string} category - The category to put the sort option in to
+ * @param {string} name - Name of the sorting option
+ * @param {function(InfoEntry,InfoEntry): number} cb - Sorting function
+ */
 function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEntry) => number)) {
     const internalSortName = items_addSort(name, cb)
     let group = components.sortBySelector?.querySelector(`optgroup[label="${category}"]`)
@@ -312,14 +370,27 @@ function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEn
     group.append(opt)
 }
 
-function currentDocument() {
+/**
+ * gets the current document (either catalog, or main document)
+ * @returns {HTMLDocument}
+ */
+function currentDocument(): HTMLDocument {
     return catalogWin?.document || document
 }
 
-function currentWindow() {
+/**
+ * gets the current window (either catalog, or main window)
+ * @returns {Window & typeof globalThis}
+ */
+function currentWindow(): Window & typeof globalThis {
     return catalogWin?.document.defaultView || window
 }
 
+/**
+ * Turns on/off an element
+ * @param {string} id the id of the element to toggle
+ * @param {'' | "none"} on more accurately the display to set for the element
+ */
 function toggleUI(id: string, on?: '' | "none") {
     const elem = document.getElementById(id) as HTMLElement | null
     if (!elem) return
@@ -329,11 +400,22 @@ function toggleUI(id: string, on?: '' | "none") {
             : "none")
 }
 
+/**
+ * Gets a css property value from the main document
+ * @param {string} name
+ * @param {string} fallback incase the property name doesn't exist
+ */
 function getCSSProp(name: string, fallback: string) {
     const s = getComputedStyle(document.documentElement)
     return s.getPropertyValue(name) || fallback
 }
 
+/**
+ * Uses the library filter, <s>and item filter</s> (deprecated)
+ * to filter a list of entries
+ * @param {items_Entry[] | null} [list=null] - the list of entries to filter, if not given, use the search results list
+ * @returns {InfoEntry[]}
+ */
 function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     let items = list || items_getResults()
 
@@ -707,6 +789,15 @@ function getElementUI<T extends typeof Element>(
     return el as InstanceType<T>
 }
 
+/**
+ * attempts to find an element of a certain type with a query selector within a container
+ * if the element is not found, throw an error
+ * @template T - an HTMLElement constructor (must be HTMLElement iself or a subclass)
+ * @param {string} selector
+ * @param {T | null} [requiredType=null] - the type the found element must be
+ * @param [root=null] - the root (defaults to currentDocument()) (may also just be anything with a querySelector implementation)
+ * @returns {T}
+ */
 function getElementOrThrowUI<T extends typeof HTMLElement>(
     selector: string,
     requiredType: T | null = null,
@@ -778,16 +869,36 @@ function toggleModalUI(
         : dialog.showModal()
 }
 
+/**
+ * Creates a new statistic in the UI
+ * Side effects:
+ * - puts a statistic in the statistics area
+ * @param {string} name - Name of the statistic
+ * @param {boolean} additive - Whether the stat is additive
+ * @param {StatCalculator} calculation - The calculation function for the stat
+ */
 function createStatUI(name: string, additive: boolean, calculation: StatCalculator) {
     statistics.push(new Statistic(name, additive, calculation))
     setResultStatUI(name, 0)
 }
 
-function deleteStatUI(name: string) {
+/**
+ * Deletes a statistic
+ * Side effects:
+ * - removes the statistic from the statistics area
+ * @param {string} name - Name of the statistic to delete
+ * @returns {boolean}
+ */
+function deleteStatUI(name: string): boolean {
     statistics = statistics.filter(v => v.name !== name)
     return deleteResultStatUI(name)
 }
 
+/**
+ * Sets the value of a statistic
+ * @param {string} key - Name of the statistic
+ * @param {number} value - Value to set
+ */
 function setResultStatUI(key: string, value: number) {
     for (let stat of statistics) {
         if (stat.name !== key) continue
@@ -797,6 +908,11 @@ function setResultStatUI(key: string, value: number) {
     }
 }
 
+/**
+ * adds value to the stat named key
+ * @param {string} key
+ * @param {number} value
+ */
 function changeResultStatsUI(key: string, value: number) {
     for (let stat of statistics) {
         if (stat.name !== key) continue
@@ -806,6 +922,11 @@ function changeResultStatsUI(key: string, value: number) {
     }
 }
 
+/**
+ * changes all statistics with an item (each stat determines how this works)
+ * @param {InfoEntry} item
+ * @param {number} [multiplier=1] - the multiplier, set to -1 to subtract
+ */
 function changeResultStatsWithItemUI(item: InfoEntry, multiplier: number = 1) {
     if (!item) return
     for (let stat of statistics) {
@@ -813,6 +934,10 @@ function changeResultStatsWithItemUI(item: InfoEntry, multiplier: number = 1) {
     }
 }
 
+/**
+ * removes a stat from display but NOT the internal list of stats
+ * @param {string} key - the stat to remove
+ */
 function deleteResultStatUI(key: string) {
     let el = components.statsOutput?.querySelector(`[data-stat-name="${key}"]`)
     if (el) {
@@ -822,6 +947,11 @@ function deleteResultStatUI(key: string) {
     return false
 }
 
+/**
+ * similar to changeResultStatsWithItem() but uses a list of items
+ * @param {InfoEntry[]} items
+ * @param {number} [multiplier=1]
+ */
 function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number = 1) {
     for (let stat of statistics) {
         stat.changeWithItemList(items, multiplier)
@@ -966,6 +1096,14 @@ async function fetchLocationUI(id: bigint, provider?: string) {
     alert(`Location set to: ${newLocation}`)
 }
 
+/**
+ * Overwrites the metadata for an item, by getting new metadata based on heuristics determined by the server
+ * side effects:
+ * - asks the user if they are sure they want to overwrite
+ * - refreshes selected items
+ * @param {ShadowRoot} _root - unused
+ * @param {InfoEntry} item
+ */
 function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     confirmUI("Are you sure you want to overwrite the metadata with a refresh")
         .then(() => {
@@ -990,6 +1128,10 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
         })
 }
 
+/**
+ * updates the librarySelector component's options by getting all libraries
+ * and creating an option for each one
+ */
 function updateLibraryDropdown() {
     components.librarySelector && (components.librarySelector.innerHTML = '<option value="0">Library</option>')
     components.newEntryLibrarySelector && (components.newEntryLibrarySelector.innerHTML = '<option value="0">Library</option>')
@@ -1047,7 +1189,14 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     }
 }
 
-function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSearchFilters) {
+/**
+ * Given a list of entries, and filters, apply the filters to the list of entries
+ * and return the new list
+ * @param {InfoEntry[]} entries
+ * @param {ClientSearchFilters} filters
+ * @returns {InfoEntry[]}
+ */
+function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSearchFilters): InfoEntry[] {
 
     entries = entries.filter(v => v.Library === items_getCurrentLibrary())
 
@@ -1126,50 +1275,7 @@ function openEventFormUI(itemid: string) {
     itemidEl.value = itemid
 }
 
-function _utcDate(date: Date) {
-    return Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        date.getUTCDate(),
-        date.getUTCHours(),
-        date.getUTCMinutes(),
-        date.getUTCSeconds(),
-        date.getUTCMilliseconds(),
-    )
-}
 
-/**
- * Converts an Temporal.ZonedDateTime parsable date, and timezone and converts
- * it to a utc timestamp
- */
-function dateAndTZToUTC(date: string, timezone: string): number {
-    let offset: string
-
-    //calculate an offset for each time
-    //because, depending on daylight savings
-    //the offset can be different depending on time of year!
-    if ("Temporal" in window) {
-        let t = Temporal.ZonedDateTime.from(date + `[${timezone}]`)
-        offset = t.offset
-    } else {
-        //NOTE:
-        //even within the same location eg America/Los_Angeles
-        //the date may need to convert timezones (eg: PST -> PDT)
-        //this may lead to 1 hours differences if the user inputs an old date
-        //which is correct because we're converting from the current timezone
-        //to the one used on that old date
-        //
-        //Users should migrate to a browser that uses real dates
-        offset = Intl.DateTimeFormat("en", {
-            timeZone: timezone,
-            timeZoneName: "longOffset"
-        }).formatToParts().find(k => k.type === "timeZoneName")?.value.slice(3) || "-00:00"
-    }
-
-    return date
-        ? _utcDate(new Date(date + offset))
-        : 0
-}
 
 /**
  * Creates an event based on a form
@@ -1195,13 +1301,13 @@ function newEventUI(form: HTMLFormElement) {
     ) || ""
 
     let ts = tsStr
-        ? dateAndTZToUTC(tsStr, timezone)
+        ? time_zoneddate2utc(tsStr, timezone)
         : 0
     let afterts = aftertsStr
-        ? dateAndTZToUTC(aftertsStr.toString(), timezone)
+        ? time_zoneddate2utc(aftertsStr.toString(), timezone)
         : 0
     let beforets = beforetsStr
-        ? dateAndTZToUTC(beforetsStr.toString(), timezone)
+        ? time_zoneddate2utc(beforetsStr.toString(), timezone)
         : 0
 
     const itemidvalue = data.get("itemid")?.toString()
@@ -1314,6 +1420,10 @@ async function newEntryUI(form: HTMLFormElement) {
     })
 }
 
+/**
+ * does a search, and fills the item listing with the results
+ * @param {string} - search query
+ */
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
     let useV3 = false
     if (search.startsWith("3")) {
@@ -1335,6 +1445,11 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
     ))
 }
 
+/**
+ * fills the item listing with an arbitrary record of id: element pairs
+ * when an element is clicked, the id associated with it is the return value of the item selection
+ * @param {Record<any, HTMLElement>} items
+ */
 function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
     const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
@@ -1358,7 +1473,13 @@ function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
     return container
 }
 
-function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel = true): HTMLDivElement {
+/**
+ * Fills the item listing with items
+ * @param {Record<string, MetadataEntry | items_Entry>} entries
+ * @param {boolean} [addCancel=true]
+ * @returns {HTMLDivElement}
+ */
+function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel: boolean = true): HTMLDivElement {
     const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
@@ -1412,6 +1533,11 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
     return container
 }
 
+/**
+ * Replaces the input element's value with a user chosen item
+ * if the user doesn't select anything, the value is set to "0"
+ * @param {HTMLInputElement} input
+ */
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
     const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
@@ -1429,6 +1555,8 @@ type SelectItemOptions = Partial<{
 
 /**
  * lets the user select an item, be sure to use fillItemListingUI first
+ * @param {SelectItemOptions} [options]
+ * @returns {Promise<null | bigint>}
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
     const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
@@ -1471,6 +1599,11 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
     })
 }
 
+/**
+ * Opens the sign in ui to let the user sign in, with an optional reason to sign in shown to the user
+ * @param {string} reason
+ * @returns {Promise<string>} the login token
+ */
 async function signinUI(reason: string): Promise<string> {
     const loginPopover = getElementOrThrowUI("#login", HTMLDialogElement)
 
@@ -1514,6 +1647,10 @@ async function signinUI(reason: string): Promise<string> {
     })
 }
 
+/**
+ * Fills a select element with all the possible formats
+ * @param {HTMLSelectElement} formatSelector
+ */
 async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
     const groups = {
         "DIGITAL": "Misc",
@@ -1559,6 +1696,11 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
     formatSelector.replaceChildren(...Object.values(optGroups))
 }
 
+/**
+ * Fills a datalist with a list of all recommenders a user has used
+ * @param {HTMLDataListElement} list
+ * @param {number} uid
+ */
 async function fillRecommendedListUI(list: HTMLDataListElement, uid: number) {
     list.innerHTML = ""
 
@@ -1570,6 +1712,10 @@ async function fillRecommendedListUI(list: HTMLDataListElement, uid: number) {
     }
 }
 
+/**
+ * Fills a select element with all the possible types
+ * @param {HTMLSelectElement} typeDropdown
+ */
 async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
     const groups = {
         "Show": "TV",
@@ -1609,6 +1755,10 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
     typeDropdown.replaceChildren(...Object.values(optGroups))
 }
 
+/**
+ * Fills a select element with all users
+ * @param {HTMLSelectElement | undefined | null} selector
+ */
 async function fillUserSelectionUI(selector: HTMLSelectElement | undefined | null) {
     for (let acc of await api_listAccounts()) {
         const [id, name] = acc.split(":")
@@ -1624,11 +1774,24 @@ async function fillUserSelectionUI(selector: HTMLSelectElement | undefined | nul
     }
 }
 
+/**
+ * Sets the current uid
+ * side effects:
+ * - alters the uid selector's value to the current uid
+ * the above side effect is necessary as the uid selector is how the current uid is kept track of
+ */
 function setUIDUI(uid: string) {
     const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement | null
     uidSelector && (uidSelector.value = uid)
 }
 
+/**
+ * Sets the current uid from a list of things that might contain a uid
+ * heuristics:
+ * - ?uname parameter
+ * - ?uid parameter
+ * - localStorage["userUid"]
+ */
 function setUIDFromHeuristicsUI() {
     const params = new URLSearchParams(document.location.search)
     if (params.has("uname")) {
@@ -1645,6 +1808,10 @@ function setUIDFromHeuristicsUI() {
     }
 }
 
+/**
+ * turns on/off display mode, which hides the chrome around the view mode
+ * @param {boolean | "toggle"} [on="toggle"]
+ */
 function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     let mainUI = document.getElementById("main-ui")
     if (on === "toggle") {
@@ -1718,12 +1885,24 @@ function closeCatalogModeUI() {
     catalogWin = null
 }
 
+/**
+ * Given an item:
+ * - set the document title to "[AIO] | itemname"
+ * - set the favicon to the item's thumbnail
+ * @param {InfoEntry} item
+ */
 function updatePageInfoWithItemUI(item: InfoEntry) {
     document.title = `[AIO] | ${item.En_Title || item.Native_Title}`
     ua_setfavicon(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
 }
 
 type StartupLang = "javascript" | "aiol" | ""
+/**
+ * Do a user startup script
+ * should only be called if the current uid matches the logged in user uid
+ * otherwise we will load random people's settings :)
+ * @param {UserSettings} settings
+ */
 function doUserStartupUI(settings: UserSettings) {
     const script = settings.UIStartupScript
     const lang = settings.StartupLang
@@ -1769,6 +1948,11 @@ type UserSettings = {
     StartupLang: StartupLang
 }
 
+/**
+ * Gets the settings for a user
+ * @param {number} uid
+ * @returns {Promise<UserSettings>}
+ */
 async function getSettings(uid: number): Promise<UserSettings> {
     let res = await authorizedRequest(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
     if (res === null || res.status !== 200) {
@@ -1866,14 +2050,29 @@ height: 100%;
     }
 }
 
+/**
+ * Update the Status field of an item (on the server and clientside)
+ * @param {bigint} itemId
+ * @param {UserStatus} status
+ */
 async function updateStatusUI(itemId: bigint, status: UserStatus) {
     return await setPropUI(findUserEntryById(itemId), "Status", status, "Update status")
 }
 
+/**
+ * Update the Notes field of an item (on the server and clientside)
+ * @param {bigint} itemId
+ * @param {string} note
+ */
 async function updateNotesUI(itemId: bigint, note: string) {
     return await setPropUI(findUserEntryById(itemId), "Notes", note, "Update notes")
 }
 
+/**
+ * Update the PurchasePrice field of an item (on the server and clientside)
+ * @param {bigint} itemId
+ * @param {string | null} [newPrice=null] if not given, prompt the user
+ */
 async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
     newPrice ||= await promptNumber("New cost", "not a number", parseFloat)
     if (newPrice === null) return
@@ -1881,6 +2080,11 @@ async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
     return await setPropUI(findInfoEntryById(itemId), "PurchasePrice", newPrice, "Update purchase price")
 }
 
+/**
+ * Ask the user for a list of additional recommenders for an item
+ * will update the list clientside, and serverside
+ * @param {bigint} itemId
+ */
 async function newRecommendedByUI(itemId: bigint) {
     let newRecommendedBy = await promptUI("Names (, separated)", "", "recommended-by")
     if (!newRecommendedBy) return
@@ -1904,6 +2108,12 @@ async function newRecommendedByUI(itemId: bigint) {
     }
 }
 
+/**
+ * Ask the user for a list of additional tags for an item
+ * will update the list clientside, and serverside
+ * @param {bigint} itemId
+ * @param {string[] | null} [tags=null]
+ */
 async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
     let newTags = null
     if (!tags) {
@@ -1929,10 +2139,20 @@ async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
     }
 }
 
+/**
+ * Update the location field of an item (on the server and clientside)
+ * @param {bigint} itemId
+ * @param {string} [location]
+ */
 async function updateLocationUI(itemId: bigint, location: string) {
     return await setPropUI(findInfoEntryById(itemId), "Location", location, "update location")
 }
 
+/**
+ * Update the En_Title field of an item (on the server and clientside)
+ * @param {bigint} itemId
+ * @param {string} [newTitle]
+ */
 async function updateUserTitleUI(itemId: bigint, newTitle: string): Promise<Response | null> {
     return await setPropUI(findInfoEntryById(itemId), "En_Title", newTitle, "Update the english title")
 }
@@ -1995,16 +2215,30 @@ async function setPropUI<T extends InfoEntry | MetadataEntry | UserEntry, N exte
     return res
 }
 
-function isViewingAllUI() {
-    return components.viewAllElem?.checked
+/**
+ * checks if all items are being viewed, does so through the viewAllElem copmonent
+ * @returns {boolean}
+ */
+function isViewingAllUI(): boolean {
+    return components.viewAllElem?.checked || false
 }
 
+/**
+ * Enables/disables all items being viewed, does so through the viewAllElem component
+ * @param {boolean} enabled
+ */
 function setViewingAllUI(enabled: boolean) {
     if (!(components.viewAllElem instanceof HTMLInputElement))
         throw new Error("If there is a viewAll element it is not an <input>")
     components.viewAllElem.checked = enabled
 }
 
+/**
+ * Given an item, open a popup window to display it
+ * @param {bigint} id - the item id
+ * @param {string} [target="_blank"]
+ * @param {boolean} [popup=true]
+ */
 function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean = true) {
     const win = open(`/ui/display.php?item-id=${id}`, target, popup ? "popup=true" : undefined)
     win?.addEventListener("modes.update-item", _ => {

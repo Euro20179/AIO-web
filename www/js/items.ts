@@ -1224,21 +1224,12 @@ function items_compareEventTiming(left: UserEvent | number, right: UserEvent | n
                         "Atlantic/Reykjavik"
                     : INTL_OPTIONS.timeZone
 
-    if ("Temporal" in window) {
-        let leftTime = new Temporal.ZonedDateTime(
-            BigInt(l) * 1000000n,
-            (typeof left !== 'number' && left.TimeZone) || defaultTZ
-        )
-        let rightTime = new Temporal.ZonedDateTime(
-            BigInt(r) * 1000000n,
-            (typeof right !== 'number' && right.TimeZone) || defaultTZ
-        )
-        return Temporal.ZonedDateTime.compare(rightTime, leftTime)
-    }
-    if (l == r) {
-        return 0
-    }
-    return r - l
+    return time_compare(
+        BigInt(l) * 1000000n, 
+        (typeof left !== 'number' && left.TimeZone) || defaultTZ,
+        BigInt(r) * 1000000n,
+        (typeof right !== 'number' && right.TimeZone) || defaultTZ
+    )
 }
 
 /**
