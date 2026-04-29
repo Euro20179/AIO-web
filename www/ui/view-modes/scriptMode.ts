@@ -101,7 +101,7 @@ ScriptMode.prototype.clear = function(this: ScriptMode, ) {
 
 ScriptMode.prototype.clearSelected = function(this: ScriptMode, ) {
     for (let mode of this.renderedModes.values()) {
-        mode.clearSelected()
+        mode.close()
     }
     this.renderedModes = new Map
 }

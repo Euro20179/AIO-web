@@ -202,7 +202,7 @@ TierListMode.prototype.refresh = function(this: TierListMode, id: bigint) {
 TierListMode.prototype.close = function(this: TierListMode, ) {
     if (this.container)
         this.container.remove()
-    else this.clearSelected()
+    else this.output.querySelector("tier-list")?.remove()
     this.clearSelected()
 }
 
