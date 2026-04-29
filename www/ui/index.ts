@@ -38,7 +38,8 @@ async function main() {
         searchForm: getElementOrThrowUI("#sidebar-form", HTMLFormElement),
         recommenders,
         newItemForm: getElementOrThrowUI("#new-item-form", HTMLFormElement),
-        promptDialog: getElementOrThrowUI("#prompt", HTMLDialogElement)
+        promptDialog: getElementOrThrowUI("#prompt", HTMLDialogElement),
+        sidebarItems: getElementOrThrowUI("#sidebar-items", HTMLElement)
     });
 
     const urlParams = new URLSearchParams(document.location.search);
@@ -149,7 +150,7 @@ async function main() {
         let entries = Object.values(items_getAllEntries()).map((v) => v.info);
         entries = sortEntries(entries, sortBySelector.value);
         items_setResults(entries.map((v) => v.ItemId));
-        renderSidebar(getFilteredResultsUI(), true);
+        components['sidebarUI']?.render(getFilteredResultsUI(), true);
         dispatchEvent(new CustomEvent("aio-items-rendered"));
     }
 

@@ -160,7 +160,7 @@ function ui_setmode(modeName: string): number {
  * @returns 0 on success
  */
 function ui_sidebarclear(): number {
-    clearSidebar()
+    components['sidebarUI']?.clearSelected()
     return 0
 }
 
@@ -177,7 +177,7 @@ function ui_sidebarselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): n
         return 1
     }
 
-    renderSidebarItem(entry)
+    renderSidebarItem.call(components['sidebarUI'] as SidebarMode, entry)
     return 0
 }
 
@@ -194,7 +194,7 @@ function ui_sidebarrender(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1
         return 1
     }
     let frag = document.createDocumentFragment()
-    return renderSidebarItem(entry, frag, { renderImg: true })
+    return renderSidebarItem.call(components['sidebarUI'] as SidebarMode, entry, frag, { renderImg: true })
 }
 
 /**
@@ -387,7 +387,7 @@ function ui_getuid(): number {
  */
 function ui_setresults(results: InfoEntry[]): number {
     items_setResults(results.map(v => v.ItemId))
-    renderSidebar(results)
+    components['sidebarUI']?.render(results)
     return 0
 }
 
@@ -436,7 +436,7 @@ function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
  */
 function ui_sidebarreorder(...ids: (bigint | InfoEntry | MetadataEntry | UserEntry)[]): number {
     ids = ids.map(v => typeof v === 'bigint' ? v : v.ItemId)
-    reorderSidebar(ids as bigint[])
+    components['sidebarUI']?.reorder(ids as bigint[])
     return 0
 }
 
@@ -581,10 +581,10 @@ async function aio_delete(item: bigint) {
     if (!res || res.status !== 200) {
         return 1
     }
-    removeSidebarItem(findInfoEntryById(item))
+    components['sidebarUI']?.sub(findInfoEntryById(item))
     items_delEntry(item)
     mode_clearItems()
-    sidebarSelectNth(1)
+    components['sidebarUI']?.selectNth(1)
     return 0
 }
 

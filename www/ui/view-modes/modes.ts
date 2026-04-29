@@ -164,6 +164,7 @@ var mode_refreshItem = function() {
     return function(item: bigint) {
         const refresh = () => {
             toForItems.delete(item)
+            components['sidebarUI']?.refresh?.(item)
             for (const mode of openViewModes) {
                 if (mode.refresh) {
                     mode.refresh(item)
@@ -248,6 +249,7 @@ const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment,
     ["event-output", EventMode],
     ["calendar-output", CalendarMode],
     ["tierlist-output", TierListMode],
+    ["sidebar-items", SidebarMode],
 ])
 
 function mode_name2cls(name: string) {
@@ -261,6 +263,7 @@ function mode_name2cls(name: string) {
         "event": "event-output",
         "calendar": "calendar-output",
         "tierlist": "tierlist-output",
+        "sidebar": "sidebar-items",
     }[name] || name
     let val = mode_map().get(name)
     if(!val) {

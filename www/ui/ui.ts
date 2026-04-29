@@ -18,6 +18,9 @@ type StartupUIComponents = {
     recommenders: HTMLDataListElement,
     newItemForm: HTMLFormElement,
     promptDialog: HTMLDialogElement,
+    sidebarItems: HTMLElement
+
+    sidebarUI: SidebarMode
 }
 
 
@@ -41,6 +44,7 @@ function startupUI({
     sortBySelector,
     statsOutput,
     newItemForm,
+    sidebarItems,
 }: typeof components) {
 
     for (let key in arguments[0]) {
@@ -74,6 +78,13 @@ function startupUI({
     if (!(components["promptDialog"] instanceof HTMLDialogElement)) {
         throw new Error("prompt dialog must be a dialog element")
     }
+
+    if(!(sidebarItems)) {
+        throw new Error("ui cannot function without a sidebar")
+    }
+
+    //@ts-ignore
+    components['sidebarUI'] = new SidebarMode(sidebarItems)
 
 
     if (statsOutput) {
@@ -143,8 +154,9 @@ function startupUI({
             }
         }
 
+        if(components['sidebarUI'])
         //add items that DO match            reapply sort
-        renderSidebarItemList(filtered).then(sortEntriesUI)
+            renderSidebarItemList.call(components['sidebarUI'], filtered, components['sidebarUI']?.output || document.createDocumentFragment()).then(sortEntriesUI)
     })
 
     if (viewAllElem instanceof HTMLInputElement)
@@ -620,7 +632,7 @@ for (let i = 0; i < 10; i++) {
     registerCTRLShortcutUI(String(i), e => {
         let event = e as KeyboardEvent
         mode_clearItems()
-        sidebarSelectNth(Number(event.key))
+        components['sidebarUI']?.selectNth(Number(event.key))
         e.preventDefault()
     })
 }
@@ -630,8 +642,8 @@ if (window.shortcuts) {
     addEventListener("keydown", e => {
         if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
             if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
-                focusNthSidebarItem(e.key === "ArrowUp" ? sidebarItems.childElementCount : 1)
-            } else focusNextSidebarItem(e.key === "ArrowUp")
+                components['sidebarUI']?.focusNthItem(e.key === "ArrowUp" ? (components['sidebarItems']?.childElementCount || 1) : 1)
+            } else components['sidebarUI']?.focusNextItem(e.key === "ArrowUp")
             if (e.ctrlKey) {
                 if (!e.shiftKey) mode_clearItems()
                 selectFocusedSidebarItem()
@@ -971,7 +983,7 @@ function sortEntriesUI() {
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
     mode_clearItems()
-    reorderSidebar(getFilteredResultsUI().map(v => v.ItemId))
+    components['sidebarUI']?.reorder(getFilteredResultsUI().map(v => v.ItemId))
 }
 
 /**
@@ -1048,11 +1060,11 @@ async function loadSearchUI() {
     mode_clearItems()
     if (entries.length === 0) {
         setError("No results")
-        clearSidebar()
+        components['sidebarUI']?.clearSelected()
         const g = genericInfo(0n, 0)
         g.En_Title = "No Results"
-        renderFakeSidebarItem(g)
-    } else renderSidebar(getFilteredResultsUI(), false)
+        renderFakeSidebarItem(g, components['sidebarUI']?.output || document.createDocumentFragment())
+    } else components['sidebarUI']?.render(getFilteredResultsUI(), false)
 }
 
 /**

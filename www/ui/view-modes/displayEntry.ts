@@ -730,7 +730,7 @@ function _mkde_actions() {// {{{
                 .then(() => {
                     let user = findUserEntryById(item.ItemId)
                     if (!user) {
-                        refreshInfo(getUidUI()).then(() => {
+                        refreshInfoUI(getUidUI()).then(() => {
                             refreshDisplayItem.call(this, item.ItemId)
                         })
                     } else {
@@ -2316,7 +2316,10 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
                 items_addCopy(itemCopy.ItemId, item.ItemId)
 
                 mode_selectItem(itemCopy, true, this)
-                renderSidebarItem(itemCopy, sidebarItems, { below: String(item.ItemId) })
+
+                if(components['sidebarUI'])
+                    renderSidebarItem.call(components['sidebarUI'], itemCopy, undefined, { below: String(item.ItemId) })
+
                 updateInfo2({
                     [String(item.ItemId)]: {
                         info: item
