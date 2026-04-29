@@ -652,11 +652,11 @@ function time_zoneddate2utc(date: string, timezone: string): number {
 function time_compare(t1: bigint, t1zone: string, t2: bigint, t2zone: string) {
     if ("Temporal" in window) {
         let leftTime = new Temporal.ZonedDateTime(
-            t1 * 1000000n,
+            t1,
             t1zone 
         )
         let rightTime = new Temporal.ZonedDateTime(
-            t2 * 1000000n,
+            t2,
             t2zone
         )
         return Temporal.ZonedDateTime.compare(rightTime, leftTime)
