@@ -1,9 +1,4 @@
 :host(sidebar-entry) {
-    @container body (width < 800px) {
-        border-left: 1px solid var(--text-color);
-        border-right: 1px solid var(--text-color);
-    }
-
     [data-type-icon]::before {
         content: attr(data-type-icon) " "
     }
