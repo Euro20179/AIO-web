@@ -106,6 +106,18 @@
     inherits: true;
 }
 
+@property --inline-widget-margin {
+    syntax: "<length-percentage>";
+    initial-value: 1px;
+    inherits: true;
+}
+
+@property --block-widget-margin {
+    syntax: "<length-percentage>";
+    initial-value: 0px;
+    inherits: true;
+}
+
 :root {
     /* special custom property values that cant be set in initial-value */
     --small-gap: 2ex;

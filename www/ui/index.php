@@ -147,8 +147,7 @@
                         <option value="gallery-output" title="Gallery mode">🖼︎ Gallery</option>
                         <option value="script-output" title="Script mode">&lt;> Script</option>
                         <option value="tierlist-output" title="Tierlist mode">S Tierlist</option>
-                    </select>
-                    <button id="new-view-window" style='height: 100%;'>🪟</button>
+                    </select><!-- no whitespace --><button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>
             </nav>
             <nav class="sidebar overflow" id="sidebar" aria-label="item selection">

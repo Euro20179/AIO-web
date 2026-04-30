@@ -43,7 +43,8 @@
     textarea,
     input,
     select {
-        margin-inline: 1px;
+        margin-inline: var(--inline-widget-margin);
+        margin-block: var(--block-widget-margin);
 
         color: inherit;
 
