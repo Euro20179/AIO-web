@@ -112,8 +112,11 @@ in_doc {
 }
 
 # Process function declaration
-!in_doc && /^(async\s+)?function/ {
+!in_doc && /^(var.*=.*)?(async\s+)?function/ {
     match($0, /function\s+([a-zA-Z0-9_]+)/, arr)
+    if (arr[1] == "") {
+        match($0, /([a-zA-Z0-9_]+) = function/, arr)
+    }
     if (arr[1] != "") {
         func_name = arr[1]
 
