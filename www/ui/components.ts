@@ -1,3 +1,6 @@
+const generalStyles: CSSStyleSheet[] = [];
+const sidebarStyles: CSSStyleSheet[] = [];
+
 function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
     const tbl = document.createElement("table")
     const thead = tbl.createTHead()
@@ -23,7 +26,7 @@ function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
 function fuckingInsaneFirefoxHackToMakeSelectAppearNormally(
     root: ShadowRoot | HTMLElement | DocumentFragment
 ) {
-    for(let sel of root.querySelectorAll("select")) {
+    for (let sel of root.querySelectorAll("select")) {
         const newSel = sel.cloneNode(true) as HTMLSelectElement
         newSel.value = sel.value
         sel.replaceWith(newSel)
@@ -33,16 +36,16 @@ function fuckingInsaneFirefoxHackToMakeSelectAppearNormally(
  * Sets up popover=hint elements
  */
 function setupHintPopovers(root: {
-    querySelectorAll: ( selector: string) => NodeListOf<Element>,
+    querySelectorAll: (selector: string) => NodeListOf<Element>,
     querySelector: (selector: string) => Element
 }) {
-    for(let el of root.querySelectorAll("[toggle-hint]")) {
+    for (let el of root.querySelectorAll("[toggle-hint]")) {
         const e = el as HTMLElement
         const toToggle = (el.getAttribute("toggle-hint") ?
-                            root.querySelector(`#${el.getAttribute("toggle-hint")}`)
-                         :  el.querySelector('[popover="hint"]')) as HTMLElement
+            root.querySelector(`#${el.getAttribute("toggle-hint")}`)
+            : el.querySelector('[popover="hint"]')) as HTMLElement
         e.onfocus = e.onmouseenter = function() {
-            toToggle.showPopover({source: this})
+            toToggle.showPopover({ source: this })
         }
 
         e.onblur = e.onmouseleave = function() {
@@ -115,7 +118,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
                 .split(",").map(v => v.trim())
         for (let i = 0; i < requested_acitons.length; i++) {
             let actionFn = actions[requested_acitons[i] as keyof typeof actions];
-            if(!actionFn) {
+            if (!actionFn) {
                 console.error(`Failed to register event: ${actions[i]}`)
                 continue
             }
@@ -196,11 +199,26 @@ customElements.define("display-entry", class extends HTMLElement {
     }
 })
 
-const sidebarStyles = new CSSStyleSheet
+const labelWrap = async<TLabel, T>(label: TLabel, promise: Promise<T>): Promise<[TLabel, T]> => {
+    return [label, await promise]
+}
+
 //gets replaced with colors.css, general.css, sidebar-entry.css in that order
 //the math.random is so that the build system doesn't inline this text, i need the ``
 //the reason i am doing this is because sharing the css styles like this triples the speed at which the sidebar can render
-sidebarStyles.replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`)
+Promise.all([
+    labelWrap(generalStyles, import("/css/colors.css", { with: { type: "css" } })),
+    labelWrap(generalStyles, import("/css/general.css", { with: { type: "css" } })),
+    labelWrap(sidebarStyles, import("/ui/templates/sidebar-entry.css", { with: { type: "css" } })),
+]).then(sheets => {
+    for(let [list, sheet] of sheets) {
+        list.push(sheet['default'])
+    }
+}).catch(err => {
+    (new CSSStyleSheet).replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`).then((res) => {
+        sidebarStyles.push(res)
+    })
+});
 customElements.define("sidebar-entry", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
@@ -209,7 +227,7 @@ customElements.define("sidebar-entry", class extends HTMLElement {
         let content = template.content.cloneNode(true) as HTMLElement
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)
-        root.adoptedStyleSheets.push(sidebarStyles)
+        root.adoptedStyleSheets.push(...generalStyles, ...sidebarStyles)
         this.root = root
     }
 
@@ -284,7 +302,7 @@ function _registerElement(name: string) {
         }
 
         connectedCallback() {
-            if(!this.templ) {
+            if (!this.templ) {
                 console.error(`Attempting to use <${this.name}> despite coenciding template not existing`)
                 return
             }
