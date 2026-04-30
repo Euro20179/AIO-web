@@ -2004,8 +2004,6 @@ function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "cli
         win.document.write(`<!DOCTYPE html>
 <head style='height: 100dvh'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' href='/css/colors.css'>
-    <link rel='stylesheet' href='/css/general.css'>
 <style>
 body {
 margin: 0;
@@ -2018,6 +2016,12 @@ height: 100%;
     <button class="popout" style='float: right;'>✗</button>
 </div>
 </body>`)
+
+        for(let sheet of document.styleSheets) {
+            const newSheet = new win.self.CSSStyleSheet()
+            newSheet.replace([...sheet.cssRules].map(v => v.cssText).join(""))
+            win.document.adoptedStyleSheets.push(newSheet)
+        }
 
 
         //this is where we are going to put the parent back
