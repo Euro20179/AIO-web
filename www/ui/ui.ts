@@ -2006,12 +2006,12 @@ function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "cli
     <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body {
-margin: 0;
-height: 100%;
+    padding: var(--small-gap);
+    height: 100%;
 }
 </style>
 </head>
-<body style='margin: var(--small-gap);'>
+<body>
 <div style='float: right; align-content: center;' class='flex' id='settings'>
     <button class="popout" style='float: right;'>✗</button>
 </div>
