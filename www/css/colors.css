@@ -40,30 +40,82 @@
     inherits: true;
 }
 
+@property --error {
+    syntax: "<color>";
+    initial-value: #e78284;
+    inherits: true;
+}
+
+@property --warn {
+    syntax: "<color>";
+    initial-value: #e5c890;
+    inherits: true;
+}
+
+@property --highlight {
+    syntax: "<color>";
+    initial-value: #95bdff;
+    inherits: true;
+}
+
+@property --highlight-text-color {
+    syntax: "<color>";
+    initial-value: #121626;
+    inherits: true;
+}
+
 @property --main {
     syntax: "<color>";
     initial-value: #121626;
     inherits: true;
 }
 
+@property --secondary {
+    syntax: "<color>";
+    initial-value: #333333;
+    inherits: true;
+}
+
+@property --text-color {
+    syntax: "<color>";
+    initial-value: hsl(from var(--main) h s calc(l * 8));
+    inherits: true;
+}
+
+@property --scroll-bar-color {
+    syntax: "<color>";
+    initial-value: #95bdff;
+    inherits: true;
+}
+
+@property --scrollbar-gutter-color {
+    syntax: "<color>";
+    initial-value: #333333;
+    inherits: true;
+}
+
 @property --input-border-roundness {
-    syntax: "<length>";
+    syntax: "<length-percentage>";
     initial-value: 5px;
     inherits: true;
 }
 
-:root {
-    /*initial-value doesn't work unless it's set to initial...*/
+@property --small-gap {
+    syntax: "<length-percentage>";
+    initial-value: 10px;
+    inherits: true;
+}
 
-    --input-border-roundness : initial;
-    --main : initial;
-    --red : initial;
-    --lavender : initial;
-    --yellow : initial;
-    --blue : initial;
-    --light-blue : initial;
-    --green : initial;
-    --pink : initial;
+:root {
+    /* special custom property values that cant be set in initial-value */
+    --small-gap: 2ex;
+    --error: var(--red);
+    --warn: var(--yellow);
+    --highlight: var(--blue);
+    --highlight-text-color: var(--main);
+    --scrollbar-bar-color: var(--blue);
+
+    --scrollbar-gutter-color: var(--secondary);
 
     &:has(option[value="light"]:checked) {
         --text-color: CanvasText;
@@ -109,18 +161,9 @@
         --text-color: hsl(from var(--main) h s calc((sign(abs(l - 100) - 30)) * 90));
     }
 
-    --error: var(--red);
-    --warn: var(--yellow);
 
     --input-background: var(--secondary);
     --input-border-color: currentColor;
     --border-roundness: var(--input-border-roundness);
 
-    --small-gap: 2ex;
-
-    --scrollbar-bar-color: var(--blue);
-    --scrollbar-gutter-color: var(--secondary);
-
-    --highlight: var(--blue);
-    --highlight-text-color: var(--main);
 }
