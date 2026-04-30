@@ -79,7 +79,7 @@ function startupUI({
         throw new Error("prompt dialog must be a dialog element")
     }
 
-    if(!(sidebarItems)) {
+    if (!(sidebarItems)) {
         throw new Error("ui cannot function without a sidebar")
     }
 
@@ -154,8 +154,8 @@ function startupUI({
             }
         }
 
-        if(components['sidebarUI'])
-        //add items that DO match            reapply sort
+        if (components['sidebarUI'])
+            //add items that DO match            reapply sort
             renderSidebarItemList.call(components['sidebarUI'], filtered, components['sidebarUI']?.output || document.createDocumentFragment()).then(sortEntriesUI)
     })
 
@@ -276,7 +276,7 @@ function setError(text: string) {
 function setErrorWhileUI(initial: string, onend: string): Function {
     setError(initial)
     return () => {
-        if(components.errorOut?.getAttribute("data-error") === initial) {
+        if (components.errorOut?.getAttribute("data-error") === initial) {
             setError(onend)
         }
     }
@@ -1998,8 +1998,8 @@ function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "cli
     }
     if (!parent) return
 
-    popoutTarget.onclick = function() {
-        let win = open("", "_blank", "popup=true")
+    popoutTarget.onclick = async function() {
+        const win = await popupUI()
         if (!win) return
         win.document.write(`<!DOCTYPE html>
 <head style='height: 100dvh'>
@@ -2017,7 +2017,7 @@ body {
 </div>
 </body>`)
 
-        for(let sheet of document.styleSheets) {
+        for (let sheet of document.styleSheets) {
             const newSheet = new win.self.CSSStyleSheet()
             newSheet.replace([...sheet.cssRules].map(v => v.cssText).join(""))
             win.document.adoptedStyleSheets.push(newSheet)
@@ -2059,10 +2059,10 @@ body {
             }
         }
 
-        win.onbeforeunload = function() {
+        win.addEventListener("pagehide", () => {
             placeholder.replaceWith(parent)
             if (watcher) watcher.destroy()
-        }
+        })
     }
 }
 
@@ -2275,4 +2275,19 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
             })
         })
     })
+}
+
+/**
+ * Creates a popup window, attempts to use dPiP.requestWindow, falls back to open()
+ * @param {DocumentPictureInPictureOptions} [pipOptions={}] options to give dPiP if dPiP is supported
+ * @returns {Promise<Window | null>}
+ */
+async function popupUI(pipOptions = {}): Promise<Window | null> {
+    let win: Window
+    if (window.documentPictureInPicture) {
+        win = await documentPictureInPicture.requestWindow(pipOptions)
+    } else {
+        win = open("", "_blank", "popup=true")
+    }
+    return win
 }
