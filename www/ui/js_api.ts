@@ -30,6 +30,26 @@ function ua_setfavicon(path: string) {
 }
 
 /**
+ * Creates a popup window, attempts to use dPiP.requestWindow, falls back to open()
+ * @param {string} [doc] an html document to put into the window
+ * @param {DocumentPictureInPictureOptions} [pipOptions={}] options to give dPiP if dPiP is supported
+ * @returns {Promise<Window | null>}
+ */
+async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
+    let win: Window
+    if (window.documentPictureInPicture) {
+        win = await documentPictureInPicture.requestWindow(pipOptions)
+    } else {
+        win = open("", "_blank", "popup=true")
+    }
+    if(doc) {
+        const parser = new DOMParser
+        win.document.documentElement.replaceWith(parser.parseFromString(doc, "text/html").documentElement)
+    }
+    return win
+}
+
+/**
  * run cb after timeout milliseconds, but restart the timer if the function is rerun.
  * @param {Function} cb
  * @param {number} timeout

@@ -1999,9 +1999,7 @@ function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "cli
     if (!parent) return
 
     popoutTarget.onclick = async function() {
-        const win = await popupUI()
-        if (!win) return
-        win.document.write(`<!DOCTYPE html>
+        const win = await ua_popup(`<!DOCTYPE html>
 <head style='height: 100dvh'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -2016,6 +2014,7 @@ body {
     <button class="popout" style='float: right;'>✗</button>
 </div>
 </body>`)
+        if (!win) return
 
         for (let sheet of document.styleSheets) {
             const newSheet = new win.self.CSSStyleSheet()
@@ -2277,17 +2276,3 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
     })
 }
 
-/**
- * Creates a popup window, attempts to use dPiP.requestWindow, falls back to open()
- * @param {DocumentPictureInPictureOptions} [pipOptions={}] options to give dPiP if dPiP is supported
- * @returns {Promise<Window | null>}
- */
-async function popupUI(pipOptions = {}): Promise<Window | null> {
-    let win: Window
-    if (window.documentPictureInPicture) {
-        win = await documentPictureInPicture.requestWindow(pipOptions)
-    } else {
-        win = open("", "_blank", "popup=true")
-    }
-    return win
-}
