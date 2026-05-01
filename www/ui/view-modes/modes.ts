@@ -167,20 +167,6 @@ function mode_getFirstModeInWindow(win: Window): Mode | undefined {
 }
 
 /**
- * Check if an item id is selected
- * @param {bigint} id
- * @returns {boolean}
- */
-function mode_isSelected(id: bigint): boolean {
-    for (let item of items_getSelected()) {
-        if (item.ItemId === id) {
-            return true
-        }
-    }
-    return false
-}
-
-/**
  * Refresh an item by item id in all openViewModes
  * @param {bigint} item
  */
@@ -235,50 +221,31 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
 /**
  * Selects an item to be displayed in {mode} if given, otherwise all openViewModes
  *
- * side effects:
- * - update stats (if updateStats is true)
  * @param {InfoEntry} item
- * @param {boolean} [updateStats=true]
  * @param {Mode} [mode=undefined] the mode to update (otherwise all open modes)
  */
-function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
-    setError("")
+function mode_selectItem(item: InfoEntry, mode?: Mode): HTMLElement[] {
+    if (mode) return [mode.add(item)]
 
-    items_selectById(item.ItemId)
-    updateStats && changeResultStatsWithItemUI(item)
-    updatePageInfoWithItemUI(item)
-    if (mode)
-        return [mode.add(item)]
-    else {
-        const elems = []
-        for (const mode of mode_listOpen()) {
-            elems.push(mode.add(item))
-        }
-        return elems
+    const elems = []
+    for (const mode of mode_listOpen()) {
+        elems.push(mode.add(item))
     }
+    return elems
 }
 //just in case
 const selectItem = mode_selectItem
 
 /**
  * Deselects an item
- * side effects:
- * - update stats (if updateStats is true)
- * - sets error to "No items selected" if no items are selected
  * @param {InfoEntry} item
- * @param {boolean} [updateStats=true]
  */
-function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
-    items_deselectById(item.ItemId)
-    updateStats && changeResultStatsWithItemUI(item, -1)
+function mode_deselectItem(item: InfoEntry) {
     for (let mode of mode_listOpen()) {
         mode.sub(item)
     }
-
-    if (items_getSelected().length === 0) {
-        setError("No items selected")
-    }
 }
+
 //just in case
 const deselectItem = mode_deselectItem
 
@@ -287,16 +254,9 @@ const deselectItem = mode_deselectItem
  * side effects:
  * - updates stats (if updateStats is true)
  * @param {InfoEntry[]} itemList
- * @param {boolean} [updateStats=true]
  * @param {Mode} [mode=undefined]
  */
-function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
-    if (itemList.length !== 0)
-        setError("")
-    items_setSelected(items_getSelected().concat(itemList))
-    updateStats && changeResultStatsWithItemListUI(itemList)
-    if (itemList.length)
-        updatePageInfoWithItemUI(itemList[0])
+function mode_selectItemList(itemList: InfoEntry[], mode?: Mode) {
     if (mode) {
         mode.addList(itemList)
     } else {
@@ -305,27 +265,6 @@ function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true,
         }
     }
 }
-//just in case
-const selectItemList = mode_selectItemList
-
-/**
- * Toggle the selectedness of an item
- * side effects:
- * - updates stats (if updateStats is true)
- * @param {InfoEntry} item
- * @param {boolean} [updateStats=true]
- */
-function mode_toggleItem(item: InfoEntry, updateStats: boolean = true) {
-    if (items_getSelected().find(a => a.ItemId === item.ItemId)) {
-        mode_deselectItem(item, updateStats)
-        //by definition we are no longer viewing everything
-        setViewingAllUI(false)
-    } else {
-        mode_selectItem(item, updateStats)
-    }
-}
-//just in case
-const toggleItem = mode_toggleItem
 
 /**
  * Clears selected items within a mode
@@ -333,17 +272,11 @@ const toggleItem = mode_toggleItem
  *
  * @see ui_modeclear(), which clears miscellanious nodes from modes
  */
-function mode_clearItems(updateStats: boolean = true) {
-    setError("No items selected")
-    items_clearSelected()
+function mode_clearItems() {
     for (const mode of mode_listOpen()) {
         mode.clearSelected()
     }
-    updateStats && resetStatsUI()
 }
-
-//just in case
-const clearItems = mode_clearItems
 
 const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void>([
     ["entry-output", DisplayMode],

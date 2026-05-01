@@ -1503,3 +1503,18 @@ function items_countryOfOrigin2Flag(origin: string) {
     }
     return str.trim()
 }
+
+/**
+ * Check if an item id is selected
+ * @param {bigint} id
+ * @returns {boolean}
+ */
+function items_isSelected(id: bigint): boolean {
+    for (let item of items_getSelected()) {
+        if (item.ItemId === id) {
+            return true
+        }
+    }
+    return false
+}
+

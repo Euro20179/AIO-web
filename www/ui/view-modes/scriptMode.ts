@@ -89,7 +89,7 @@ ScriptMode.prototype.clear = function(this: ScriptMode, ) {
             mode.clear()
     }
 
-    mode_clearItems()
+    clearUI()
 
     if (this.output instanceof this.win.HTMLElement) {
         this.output.innerHTML = ""

@@ -158,7 +158,7 @@ function _mkde_actions() {// {{{
         /**
          * Deselects the current item
          */
-        close: function(item) {return  mode_deselectItem(item)},
+        close: function(item) {return  deselectUI(item)},
 
         /**
          * Creates a copy of the current item
@@ -672,8 +672,8 @@ function _mkde_actions() {// {{{
 
             templEditor._updatePreview = templEditor.oninput = () => {
                 preview.self.GLOBAL_TEMPLATE = { [`${item.ItemId}`]: templEditor.value }
-                preview.self.mode_deselectItem(item, false)
-                preview.self.mode_selectItem(item, false)
+                preview.self.deselectUI(item, false)
+                preview.self.selectUI(item, false)
             }
         },
 
@@ -1325,7 +1325,7 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
         child = await items_getEntryAny(child.ItemId)
         let el = createClickableEntryUI(
             child.ItemId,
-            () => mode_toggleItem(findInfoEntryById(child.ItemId))
+            () => toggleItemUI(findInfoEntryById(child.ItemId))
         )
 
         el.setAttribute("data-view-count", String(child.user.ViewCount))
@@ -2315,7 +2315,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
 
                 items_addCopy(itemCopy.ItemId, item.ItemId)
 
-                mode_selectItem(itemCopy, true, this)
+                selectUI(itemCopy, true, this)
 
                 if(components['sidebarUI'])
                     renderSidebarItem.call(components['sidebarUI'], itemCopy, undefined, { below: String(item.ItemId) })

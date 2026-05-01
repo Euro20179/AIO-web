@@ -249,11 +249,11 @@ function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
         return 2
     }
 
-    if (mode_isSelected(jsId)) {
-        mode_deselectItem(entry)
+    if (items_isSelected(jsId)) {
+        deselectUI(entry)
         return 0
     } else {
-        mode_selectItem(entry)
+        selectUI(entry)
         return 1
     }
 }
@@ -265,7 +265,7 @@ function ui_toggle(id: bigint | InfoEntry | MetadataEntry | UserEntry): number {
  */
 function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | HTMLElement {
     let jsId = typeof id === 'bigint' ? id : id.ItemId
-    if (mode_isSelected(jsId)) {
+    if (items_isSelected(jsId)) {
         return 2
     }
     const entry = findInfoEntryById(jsId)
@@ -274,7 +274,7 @@ function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | 
         return 1
     }
 
-    return mode_selectItem(entry)[0]
+    return selectUI(entry)[0]
 }
 
 /**
@@ -284,7 +284,7 @@ function ui_select(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | 
  */
 function ui_deselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 | "" {
     let jsId = typeof id === 'bigint' ? id : id.ItemId
-    if (!mode_isSelected(jsId)) {
+    if (!items_isSelected(jsId)) {
         return 2
     }
     const entry = findInfoEntryById(jsId)
@@ -293,7 +293,7 @@ function ui_deselect(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | 2 
         return 1
     }
 
-    mode_deselectItem(entry)
+    deselectUI(entry)
     return ""
 }
 
@@ -314,7 +314,7 @@ function ui_render(id: bigint | InfoEntry | MetadataEntry | UserEntry): 1 | HTML
 
     const m = new DisplayMode(frag)
 
-    let res = mode_selectItem(entry, false, m)[0]
+    let res = mode_selectItem(entry, m)[0]
     m.close()
     return res
 }
@@ -356,7 +356,7 @@ function ui_render_from(id: bigint, mode: "entry-output" |
     }
 
     const m = new modes[mode](frag)
-    let res = mode_selectItem(entry, false, m)[0]
+    let res = mode_selectItem(entry, m)[0]
     m.close()
     return res
 }
@@ -366,7 +366,7 @@ function ui_render_from(id: bigint, mode: "entry-output" |
  * @returns 0 on success
  */
 function ui_clear(): number {
-    mode_clearItems()
+    clearUI()
     return 0
 }
 
@@ -622,7 +622,7 @@ async function aio_delete(item: bigint) {
     }
     components['sidebarUI']?.sub(findInfoEntryById(item))
     items_delEntry(item)
-    mode_clearItems()
+    clearUI()
     components['sidebarUI']?.selectNth(1)
     return 0
 }

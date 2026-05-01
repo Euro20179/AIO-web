@@ -168,11 +168,11 @@ function startupUI({
         viewAllElem.addEventListener("change", _ => {
             resetStatsUI()
             if (!viewAllElem.checked) {
-                mode_clearItems(false)
+                clearUI(false)
             } else {
-                mode_clearItems()
+                clearUI()
                 for (let mode of mode_listOpen()) {
-                    mode_selectItemList(getFilteredResultsUI(), true, mode)
+                    selectListUI(getFilteredResultsUI(), true, mode)
                 }
             }
         })
@@ -636,7 +636,7 @@ registerCTRLShortcutUI("D", e => {
 for (let i = 0; i < 10; i++) {
     registerCTRLShortcutUI(String(i), e => {
         let event = e as KeyboardEvent
-        mode_clearItems()
+        clearUI()
         components['sidebarUI']?.selectNth(Number(event.key))
         e.preventDefault()
     })
@@ -650,7 +650,7 @@ if (window.shortcuts) {
                 components['sidebarUI']?.focusNthItem(e.key === "ArrowUp" ? (components['sidebarItems']?.childElementCount || 1) : 1)
             } else components['sidebarUI']?.focusNextItem(e.key === "ArrowUp")
             if (e.ctrlKey) {
-                if (!e.shiftKey) mode_clearItems()
+                if (!e.shiftKey) clearUI()
                 selectFocusedSidebarItem()
             }
             e.preventDefault()
@@ -947,7 +947,7 @@ function sortEntriesUI() {
     let newEntries = sortEntries(items_getResults().map(v => v.info), sortby)
     let ids = newEntries.map(v => v.ItemId)
     items_setResults(ids)
-    mode_clearItems()
+    clearUI()
     components['sidebarUI']?.reorder(getFilteredResultsUI().map(v => v.ItemId))
 }
 
@@ -1022,7 +1022,7 @@ async function loadSearchUI() {
 
     items_setResults(entries.map(v => v.ItemId))
 
-    mode_clearItems()
+    clearUI()
     if (entries.length === 0) {
         setError("No results")
         components['sidebarUI']?.clearSelected()
@@ -2245,3 +2245,101 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
         })
     })
 }
+
+/**
+ * Selects an item to be displayed in {mode} if given, otherwise all openViewModes
+ *
+ * side effects:
+ * - update stats (if updateStats is true)
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ * @param {Mode} [mode=undefined] the mode to update (otherwise all open modes)
+ */
+function selectUI(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
+    setError("")
+
+    items_selectById(item.ItemId)
+    updateStats && changeResultStatsWithItemUI(item)
+    updatePageInfoWithItemUI(item)
+    return mode_selectItem(item, mode)
+}
+
+/**
+ * Selects a list of items to be selected within {mode} or all openViewModes if not given
+ * side effects:
+ * - updates stats (if updateStats is true)
+ * - sets error to "" (if list is not empty, meaining, we selected something)
+ * @param {InfoEntry[]} itemList
+ * @param {boolean} [updateStats=true]
+ * @param {Mode} [mode=undefined]
+ */
+function selectListUI(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
+    if (itemList.length !== 0)
+        setError("")
+    items_setSelected(items_getSelected().concat(itemList))
+    updateStats && changeResultStatsWithItemListUI(itemList)
+    if (itemList.length)
+        updatePageInfoWithItemUI(itemList[0])
+
+    mode_selectItemList(itemList, mode)
+}
+//just in case
+const selectItemList = selectListUI
+
+/**
+ * Deselects an item
+ * side effects:
+ * - update stats (if updateStats is true)
+ * - sets error to "No items selected" if no items are selected
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ */
+function deselectUI(item: InfoEntry, updateStats: boolean = true) {
+    items_deselectById(item.ItemId)
+    updateStats && changeResultStatsWithItemUI(item, -1)
+
+    mode_deselectItem(item)
+
+    if (items_getSelected().length === 0) {
+        setError("No items selected")
+    }
+}
+
+/**
+ * Toggle the selectedness of an item
+ * side effects:
+ * - updates stats (if updateStats is true)
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ */
+function toggleItemUI(item: InfoEntry, updateStats: boolean = true) {
+    if(items_isSelected(item.ItemId)) {
+        deselectUI(item, updateStats)
+        //by definition we are no longer viewing everything
+        setViewingAllUI(false)
+    }
+    else {
+        selectUI(item, updateStats)
+    }
+}
+//just in case
+const toggleItem = toggleItemUI
+
+
+/**
+ * Clears selected items within a mode
+ * side effects:
+ * - updates stats
+ * - sets error to "No items selected"
+ *
+ * @see ui_modeclear(), which clears miscellanious nodes from modes
+ */
+function clearUI(updateStats: boolean = true) {
+    setError("No items selected")
+    items_clearSelected()
+    mode_clearItems()
+    updateStats && resetStatsUI()
+}
+
+//just in case
+const clearItems = clearUI

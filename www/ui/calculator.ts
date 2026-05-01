@@ -2137,7 +2137,7 @@ class CalcVarTable {
             "Str('{id} is not selected' | '{id} not found' | '')"))
 
         this.symbols.set("ui_clear", new Func(() => {
-            return Type.from(mode_clearItems())
+            return Type.from(clearUI())
         }, "Clears selected items, also updates stats", [], "Str('undefined')"))
 
         this.symbols.set("ui_setuid", new Func((newUid) => {

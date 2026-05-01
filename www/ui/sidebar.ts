@@ -176,14 +176,14 @@ SidebarMode.prototype.selectNth = function(n: number) {
     if (id == 0n) return
     el.focus()
 
-    mode_selectItem(findInfoEntryById(id))
+    selectUI(findInfoEntryById(id))
 }
 
 SidebarMode.prototype.selectFocusedItem = function() {
     if (this.win.document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
 
     const id = this.win.document.activeElement.getAttribute("data-entry-id") as string
-    mode_selectItem(findInfoEntryById(BigInt(id)))
+    selectUI(findInfoEntryById(BigInt(id)))
 }
 
 SidebarMode.prototype.focusNextItem = function(backward: boolean = false) {
@@ -226,7 +226,7 @@ function selectFocusedSidebarItem() {
     if (document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
 
     const id = document.activeElement.getAttribute("data-entry-id") as string
-    mode_selectItem(findInfoEntryById(BigInt(id)))
+    selectUI(findInfoEntryById(BigInt(id)))
 }
 
 
@@ -254,12 +254,12 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
 
 function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
     if (clearSelected) {
-        mode_clearItems()
+        clearUI()
     }
     if (isViewingAllUI()) {
-        mode_selectItemList(entries)
+        selectListUI(entries)
     } else {
-        mode_selectItem(entries[0])
+        selectUI(entries[0])
     }
 }
 
@@ -269,14 +269,14 @@ function changeSidebarItemData(id: bigint, el: HTMLElement) {
 }
 
 function sidebarEntryOpenOne(item: InfoEntry) {
-    mode_clearItems()
-    mode_selectItem(item)
+    clearUI()
+    selectUI(item)
 
     setViewingAllUI(false)
 }
 
 function sidebarEntryOpenMultiple(item: InfoEntry) {
-    mode_toggleItem(item)
+    toggleItemUI(item)
 }
 
 async function renderSidebarItemList(this: SidebarMode, items: InfoEntry[], sidebarParent: HTMLElement | DocumentFragment, options?: {
