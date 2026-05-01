@@ -53,6 +53,15 @@ const ModePrimitives = {
 
 let openViewModes: Mode[] = []
 
+/**
+ * Given an object of item ids to update, and new values for {info, user, meta, events} for that item
+ * update the state for that item to have the new values.
+ *
+ * dispatches the modes.update-item event which may trigger other things to happen
+
+ * @param {Record<string, Partial<{user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry}>>} toUpdate a record containing the item ids to update with their values
+ * @param {boolean} [del=false] if the items should be deleted
+ */
 function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry }>>, del: boolean = false) {
     let updatedLibraries = false
     for (let id in toUpdate) {
@@ -101,7 +110,13 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
 }
 
 
-function mode_getFirstModeInWindow(win: Window) {
+/**
+ * Given a window, get the first mode in the list of openViewModes that is
+ * being displayed in that window
+ * @param {Window} win
+ * @returns {Mode | undefined}
+ */
+function mode_getFirstModeInWindow(win: Window): Mode | undefined {
     for (let mode of openViewModes) {
         if (mode.win === win) {
             return mode
@@ -109,7 +124,12 @@ function mode_getFirstModeInWindow(win: Window) {
     }
 }
 
-function mode_isSelected(id: bigint) {
+/**
+ * Check if an item id is selected
+ * @param {bigint} id
+ * @returns {boolean}
+ */
+function mode_isSelected(id: bigint): boolean {
     for (let item of items_getSelected()) {
         if (item.ItemId === id) {
             return true
@@ -118,6 +138,11 @@ function mode_isSelected(id: bigint) {
     return false
 }
 
+/**
+ * Makes a mode display in a different window
+ * @param {Window & typeof globalThis} newWin
+ * @param {Mode} mode
+ */
 function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
     const refresh = () => {
         for (let item of items_getSelected()) {
@@ -140,6 +165,15 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
     }
 }
 
+/**
+ * Selects an item to be displayed in {mode} if given, otherwise all openViewModes
+ *
+ * side effects:
+ * - update stats (if updateStats is true)
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ * @param {Mode} [mode=undefined] the mode to update (otherwise all open modes)
+ */
 function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
     setError("")
 
@@ -159,6 +193,10 @@ function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mo
 //just in case
 const selectItem = mode_selectItem
 
+/**
+ * Refresh an item by item id in all openViewModes
+ * @param {bigint} item
+ */
 var mode_refreshItem = function() {
     let toForItems = new Map
     return function(item: bigint) {
@@ -178,6 +216,14 @@ var mode_refreshItem = function() {
     }
 }()
 
+/**
+ * Deselects an item
+ * side effects:
+ * - update stats (if updateStats is true)
+ * - sets error to "No items selected" if no items are selected
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ */
 function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
     items_deselectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item, -1)
@@ -192,6 +238,14 @@ function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
 //just in case
 const deselectItem = mode_deselectItem
 
+/**
+ * Selects a list of items to be selected within {mode} or all openViewModes if not given
+ * side effects:
+ * - updates stats (if updateStats is true)
+ * @param {InfoEntry[]} itemList
+ * @param {boolean} [updateStats=true]
+ * @param {Mode} [mode=undefined]
+ */
 function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true, mode?: Mode) {
     if (itemList.length !== 0)
         setError("")
@@ -210,6 +264,13 @@ function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true,
 //just in case
 const selectItemList = mode_selectItemList
 
+/**
+ * Toggle the selectedness of an item
+ * side effects:
+ * - updates stats (if updateStats is true)
+ * @param {InfoEntry} item
+ * @param {boolean} [updateStats=true]
+ */
 function mode_toggleItem(item: InfoEntry, updateStats: boolean = true) {
     if (items_getSelected().find(a => a.ItemId === item.ItemId)) {
         mode_deselectItem(item, updateStats)
@@ -252,7 +313,12 @@ const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment,
     ["sidebar-items", SidebarMode],
 ])
 
-function mode_name2cls(name: string) {
+/**
+ * Given a mode name, convert it to a mode class
+ * @param {string} name
+ * @returns {Function}
+ */
+function mode_name2cls(name: string): Function {
     let ogName = name
     name = {
         "entry": "entry-output",
@@ -272,12 +338,22 @@ function mode_name2cls(name: string) {
     return val
 }
 
-function mode_cls2name(cls: (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void) {
-    let map = new Map(mode_map().entries().map(([k, v]) => [v, k]))
+/**
+ * Given a mode class, convert it to it's name
+ * @param {(output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void} cls
+ * @returns string
+ */
+function mode_cls2name(cls: (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void): string {
+    let map = new Map(mode_map().entries().map(([k, v]: any) => [v, k]))
     return map.get(cls)
 }
 
 //this should ONLY operate within the user specified or current window otherwise it makes no sense
+/**
+ * Given a mode name, and window, close all open modes within that window, and open the {name} mode
+ * @param {string} name
+ * @param {Window & typeof globalThis} [win=window]
+ */
 function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     const newMode = mode_name2cls(name)
     if(!newMode) return
