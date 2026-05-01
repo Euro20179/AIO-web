@@ -85,6 +85,11 @@ function startupUI({
 
     //@ts-ignore
     components['sidebarUI'] = new SidebarMode(sidebarItems)
+    mode_add(components['sidebarUI'] as SidebarMode, {
+        attachment: 'sticky',
+        closable: false,
+        listed: false
+    })
 
 
     if (statsOutput) {
@@ -166,7 +171,7 @@ function startupUI({
                 mode_clearItems(false)
             } else {
                 mode_clearItems()
-                for (let mode of openViewModes) {
+                for (let mode of mode_listOpen()) {
                     mode_selectItemList(getFilteredResultsUI(), true, mode)
                 }
             }
@@ -2250,8 +2255,7 @@ var refreshItemUI = function() {
     return function(item: bigint) {
         const refresh = () => {
             toForItems.delete(item)
-            components['sidebarUI']?.refresh?.(item)
-            for (const mode of openViewModes) {
+            for (const mode of mode_listALL()) {
                 if (mode.refresh) {
                     mode.refresh(item)
                 }

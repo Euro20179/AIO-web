@@ -376,7 +376,7 @@ function ui_clear(): number {
  */
 function ui_modeclear(): number {
     let valid = 1
-    for (let mode of openViewModes) {
+    for (let mode of mode_listOpen()) {
         if ("clear" in mode) {
             //@ts-ignore
             mode.clear()
@@ -454,7 +454,7 @@ function ui_selected(): InfoEntry[] {
  * @returns Empty string on success, 1 if mode doesn't support putting content
  */
 function ui_put(...html: (string | HTMLElement)[]): "" | 1 {
-    for (let mode of openViewModes) {
+    for (let mode of mode_listOpen()) {
         if (!mode.put) {
             continue
         }

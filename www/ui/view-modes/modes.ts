@@ -1,3 +1,15 @@
+type ModeProperties = {
+    //attachment to its window
+    //- sticky: does not move windows
+    //- free: can move windows
+    attachment: "sticky" | "free"
+    //whether or not this mode can be listed in functions like mode_listOpen()
+    //or mode_getFirstModeInWindow()
+    listed: boolean
+    closable: boolean
+}
+let openViewModes: Map<Mode, ModeProperties> = new Map
+
 interface Mode {
     output: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
@@ -51,7 +63,37 @@ const ModePrimitives = {
     }
 }
 
-let openViewModes: Mode[] = []
+/**
+ * gets a list of open modes
+ * @returns {Mode[]}
+ */
+function mode_listOpen(): Mode[] {
+    return openViewModes
+        .entries()
+        .filter(([_, p]) => p.listed)
+        .map(v => v[0])
+        .toArray()
+}
+
+/**
+ * Lists <b>ALL</b> modes, even if they are unlistable
+ */
+function mode_listALL(): Mode[] {
+    return openViewModes.keys().toArray()
+}
+
+/**
+ * adds a mode to the list of open modes, with optional properties
+ * @param {Mode} mode
+ * @param {ModeProperties} [properties={attachment: "free"}]
+ */
+function mode_add(mode: Mode, properties?: ModeProperties) {
+    openViewModes.set(mode, properties || {
+        listed: true,
+        closable: true,
+        attachment: "free"
+    })
+}
 
 /**
  * Given an object of item ids to update, and new values for {info, user, meta, events} for that item
@@ -117,7 +159,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
  * @returns {Mode | undefined}
  */
 function mode_getFirstModeInWindow(win: Window): Mode | undefined {
-    for (let mode of openViewModes) {
+    for (let mode of mode_listOpen()) {
         if (mode.win === win) {
             return mode
         }
@@ -139,18 +181,20 @@ function mode_isSelected(id: bigint): boolean {
 }
 
 /**
- * Makes a mode display in a different window
+ * Makes a mode display in a different window (if it's attachment is 'free')
  * @param {Window & typeof globalThis} newWin
  * @param {Mode} mode
  */
 function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
+    if(openViewModes.get(mode)?.attachment === 'sticky') return
+
     const refresh = () => {
         for (let item of items_getSelected()) {
             refreshItemUI(item.ItemId)
         }
     }
     if (newWin === window) {
-        if (mode.chwin) {
+        if (mode.chwin && mode) {
             mode.chwin(window)
             refresh()
         }
@@ -184,7 +228,7 @@ function mode_selectItem(item: InfoEntry, updateStats: boolean = true, mode?: Mo
         return [mode.add(item)]
     else {
         const elems = []
-        for (const mode of openViewModes) {
+        for (const mode of mode_listOpen()) {
             elems.push(mode.add(item))
         }
         return elems
@@ -204,7 +248,7 @@ const selectItem = mode_selectItem
 function mode_deselectItem(item: InfoEntry, updateStats: boolean = true) {
     items_deselectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item, -1)
-    for (let mode of openViewModes) {
+    for (let mode of mode_listOpen()) {
         mode.sub(item)
     }
 
@@ -233,7 +277,7 @@ function mode_selectItemList(itemList: InfoEntry[], updateStats: boolean = true,
     if (mode) {
         mode.addList(itemList)
     } else {
-        for (let mode of openViewModes) {
+        for (let mode of mode_listOpen()) {
             mode.addList(itemList)
         }
     }
@@ -269,7 +313,7 @@ const toggleItem = mode_toggleItem
 function mode_clearItems(updateStats: boolean = true) {
     setError("No items selected")
     items_clearSelected()
-    for (const mode of openViewModes) {
+    for (const mode of mode_listOpen()) {
         mode.clearSelected()
     }
     updateStats && resetStatsUI()
@@ -336,17 +380,20 @@ function mode_setMode(name: string, win: Window & typeof globalThis = window) {
     if(!newMode) return
 
     try {
-        let newModes = []
-        for (const mode of openViewModes) {
-            if (mode.win === win) {
+        const toDel = []
+        for (const [mode, properties] of openViewModes) {
+            if (mode.win === win && properties.closable) {
                 mode.close()
-            } else {
-                newModes.push(mode)
+                toDel.push(mode)
             }
         }
-        openViewModes = newModes
+
+        for(let m of toDel) {
+            openViewModes.delete(m)
+        }
+
         const m = new (newMode as any)(undefined, win)
-        openViewModes.push(m as Mode)
+        mode_add(m)
         m.addList(items_getSelected())
     } catch (err) {
         console.error(err)

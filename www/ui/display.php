@@ -83,7 +83,7 @@
         items_addItem({meta, events, info, user})
         items_setResults([BigInt(id)])
         const m = new DisplayMode(document.body)
-        openViewModes.push(m)
+        mode_add(m)
         updateInfo2({
             [id]: {
                 info, user, events, meta

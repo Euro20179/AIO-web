@@ -70,7 +70,7 @@ async function main() {
 
             //i think this is to reorder everything?:
             if (urlParams.has("view-all")) {
-                for (let mode of openViewModes) {
+                for (let mode of mode_listOpen()) {
                     mode_selectItemList(getFilteredResultsUI(), true, mode);
                 }
 
