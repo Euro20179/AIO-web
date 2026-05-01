@@ -110,7 +110,7 @@ function startupUI({
     }
 
     viewToggle?.addEventListener("change", e => {
-        mode_setMode((e.target as HTMLSelectElement).value, (catalogWin || window) as Window & typeof globalThis)
+        mode_setMode((e.target as HTMLSelectElement).value, currentWindow())
     })
 
     librarySelector?.addEventListener("change", function() {
@@ -188,7 +188,7 @@ function startupUI({
         }
 
         newWindow.addEventListener("click", () => {
-            const mode = mode_getFirstModeInWindow(catalogWin || window)
+            const mode = mode_getFirstModeInWindow(currentWindow())
             if (!mode) return
             const name = mode_cls2name(mode.constructor as any)
             if (name)
@@ -387,7 +387,7 @@ function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEn
  * @returns {HTMLDocument}
  */
 function currentDocument(): HTMLDocument {
-    return catalogWin?.document || document
+    return modeWin.document
 }
 
 /**
@@ -395,7 +395,7 @@ function currentDocument(): HTMLDocument {
  * @returns {Window & typeof globalThis}
  */
 function currentWindow(): Window & typeof globalThis {
-    return catalogWin?.document.defaultView || window
+    return modeWin as Window & typeof globalThis
 }
 
 /**
@@ -1838,14 +1838,14 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
 /**
  * @description keeps track of the window being used to display the information selected by view-toggle
  */
-let catalogWin: Window | null = null
+let modeWin: Window = window
 
 /**
  * checks if the catalog window is open
  * @returns {boolean}
  */
 function isCatalogModeUI(): boolean {
-    return catalogWin !== null
+    return modeWin !== window
 }
 
 /**
@@ -1861,17 +1861,20 @@ function openCatalogModeUI() {
     urlParams.set("no-startup", "true")
     urlParams.set("no-mode", "true")
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
-    catalogWin = open(newURL, "_blank", "popup=true")
-    if (catalogWin) {
-        catalogWin.addEventListener("beforeunload", () => {
+    const win = open(newURL, "_blank", "popup=true")
+    if (win) {
+        modeWin = win
+        win.addEventListener("beforeunload", () => {
             closeCatalogModeUI()
         })
         const thisMode = mode_getFirstModeInWindow(window)
         if (thisMode) {
-            mode_chwin(catalogWin as Window & typeof globalThis, thisMode)
+            mode_chwin(win as Window & typeof globalThis, thisMode)
         }
         mainUI.classList.add("catalog-mode")
         toggleUI("viewing-area", "none")
+    } else {
+        alert("Failed to track the newly opened window, it will not work")
     }
 }
 
@@ -1879,11 +1882,11 @@ function openCatalogModeUI() {
  * closes the catalog window
  */
 function closeCatalogModeUI() {
-    if (!catalogWin) {
+    if (!modeWin) {
         console.warn("Catalog window is not open")
         return
     }
-    const thisMode = mode_getFirstModeInWindow(catalogWin)
+    const thisMode = mode_getFirstModeInWindow(modeWin)
     if (thisMode) {
         mode_chwin(window, thisMode)
     }
@@ -1894,7 +1897,7 @@ function closeCatalogModeUI() {
     }
     mainUI.classList.remove("catalog-mode")
     toggleUI("viewing-area", "")
-    catalogWin = null
+    modeWin = window
 }
 
 /**

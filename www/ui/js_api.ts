@@ -91,8 +91,8 @@ function util_debounce(cb: Function, timeout: number) {
  */
 function ui_setcss(property: string, value: string): void {
     document.documentElement.style.setProperty(property, value)
-    if (catalogWin) {
-        catalogWin.document.documentElement.style.setProperty(property, value)
+    if (modeWin) {
+        modeWin.document.documentElement.style.setProperty(property, value)
     }
 }
 

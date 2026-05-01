@@ -123,8 +123,8 @@ function dotests() {
 
         catalog: mktestgroup("catalog", [
             ["open catalog mode", r(openCatalogModeUI), call, l(isCatalogModeUI)],
-            ["get current doc", r(currentDocument), eq, r(() => catalogWin?.document)],
-            ["get current window", r(currentWindow), eq, r(() => catalogWin)],
+            ["get current doc", r(currentDocument), eq, r(() => modeWin?.document)],
+            ["get current window", r(currentWindow), eq, r(() => modeWin)],
             ["close catalog mode", r(closeCatalogModeUI), not(call), l(isCatalogModeUI)]
         ])
     } as const
