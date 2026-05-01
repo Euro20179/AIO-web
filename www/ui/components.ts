@@ -307,6 +307,9 @@ function _registerElement(name: string) {
                 return
             }
 
+            //no need to replace children, they're already there
+            if(this.innerHTML) return
+
             let content = this.templ.content.cloneNode(true)
             //this should be replaceContent because
             //any time this element moves or smth

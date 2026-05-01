@@ -42,9 +42,28 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
     } else {
         win = open("", "_blank", "popup=true")
     }
+
     if(doc) {
         const parser = new DOMParser
         win.document.documentElement.replaceWith(parser.parseFromString(doc, "text/html").documentElement)
+    }
+
+    picker: {
+        const cspicker = getElementUI("color-scheme-selector")
+        if(!cspicker) break picker
+        console.log(cspicker.querySelectorAll("option"))
+        win.document.body.prepend(cspicker.cloneNode(true))
+
+        const s = document.createElement("script")
+        s.src = "/ui/components.js"
+        win.document.body.append(s)
+
+        const psel = getElementUI("select", win.self.HTMLSelectElement, win.document)
+        if(!psel) break picker
+
+        const v = getElementUI("select", HTMLSelectElement, cspicker)
+        if(v)
+            psel.value = v.value
     }
     return win
 }
