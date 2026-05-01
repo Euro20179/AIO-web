@@ -1968,7 +1968,9 @@ type UserSettings = {
 async function getSettings(uid: number): Promise<UserSettings> {
     let res = await authorizedRequest(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
     if (res === null || res.status !== 200) {
-        console.error(res?.status)
+        res?.text().then(text => {
+            console.error(`${res?.status} ${text}`)
+        })
         return { UIStartupScript: "", StartupLang: "" }
     }
     const t = await res.text()

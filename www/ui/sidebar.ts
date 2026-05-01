@@ -36,7 +36,7 @@ function SidebarMode(this: SidebarMode, output?: HTMLElement | DocumentFragment,
 SidebarMode.prototype.NAME = 'sidebar-list'
 
 SidebarMode.prototype.resizeHandler = function() {
-    if (!this._setToNone) {
+    if (!this._setToNone && this.output) {
         for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
             if (this.itemsOnScreen.has(sidebarEntry)) continue
             sidebarEntry.style.display = 'none'
@@ -50,6 +50,7 @@ SidebarMode.prototype.resizeHandler = function() {
     this._resizeTO = setTimeout(() => {
         this._setToNone = false
         this._resizeTO = 0
+        if(!this.output) return
         for (let sidebarEntry of this.output.querySelectorAll("sidebar-entry") as NodeListOf<HTMLElement>) {
             if (this.itemsOnScreen.has(sidebarEntry)) continue
             sidebarEntry.style.display = ''
