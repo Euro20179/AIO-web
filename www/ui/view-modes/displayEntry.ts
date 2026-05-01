@@ -232,8 +232,8 @@ function _mkde_actions() {// {{{
          * with requires filled in as the current item
          */
         newrequires: function(item ){
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
-            const requiresIdEl = getElementOrThrowUI(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
+            const newEntryDialog = getElementOrThrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
+            const requiresIdEl = getElementOrThrow(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
 
             requiresIdEl.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -264,8 +264,8 @@ function _mkde_actions() {// {{{
          * Creates a new item with the parentId set to the current item
          */
         newchild: function(item) {
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
-            const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
+            const newEntryDialog = getElementOrThrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
+            const parentIdInput = getElementOrThrow(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -296,8 +296,8 @@ function _mkde_actions() {// {{{
          * Creates a new item with copyOf set to the current item
          */
         newcopy: function(item) {
-            const newEntryDialog = getElementOrThrowUI("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
-            const parentIdInput = getElementOrThrowUI(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
+            const newEntryDialog = getElementOrThrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
+            const parentIdInput = getElementOrThrow(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
             newEntryDialog.showModal()
@@ -358,7 +358,7 @@ function _mkde_actions() {// {{{
                 throw new Error("set object table element has no value")
             }
 
-            const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
+            const objectTbl = getElementOrThrow("#display-info-object-tbl", this.win.HTMLTableElement, root)
             const user = findUserEntryById(item.ItemId)
             const meta = findMetadataById(item.ItemId)
             switch (target.value) {
@@ -506,7 +506,7 @@ function _mkde_actions() {// {{{
         saveobject: function(item, root) {
             const tbl = root.getElementById("display-info-object-tbl")
 
-            const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
+            const editedObject = getElementOrThrow("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
             let into: Record<string, any> = {}
             let keyName
@@ -615,7 +615,7 @@ function _mkde_actions() {// {{{
             const name = await promptUI("Field name")
             if (!name) return
 
-            const editedObject = getElementOrThrowUI("#current-edited-object", this.win.HTMLSelectElement, root)?.value
+            const editedObject = getElementOrThrow("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
             //These should not get arbitrary field names
             if (["user", "meta", "entry"].includes(editedObject)) return
@@ -625,7 +625,7 @@ function _mkde_actions() {// {{{
 
             obj[name] = ""
 
-            const objectTbl = getElementOrThrowUI("#display-info-object-tbl", this.win.HTMLTableElement, root)
+            const objectTbl = getElementOrThrow("#display-info-object-tbl", this.win.HTMLTableElement, root)
             updateObjectTbl(obj, objectTbl, false)
         },
 
@@ -986,7 +986,7 @@ async function itemIdentification(form: HTMLFormElement) {
 
     switch (queryType) {
         case "by-title":
-            let titleSearchContainer = getElementOrThrowUI("#identify-items", HTMLDialogElement, shadowRoot)
+            let titleSearchContainer = getElementOrThrow("#identify-items", HTMLDialogElement, shadowRoot)
             finalItemId = await titleIdentification(provider, search, titleSearchContainer) || ""
 
             if (!finalItemId) {
@@ -1473,12 +1473,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             const recommender = document.createElement("de-recommender")
             el.append(recommender)
 
-            const b = getElementOrThrowUI('[role="button"]', this.win.HTMLElement, recommender)
+            const b = getElementOrThrow('[role="button"]', this.win.HTMLElement, recommender)
             b.setAttribute("recommender", r)
-            const db = getElementOrThrowUI("button.delete", this.win.HTMLElement, recommender)
+            const db = getElementOrThrow("button.delete", this.win.HTMLElement, recommender)
             db.setAttribute("recommender-idx", String(i))
 
-            const s = getElementOrThrowUI("span", this.win.HTMLElement, recommender)
+            const s = getElementOrThrow("span", this.win.HTMLElement, recommender)
             s.append(r)
             i++
         }
@@ -1875,7 +1875,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                     ? (lengthInNumber || "0")
                     : (part[3] || "0") //part[3] could be empty string
 
-            let p = getElementUI(
+            let p = getElement(
                 "progress",
                 this.win.HTMLProgressElement,
                 container
@@ -1884,7 +1884,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 
-            let c = getElementOrThrowUI(
+            let c = getElementOrThrow(
                 ".entry-progressbar-position-label",
                 this.win.HTMLElement,
                 container
@@ -1895,7 +1895,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             }
             c.append(node)
 
-            const upHint = getElementOrThrowUI(
+            const upHint = getElementOrThrow(
                 "#user-progress-hint",
                 this.win.HTMLElement,
                 c

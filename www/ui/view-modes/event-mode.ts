@@ -158,7 +158,7 @@ EventMode.prototype.subList = function(this: EventMode, entry: InfoEntry[]) {
 EventMode.prototype.mkcontainers = function(this: EventMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
-    return { container: c, output: getElementOrThrowUI("#event-output-table", null, c) }
+    return { container: c, output: getElementOrThrow("#event-output-table", null, c) }
 }
 
 EventMode.prototype.mkcontainer = function(this: EventMode, ) {

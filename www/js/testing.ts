@@ -114,7 +114,7 @@ function dotests() {
             })],
 
             ["ui_newscript", r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"), call, l(() => {
-                const scriptSelect = getElementUI("#script-select", HTMLElement)
+                const scriptSelect = getElement("#script-select", HTMLElement)
                 if(!scriptSelect) return false
                 return Boolean(userScripts.get("TESTING SCRIPT")) &&
                         Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))

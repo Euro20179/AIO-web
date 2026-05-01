@@ -39,7 +39,7 @@ function GalleryMode(this: GalleryMode, output?: HTMLElement | DocumentFragment,
 GalleryMode.prototype.mkcontainers = function(this: GalleryMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
-    return { container: c, output: getElementOrThrowUI(":first-child", null, c) }
+    return { container: c, output: getElementOrThrow(":first-child", null, c) }
 }
 
 GalleryMode.prototype.mkcontainer = function(this: GalleryMode, ) {

@@ -9,37 +9,37 @@ type ClientSearchFilters = {
 async function main() {
     setupHintPopovers(document)
 
-    const sortBySelector = getElementOrThrowUI(
+    const sortBySelector = getElementOrThrow(
         '[name="sort-by"]',
         HTMLSelectElement,
     );
 
-    const recommenders = getElementOrThrowUI(
+    const recommenders = getElementOrThrow(
         "datalist#recommended-by",
         HTMLDataListElement,
     );
 
     startupUI({
         newWindow: document.getElementById("new-view-window"),
-        viewToggle: getElementOrThrowUI("#view-toggle", HTMLSelectElement),
-        viewAllElem: getElementOrThrowUI("#view-all", HTMLInputElement),
+        viewToggle: getElementOrThrow("#view-toggle", HTMLSelectElement),
+        viewAllElem: getElementOrThrow("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
-        newEntryLibrarySelector: getElementOrThrowUI(
+        newEntryLibrarySelector: getElementOrThrow(
             '[name="libraryId"]',
             HTMLSelectElement,
         ),
-        librarySelector: getElementOrThrowUI(
+        librarySelector: getElementOrThrow(
             "#library-selector",
             HTMLSelectElement,
         ),
-        userSelector: getElementUI('[name="uid"]', HTMLSelectElement),
+        userSelector: getElement('[name="uid"]', HTMLSelectElement),
         sortBySelector,
         errorOut: document.getElementById("error"),
-        searchForm: getElementOrThrowUI("#sidebar-form", HTMLFormElement),
+        searchForm: getElementOrThrow("#sidebar-form", HTMLFormElement),
         recommenders,
-        newItemForm: getElementOrThrowUI("#new-item-form", HTMLFormElement),
-        promptDialog: getElementOrThrowUI("#prompt", HTMLDialogElement),
-        sidebarItems: getElementOrThrowUI("#sidebar-items", HTMLElement)
+        newItemForm: getElementOrThrow("#new-item-form", HTMLFormElement),
+        promptDialog: getElementOrThrow("#prompt", HTMLDialogElement),
+        sidebarItems: getElementOrThrow("#sidebar-items", HTMLElement)
     });
 
     const urlParams = new URLSearchParams(document.location.search);
@@ -95,14 +95,14 @@ async function main() {
     }
 
     fillFormatSelectionUI(
-        getElementOrThrowUI('[name="format"]', HTMLSelectElement),
+        getElementOrThrow('[name="format"]', HTMLSelectElement),
     );
 
     fillTypeSelectionUI(
-        getElementOrThrowUI('#new-item-form [name="type"]', HTMLSelectElement),
+        getElementOrThrow('#new-item-form [name="type"]', HTMLSelectElement),
     );
 
-    await fillUserSelectionUI(getElementUI('[name="uid"]', HTMLSelectElement));
+    await fillUserSelectionUI(getElement('[name="uid"]', HTMLSelectElement));
 
     setUIDFromHeuristicsUI();
 

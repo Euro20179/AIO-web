@@ -131,9 +131,9 @@ function startupUI({
     })
 
     if (newItemForm) {
-        const title = getElementOrThrowUI('[name="title"]', HTMLInputElement, newItemForm)
+        const title = getElementOrThrow('[name="title"]', HTMLInputElement, newItemForm)
         newItemForm.oninput = function() {
-            const location = getElementOrThrowUI('[name="location"]', HTMLInputElement, newItemForm)
+            const location = getElementOrThrow('[name="location"]', HTMLInputElement, newItemForm)
             if (typeof settings.location_generator === 'string') {
                 location.value = settings.location_generator.replaceAll("{}", title.value)
             } else if (typeof settings.location_generator === 'function') {
@@ -550,7 +550,7 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
 }
 
 registerCTRLShortcutUI("\\", (e) => {
-    const search = getElementOrThrowUI("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
+    const search = getElementOrThrow("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
 
     search.focus()
 
@@ -567,7 +567,7 @@ registerCTRLShortcutUI("\\", (e) => {
 })
 
 registerCTRLShortcutUI("/", e => {
-    const search = getElementOrThrowUI('[name="search-query"]', HTMLInputElement, components.searchForm)
+    const search = getElementOrThrow('[name="search-query"]', HTMLInputElement, components.searchForm)
     search?.focus()
     search?.select()
     e.preventDefault()
@@ -696,7 +696,7 @@ function runUserScriptUI(name: string) {
  * @param {string} desc - what the script does
  */
 function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
-    const scriptSelect = getElementOrThrowUI("#script-select", HTMLElement)
+    const scriptSelect = getElementOrThrow("#script-select", HTMLElement)
 
     const par = document.createElement("div")
     par.classList.add("user-script")
@@ -760,11 +760,11 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
   * @param html {string} the html to put in the confirmation box
   */
 async function confirmUI(html: string) {
-    const cEl = getElementOrThrowUI("#confirm", currentWindow().HTMLDialogElement)
+    const cEl = getElementOrThrow("#confirm", currentWindow().HTMLDialogElement)
     const close = cEl.querySelector("button:first-child") as HTMLButtonElement
-    const cancel = getElementOrThrowUI("#cancel", currentWindow().HTMLButtonElement, cEl)
-    const ok = getElementOrThrowUI("#ok", currentWindow().HTMLButtonElement, cEl)
-    const root = getElementOrThrowUI("[root]", currentWindow().HTMLElement, cEl)
+    const cancel = getElementOrThrow("#cancel", currentWindow().HTMLButtonElement, cEl)
+    const ok = getElementOrThrow("#ok", currentWindow().HTMLButtonElement, cEl)
+    const root = getElementOrThrow("[root]", currentWindow().HTMLElement, cEl)
     root.innerHTML = html || "<p>CONFIRM</p>"
 
     cEl.showModal()
@@ -780,46 +780,6 @@ async function confirmUI(html: string) {
         }
         ok.onclick = () => cEl.close("true")
     })
-}
-
-/**
- * Gets an element by a query selector that's an instanceof {requiredType}
- * If such an element is not found, null is returned
- *
- * @param selector passed to root.querySelector
- * @param [requiredType=null] The type the found element must be
- * @param [root=null] The root document, (default is currentDocument())
- * @reutrns {Element | null}
- */
-function getElementUI<T extends typeof Element>(
-    selector: string,
-    requiredType: T | null = null,
-    root: { querySelector(selector: string): Element | null } | null = null
-): InstanceType<T> | null {
-    let el = (root || currentDocument()).querySelector(selector)
-    if (!el || (requiredType && !(el instanceof (requiredType as T)))) return null
-    return el as InstanceType<T>
-}
-
-/**
- * attempts to find an element of a certain type with a query selector within a container
- * if the element is not found, throw an error
- * @template T - an HTMLElement constructor (must be HTMLElement iself or a subclass)
- * @param {string} selector
- * @param {T | null} [requiredType=null] - the type the found element must be
- * @param [root=null] - the root (defaults to currentDocument()) (may also just be anything with a querySelector implementation)
- * @returns {T}
- */
-function getElementOrThrowUI<T extends typeof HTMLElement>(
-    selector: string,
-    requiredType: T | null = null,
-    root: { querySelector(selector: string): HTMLElement | null } | null = null
-): InstanceType<T> {
-    let el = getElementUI(selector, requiredType, root)
-    if (!(el)) {
-        throw new Error(`Element: ${selector} was not found`)
-    }
-    return el
 }
 
 /**
@@ -843,7 +803,7 @@ function openModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ): HTMLDialogElement | null {
-    const modal = getElementUI(`#${modalName}`, HTMLDialogElement, root)
+    const modal = getElement(`#${modalName}`, HTMLDialogElement, root)
     modal?.showModal()
     return modal
 }
@@ -859,7 +819,7 @@ function closeModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ) {
-    getElementUI(`#${modalName}`, HTMLDialogElement, root)?.close()
+    getElement(`#${modalName}`, HTMLDialogElement, root)?.close()
 }
 
 /**
@@ -873,7 +833,7 @@ function toggleModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ) {
-    let dialog = getElementUI(`#${modalName}`, HTMLDialogElement, root)
+    let dialog = getElement(`#${modalName}`, HTMLDialogElement, root)
     if (!dialog) return
 
     dialog.open
@@ -1283,7 +1243,7 @@ function openEventFormUI(itemid: string) {
     const form = modal.querySelector("form")
     if (!form) return
 
-    const itemidEl = getElementOrThrowUI('[name="itemid"]', HTMLInputElement, form)
+    const itemidEl = getElementOrThrow('[name="itemid"]', HTMLInputElement, form)
     itemidEl.value = itemid
 }
 
@@ -1463,7 +1423,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
  * @param {Record<any, HTMLElement>} items
  */
 function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
-    const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
+    const itemsFillDiv = getElementOrThrow("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
     const container = document.createElement("div")
@@ -1492,7 +1452,7 @@ function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
  * @returns {HTMLDivElement}
  */
 function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel: boolean = true): HTMLDivElement {
-    const itemsFillDiv = getElementOrThrowUI("#put-items-to-select", HTMLElement)
+    const itemsFillDiv = getElementOrThrow("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
     const container = itemsFillDiv.querySelector("div") || document.createElement("div")
@@ -1552,7 +1512,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
  */
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
-    const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
+    const popover = getElementOrThrow("#items-listing", HTMLDialogElement)
     if (item === null) {
         input.value = "0"
         return
@@ -1571,11 +1531,11 @@ type SelectItemOptions = Partial<{
  * @returns {Promise<null | bigint>}
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
-    const popover = getElementOrThrowUI("#items-listing", HTMLDialogElement)
+    const popover = getElementOrThrow("#items-listing", HTMLDialogElement)
 
 
-    let f = getElementOrThrowUI("#items-listing-search", HTMLFormElement)
-    let query = getElementOrThrowUI('[name="items-listing-search"]', HTMLInputElement, f)
+    let f = getElementOrThrow("#items-listing-search", HTMLFormElement)
+    let query = getElementOrThrow('[name="items-listing-search"]', HTMLInputElement, f)
 
     let { container, onsearch } = options || {}
 
@@ -1617,7 +1577,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
  * @returns {Promise<string>} the login token
  */
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = getElementOrThrowUI("#login", HTMLDialogElement)
+    const loginPopover = getElementOrThrow("#login", HTMLDialogElement)
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
     if (loginReasonEl instanceof HTMLElement) {
@@ -1639,7 +1599,7 @@ async function signinUI(reason: string): Promise<string> {
 
     loginPopover.showModal()
     return await new Promise((res) => {
-        const form = getElementOrThrowUI("#login-form", HTMLFormElement, loginPopover)
+        const form = getElementOrThrow("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             alert(1)
             let data = new FormData(form)
@@ -2054,7 +2014,7 @@ body {
             }
         }
 
-        const closePopout = getElementUI("button.popout", win.self.HTMLElement, win.document.body)
+        const closePopout = getElement("button.popout", win.self.HTMLElement, win.document.body)
         if (closePopout) {
             closePopout.onclick = () => {
                 placeholder.replaceWith(parent)

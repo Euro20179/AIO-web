@@ -49,7 +49,7 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
     }
 
     picker: {
-        const cspicker = getElementUI("color-scheme-selector")
+        const cspicker = getElement("color-scheme-selector")
         if(!cspicker) break picker
         console.log(cspicker.querySelectorAll("option"))
         win.document.body.prepend(cspicker.cloneNode(true))
@@ -58,10 +58,10 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
         s.src = "/ui/components.js"
         win.document.body.append(s)
 
-        const psel = getElementUI("select", win.self.HTMLSelectElement, win.document)
+        const psel = getElement("select", win.self.HTMLSelectElement, win.document)
         if(!psel) break picker
 
-        const v = getElementUI("select", HTMLSelectElement, cspicker)
+        const v = getElement("select", HTMLSelectElement, cspicker)
         if(v)
             psel.value = v.value
     }

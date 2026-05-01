@@ -33,7 +33,7 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
         customExpr.oninput = this._customExpr.bind(this)
     }
 
-    const tle = getElementUI("tier-list", this.win.HTMLElement, this.output)
+    const tle = getElement("tier-list", this.win.HTMLElement, this.output)
     if(!tle) {
         this.tierlistEl = document.createElement("tier-list")
         this.output.append(this.tierlistEl)
@@ -80,7 +80,7 @@ TierListMode.prototype._customExpr = function(this: TierListMode, ) {
 
 TierListMode.prototype._getMode = function(this: TierListMode, ): "general" | "user" | "custom" {
     let modeSelector = this.output.querySelector("#tierlist-mode")
-    let custom = getElementUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
+    let custom = getElement("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
     if (custom?.value) {
         return "custom"
     }
@@ -107,7 +107,7 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
     } else if (mode === "user") {
         rating = user.UserRating
     } else /*custom*/ {
-        let customExprEl = getElementOrThrowUI("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
+        let customExprEl = getElementOrThrow("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
         const expr = customExprEl.value
         let item = findInfoEntryById(id)
         let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
@@ -215,7 +215,7 @@ TierListMode.prototype.clearSelected = function(this: TierListMode, ) {
 TierListMode.prototype.mkcontainers = function(this: TierListMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
-    return { container: c, output: getElementOrThrowUI(":first-child", null, c) }
+    return { container: c, output: getElementOrThrow(":first-child", null, c) }
 }
 
 TierListMode.prototype.mkcontainer = function(this: TierListMode, ): HTMLElement {

@@ -6,14 +6,14 @@ type CalcMode = {
 function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
-    let exprInput = getElementUI("#calc-expression", this.win.HTMLTextAreaElement, this.container)
+    let exprInput = getElement("#calc-expression", this.win.HTMLTextAreaElement, this.container)
 
     if(exprInput){
         this.expressionInput = exprInput
         this.expressionInput.onchange = _updateEachCalcItem.bind(this)
     }
 
-    const sortButton = getElementUI(`#calc-sorter`, this.win.HTMLElement)
+    const sortButton = getElement(`#calc-sorter`, this.win.HTMLElement)
     if (sortButton) {
         sortButton.onclick = () => {
             this.sortCalcDisplay()
@@ -26,7 +26,7 @@ CalcMode.prototype.mkcontainers = function(this: CalcMode, into: HTMLElement | D
     into.append(c)
     return {
         container: c,
-        output: getElementOrThrowUI("#calc-items", null, c)
+        output: getElementOrThrow("#calc-items", null, c)
     }
 }
 
@@ -95,7 +95,7 @@ CalcMode.prototype.refresh = function(this: CalcMode, id: bigint) {
 CalcMode.prototype.chwin = function(this: CalcMode, win: Window & typeof globalThis) {
     const container = ModePrimitives.chwin.call(this, win)
 
-    this.output = getElementOrThrowUI("#calc-items", null, container) as HTMLElement
+    this.output = getElementOrThrow("#calc-items", null, container) as HTMLElement
     this.expressionInput = container.querySelector("#calc-expression") as HTMLTextAreaElement
     this.expressionInput.onchange = _updateEachCalcItem.bind(this)
 

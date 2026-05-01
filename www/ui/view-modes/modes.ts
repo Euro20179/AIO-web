@@ -25,7 +25,7 @@ const ModePrimitives = {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({output, container: c} = this.mkcontainers(containerPlacement || getElementOrThrowUI("#viewing-area", null, this.win.document)))
+            ({output, container: c} = this.mkcontainers(containerPlacement || getElementOrThrow("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -41,7 +41,7 @@ const ModePrimitives = {
 
         this.win = win
 
-        let { output: newOutput, container } = this.mkcontainers(getElementOrThrowUI("#viewing-area", null, this.win.document))
+        let { output: newOutput, container } = this.mkcontainers(getElementOrThrow("#viewing-area", null, this.win.document))
         const imported = win.document.importNode(this.output, true)
         newOutput.replaceChildren(...imported.childNodes)
         this.output = newOutput
