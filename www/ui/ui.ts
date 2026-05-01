@@ -2278,3 +2278,26 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
     })
 }
 
+/**
+ * Refresh an item by item id in all openViewModes
+ * @param {bigint} item
+ */
+var refreshItemUI = function() {
+    let toForItems = new Map
+    return function(item: bigint) {
+        const refresh = () => {
+            toForItems.delete(item)
+            components['sidebarUI']?.refresh?.(item)
+            for (const mode of openViewModes) {
+                if (mode.refresh) {
+                    mode.refresh(item)
+                }
+            }
+        }
+        if(toForItems.has(item)) {
+            clearTimeout(toForItems.get(item))
+        }
+        toForItems.set(item, setTimeout(refresh, 40))
+    }
+}()
+
