@@ -56,13 +56,13 @@ async function main() {
 
         items_refreshRelations(uid).then(() => {
             for (let item of items_getSelected()) {
-                refreshItemUI(item.ItemId);
+                mode_refreshItem(item.ItemId);
             }
         });
 
         items_refreshMetadata(uid).then(() => {
             for (let item of items_getSelected()) {
-                refreshItemUI(item.ItemId);
+                mode_refreshItem(item.ItemId);
             }
 
             const ev = new CustomEvent("aio-metadata-loaded");
@@ -157,7 +157,7 @@ async function main() {
     //do this second because events can get really large, and having to wait for it could take a while
     loadUserEvents(uid).then(() => {
         for (let item of items_getSelected()) {
-            refreshItemUI(item.ItemId);
+            mode_refreshItem(item.ItemId);
         }
     });
 }

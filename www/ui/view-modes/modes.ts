@@ -129,7 +129,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
 
         items_updateEntryById(id, { user, events, meta, info })
 
-        refreshItemUI(BigInt(id))
+        mode_refreshItem(BigInt(id))
 
         for (let parent of items_getEntry(BigInt(id)).relations.findParents()) {
             //if the parent is this, or itself, just dont update
@@ -181,6 +181,29 @@ function mode_isSelected(id: bigint): boolean {
 }
 
 /**
+ * Refresh an item by item id in all openViewModes
+ * @param {bigint} item
+ */
+var mode_refreshItem = function() {
+    let toForItems = new Map
+    return function(item: bigint) {
+        const refresh = () => {
+            toForItems.delete(item)
+            for (const mode of mode_listALL()) {
+                if (mode.refresh) {
+                    mode.refresh(item)
+                }
+            }
+        }
+        if(toForItems.has(item)) {
+            clearTimeout(toForItems.get(item))
+        }
+        toForItems.set(item, setTimeout(refresh, 40))
+    }
+}()
+
+
+/**
  * Makes a mode display in a different window (if it's attachment is 'free')
  * @param {Window & typeof globalThis} newWin
  * @param {Mode} mode
@@ -190,7 +213,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
 
     const refresh = () => {
         for (let item of items_getSelected()) {
-            refreshItemUI(item.ItemId)
+            mode_refreshItem(item.ItemId)
         }
     }
     if (newWin === window) {
