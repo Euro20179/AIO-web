@@ -25,7 +25,7 @@ function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, w
 ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
-    return { container: c, output: getElementOrThrow('#script-execute-output', null, c) as HTMLDivElement }
+    return { container: c, output: dom_getelorthrow('#script-execute-output', null, c) as HTMLDivElement }
 }
 
 ScriptMode.prototype.mkcontainer = function(this: ScriptMode, ) {
@@ -52,7 +52,7 @@ ScriptMode.prototype.close = function(this: ScriptMode, ) {
 }
 
 ScriptMode.prototype.add = function(this: ScriptMode, entry: InfoEntry) {
-    const modeSelect = getElement("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
+    const modeSelect = dom_getel("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
     const newMode = mode_name2cls(modeSelect)
     const d: Mode = this.renderedModes.has(modeSelect) ?
                             this.renderedModes.get(modeSelect)
@@ -142,11 +142,11 @@ function execute(this: ScriptMode) {
     let tbl = new CalcVarTable()
     tbl.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
 
-    if (getElementOrThrow("#script-execute-output-clear", this.win.HTMLInputElement, this.win.document)?.checked) {
+    if (dom_getelorthrow("#script-execute-output-clear", this.win.HTMLInputElement, this.win.document)?.checked) {
         this.clear()
     }
 
-    if (getElementOrThrow("#script-js-mode", this.win.HTMLInputElement, this.win.document)?.checked) {
+    if (dom_getelorthrow("#script-js-mode", this.win.HTMLInputElement, this.win.document)?.checked) {
         //put the script within a scope so the user can redeclare vars
         script = `{${script}}`
         let b = new Blob([script], { type: "application/javascript" })

@@ -1,4 +1,15 @@
 /**
+ * @module js_api
+ * @requires modes.ts
+ * @requires ui.ts
+ * @requires items.ts
+ * @requires api.ts
+ * @description
+ * a module consisting of basic uitility-like functions
+ * that either provide an api for small tasks, or are wrappers around other apis
+ */
+
+/**
  * Downloads data as a file in the browser
  * @param {string} data - The content to download
  * @param {string} name - The filename for the download
@@ -49,7 +60,7 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
     }
 
     picker: {
-        const cspicker = getElement("color-scheme-selector")
+        const cspicker = dom_getel("color-scheme-selector")
         if(!cspicker) break picker
         console.log(cspicker.querySelectorAll("option"))
         win.document.body.prepend(cspicker.cloneNode(true))
@@ -58,10 +69,10 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
         s.src = "/ui/components.js"
         win.document.body.append(s)
 
-        const psel = getElement("select", win.self.HTMLSelectElement, win.document)
+        const psel = dom_getel("select", win.self.HTMLSelectElement, win.document)
         if(!psel) break picker
 
-        const v = getElement("select", HTMLSelectElement, cspicker)
+        const v = dom_getel("select", HTMLSelectElement, cspicker)
         if(v)
             psel.value = v.value
     }
@@ -83,6 +94,48 @@ function util_debounce(cb: Function, timeout: number) {
         to = setTimeout(cb, timeout)
     }
 }
+
+/**
+ * Gets an element by a query selector that's an instanceof {requiredType}
+ * If such an element is not found, null is returned
+ *
+ * @param selector passed to root.querySelector
+ * @param [requiredType=null] The type the found element must be
+ * @param [root=null] The root document, (default is currentDocument())
+ * @reutrns {Element | null}
+ */
+function dom_getel<T extends typeof Element>(
+    selector: string,
+    requiredType: T | null = null,
+    root: { querySelector(selector: string): Element | null } | null = null
+): InstanceType<T> | null {
+    let el = (root || currentDocument()).querySelector(selector)
+    if (!el || (requiredType && !(el instanceof (requiredType as T)))) return null
+    return el as InstanceType<T>
+}
+const getElementUI = dom_getel
+
+/**
+ * attempts to find an element of a certain type with a query selector within a container
+ * if the element is not found, throw an error
+ * @template T - an HTMLElement constructor (must be HTMLElement iself or a subclass)
+ * @param {string} selector
+ * @param {T | null} [requiredType=null] - the type the found element must be
+ * @param [root=null] - the root (defaults to currentDocument()) (may also just be anything with a querySelector implementation)
+ * @returns {T}
+ */
+function dom_getelorthrow<T extends typeof HTMLElement>(
+    selector: string,
+    requiredType: T | null = null,
+    root: { querySelector(selector: string): HTMLElement | null } | null = null
+): InstanceType<T> {
+    let el = dom_getel(selector, requiredType, root)
+    if (!(el)) {
+        throw new Error(`Element: ${selector} was not found`)
+    }
+    return el
+}
+const getElementOrThrowUI = dom_getel
 
 /**
  * sets a css property on document and if catalogWin is open, also that document

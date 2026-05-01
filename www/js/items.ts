@@ -1,7 +1,7 @@
 /**
  * @module items
- * REQUIRES: api.ts
- * DESCRIPTION:
+ * @requires api.ts
+ * @description
  * contains the global state of all entries, libraries, selected entries, etc..
  * in addition contains functions that interact with the state,
  * such as retrieving and setting entries

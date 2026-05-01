@@ -1,3 +1,12 @@
+/**
+    * @module modes
+    * @requires items.ts
+    * @description
+    * Manages state reguarding modes
+    * is decoupled from the ui as much as possible
+
+    * individual modes may and still are likely coupled to the ui
+*/
 type ModeProperties = {
     //attachment to its window
     //- sticky: does not move windows
@@ -37,7 +46,7 @@ const ModePrimitives = {
         this.win = win ||= window
         let c = null
         if(!output) {
-            ({output, container: c} = this.mkcontainers(containerPlacement || getElementOrThrow("#viewing-area", null, this.win.document)))
+            ({output, container: c} = this.mkcontainers(containerPlacement || dom_getelorthrow("#viewing-area", null, this.win.document)))
         }
         this.output = output
         this.container = c
@@ -53,7 +62,7 @@ const ModePrimitives = {
 
         this.win = win
 
-        let { output: newOutput, container } = this.mkcontainers(getElementOrThrow("#viewing-area", null, this.win.document))
+        let { output: newOutput, container } = this.mkcontainers(dom_getelorthrow("#viewing-area", null, this.win.document))
         const imported = win.document.importNode(this.output, true)
         newOutput.replaceChildren(...imported.childNodes)
         this.output = newOutput

@@ -118,7 +118,7 @@ CalendarMode.prototype._getValidEvents = function(this: CalendarMode, start: Dat
             end.getTime(),
         )
     ]
-    const eventFilter = getElement(
+    const eventFilter = dom_getel(
         "#event-filter",
         this.win.HTMLInputElement,
         this.output
@@ -297,7 +297,7 @@ CalendarMode.prototype.clearSelected = function(this: CalendarMode, ) {
 CalendarMode.prototype.mkcontainers = function(this: CalendarMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
     into.append(c)
-    return { container: c, output: getElementOrThrow(":first-child", null, c) }
+    return { container: c, output: dom_getelorthrow(":first-child", null, c) }
 }
 CalendarMode.prototype.mkcontainer = function(this: CalendarMode, ) {
     return document.createElement("calendar-template")

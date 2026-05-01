@@ -166,11 +166,11 @@ SidebarMode.prototype.updateThumbnail = function(this: SidebarMode, id: bigint, 
 }
 
 SidebarMode.prototype.focusNthItem = function(n: number) {
-    getElementOrThrow(`:nth-child(${n})`, this.win.HTMLElement, this.output)?.focus()
+    dom_getelorthrow(`:nth-child(${n})`, this.win.HTMLElement, this.output)?.focus()
 }
 
 SidebarMode.prototype.selectNth = function(n: number) {
-    const el = getElement(`:nth-child(${n})`, this.win.HTMLElement, this.output)
+    const el = dom_getel(`:nth-child(${n})`, this.win.HTMLElement, this.output)
     if (!el) return
     const id = BigInt(el.getAttribute("data-entry-id") || 0)
     if (id == 0n) return

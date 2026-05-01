@@ -9,37 +9,37 @@ type ClientSearchFilters = {
 async function main() {
     setupHintPopovers(document)
 
-    const sortBySelector = getElementOrThrow(
+    const sortBySelector = dom_getelorthrow(
         '[name="sort-by"]',
         HTMLSelectElement,
     );
 
-    const recommenders = getElementOrThrow(
+    const recommenders = dom_getelorthrow(
         "datalist#recommended-by",
         HTMLDataListElement,
     );
 
     startupUI({
         newWindow: document.getElementById("new-view-window"),
-        viewToggle: getElementOrThrow("#view-toggle", HTMLSelectElement),
-        viewAllElem: getElementOrThrow("#view-all", HTMLInputElement),
+        viewToggle: dom_getelorthrow("#view-toggle", HTMLSelectElement),
+        viewAllElem: dom_getelorthrow("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
-        newEntryLibrarySelector: getElementOrThrow(
+        newEntryLibrarySelector: dom_getelorthrow(
             '[name="libraryId"]',
             HTMLSelectElement,
         ),
-        librarySelector: getElementOrThrow(
+        librarySelector: dom_getelorthrow(
             "#library-selector",
             HTMLSelectElement,
         ),
-        userSelector: getElement('[name="uid"]', HTMLSelectElement),
+        userSelector: dom_getel('[name="uid"]', HTMLSelectElement),
         sortBySelector,
         errorOut: document.getElementById("error"),
-        searchForm: getElementOrThrow("#sidebar-form", HTMLFormElement),
+        searchForm: dom_getelorthrow("#sidebar-form", HTMLFormElement),
         recommenders,
-        newItemForm: getElementOrThrow("#new-item-form", HTMLFormElement),
-        promptDialog: getElementOrThrow("#prompt", HTMLDialogElement),
-        sidebarItems: getElementOrThrow("#sidebar-items", HTMLElement)
+        newItemForm: dom_getelorthrow("#new-item-form", HTMLFormElement),
+        promptDialog: dom_getelorthrow("#prompt", HTMLDialogElement),
+        sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement)
     });
 
     const urlParams = new URLSearchParams(document.location.search);
@@ -95,14 +95,14 @@ async function main() {
     }
 
     fillFormatSelectionUI(
-        getElementOrThrow('[name="format"]', HTMLSelectElement),
+        dom_getelorthrow('[name="format"]', HTMLSelectElement),
     );
 
     fillTypeSelectionUI(
-        getElementOrThrow('#new-item-form [name="type"]', HTMLSelectElement),
+        dom_getelorthrow('#new-item-form [name="type"]', HTMLSelectElement),
     );
 
-    await fillUserSelectionUI(getElement('[name="uid"]', HTMLSelectElement));
+    await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
 
     setUIDFromHeuristicsUI();
 

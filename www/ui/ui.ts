@@ -1,4 +1,10 @@
-/*
+/**
+ * @module ui
+ * @requires items.ts
+ * @requires modes.ts
+ * @requires js_api.ts
+ * @requires api.ts
+ * @description
  * This file is for functions that should be called by the ui to handle api operations
  * with client-side inputs
 */
@@ -136,9 +142,9 @@ function startupUI({
     })
 
     if (newItemForm) {
-        const title = getElementOrThrow('[name="title"]', HTMLInputElement, newItemForm)
+        const title = dom_getelorthrow('[name="title"]', HTMLInputElement, newItemForm)
         newItemForm.oninput = function() {
-            const location = getElementOrThrow('[name="location"]', HTMLInputElement, newItemForm)
+            const location = dom_getelorthrow('[name="location"]', HTMLInputElement, newItemForm)
             if (typeof settings.location_generator === 'string') {
                 location.value = settings.location_generator.replaceAll("{}", title.value)
             } else if (typeof settings.location_generator === 'function') {
@@ -555,7 +561,7 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
 }
 
 registerCTRLShortcutUI("\\", (e) => {
-    const search = getElementOrThrow("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
+    const search = dom_getelorthrow("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
 
     search.focus()
 
@@ -572,7 +578,7 @@ registerCTRLShortcutUI("\\", (e) => {
 })
 
 registerCTRLShortcutUI("/", e => {
-    const search = getElementOrThrow('[name="search-query"]', HTMLInputElement, components.searchForm)
+    const search = dom_getelorthrow('[name="search-query"]', HTMLInputElement, components.searchForm)
     search?.focus()
     search?.select()
     e.preventDefault()
@@ -701,7 +707,7 @@ function runUserScriptUI(name: string) {
  * @param {string} desc - what the script does
  */
 function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
-    const scriptSelect = getElementOrThrow("#script-select", HTMLElement)
+    const scriptSelect = dom_getelorthrow("#script-select", HTMLElement)
 
     const par = document.createElement("div")
     par.classList.add("user-script")
@@ -765,11 +771,11 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
   * @param html {string} the html to put in the confirmation box
   */
 async function confirmUI(html: string) {
-    const cEl = getElementOrThrow("#confirm", currentWindow().HTMLDialogElement)
+    const cEl = dom_getelorthrow("#confirm", currentWindow().HTMLDialogElement)
     const close = cEl.querySelector("button:first-child") as HTMLButtonElement
-    const cancel = getElementOrThrow("#cancel", currentWindow().HTMLButtonElement, cEl)
-    const ok = getElementOrThrow("#ok", currentWindow().HTMLButtonElement, cEl)
-    const root = getElementOrThrow("[root]", currentWindow().HTMLElement, cEl)
+    const cancel = dom_getelorthrow("#cancel", currentWindow().HTMLButtonElement, cEl)
+    const ok = dom_getelorthrow("#ok", currentWindow().HTMLButtonElement, cEl)
+    const root = dom_getelorthrow("[root]", currentWindow().HTMLElement, cEl)
     root.innerHTML = html || "<p>CONFIRM</p>"
 
     cEl.showModal()
@@ -808,7 +814,7 @@ function openModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ): HTMLDialogElement | null {
-    const modal = getElement(`#${modalName}`, HTMLDialogElement, root)
+    const modal = dom_getel(`#${modalName}`, HTMLDialogElement, root)
     modal?.showModal()
     return modal
 }
@@ -824,7 +830,7 @@ function closeModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ) {
-    getElement(`#${modalName}`, HTMLDialogElement, root)?.close()
+    dom_getel(`#${modalName}`, HTMLDialogElement, root)?.close()
 }
 
 /**
@@ -838,7 +844,7 @@ function toggleModalUI(
         querySelector(query: string): HTMLElement | null
     }
 ) {
-    let dialog = getElement(`#${modalName}`, HTMLDialogElement, root)
+    let dialog = dom_getel(`#${modalName}`, HTMLDialogElement, root)
     if (!dialog) return
 
     dialog.open
@@ -1248,7 +1254,7 @@ function openEventFormUI(itemid: string) {
     const form = modal.querySelector("form")
     if (!form) return
 
-    const itemidEl = getElementOrThrow('[name="itemid"]', HTMLInputElement, form)
+    const itemidEl = dom_getelorthrow('[name="itemid"]', HTMLInputElement, form)
     itemidEl.value = itemid
 }
 
@@ -1428,7 +1434,7 @@ async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement
  * @param {Record<any, HTMLElement>} items
  */
 function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
-    const itemsFillDiv = getElementOrThrow("#put-items-to-select", HTMLElement)
+    const itemsFillDiv = dom_getelorthrow("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
     const container = document.createElement("div")
@@ -1457,7 +1463,7 @@ function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
  * @returns {HTMLDivElement}
  */
 function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>, addCancel: boolean = true): HTMLDivElement {
-    const itemsFillDiv = getElementOrThrow("#put-items-to-select", HTMLElement)
+    const itemsFillDiv = dom_getelorthrow("#put-items-to-select", HTMLElement)
     itemsFillDiv.innerHTML = ""
 
     const container = itemsFillDiv.querySelector("div") || document.createElement("div")
@@ -1517,7 +1523,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
  */
 async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
     let item = await selectItemUI()
-    const popover = getElementOrThrow("#items-listing", HTMLDialogElement)
+    const popover = dom_getelorthrow("#items-listing", HTMLDialogElement)
     if (item === null) {
         input.value = "0"
         return
@@ -1536,11 +1542,11 @@ type SelectItemOptions = Partial<{
  * @returns {Promise<null | bigint>}
 */
 async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
-    const popover = getElementOrThrow("#items-listing", HTMLDialogElement)
+    const popover = dom_getelorthrow("#items-listing", HTMLDialogElement)
 
 
-    let f = getElementOrThrow("#items-listing-search", HTMLFormElement)
-    let query = getElementOrThrow('[name="items-listing-search"]', HTMLInputElement, f)
+    let f = dom_getelorthrow("#items-listing-search", HTMLFormElement)
+    let query = dom_getelorthrow('[name="items-listing-search"]', HTMLInputElement, f)
 
     let { container, onsearch } = options || {}
 
@@ -1582,7 +1588,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
  * @returns {Promise<string>} the login token
  */
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = getElementOrThrow("#login", HTMLDialogElement)
+    const loginPopover = dom_getelorthrow("#login", HTMLDialogElement)
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
     if (loginReasonEl instanceof HTMLElement) {
@@ -1604,7 +1610,7 @@ async function signinUI(reason: string): Promise<string> {
 
     loginPopover.showModal()
     return await new Promise((res) => {
-        const form = getElementOrThrow("#login-form", HTMLFormElement, loginPopover)
+        const form = dom_getelorthrow("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             alert(1)
             let data = new FormData(form)
@@ -2019,7 +2025,7 @@ body {
             }
         }
 
-        const closePopout = getElement("button.popout", win.self.HTMLElement, win.document.body)
+        const closePopout = dom_getel("button.popout", win.self.HTMLElement, win.document.body)
         if (closePopout) {
             closePopout.onclick = () => {
                 placeholder.replaceWith(parent)
