@@ -3,15 +3,19 @@ function dotests(category: string) {
 
     let passFails = new Map<string, { pass: bigint, fail: bigint }>
 
+    type Test = [string, Function, (left: any, right: any) => boolean, Function, {
+        subtest: (left: any, right: any) => Function
+    }?]
+
     function mktestgroup(
         groupName: string,
-        tests: [string, Function, (left: any, right: any) => boolean, Function][]
+        tests: Test[]
     ) {
         testCounts.set(groupName, 0n)
         return () => {
             console.group(groupName, 'tests')
             for (let [
-                name, left, comp, right
+                name, left, comp, right, options
             ] of tests) {
                 testCounts.set(groupName, (testCounts.get(groupName) || 0n) + 1n);
                 const pf = passFails.get(groupName) || { pass: 0n, fail: 0n }
@@ -22,8 +26,8 @@ function dotests(category: string) {
                         fail: pf.fail
                     })
                     const args = comp === call
-                                    ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, r]
-                                    : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
+                        ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, r]
+                        : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
                     console.info.apply(null, args)
                 } else {
                     passFails.set(groupName, {
@@ -32,15 +36,19 @@ function dotests(category: string) {
                     })
                     console.error(name, left, right)
                 }
+
+                if (options?.subtest) {
+                    options?.subtest(l, r)()
+                }
             }
-            const {pass, fail} = passFails.get(groupName) || { pass: 0n, fail: 0n}
+            const { pass, fail } = passFails.get(groupName) || { pass: 0n, fail: 0n }
             let style = "color: red;"
-            if(fail === 0n) {
+            if (fail === 0n) {
                 style = "color: limegreen"
             }
             console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
             console.groupEnd()
-            return {pass, fail}
+            return { pass, fail }
         }
     }
 
@@ -81,7 +89,7 @@ function dotests(category: string) {
         return (left: any, right: any) => !cmp(left, right)
     }
 
-    function call(left: any, right: Function) { 
+    function call(left: any, right: Function) {
         return right(left)
     }
 
@@ -97,14 +105,14 @@ function dotests(category: string) {
 
     const tests = {
         js_api: mktestgroup("js api", [
-            [ "ui_render", r(ui_render, 1n), is, l(HTMLElement) ],
+            ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
 
-            [ "set and get selected", r(() => {
+            ["set and get selected", r(() => {
                 items_setSelected([findInfoEntryById(1n)])
                 return ui_selected().map(v => v.ItemId)
-            }), deq, l([1n]) ],
+            }), deq, l([1n])],
 
-            [ "ui_addsort", r(ui_addsort, "TEST", () => 1), call, l(() => {
+            ["ui_addsort", r(ui_addsort, "TEST", () => 1), call, l(() => {
                 return Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
             })],
 
@@ -114,15 +122,15 @@ function dotests(category: string) {
 
             ["ui_seterr", r(ui_seterr, "TESTING ERROR"), call, l(() => {
                 const err = components.errorOut
-                if(!err) return true
+                if (!err) return true
                 return err.getAttribute("data-error") === "TESTING ERROR"
             })],
 
             ["ui_newscript", r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"), call, l(() => {
                 const scriptSelect = dom_getel("#script-select", HTMLElement)
-                if(!scriptSelect) return false
+                if (!scriptSelect) return false
                 return Boolean(userScripts.get("TESTING SCRIPT")) &&
-                        Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
+                    Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
             })],
 
             ["ui_clearSelected", r(ui_clear), eq, l(0)],
@@ -138,24 +146,27 @@ function dotests(category: string) {
         ]),
 
         display_entry_mode: mktestgroup("display entry mode", [
-            ["render", r(() => ui_render_from(2n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
-                if(left === 1 || left === 2) return false
-                mktestgroup("presense of elements", [
-                    ['user actions filled', l(() => left.querySelector("#user-actions td:has(.delete)")), not(eq), l(null)],
-                    ['description not empty', l(() => left.querySelector("#description")?.innerHTML), call, l((left: string | null) => {
-                        mktestgroup("description not empty", [
-                            ['not null', l(left), not(eq), l(null)],
-                            ['not empty string', l(left), not(eq), l("")]
-                        ])()
-                        return true
-                    })]
-                ])()
-                return true
-            })],
+            ["render", r(() => ui_render_from(1n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
+                return left !== 1 && left !== 2
+            }), {
+                    subtest: left => {
+                        return mktestgroup("presense of elements", [
+                            ['user actions filled', l(() => left.querySelector("#user-actions td:has(.delete)")), not(eq), l(null)],
+                            ['description not empty', l(() => left.querySelector("#description")?.innerHTML), call, l((left: string | null) => {
+                                return true
+                            }), {
+                                    subtest: left => mktestgroup("description not empty", [
+                                        ['not null', l(left), not(eq), l(null)],
+                                        ['not empty string', l(left), not(eq), l("")]
+                                    ])
+                                }]
+                        ])
+                    }
+                }],
         ]),
     } as const
 
-    if(category) {
+    if (category) {
         tests[category as keyof typeof tests]()
     } else {
         for (let test in tests) {
@@ -163,10 +174,10 @@ function dotests(category: string) {
             tests[test as keyof typeof tests]()
         }
     }
-    const {pass, fail} = passFails.values()
-                        .reduce((p, c) => ({pass: p.pass + c.pass, fail: p.fail + c.fail}), {pass: 0n, fail: 0n})
+    const { pass, fail } = passFails.values()
+        .reduce((p, c) => ({ pass: p.pass + c.pass, fail: p.fail + c.fail }), { pass: 0n, fail: 0n })
     let style = "color: red;"
-    if(fail === 0n) {
+    if (fail === 0n) {
         style = "color: limegreen"
     }
     console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
