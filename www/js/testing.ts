@@ -103,7 +103,7 @@ function dotests(category: string) {
         return () => val
     }
 
-    const tests = {
+    let tests: Record<string, Function> = {
         ui_stuff: mktestgroup("ui stuff", [
             ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
 
@@ -207,7 +207,19 @@ function dotests(category: string) {
                     }
                 }],
         ]),
-    } as const
+    }
+
+    const pitemsTests: Test[] = []
+    for(let probably of [probablyUserItem, probablyInfoEntry, probablyMetaEntry]) {
+        let pname = probably.name.match(/probably(.+?)(?:Item|Entry)/)?.[1] || "name"
+        if(pname === 'Meta') pname = 'Metadata'
+        for(let generic of [genericInfo, genericMetadata, genericUserEntry]) {
+            let gname = generic.name.match(/generic(.+)(?:Entry)?/)?.[1] || "name"
+            if(gname === 'UserEntry') gname = 'User'
+            pitemsTests.push([`${probably.name} with ${generic.name} (${gname === pname})`, r(probably, generic(1n, 1)), eq, l(gname == pname)])
+        }
+    }
+    tests['probablyItems'] = mktestgroup("item object type heuristics", pitemsTests)
 
     if (category) {
         tests[category as keyof typeof tests]()
