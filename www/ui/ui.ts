@@ -1858,6 +1858,7 @@ function closeCatalogModeUI() {
         return
     }
     const thisMode = mode_getFirstModeInWindow(modeWin)
+    modeWin.close()
     if (thisMode) {
         mode_chwin(window, thisMode)
     }
