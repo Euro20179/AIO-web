@@ -1473,12 +1473,15 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             const recommender = document.createElement("de-recommender")
             el.append(recommender)
 
-            const b = dom_getelorthrow('[role="button"]', this.win.HTMLElement, recommender)
+            const b = dom_getel('[role="button"]', this.win.HTMLElement, recommender)
+            if(!b) continue
             b.setAttribute("recommender", r)
-            const db = dom_getelorthrow("button.delete", this.win.HTMLElement, recommender)
+            const db = dom_getel("button.delete", this.win.HTMLElement, recommender)
+            if(!db) continue
             db.setAttribute("recommender-idx", String(i))
 
-            const s = dom_getelorthrow("span", this.win.HTMLElement, recommender)
+            const s = dom_getel("span", this.win.HTMLElement, recommender)
+            if(!s) continue
             s.append(r)
             i++
         }
@@ -1884,22 +1887,24 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 
-            let c = dom_getelorthrow(
+            let c = dom_getel(
                 ".entry-progressbar-position-label",
                 this.win.HTMLElement,
                 container
             )
+            if(!c) continue
             const node = document.createTextNode(`${label || ""}${part[2]}`)
             if (parseInt(max)) {
                 node.appendData(`/${max}`)
             }
             c.append(node)
 
-            const upHint = dom_getelorthrow(
+            const upHint = dom_getel(
                 "#user-progress-hint",
                 this.win.HTMLElement,
                 c
             )
+            if(!upHint) continue
             upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10) || 0}%`
         }
     })

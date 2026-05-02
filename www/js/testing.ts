@@ -1,4 +1,4 @@
-function dotests() {
+function dotests(category: string) {
     let testCounts = new Map<string, bigint>
 
     let passFails = new Map<string, { pass: bigint, fail: bigint }>
@@ -22,8 +22,8 @@ function dotests() {
                         fail: pf.fail
                     })
                     const args = comp === call
-                                    ? ["%s %O %O %c[✓]", name, l, r, "background: limegreen; color: black"]
-                                    : ["%s %O %c[✓]", name, l, "background: limegreen; color: black"]
+                                    ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, r]
+                                    : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
                     console.info.apply(null, args)
                 } else {
                     passFails.set(groupName, {
@@ -40,11 +40,16 @@ function dotests() {
             }
             console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
             console.groupEnd()
+            return {pass, fail}
         }
     }
 
     function eq(left: any, right: any) {
         return left === right
+    }
+
+    function in_(left: any, right: any) {
+        return right.includes(left)
     }
 
     function deq(left: any, right: any) {
@@ -77,7 +82,7 @@ function dotests() {
     }
 
     function call(left: any, right: Function) { 
-        return right()
+        return right(left)
     }
 
     //run
@@ -118,7 +123,11 @@ function dotests() {
                 if(!scriptSelect) return false
                 return Boolean(userScripts.get("TESTING SCRIPT")) &&
                         Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
-            })]
+            })],
+
+            ["ui_clearSelected", r(ui_clear), eq, l(0)],
+
+            ["ui_select", r(ui_select, 1n), not(in_), l([1, 2])],
         ]),
 
         catalog: mktestgroup("catalog", [
@@ -126,11 +135,39 @@ function dotests() {
             ["get current doc", r(currentDocument), eq, r(() => modeWin?.document)],
             ["get current window", r(currentWindow), eq, r(() => modeWin)],
             ["close catalog mode", r(closeCatalogModeUI), not(call), l(isCatalogModeUI)]
-        ])
+        ]),
+
+        display_entry_mode: mktestgroup("display entry mode", [
+            ["render", r(() => ui_render_from(2n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
+                if(left === 1 || left === 2) return false
+                mktestgroup("presense of elements", [
+                    ['user actions filled', l(() => left.querySelector("#user-actions td:has(.delete)")), not(eq), l(null)],
+                    ['description not empty', l(() => left.querySelector("#description")?.innerHTML), call, l((left: string | null) => {
+                        mktestgroup("description not empty", [
+                            ['not null', l(left), not(eq), l(null)],
+                            ['not empty string', l(left), not(eq), l("")]
+                        ])()
+                        return true
+                    })]
+                ])()
+                return true
+            })],
+        ]),
     } as const
 
-    for (let test in tests) {
-        if (!Object.hasOwn(tests, test)) continue
-        tests[test as keyof typeof tests]()
+    if(category) {
+        tests[category as keyof typeof tests]()
+    } else {
+        for (let test in tests) {
+            if (!Object.hasOwn(tests, test)) continue
+            tests[test as keyof typeof tests]()
+        }
     }
+    const {pass, fail} = passFails.values()
+                        .reduce((p, c) => ({pass: p.pass + c.pass, fail: p.fail + c.fail}), {pass: 0n, fail: 0n})
+    let style = "color: red;"
+    if(fail === 0n) {
+        style = "color: limegreen"
+    }
+    console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
 }
