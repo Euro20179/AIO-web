@@ -216,7 +216,7 @@ function dotests(category: string) {
         for(let generic of [genericInfo, genericMetadata, genericUserEntry]) {
             let gname = generic.name.match(/generic(.+)(?:Entry)?/)?.[1] || "name"
             if(gname === 'UserEntry') gname = 'User'
-            pitemsTests.push([`${probably.name} with ${generic.name} (${gname === pname})`, r(probably, generic(1n, 1)), eq, l(gname == pname)])
+            pitemsTests.push([`probably ${pname} with generic ${gname} (${gname === pname})`, r(probably, generic(1n, 1)), eq, l(gname == pname)])
         }
     }
     tests['probablyItems'] = mktestgroup("item object type heuristics", pitemsTests)
