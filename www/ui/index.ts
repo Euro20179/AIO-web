@@ -65,8 +65,6 @@ async function main() {
                 mode_refreshItem(item.ItemId);
             }
 
-            const ev = new CustomEvent("aio-metadata-loaded");
-            dispatchEvent(ev);
             ua_setfavicon(
                 fixThumbnailURL(
                     findMetadataById(

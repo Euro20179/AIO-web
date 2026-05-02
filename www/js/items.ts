@@ -771,6 +771,9 @@ async function items_refreshMetadata(uid: number) {
     for (let item of items) {
         _globalsNewUi.entries[String(item.ItemId)].meta = item
     }
+
+    const ev = new CustomEvent("aio-metadata-loaded");
+    dispatchEvent(ev);
 }
 
 /**
