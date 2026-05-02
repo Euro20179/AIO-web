@@ -1000,6 +1000,7 @@ function mkSearchUI(params: Record<string, string>) {
  * - clears selected items
  * - re-renders the side bar with the new results
  * - if there are no results, sets the error to "No results"
+ * - at the end, fires the aio-search-performed event
  */
 async function loadSearchUI() {
     let form = components.searchForm
@@ -1035,6 +1036,12 @@ async function loadSearchUI() {
         g.En_Title = "No Results"
         renderFakeSidebarItem(g, components['sidebarUI']?.output || document.createDocumentFragment())
     } else components['sidebarUI']?.render(getFilteredResultsUI(), false)
+
+    dispatchEvent(new CustomEvent("aio-search-performed", {
+        detail: {
+            results: entries
+        }
+    }))
 }
 
 /**

@@ -220,12 +220,14 @@
                     <code>aio-metadata-loaded</code>
                 </p>
                 <p class="function-description">
-                    The metadata from pageload has finished loading
+                    Fires at the end of <code>items_refreshMetadata</code>
                 </p>
             </li>
             <li class="doc-card">
-                <p class="function-name"><code>aio-items-rendered</code></p>
-                <p class="function-description">Fired once the initial sidebar rendering, and item selection is complete
+                <p class="function-name"><code>aio-search-performed</code></p>
+                <p class="function-description">
+                    Fires at the end of <code>loadSearchUI</code>.
+                    detail contains one item: <code>results: InfoEntry[]</code>
                 </p>
             </li>
            <li class="doc-card">

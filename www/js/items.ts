@@ -764,7 +764,10 @@ async function items_loadLibraries(uid: number) {
 }
 
 /**
-    * loads all metadata info, and updates the global entries list
+ * loads all metadata info, and updates the global entries list
+ * side effects:
+ * - fires aio-metadata-loaded after loading metadata
+ * @param {number} uid
 */
 async function items_refreshMetadata(uid: number) {
     let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)

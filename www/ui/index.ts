@@ -52,15 +52,10 @@ async function main() {
 
     const onrender = () => {
         //just in case
-        removeEventListener("aio-items-rendered", onrender);
+        removeEventListener("aio-search-performed", onrender);
 
-        items_refreshRelations(uid).then(() => {
-            for (let item of items_getSelected()) {
-                mode_refreshItem(item.ItemId);
-            }
-        });
-
-        items_refreshMetadata(uid).then(() => {
+        const metadataload = () => {
+            removeEventListener("aio-metadata-load", metadataload)
             for (let item of items_getSelected()) {
                 mode_refreshItem(item.ItemId);
             }
@@ -81,11 +76,19 @@ async function main() {
 
                 setViewingAllUI(true);
             }
-        });
+        }
+
+        addEventListener("aio-metadata-loaded", metadataload)
+
+        Promise.race([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
+            for (let item of items_getSelected()) {
+                mode_refreshItem(item.ItemId);
+            }
+        })
     };
     //allow the fetch to happen *after* items are rendered on firefox
     //becasue firefox doesn't render the items until after the fetch for some reason
-    addEventListener("aio-items-rendered", onrender);
+    addEventListener("aio-search-performed", onrender);
 
     //if the user is logged in, do ui startup script for their user and their user only
     if (
@@ -141,22 +144,24 @@ async function main() {
     await loadInfoEntries(uid);
 
     if (initialSearch) {
-        ui_search(initialSearch || searchInput.value, () => {
-            dispatchEvent(new CustomEvent("aio-items-rendered"));
-        });
+        ui_search(initialSearch || searchInput.value);
     } else if (searchInput.value) {
         //this should be separate because ui_search will add another 3
         // if serachInput.value is something like `3 @hi`
         mkSearchUI({
             "search-query": searchInput.value,
         });
-        dispatchEvent(new CustomEvent("aio-items-rendered"));
     } else {
         let entries = Object.values(items_getAllEntries()).map((v) => v.info);
         entries = sortEntries(entries, sortBySelector.value);
         items_setResults(entries.map((v) => v.ItemId));
         components['sidebarUI']?.render(getFilteredResultsUI(), true);
-        dispatchEvent(new CustomEvent("aio-items-rendered"));
+        //do a fake search-performed event, since that's basically what this is
+        dispatchEvent(new CustomEvent("aio-search-performed", {
+            detail: {
+                results: entries
+            }
+        }))
     }
 
     //do this second because events can get really large, and having to wait for it could take a while
