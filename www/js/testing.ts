@@ -28,7 +28,7 @@ function dotests(category: string) {
                     const args = comp === call
                         ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, r]
                         : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
-                    console.info.apply(null, args)
+                    console.debug.apply(null, args)
                 } else {
                     passFails.set(groupName, {
                         pass: pf.pass,
@@ -46,7 +46,7 @@ function dotests(category: string) {
             if (fail === 0n) {
                 style = "color: limegreen"
             }
-            console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
+            console.info("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
             console.groupEnd()
             return { pass, fail }
         }
@@ -235,5 +235,5 @@ function dotests(category: string) {
     if (fail === 0n) {
         style = "color: limegreen"
     }
-    console.log("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
+    console.info("%c%d/%d (%f%%)", style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
 }
