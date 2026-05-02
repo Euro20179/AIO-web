@@ -156,7 +156,7 @@ function dotests(category: string) {
             ["set modes", l(0), eq, l(0), {
                 subtest: () => {
                     const tests: Test[] = []
-                    for(let [name, mode] of mode_map()) {
+                    for(let [name, mode] of [...mode_map().entries()].reverse()) {
                         if(name === 'graph-output') continue
                         tests.push([name, r(ui_setmode, name), call, l(() => {
                             //@ts-ignore
@@ -179,6 +179,7 @@ function dotests(category: string) {
 - [b]one[/b]
 - two
 [/list]`), eq, l('• <b>one</b>\n• two')],
+            ['html', r(parseNotes, '<p align="center">[b]hi[/b]</p>'), eq, l('<p align="center"><b>hi</b></p>')],
         ]),
 
         catalog: mktestgroup("catalog", [
