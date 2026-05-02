@@ -56,9 +56,6 @@ async function main() {
 
         const metadataload = () => {
             removeEventListener("aio-metadata-load", metadataload)
-            for (let item of items_getSelected()) {
-                mode_refreshItem(item.ItemId);
-            }
 
             ua_setfavicon(
                 fixThumbnailURL(
