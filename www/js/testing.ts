@@ -104,7 +104,7 @@ function dotests(category: string) {
     }
 
     const tests = {
-        js_api: mktestgroup("js api", [
+        ui_stuff: mktestgroup("ui stuff", [
             ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
 
             ["set and get selected", r(() => {
@@ -151,7 +151,21 @@ function dotests(category: string) {
                         ["delete stat", r(ui_delstat, 'test'), eq, l(true)]
                     ])
                 }
-            }]
+            }],
+
+            ["set modes", l(0), eq, l(0), {
+                subtest: () => {
+                    const tests: Test[] = []
+                    for(let [name, mode] of mode_map()) {
+                        if(name === 'graph-output') continue
+                        tests.push([name, r(ui_setmode, name), call, l(() => {
+                            //@ts-ignore
+                            return mode_cls2name(mode_getFirstModeInWindow(window)?.constructor) == name
+                        })])
+                    }
+                    return mktestgroup("each mode", tests)
+                }
+            }],
         ]),
 
         notes: mktestgroup("notes", [

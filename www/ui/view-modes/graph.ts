@@ -1,5 +1,5 @@
 function getCtx2(this: GraphMode, id: string): CanvasRenderingContext2D {
-    const canv = this.win.document.getElementById(id) as HTMLCanvasElement
+    const canv = dom_getelorthrow(`#${CSS.escape(id)}`, this.win.HTMLCanvasElement, this.win.document)
     return canv.getContext("2d") as CanvasRenderingContext2D
 }
 
