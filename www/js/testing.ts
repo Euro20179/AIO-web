@@ -34,7 +34,7 @@ function dotests(category: string) {
                         pass: pf.pass,
                         fail: pf.fail + 1n
                     })
-                    console.error(name, left, right)
+                    console.error(name, l, r)
                 }
 
                 if (options?.subtest) {
@@ -94,7 +94,7 @@ function dotests(category: string) {
     }
 
     //run
-    function r(fn: Function, ...args: any[]) {
+    function r<T extends (...args: any[]) => any>(fn: Function, ...args: Parameters<T>) {
         return () => fn.apply(null, args)
     }
 
@@ -136,6 +136,35 @@ function dotests(category: string) {
             ["ui_clearSelected", r(ui_clear), eq, l(0)],
 
             ["ui_select", r(ui_select, 1n), not(in_), l([1, 2])],
+
+            ["ui_createstat", r<typeof ui_createstat>(ui_createstat, 'test', true, (e, mult) => 1 * mult), eq, l(0), {
+                subtest: (left) => {
+                    return mktestgroup("stat tests", [
+                        ["ui_setstat (to 3)", r(ui_setstat, 'test', 3), eq, l(3)],
+                        ["change stat (inc by 1)", r(changeResultStatsWithItemUI, items_getEntry(1n)), call, l(() => {
+                            for(let stat of statistics) {
+                                if(stat.name !== 'test') continue
+
+                                return stat.value === 4
+                            }
+                        })],
+                        ["delete stat", r(ui_delstat, 'test'), eq, l(true)]
+                    ])
+                }
+            }]
+        ]),
+
+        notes: mktestgroup("notes", [
+            ["simple note", r(parseNotes, "yes"), eq, l("yes")],
+            ["unclosed note", r(parseNotes, '[b]hi'), eq, l("[b]hi")],
+            ["complex unclosed note", r(parseNotes, '[b]hi[i]hi[/i]'), eq, l("[b]hi[i]hi[/i]")],
+            ["complex note", r(parseNotes, '[b]hi[i]hi[/i][/b]'), eq, l("<b>hi<i>hi</i></b>")],
+            ["[item]", r(parseNotes, "[item=1]my item[/item] cool item"), eq, l(`<button onclick="items_getEntryAny(1).then(res => res.ItemId && toggleItem(res.info))">my item</button> cool item`)],
+            ["[spoiler]", r(parseNotes, '[b]SPOILER[/b] [spoiler]hi[/spoiler]'), eq, l("<b>SPOILER</b> <span class='spoiler'>hi</span>")],
+            ["complex + [list]", r(parseNotes, `[list]
+- [b]one[/b]
+- two
+[/list]`), eq, l('• <b>one</b>\n• two')],
         ]),
 
         catalog: mktestgroup("catalog", [
