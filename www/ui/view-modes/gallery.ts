@@ -32,9 +32,9 @@ type GalleryMode = {
     removeGalleryItem(entry: InfoEntry): any
 } & Mode
 
-function GalleryMode(this: GalleryMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var GalleryMode: ModeConstructor<GalleryMode> = function(this: GalleryMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
-}
+} as any
 
 GalleryMode.prototype.mkcontainers = function(this: GalleryMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()

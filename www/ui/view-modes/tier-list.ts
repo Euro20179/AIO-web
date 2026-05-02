@@ -11,12 +11,12 @@ type TierListMode = {
     _findInfo(id: bigint, mode: "general" | "user" | "custom"): [number, string | false]
 } & Mode
 
-function TierListMode(this: TierListMode, output?: HTMLElement | DocumentFragment, win ?: Window & typeof globalThis) {
+var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, output?: HTMLElement | DocumentFragment, win ?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
     this.rows = {}
 
     this._setup()
-}
+} as any
 
 TierListMode.prototype._setup = function(this: TierListMode, ) {
     const tierListStyles = settings_get("tierlist_styles")

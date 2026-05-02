@@ -10,7 +10,7 @@ type CalendarMode = {
     _render(): HTMLElement
 } & Mode
 
-function CalendarMode(this: CalendarMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var CalendarMode: ModeConstructor<CalendarMode> = function(this: CalendarMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win);
 
     (function(this: CalendarMode) {
@@ -33,7 +33,7 @@ function CalendarMode(this: CalendarMode, output?: HTMLElement | DocumentFragmen
     this.selectedTime = [new Date(now.getFullYear(), now.getMonth()), new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)]
 
     this._setupWin()
-}
+} as any
 
 /**
  * sets everything up in the current window

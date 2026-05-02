@@ -3,7 +3,7 @@ type CalcMode = {
     sortCalcDisplay(): any
 } & Mode
 
-function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var CalcMode: ModeConstructor<CalcMode> = function(this: CalcMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
     let exprInput = dom_getel("#calc-expression", this.win.HTMLTextAreaElement, this.container)
@@ -19,7 +19,7 @@ function CalcMode(this: CalcMode, output?: HTMLElement | DocumentFragment, win?:
             this.sortCalcDisplay()
         }
     }
-}
+} as any
 
 CalcMode.prototype.mkcontainers = function(this: CalcMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()

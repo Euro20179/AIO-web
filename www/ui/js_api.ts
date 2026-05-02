@@ -430,8 +430,7 @@ function ui_clear(): number {
 function ui_modeclear(): number {
     let valid = 1
     for (let mode of mode_listOpen()) {
-        if ("clear" in mode) {
-            //@ts-ignore
+        if (mode.clear) {
             mode.clear()
             valid = 0
         }
@@ -590,9 +589,8 @@ function ui_seterr(err: string): void {
 /**
  * An alias for addUserScriptUI
  */
-function ui_newscript() {
-    //@ts-ignore
-    addUserScriptUI(...arguments)
+function ui_newscript(...args: Parameters<typeof addUserScriptUI>) {
+    addUserScriptUI(...args)
 }
 
 /**

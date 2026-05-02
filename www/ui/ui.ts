@@ -89,7 +89,6 @@ function startupUI({
         throw new Error("ui cannot function without a sidebar")
     }
 
-    //@ts-ignore
     components['sidebarUI'] = new SidebarMode(sidebarItems)
     mode_add(components['sidebarUI'] as SidebarMode, {
         attachment: 'sticky',
@@ -1970,7 +1969,6 @@ function popoutUI(popoutTarget: HTMLElement, _event: keyof WindowEventMap = "cli
             || root.nodeType === Node.DOCUMENT_FRAGMENT_NODE
         ))
             throw new Error("Popout button root is not a document")
-        //@ts-ignore
         parent = root.getElementById(toPop)
     }
     if (!parent) return

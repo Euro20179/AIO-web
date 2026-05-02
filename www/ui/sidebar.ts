@@ -18,7 +18,7 @@ type SidebarMode = {
     mkobserver(): any
 } & Mode
 
-function SidebarMode(this: SidebarMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var SidebarMode: ModeConstructor<SidebarMode> = function(this: SidebarMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
     this.itemsOnScreen = new Set
@@ -31,7 +31,7 @@ function SidebarMode(this: SidebarMode, output?: HTMLElement | DocumentFragment,
     this._resizeTO = 0
     this._setToNone = false
     this.win.addEventListener("resize", this.resizeHandler)
-}
+} as any
 
 SidebarMode.prototype.NAME = 'sidebar-list'
 

@@ -7,7 +7,8 @@ type ScriptMode = {
     clear(): any
 } & Mode
 
-function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+
+var ScriptMode: ModeConstructor<ScriptMode> = function(this: ScriptMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
     this.renderedModes = new Map
@@ -20,7 +21,7 @@ function ScriptMode(this: ScriptMode, output?: HTMLElement | DocumentFragment, w
         }
     }
     this.run.onclick = execute.bind(this)
-}
+} as any
 
 ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement | DocumentFragment) {
     const c = this.mkcontainer()
@@ -54,10 +55,8 @@ ScriptMode.prototype.close = function(this: ScriptMode, ) {
 ScriptMode.prototype.add = function(this: ScriptMode, entry: InfoEntry) {
     const modeSelect = dom_getel("#script-select-view", this.win.HTMLSelectElement, this.container)?.value || 'entry'
     const newMode = mode_name2cls(modeSelect)
-    const d: Mode = this.renderedModes.has(modeSelect) ?
-                            this.renderedModes.get(modeSelect)
-                            //@ts-ignore
-                        : new newMode(this.output, this.win)
+    const d: Mode = this.renderedModes.get(modeSelect)
+                    ?? new newMode(this.output, this.win)
     const e = d.add(entry)
     e.style.display = "block"
     this.renderedModes.set(modeSelect, d)
@@ -84,8 +83,7 @@ ScriptMode.prototype.subList = function(this: ScriptMode, entries: InfoEntry[]) 
 
 ScriptMode.prototype.clear = function(this: ScriptMode, ) {
     for (let mode of this.renderedModes.values()) {
-        if ("clear" in mode)
-            //@ts-ignore
+        if (mode.clear)
             mode.clear()
     }
 

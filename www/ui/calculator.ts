@@ -2387,8 +2387,7 @@ class CalcVarTable {
         this.symbols.set("js_call", new Func((...params: Type[]) => {
             const name = params[0].toStr().jsStr()
             const realParams = params.splice(1).map(v => v.jsValue)
-            //@ts-ignore
-            const fn = window[name]
+            const fn = window[name as keyof typeof window]
             if (fn && typeof fn === 'function') {
                 return Type.from(fn(...realParams))
             }

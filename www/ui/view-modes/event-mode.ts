@@ -78,7 +78,7 @@ type EventMode = {
 } & Mode
 
 
-function EventMode(this: EventMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var EventMode: ModeConstructor<EventMode> = function(this: EventMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
     this.eventFilter = (this.container || this.win.document).querySelector("#event-filter") as HTMLInputElement
 
@@ -91,7 +91,7 @@ function EventMode(this: EventMode, output?: HTMLElement | DocumentFragment, win
     this.excludedEvents = []
 
     this.eventOrder = new OrderedEvents()
-}
+} as any
 
 EventMode.prototype._filterEvents = function(this: EventMode, script: string) {
     this.excludedEvents.length = 0

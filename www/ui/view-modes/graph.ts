@@ -413,7 +413,7 @@ function destroyCharts() {
 
 type GraphMode = Mode
 
-function GraphMode(this: GraphMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
     groupBySelect = this.win.document.getElementById("group-by") as HTMLSelectElement
@@ -557,7 +557,7 @@ function GraphMode(this: GraphMode, output?: HTMLElement | DocumentFragment, win
 
         return mkXTypeChart(ctx, years, counts, '#items')
     })
-}
+} as any
 
 GraphMode.prototype.close = function(this: GraphMode) {
     if (this.container)

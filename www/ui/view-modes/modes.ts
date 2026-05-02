@@ -17,7 +17,13 @@ type ModeProperties = {
     listed: boolean
     closable: boolean
 }
+
+
 let openViewModes: Map<Mode, ModeProperties> = new Map
+
+interface ModeConstructor<T> {
+  new (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis): T;
+}
 
 interface Mode {
     output: HTMLElement | DocumentFragment
@@ -287,7 +293,7 @@ function mode_clearItems() {
     }
 }
 
-const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) => void>([
+const mode_map = () => new Map<string, ModeConstructor<Mode>>([
     ["entry-output", DisplayMode],
     ["graph-output", GraphMode],
     ["calc-output", CalcMode],
@@ -304,7 +310,7 @@ const mode_map = () => new Map<string, (output?: HTMLElement | DocumentFragment,
  * @param {string} name
  * @returns {Function}
  */
-function mode_name2cls(name: string): Function {
+function mode_name2cls(name: string): ModeConstructor<Mode> {
     let ogName = name
     name = {
         "entry": "entry-output",

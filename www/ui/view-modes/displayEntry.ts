@@ -791,7 +791,7 @@ function _mkde_actions() {// {{{
     } as Record<string, (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any> //}}}
 }// }}}
 
-function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
+var DisplayMode: ModeConstructor<DisplayMode> = function(this: DisplayMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
     this.displayQueue = []
@@ -818,7 +818,7 @@ function DisplayMode(this: DisplayMode, output?: HTMLElement | DocumentFragment,
             }
         })
     }
-}
+} as any
 
 DisplayMode.prototype.de_actions = _mkde_actions()
 
