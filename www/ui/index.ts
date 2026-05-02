@@ -67,6 +67,13 @@ async function main() {
 
             const ev = new CustomEvent("aio-metadata-loaded");
             dispatchEvent(ev);
+            ua_setfavicon(
+                fixThumbnailURL(
+                    findMetadataById(
+                        items_getSelected()[0].ItemId
+                    ).Thumbnail
+                )
+            )
 
             //i think this is to reorder everything?:
             if (urlParams.has("view-all")) {
