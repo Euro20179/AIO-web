@@ -475,7 +475,6 @@
             @container body (width < 800px) {
                 display: flex;
                 flex-direction: row;
-                min-width: fit-content;
                 min-height: fit-content;
             }
 
