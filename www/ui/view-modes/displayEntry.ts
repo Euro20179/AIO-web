@@ -1221,18 +1221,16 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
 }
 
 
-function whatToInclude(el: ShadowRoot): { self: boolean, children: boolean, copies: boolean, recursive: boolean, requires: boolean } {
-    const self = (el.getElementById("include-self-in-cost") as HTMLInputElement)?.checked
-    const children = (el.getElementById("include-children-in-cost") as HTMLInputElement)?.checked
-    const copies = (el.getElementById("include-copies-in-cost") as HTMLInputElement)?.checked
-    const requires = (el.getElementById("include-requires-in-cost") as HTMLInputElement)?.checked
-    const recursive = (el.getElementById("include-recusively-in-cost") as HTMLInputElement)?.checked
+function whatToInclude(el: ShadowRoot): { include: bigint, recursive: boolean } {
+    const checked = (id: string) => (el.getElementById(`include-${id}-in-cost`) as HTMLInputElement)?.checked
+    let include = 0n
+    if(checked("self")) include |= items_reduce_SELF
+    if(checked("children")) include |= items_reduce_CHILDREN
+    if(checked("copies")) include |= items_reduce_COPIES
+    if(checked("requires")) include |= items_reduce_REQUIRES
     return {
-        self,
-        children,
-        copies,
-        requires,
-        recursive
+        include,
+        recursive: checked("recursively")
     }
 }
 
@@ -1243,16 +1241,16 @@ function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const info = findInfoEntryById(itemId)
     if (!info) return
 
-    const { self, children, copies, recursive, requires } = whatToInclude(el)
+    const { include, recursive } = whatToInclude(el)
 
-    costEl.innerText = String(items_calculateCost(itemId, self, children, copies, requires, recursive))
+    costEl.innerText = String(items_calculateCost(itemId, include, recursive))
 }
 
 function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint, eventFilter = "") {
 
-    const { self, children, copies, recursive, requires } = whatToInclude(el)
+    const {include, recursive} = whatToInclude(el)
 
-    const eventsToLookAt = items_findAllEvents(itemId, self, children, copies, requires, recursive)
+    const eventsToLookAt = items_findAllEvents(itemId, include, recursive)
         .filter(v => {
             if (!eventFilter) return true
             return v.Event.includes(eventFilter) ||
@@ -1548,8 +1546,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         el => updateStatusDisplay(user.Status, el))
 
     renderComponent("#cost", l => {
-        const { self, children, copies, recursive, requires } = whatToInclude(el)
-        l.innerText = String(items_calculateCost(item.ItemId, self, children, copies, requires, recursive))
+        const {include, recursive} = whatToInclude(el)
+        l.innerText = String(items_calculateCost(item.ItemId, include, recursive))
     })
 
     renderComponent("#tz-selector", tzEl => {
