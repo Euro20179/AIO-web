@@ -11,8 +11,10 @@ if (str_starts_with($auth_header, "Basic ")) {
 
     if (array_key_exists("location", $_GET)) {
         $path = $_GET["location"];
-    } else {
+    } else if ($_SERVER['QUERY_STRING'] != ""){
         $path = "/ui?${_SERVER['QUERY_STRING']}";
+    } else {
+        $path = '/ui';
     }
 
 
