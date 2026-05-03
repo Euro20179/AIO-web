@@ -26,11 +26,11 @@ var SidebarMode: ModeConstructor<SidebarMode> = function(this: SidebarMode, outp
     this.mkobserver()
 
     //@ts-ignore
-    addEventListener("modes.update-item", this.modesUpdateHandler)
+    addEventListener("modes.update-item", this.modesUpdateHandler.bind(this))
 
     this._resizeTO = 0
     this._setToNone = false
-    this.win.addEventListener("resize", this.resizeHandler)
+    this.win.addEventListener("resize", this.resizeHandler.bind(this))
 } as any
 
 SidebarMode.prototype.NAME = 'sidebar-list'
