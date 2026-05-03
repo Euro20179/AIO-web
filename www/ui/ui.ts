@@ -978,6 +978,21 @@ function getSearchDataUI(): FormData {
 
 /**
  * Akin to the user submitting the search form
+ * form inputs:
+ * - search-query: string, the search query (processed on the client, so uses client filters, and '3' prefixing)
+ * - sort-by: ""
+ *   | "item-id"
+ *   | "release-year"
+ *   | "cost"
+ *   | "user-title"
+ *   | "native-title"
+ *   | "-aiow-numeric-title"
+ *   | "rating"
+ *   | "general-rating"
+ *   | "added"
+ *   | "finished"
+ *   | "viewing", the sorting method, applies server and client side
+ * - uid: number, the user id to query items from
  * @param {Record<string, string>} params - values to override
  */
 function mkSearchUI(params: Record<string, string>) {
