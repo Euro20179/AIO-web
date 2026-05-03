@@ -26,6 +26,8 @@ type StartupUIComponents = {
     promptDialog: HTMLDialogElement,
     sidebarItems: HTMLElement
 
+    mainUI: HTMLElement
+
     sidebarUI: SidebarMode
 }
 
@@ -620,9 +622,8 @@ registerCTRLShortcutUI("B", e => {
 })
 
 registerCTRLShortcutUI("V", e => {
-    let mainUI = document.getElementById("main-ui")
     //we dont want dual-window mode to be toggleable if we are in display mode
-    if (mainUI?.classList.contains("display-mode")) {
+    if (components.mainUI?.classList.contains("display-mode")) {
         return
     }
     if (isCatalogModeUI()) {
@@ -958,11 +959,11 @@ function sortEntriesUI() {
 
 /**
  * Gets the currently selected uid from the uid selector
+ * @returns {number}
  */
 function getUidUI() {
-    const uidSelector = document.querySelector("[name=\"uid\"]") as HTMLSelectElement
-    if (!uidSelector) return 0
-    return Number(uidSelector.value)
+    if (!components.userSelector) return 0
+    return Number(components.userSelector.value)
 }
 
 /**
@@ -1016,26 +1017,20 @@ function mkSearchUI(params: Record<string, string>) {
  * - re-renders the side bar with the new results
  * - if there are no results, sets the error to "No results"
  * - at the end, fires the aio-search-performed event
+ * @param {HTMLFormElement} [form] the form to pull from (defaults to the form on the page)
  */
-async function loadSearchUI() {
-    let form = components.searchForm
+async function loadSearchUI(form: HTMLFormElement | null | undefined = components.searchForm) {
     if (!form) throw new Error("No search form found")
 
     let formData = new FormData(form)
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = filters.useV4
-        ? await api_queryV4(
-            String(filters.newSearch) || "%",
-            Number(formData.get('uid')) || 0,
-            filters.sortBy as SortKind
-        )
-        : await api_queryV3(
-            String(filters.newSearch) || "#",
-            Number(formData.get("uid")) || 0,
-            filters.sortBy as SortKind
-        )
+    let entries = await (filters.useV4 ? api_queryV4 : api_queryV3)(
+        String(filters.newSearch) || "%",
+        Number(formData.get('uid')) || 0,
+        filters.sortBy as SortKind
+    )
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -1817,13 +1812,12 @@ function setUIDFromHeuristicsUI() {
  * @param {boolean | "toggle"} [on="toggle"]
  */
 function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
-    let mainUI = document.getElementById("main-ui")
     if (on === "toggle") {
-        mainUI?.classList.toggle("display-mode")
+        components.mainUI?.classList.toggle("display-mode")
     } else if (on) {
-        mainUI?.classList.add("display-mode")
+        components.mainUI?.classList.add("display-mode")
     } else {
-        mainUI?.classList.remove("display-mode")
+        components.mainUI?.classList.remove("display-mode")
     }
 }
 
@@ -1844,7 +1838,7 @@ function isCatalogModeUI(): boolean {
  * opens the catalog window
  */
 function openCatalogModeUI() {
-    let mainUI = document.getElementById("main-ui")
+    let mainUI = components.mainUI
     if (!mainUI || mainUI.classList.contains("catalog-mode")) return
 
     let urlParams = new URLSearchParams(location.search)
@@ -1883,7 +1877,7 @@ function closeCatalogModeUI() {
     if (thisMode) {
         mode_chwin(window, thisMode)
     }
-    let mainUI = document.getElementById("main-ui")
+    let mainUI = components.mainUI
     if (!mainUI) {
         console.warn("could not find main ui")
         return
@@ -2340,7 +2334,7 @@ function deselectUI(item: InfoEntry, updateStats: boolean = true) {
  * @param {boolean} [updateStats=true]
  */
 function toggleItemUI(item: InfoEntry, updateStats: boolean = true) {
-    if(items_isSelected(item.ItemId)) {
+    if (items_isSelected(item.ItemId)) {
         deselectUI(item, updateStats)
         //by definition we are no longer viewing everything
         setViewingAllUI(false)

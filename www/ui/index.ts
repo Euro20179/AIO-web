@@ -39,7 +39,8 @@ async function main() {
         recommenders,
         newItemForm: dom_getelorthrow("#new-item-form", HTMLFormElement),
         promptDialog: dom_getelorthrow("#prompt", HTMLDialogElement),
-        sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement)
+        sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement),
+        mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });
 
     const urlParams = new URLSearchParams(document.location.search);
