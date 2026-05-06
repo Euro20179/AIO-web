@@ -95,6 +95,15 @@ function util_debounce(cb: Function, timeout: number) {
     }
 }
 
+function arr_shuf<T extends {[Symbol.iterator](): any}>(iter: T): Array<any> {
+    const cpy: any = [...iter]
+    for (let i = cpy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cpy[i], cpy[j]] = [cpy[j], cpy[i]];
+    }
+    return cpy
+}
+
 /**
  * Gets an element by a query selector that's an instanceof {requiredType}
  * If such an element is not found, null is returned

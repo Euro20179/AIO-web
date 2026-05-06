@@ -1188,6 +1188,88 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     }
 }
 
+type ClientFilter = (filter: string) => boolean
+type ClientFilterApplication = (filter: string, entries: ArrayIterator<InfoEntry>) => ArrayIterator<InfoEntry>
+const clientFilters = new Map<ClientFilter, ClientFilterApplication>
+
+/**
+ * Adds a filter to client filters
+ * @param {ClientFilter} filter a function that takes a string (filter name) as an argument and returns a boolean to determine if it is the filter you want
+ * @param {ClientFilterApplication} map a function that takes the filter name, and a list of InfoEntry, and returns a list of InfoEntry after filter has been applied
+ */
+function addClientFilterRuleUI(filter: ClientFilter, map: ClientFilterApplication) {
+    clientFilters.set(filter, map)
+}
+
+/**
+ * Removes a filter from the client filters
+ * @param {ClientFilter} filter The filter to remove
+ * @returns {1 | 0} 1 for success, 0 if filter does not exist
+ */
+function removeClientFilterRuleUI(filter: ClientFilter): 1 | 0 {
+    if (clientFilters.has(filter)) {
+        clientFilters.delete(filter)
+        return 1
+    }
+    return 0
+}
+
+addClientFilterRuleUI(filter => filter.startsWith("is"),
+    function(filter, items) {
+        let ty = filter.split("is")[1]?.trim()
+        if (!ty) return items
+        ty = ty.replace(/(\w)(\S*)/g, (_, $1, $2) => $1.toUpperCase() + $2)
+        return items.filter(v => v.Type == ty)
+    })
+
+addClientFilterRuleUI(filter => !!filter.match(/\[(\d*):(-?\d*)\]/),
+    function(filter, items) {
+        const match = filter.match(/\[(\d*):(-?\d*)\]/)
+        if (!match) return items
+        return items.drop(+match[1]).take(+match[2] - +match[1])
+    })
+
+addClientFilterRuleUI(filter => filter.startsWith("/") && filter.endsWith("/"),
+    function(filter, items) {
+        const re = new RegExp(filter.slice(1, filter.length - 1))
+        return items.filter(v => v.En_Title.match(re))
+    })
+
+addClientFilterRuleUI(filter => filter === 'shuffle' || filter === 'shuf',
+    (_, items) => arr_shuf(items).values())
+
+addClientFilterRuleUI(filter => filter.startsWith("head"),
+    (filter, items) => items.take(parseInt(filter.slice("head".length).trim()) || 1))
+
+addClientFilterRuleUI(filter => filter.startsWith("tail"),
+    (filter, items) => {
+        const e = [...items]
+        const tail = parseInt(filter.slice("tail".length).trim()) || 1
+        return e.reverse().slice(0, tail).reverse().values()
+    })
+
+addClientFilterRuleUI(filter => filter.startsWith("sort"),
+    (filter, items) => {
+        let type = filter.slice("sort".length).trim() || "a"
+        const reversed = type.startsWith("-") ? -1 : 1
+        if (reversed == -1) type = type.slice(1)
+        switch (type[0]) {
+            case "a":
+                return [...items].sort((a, b) => (a.En_Title > b.En_Title ? 1 : -1) * reversed).values()
+            default:
+                return items
+        }
+
+    })
+
+addClientFilterRuleUI(filter => filter === "!child", (filter, items) => {
+    return items.filter(v => !items_getEntry(v.ItemId).relations.isChild())
+})
+
+addClientFilterRuleUI(filter => filter === "!copy", (filter, items) => {
+    return items.filter(v => !items_getEntry(v.ItemId).relations.isCopy())
+})
+
 /**
  * Given a list of entries, and filters, apply the filters to the list of entries
  * and return the new list
@@ -1205,58 +1287,15 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 
     for (let filter of filters.filterRules) {
         filter = filter.trim()
-        if (filter.startsWith("is")) {
-            let ty = filter.split("is")[1]?.trim()
-            if (!ty) continue
-            ty = ty.replace(/(\w)(\S*)/g, (_, $1, $2) => {
-                return $1.toUpperCase() + $2
-            })
-            entries = entries.filter(v => v.Type == ty)
-        }
 
-        let slicematch = filter.match(/\[(\d*):(-?\d*)\]/)
-        if (slicematch) {
-            let start = +slicematch[1]
-            let end = +slicematch[2]
-            entries = entries.slice(start, end)
+        let e = entries.values()
+        for (let [is, filterFn] of clientFilters.entries()) {
+            if (is(filter)) e = filterFn(filter, e)
         }
-
-        if (filter.startsWith("/") && filter.endsWith("/")) {
-            let re = new RegExp(filter.slice(1, filter.length - 1))
-            entries = entries.filter(v => v.En_Title.match(re))
-        } else if (filter == "shuffle" || filter == "shuf") {
-            entries = entries.sort(() => Math.random() - Math.random())
-        } else if (filter.startsWith("head")) {
-            const n = filter.slice("head".length).trim() || 1
-            entries = entries.slice(0, Number(n))
-        } else if (filter.startsWith("tail")) {
-            const n = filter.slice("tail".length).trim() || 1
-            entries = entries.slice(entries.length - Number(n))
-        } else if (filter.startsWith("sort")) {
-            let type = filter.slice("sort".length).trim() || "a"
-            const reversed = type.startsWith("-") ? -1 : 1
-            if (reversed == -1) type = type.slice(1)
-            switch (type[0]) {
-                case "a":
-                    entries.sort((a, b) => (a.En_Title > b.En_Title ? 1 : -1) * reversed)
-                    break;
-            }
-        } else if (filter === "!child") {
-            entries = entries.filter(v => {
-                let e = items_getEntry(v.ItemId)
-                return !e.relations.isChild()
-            })
-        } else if (filter === "!copy") {
-            entries = entries.filter(v => items_getEntry(v.ItemId).relations.isCopy())
-        }
+        entries = e.toArray()
     }
 
-    // if (filters.end < 0) {
-    //     filters.end += entries.length + 1
-    // }
     return entries
-    //
-    // return entries.slice(filters.start, filters.end)
 }
 
 /**
