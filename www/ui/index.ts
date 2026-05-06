@@ -1,11 +1,3 @@
-type ClientSearchFilters = {
-    filterRules: string[];
-    newSearch: string;
-    sortBy: string;
-
-    useV4: boolean;
-};
-
 async function main() {
     setupHintPopovers(document)
 

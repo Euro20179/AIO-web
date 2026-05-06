@@ -9,6 +9,17 @@
  * with client-side inputs
 */
 
+type ClientSearchFilters = {
+    filterRules: string[];
+    newSearch: string;
+    sortBy: string;
+
+    useV4: boolean;
+
+    [key: string]: any
+};
+
+
 type StartupUIComponents = {
     newWindow: HTMLElement,
     viewToggle: HTMLSelectElement,
@@ -1145,26 +1156,49 @@ function updateLibraryDropdown() {
     }
 }
 
+
+const clientSearchParsers = new Map<string, (search: string, filters: ClientSearchFilters, searchForm: FormData) => string>
+
 /**
- * pulls out relevant filters for the client
- * has the side effect of modifying search-query, removing any parts deemed filters for the client
- * eg: \[start:end\]
+ * Creates a new client search parser that gets used to parse the search query before sending it to the api
+ * @param {string} name - name of the parser (a unique identifier)
+ * @param {(search: string, filters: ClientSearchFilters) => string} parser - the function that parses the current search string, and is provided the current, already parsed, filters
+ * @returns {1 | 0} - 0 on success
  */
-function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilters {
-    // let start = 0
-    // let end = -1
+function addSearchParserUI(name: string, parser: (search: string, filters: ClientSearchFilters, searchForm: FormData) => string): 1 | 0 {
+    if (clientSearchParsers.has(name)) {
+        return 1
+    }
+    clientSearchParsers.set(name, parser)
+    return 0
+}
 
-    let search = searchForm.get("search-query") as string
+/**
+ * Deletes a search parser
+ * @param {string} name - name of the parser to delete
+ * @returns {1 | 0} - 0 on success
+ */
+function deleteSearchParserUI(name: string): 1 | 0 {
+    if (!clientSearchParsers.has(name)) {
+        return 1
+    }
+    clientSearchParsers.delete(name)
+    return 0
+}
 
-    let useV4 = true
-    if (search.startsWith("3")) {
-        useV4 = false
+addSearchParserUI("use-v4", (search, filters) => {
+    console.log(search, search.startsWith("3"))
+    filters["useV4"] = !search.startsWith("3")
+    if (!filters["useV4"]) {
         search = search.slice(1).trimStart()
     }
+    return search
+})
 
+addSearchParserUI("filter-parser", (search, filters) => {
     let inBracket = 0
     let filterStartPos = -1
-    for (let i = 0; i < search.length; i++) {
+    for (let i = 0; !filters["useV4"] && i < search.length; i++) {
         if (search[i] === "{") inBracket++
         else if (search[i] === "}") inBracket--
         if (i > 2 && search[i - 1] == "-" && search[i] == ">" && inBracket <= 0) {
@@ -1172,20 +1206,43 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
             break
         }
     }
-    let filters: string[] = []
+    let foundFilts: string[] = []
     if (filterStartPos > -1) {
-        filters = search.slice(filterStartPos).split("->").map(v => v.trim())
+        foundFilts = search.slice(filterStartPos).split("->").map(v => v.trim())
         search = search.slice(0, filterStartPos)
     }
+    filters["filterRules"] = foundFilts
+    return search
+})
 
-    let sortBy = searchForm.get("sort-by") as string
+addSearchParserUI("sort-by", (search, filters, form) => {
+    filters["sortBy"] = form.get("sort-by") as string
+    return search
+})
 
-    return {
-        filterRules: filters,
+/**
+ * pulls out relevant filters for the client
+ * has the side effect of modifying search-query, removing any parts deemed filters for the client
+ * eg: \[start:end\]
+ * @param {FormData} searchForm form that contains the search-query key-value pair
+ * @returns {ClientSearchFilters}
+ */
+function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilters {
+
+    let search = searchForm.get("search-query") as string
+
+    const filters: ClientSearchFilters = {
+        useV4: true,
+        filterRules: [],
         newSearch: search,
-        sortBy,
-        useV4
+        sortBy: ""
     }
+
+    for(let parser of clientSearchParsers.values()) {
+        filters["newSearch"] = parser(filters["newSearch"], filters, searchForm)
+    }
+
+    return filters
 }
 
 type ClientFilter = (filter: string) => boolean
