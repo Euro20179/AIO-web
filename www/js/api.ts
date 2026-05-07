@@ -447,8 +447,12 @@ async function api_deleteEntry(itemId: bigint) {
     })
 }
 
-async function api_overwriteMetadataEntry(itemId: bigint) {
-    return authorizedRequest(`${apiPath}/metadata/fetch?id=${itemId}`, {
+async function api_overwriteMetadataEntry(itemId: bigint, provider?: string) {
+    const params = new URLSearchParams([
+        ["id", String(itemId)],
+    ])
+    if(provider) params.set("provider", provider)
+    return authorizedRequest(`${apiPath}/metadata/fetch?${params.toString()}`, {
         "signin-reason": "automatically update metadata"
     })
 }
