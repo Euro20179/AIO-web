@@ -21,14 +21,26 @@
 
     <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
         <select name="provider" required>
-            <option value="anilist">Anilist (anime)</option>
-            <option value="omdb">open movie database (omdb) (movie/tv)</option>
-            <option value="openlibrary">open library ISBN lookup (books)</option>
-            <option value="googlebooks">google books search (books)</option>
-            <option value="sonarr">sonarr (tv)</option>
-            <option value="radarr">radarr (movie)</option>
-            <option value="seerr">seerr (movies)</option>
-            <option value="steam">steam (games)</option>
+            <optgroup label="Anime">
+                <option value="anilist">Anilist</option>
+            </optgroup>
+            <optgroup label="Movies+TV">
+                <option value="omdb">Open Movie Database (imdb)</option>
+            </optgroup>
+            <optgroup label="Books">
+                <option value="openlibrary">Open Library ISBN Lookup</option>
+                <option value="googlebooks">Google Books Search</option>
+            </optgroup>
+            <optgroup label="Games">
+                <option value="steam">Steam</option>
+            </optgroup>
+            <optgroup label="Movies">
+                <option value="radarr">Radarr</option>
+                <option value="seerr">Seerr</option>
+            </optgroup>
+            <optgroup label="Tv">
+                <option value="sonarr">Sonarr</option>
+            </optgroup>
         </select>
         <select name="query-type" required>
             <option value="by-title">By title</option>
