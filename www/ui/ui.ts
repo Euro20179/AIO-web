@@ -1059,7 +1059,6 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
             }
             const text = await res.text()
             entries = []
-            console.log(text.split("\x02").slice(1).join("\x02").trim())
             for(let meta of api_deserializeJsonl<MetadataEntry>(text.split("\x02").slice(1).join("\x02").trim())) {
                 entries.push(items_meta2info(meta))
                 items_addItem({
