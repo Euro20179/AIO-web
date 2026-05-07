@@ -1522,3 +1522,45 @@ function items_isSelected(id: bigint): boolean {
     return false
 }
 
+
+/**
+ * Attempts to convert a metadata entry to an info entry as best as possible
+ * @param {MetadataEntry} meta
+ * @returns {InfoEntry}
+ */
+function items_meta2info(meta: MetadataEntry): InfoEntry {
+    return {
+        En_Title: meta.Title,
+        Native_Title: meta.Native_Title,
+        ItemId: meta.ItemId,
+        Uid: meta.Uid,
+        ArtStyle: 0,
+        Collection: JSON.parse(meta.Genres || "[]").join("\x1F"),
+        Tags: JSON.parse(meta.Genres || "[]"),
+        Location: "",
+        Format: 7,
+        Library: 0n,
+        PurchasePrice: 0,
+        RecommendedBy: "[]",
+        Type: "Movie"
+    }
+}
+
+/**
+ * Attempts to convert a metadata entry to a user entry as best as possible
+ * @param {MetadataEntry} meta
+ * @returns {UserEntry}
+ */
+function items_meta2user(meta: MetadataEntry): UserEntry {
+    return {
+        CurrentPosition: "",
+        Extra: meta.MediaDependant || "{}",
+        ItemId: meta.ItemId,
+        Uid: meta.Uid,
+        Minutes: 0,
+        Notes: "",
+        Status: "",
+        UserRating: meta.Rating,
+        ViewCount: 0
+    }
+}

@@ -14,7 +14,7 @@ type ClientSearchFilters = {
     newSearch: string;
     sortBy: string;
 
-    useV4: boolean;
+    searchType: "4" | "3" | `metadata:${string}`
 
     [key: string]: any
 };
@@ -1037,11 +1037,40 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
 
     let filters = parseClientsideSearchFiltering(formData)
 
-    let entries = await (filters.useV4 ? api_queryV4 : api_queryV3)(
-        String(filters.newSearch) || "%",
-        Number(formData.get('uid')) || 0,
-        filters.sortBy as SortKind
-    )
+    const st = filters["searchType"]
+    let entries: InfoEntry[]
+    switch(st) {
+        case "4": 
+        case "3": {
+            entries = await api_query(
+                String(filters.newSearch) || "%",
+                Number(formData.get("uid")) || 0,
+                Number(st) as 3 | 4,
+                filters.sortBy as SortKind
+            )
+            break
+        }
+        default: {
+            let [_, provider] = st.split(":")
+            const res = await api_identify(String(filters.newSearch) || "%", provider)
+            if(!res) {
+                entries = []
+                break
+            }
+            const text = await res.text()
+            entries = []
+            console.log(text.split("\x02").slice(1).join("\x02").trim())
+            for(let meta of api_deserializeJsonl<MetadataEntry>(text.split("\x02").slice(1).join("\x02").trim())) {
+                entries.push(items_meta2info(meta))
+                items_addItem({
+                    events: [],
+                    info: entries[entries.length - 1],
+                    user: items_meta2user(meta),
+                    meta
+                })
+            }
+        }
+    }
 
     entries = applyClientsideSearchFiltering(entries, filters)
 
@@ -1186,11 +1215,21 @@ function deleteSearchParserUI(name: string): 1 | 0 {
     return 0
 }
 
-addSearchParserUI("use-v4", (search, filters) => {
-    console.log(search, search.startsWith("3"))
-    filters["useV4"] = !search.startsWith("3")
-    if (!filters["useV4"]) {
+addSearchParserUI("search-type", (search, filters) => {
+    if(search.startsWith("3")) {
+        filters["searchType"] = '3'
         search = search.slice(1).trimStart()
+    } else if (search.startsWith("!s")) {
+        if(search.startsWith("!s:")) {
+            let identifier = search.split("!s:")[1].split(/\s/)[0]
+            filters["searchType"] = `metadata:${identifier}`
+            search = search.slice(3 + identifier.length).trimStart()
+        } else {
+            filters["searchType"] = `metadata:${"omdb"}`
+            search = search.slice(2).trimStart()
+        }
+    } else {
+        filters['searchType'] = '4'
     }
     return search
 })
@@ -1232,7 +1271,7 @@ function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilte
     let search = searchForm.get("search-query") as string
 
     const filters: ClientSearchFilters = {
-        useV4: true,
+        searchType: '4',
         filterRules: [],
         newSearch: search,
         sortBy: ""
