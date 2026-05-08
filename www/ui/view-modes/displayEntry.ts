@@ -1799,7 +1799,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         //remove the <Media>- part from the key looks ugly
         let modifiedKeys: { [k: string]: string } = {}
         for (let key in mediaDependant) {
-            let title = key.split("-")[1]
+            let title = key.split("-").slice(1).join("-")
             title = title[0].toLocaleUpperCase() + title.slice(1)
             const val = mediaDependant[key]
             modifiedKeys[title] = val
@@ -1812,17 +1812,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     el.host.setAttribute("data-user-status", user.Status)
 
     //Media dependant
-    let lengthInNumber: 0 | string = 0
-    for (let key in mediaDependant) {
-        if (
-            key.endsWith("episodes")
-            || key.endsWith(`volumes`)
-            || key.endsWith(`chapters`)
-            || key.endsWith(`page-count`)
-        ) {
-            lengthInNumber = mediaDependant[key]
-        }
-    }
+    let lengthInNumber = items_getLength(mediaDependant)[0] || 0
+    console.log(lengthInNumber)
 
     renderComponent("#entry-progressbar", progressEl => {
         if (!("max" in progressEl &&
@@ -1834,7 +1825,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     renderComponent("#entry-progressbar-position-label", captionEl => {
         captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
-        captionEl.title = `${Math.round(userPos / parseInt(lengthInNumber || '0') * 1000) / 10}%`
+        captionEl.title = `${Math.round(userPos / lengthInNumber * 1000) / 10}%`
     })
 
     renderComponent("#multiple-progress", multipleProgressEl => {
@@ -1873,8 +1864,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 //if there's no label, and no total is given
                 //use the mediaDependant determined length
                 !label && part[3] === undefined
-                    ? (lengthInNumber || "0")
-                    : (part[3] || "0") //part[3] could be empty string
+                    ? (lengthInNumber || 0)
+                    : (part[3] || 0) //part[3] could be empty string
 
             let p = dom_getel(
                 "progress",
@@ -1892,7 +1883,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             )
             if(!c) continue
             const node = document.createTextNode(`${label || ""}${part[2]}`)
-            if (parseInt(max)) {
+            if (max) {
                 node.appendData(`/${max}`)
             }
             c.append(node)
@@ -1903,7 +1894,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 c
             )
             if(!upHint) continue
-            upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(max) * 1000) / 10) || 0}%`
+            upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(String(max)) * 1000) / 10) || 0}%`
         }
     })
 

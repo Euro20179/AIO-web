@@ -1565,3 +1565,24 @@ function items_meta2user(meta: MetadataEntry): UserEntry {
         ViewCount: 0
     }
 }
+
+/**
+ * Attempts to find the length of a media based on its mediaDependant data
+ * @param {Record<string, string>} mediaData The data object to use
+ * @returns {[number, string]} the length followed by a unit
+ */
+function items_getLength(mediaData: Record<string, string>): [number, string] {
+    for(let key in mediaData) {
+        for(let possibility of [
+            "episodes",
+            "volumes",
+            "chapters",
+            "page-count"
+        ]) {
+            if(key.endsWith(possibility)) {
+                return [parseInt(mediaData[key]), possibility]
+            }
+        }
+    }
+    return [NaN, "INVALID"]
+}
