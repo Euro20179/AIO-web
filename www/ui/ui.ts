@@ -736,6 +736,27 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
 }
 
 /**
+ * Filters the users scripts in the user scripts dialog.
+ * Checks if {filter} is included in that script's text somewhere
+ * @param {string} filter
+ */
+function filterUserScriptsUI(filter: string) {
+    const scriptSelect = dom_getelorthrow("#script-select", HTMLElement)
+    const divs = scriptSelect.querySelectorAll("div")
+    for(let el of divs) {
+        el.hidden = false
+    }
+
+    if(!filter) return
+
+    for(let el of divs) {
+        if (!el.textContent.includes(filter)) {
+            el.hidden = true
+        }
+    }
+}
+
+/**
  * Shows a prompt dialog to the user
  * @param {string} html - The prompt message to display
  * @param {string} [_default] - Optional default value for the prompt
