@@ -80,7 +80,9 @@
     <new-entry-dialog></new-entry-dialog>
 
     <dialog id="script-select">
-        <input oninput="filterUserScriptsUI(this.value)" placeholder="Filter" />
+        <form action="javascript:runFirstUserScriptUI()">
+            <input oninput="filterUserScriptsUI(this.value)" placeholder="Filter" />
+        </form>
     </dialog>
 
     <div id="main">

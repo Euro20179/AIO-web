@@ -736,6 +736,14 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
 }
 
 /**
+ * Picks the first script from the dialog and runs it
+ */
+function runFirstUserScriptUI() {
+    const scriptName = dom_getelorthrow("#script-select div:not([hidden]) h3", HTMLElement)
+    runUserScriptUI(scriptName.textContent)
+}
+
+/**
  * Filters the users scripts in the user scripts dialog.
  * Checks if {filter} is included in that script's text somewhere
  * @param {string} filter
