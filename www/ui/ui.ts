@@ -1431,7 +1431,7 @@ function openEventFormUI(itemid: string) {
     const modal = openModalUI("new-event-form")
     if (!modal) return
 
-    const form = modal.querySelector("form")
+    const form = modal.querySelector("form:has(input)")
     if (!form) return
 
     const itemidEl = dom_getelorthrow('[name="itemid"]', HTMLInputElement, form)
