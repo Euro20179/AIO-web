@@ -226,7 +226,7 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
     else {
         newWin.addEventListener("DOMContentLoaded", () => {
             mode.chwin?.(newWin)
-            newWin.self.addEventListener("aio-items-rendered", () => {
+            newWin.self.addEventListener("modes.update-item", () => {
                 refresh()
             })
         })
