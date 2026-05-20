@@ -80,7 +80,13 @@
                 `
             }
             async function _selectEvent(outputDatetimeLocalName) {
-                const item = await selectItemUI()
+                const c1 = await fillItemListingUI(
+                    Object.fromEntries(
+                        items_getSelected()
+                            .map(i => [i.ItemId, items_getEntry(i.ItemId)])
+                    )
+                )
+                const item = await selectItemUI({container: c1})
                 if(!item) return
                 const events = findUserEventsById(item)
                 if(!events || !events.length) {
