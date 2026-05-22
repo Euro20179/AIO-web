@@ -23,6 +23,7 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
 
     let modeSelector = this.output.querySelector("#tierlist-mode")
     let customExpr = this.output.querySelector("#tierlist-custom")
+    let exportTierlist = dom_getel("#export-tierlist", this.win.HTMLElement, this.output)
 
     if (modeSelector instanceof this.win.HTMLSelectElement) {
         this.previousMode = modeSelector.value
@@ -31,6 +32,34 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
 
     if (customExpr instanceof this.win.HTMLTextAreaElement) {
         customExpr.oninput = this._customExpr.bind(this)
+    }
+
+    if(exportTierlist) {
+        exportTierlist.onclick =(e) => {
+            if(!this.tierlistEl) return
+            let out = "\x01"
+            for(let tier of this.tierlistEl.querySelectorAll("ul")) {
+                let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
+                out += `\x05${tier.className.split('-tier')[0]}\x00${color}\x06`
+                for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
+                    if(el instanceof this.win.HTMLImageElement) {
+                        out += `${el.src}\x00`
+                    } else {
+                        const svg = document.createElement("svg")
+                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+                        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+                        svg.setAttribute("viewBox", "-100 -100 200 200")
+                        text.setAttribute("x", "50")
+                        text.setAttribute("y", "50")
+                        text.append(el.innerHTML)
+                        svg.append(text)
+                        out += `data:image/svg+xml,${svg.outerHTML}\x00`
+                    }
+                }
+                out += "\x1d"
+            }
+            ua_download(out, "aio.tierlist", "application/x-tierlist")
+        }
     }
 
     const tle = dom_getel("tier-list", this.win.HTMLElement, this.output)
@@ -228,4 +257,3 @@ TierListMode.prototype.chwin = function(this: TierListMode, win: Window & typeof
     this._setup()
     return container
 }
-
