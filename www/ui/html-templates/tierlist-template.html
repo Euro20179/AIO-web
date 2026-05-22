@@ -14,7 +14,12 @@
 
         <textarea id="tierlist-custom" placeholder="Custom tierlist expression"></textarea>
 
-        <button id="export-tierlist">Export as .tierlist</button>
+        <button id="export-tierlist">Export</button>
+        as
+        <select id="export-tierlist-as">
+            <option value="application/x-tierlist">.tierlist</option>
+            <option value="application/x-tierlist+xml">.tierlistx</option>
+        </select>
     </menu>
     <tier-list class="block">
     </tier-list>

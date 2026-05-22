@@ -18,6 +18,85 @@ var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, o
     this._setup()
 } as any
 
+function _exportTierlist_binary(root: HTMLElement) {
+    let out = "\x01"
+    for(let tier of root.querySelectorAll("ul")) {
+        let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
+        out += `\x05${tier.querySelector('tier-label')?.textContent}\x00${color}\x06`
+        for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
+            if("src" in el && typeof el.src === "string") {
+                out += `${el.src}\x00`
+            } else {
+                const svg = document.createElement("svg")
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+                svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+                svg.setAttribute("viewBox", "-100 -100 200 200")
+                text.setAttribute("x", "50")
+                text.setAttribute("y", "50")
+                text.append(el.innerHTML)
+                svg.append(text)
+                out += `data:image/svg+xml,${svg.outerHTML}\x00`
+            }
+        }
+        out += "\x1d"
+    }
+    ua_download(out, "aio.tierlist", "application/x-tierlist")
+}
+
+function _exportTierlist_xml(tierlist: HTMLElement) {
+    const doctype = document.implementation.createDocumentType(
+        "tierlist",
+        "-//SECEURITY PLACE//DTD TIERLISTX 1.0//EN",
+        "https://static.seceurity.place/xml/tierlistx.dtd")
+    const doc = document.implementation.createDocument(
+        "https://static.seceurity.place/xml/tierlistx.html",
+        null,
+        doctype)
+    const root = doc.createElement("tierlist")
+    doc.append(root)
+    let i = 0
+    for (let tier of tierlist.querySelectorAll("ul")) {
+        const row = doc.createElement("row")
+        root.appendChild(row)
+        let label = tier.querySelector("tier-label")?.textContent
+        if (!label) {
+            label = `Tier#${i}`
+        }
+        row.setAttribute("name", label)
+        let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
+        row.setAttribute("color", color)
+
+        for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
+            const item = doc.createElement("item")
+            if("src" in el && typeof el.src === "string") {
+                item.append(doc.createTextNode(el.src))
+            } else {
+                const svg = document.createElement("svg")
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
+                svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+                svg.setAttribute("viewBox", "-100 -100 200 200")
+                text.setAttribute("x", "50")
+                text.setAttribute("y", "50")
+                text.append(el.innerHTML)
+                svg.append(text)
+                item.append(doc.createTextNode(`data:image/svg+xml,${svg.outerHTML}`))
+            }
+            row.appendChild(item)
+        }
+
+        i++
+    }
+    const s = new XMLSerializer()
+    ua_download("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + s.serializeToString(doc),
+                "aio.tierlistx", "application/x-tierlist+xml")
+}
+
+function _exportTierlist(root: HTMLElement, as: "application/x-tierlist" | "application/x-tierlist+xml") {
+    return as === "application/x-tierlist"
+        ? _exportTierlist_binary(root)
+        : _exportTierlist_xml(root)
+}
+
 TierListMode.prototype._setup = function(this: TierListMode, ) {
     const tierListStyles = settings_get("tierlist_styles")
 
@@ -37,28 +116,14 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
     if(exportTierlist) {
         exportTierlist.onclick =(e) => {
             if(!this.tierlistEl) return
-            let out = "\x01"
-            for(let tier of this.tierlistEl.querySelectorAll("ul")) {
-                let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
-                out += `\x05${tier.className.split('-tier')[0]}\x00${color}\x06`
-                for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
-                    if(el instanceof this.win.HTMLImageElement) {
-                        out += `${el.src}\x00`
-                    } else {
-                        const svg = document.createElement("svg")
-                        const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
-                        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-                        svg.setAttribute("viewBox", "-100 -100 200 200")
-                        text.setAttribute("x", "50")
-                        text.setAttribute("y", "50")
-                        text.append(el.innerHTML)
-                        svg.append(text)
-                        out += `data:image/svg+xml,${svg.outerHTML}\x00`
-                    }
-                }
-                out += "\x1d"
-            }
-            ua_download(out, "aio.tierlist", "application/x-tierlist")
+            _exportTierlist(
+                this.tierlistEl,
+                dom_getelorthrow(
+                    "#export-tierlist-as",
+                    this.win.HTMLSelectElement,
+                    this.output
+                ).value as any
+            )
         }
     }
 
