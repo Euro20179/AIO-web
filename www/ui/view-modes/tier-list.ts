@@ -21,7 +21,7 @@ var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, o
 function _exportTierlist_binary(root: HTMLElement) {
     let out = "\x01"
     for(let tier of root.querySelectorAll("ul")) {
-        let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
+        let color = _getClr((tier.firstElementChild || document.documentElement) as HTMLElement)
         out += `\x05${tier.querySelector('tier-label')?.textContent}\x00${color}\x06`
         for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
             if("src" in el && typeof el.src === "string") {
@@ -41,6 +41,42 @@ function _exportTierlist_binary(root: HTMLElement) {
         out += "\x1d"
     }
     ua_download(out, "aio.tierlist", "application/x-tierlist")
+}
+
+function _getClr(element: HTMLElement) {
+    let clr = getComputedStyle(element).backgroundColor
+    /* color can be some insane color that no other program would support, eg: color(srgb r g b / a) */
+    /* if the browser supports parsing colors, parse it and turn it into #rrggbbaa */
+    /*this has the added benifit of: if the color is fully transparent
+        * (we dont want this), change it to some default color, like black */
+    if("CSSColorValue" in window) {
+        /* support for this is AWFUL, even in chrome which "supports" it */
+        /* it doesn't parse every color... */
+        try {
+            //@ts-ignore
+            let rgb = CSSColorValue.parse(clr)
+            console.log(rgb)
+            //@ts-ignore
+            if(!(rgb instanceof element.ownerDocument.defaultView.CSSRGB)) {
+                return clr
+            }
+
+            const parsecomponent = (c: CSSUnitValue, max = 255) => {
+                let val = (c.unit === 'percentage'
+                    ? Math.floor(c.value * max)
+                    : Math.floor(c.value)).toString(16)
+                console.log(val)
+                return val.length === 1
+                    ? '0' + val
+                    : val
+            }
+            return `#${parsecomponent(rgb.r)}${parsecomponent(rgb.g)}${parsecomponent(rgb.b)}`
+        } catch(err) {
+            console.warn(err)
+            return clr
+        }
+    }
+    return clr
 }
 
 function _exportTierlist_xml(tierlist: HTMLElement) {
@@ -63,7 +99,7 @@ function _exportTierlist_xml(tierlist: HTMLElement) {
             label = `Tier#${i}`
         }
         row.setAttribute("name", label)
-        let color = getComputedStyle(tier.firstElementChild || document.documentElement).backgroundColor
+        let color = _getClr((tier.firstElementChild || document.documentElement) as HTMLElement)
         row.setAttribute("color", color)
 
         for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
