@@ -1483,6 +1483,7 @@ function items_countryOfOrigin2Flag(origin: string) {
     const flags = {
         "Japan": "🇯🇵",
         "JP": "🇯🇵",
+        "CA": "🇨🇦",
         "Canada": "🇨🇦",
         "United States": "🇺🇸",
         "US": "🇺🇸",

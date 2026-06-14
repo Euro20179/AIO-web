@@ -55,7 +55,6 @@ function _getClr(element: HTMLElement) {
         try {
             //@ts-ignore
             let rgb = CSSColorValue.parse(clr)
-            console.log(rgb)
             //@ts-ignore
             if(!(rgb instanceof element.ownerDocument.defaultView.CSSRGB)) {
                 return clr
@@ -65,7 +64,6 @@ function _getClr(element: HTMLElement) {
                 let val = (c.unit === 'percentage'
                     ? Math.floor(c.value * max)
                     : Math.floor(c.value)).toString(16)
-                console.log(val)
                 return val.length === 1
                     ? '0' + val
                     : val
