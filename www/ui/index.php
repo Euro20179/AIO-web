@@ -126,6 +126,7 @@
                             <option value="added">Added</option>
                             <option value="finished">Finished</option>
                             <option value="viewing">Viewing</option>
+                            <option value="planned">Planned</option>
                         </optgroup>
                     </select>
 

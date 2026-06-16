@@ -868,7 +868,7 @@ sorts.set("rating", (a, b) => {
     return bUInfo?.UserRating - aUInfo?.UserRating
 })
 
-for(let event of ["Added", "Finished", "Viewing"]) {
+for(let event of ["Added", "Finished", "Viewing", "Planned"]) {
     sorts.set(event.toLowerCase(), (a, b) => {
         let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === event)
         let be = findUserEventsById(b.ItemId).findLast(v => v.Event === event)
