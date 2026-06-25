@@ -587,6 +587,6 @@ function api_uiSort2Api(sort: SortKind) {
             return "entryInfo.itemId"
         //in case the order by doesnt exist on the server
         default:
-            return ""
+            return sort
     }
 }

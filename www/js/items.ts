@@ -95,6 +95,7 @@ type InfoEntry = {
     Library: bigint
     Uid: number
     RecommendedBy: string
+    Priority: number
 
     Tags: string[]
 }
@@ -860,6 +861,8 @@ function sortEvents(events: UserEvent[]): UserEvent[] {
 }
 
 const sorts = new Map<string, ((a: InfoEntry, b: InfoEntry) => number)>
+
+sorts.set("priority", (a, b) => b.Priority - a.Priority)
 
 sorts.set("rating", (a, b) => {
     let aUInfo = findUserEntryById(a.ItemId)
