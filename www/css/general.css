@@ -231,6 +231,14 @@
         text-decoration: none;
     }
 
+    button.simple {
+        border: none;
+    }
+
+    p.simple {
+        margin: 0;
+    }
+
     .bad {
         --accent-color: var(--pink);
         color: var(--accent-color);

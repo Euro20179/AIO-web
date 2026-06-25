@@ -49,7 +49,7 @@
             gap: 0;
         }
 
-        button {
+        & > button:first-of-type {
             min-height: 70cqi;
             width: fit-content;
             height: fit-content;
@@ -60,6 +60,10 @@
             @container body (width < 800px) {
                 min-height: revert;
             }
+        }
+
+        button {
+            align-self: center;
         }
     }
 

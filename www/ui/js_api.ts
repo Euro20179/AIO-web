@@ -62,7 +62,6 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
     picker: {
         const cspicker = dom_getel("color-scheme-selector")
         if(!cspicker) break picker
-        console.log(cspicker.querySelectorAll("option"))
         win.document.body.prepend(cspicker.cloneNode(true))
 
         const s = document.createElement("script")

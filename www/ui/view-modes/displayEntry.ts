@@ -1813,7 +1813,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Media dependant
     let lengthInNumber = items_getLength(mediaDependant)[0] || 0
-    console.log(lengthInNumber)
 
     renderComponent("#entry-progressbar", progressEl => {
         if (!("max" in progressEl &&

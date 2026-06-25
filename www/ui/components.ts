@@ -231,6 +231,12 @@ customElements.define("sidebar-entry", class extends HTMLElement {
         this.root = root
     }
 
+    connectedCallback() {
+        let entry = items_getEntry(BigInt(this.getAttribute("data-entry-id") || "0"))
+        if(entry)
+            updateDeclarativeDSL({}, entry.info, entry.user, entry.meta, this.root) 
+    }
+
     focus() {
         this.root.querySelector("button")?.focus()
     }

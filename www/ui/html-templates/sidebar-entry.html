@@ -1,8 +1,31 @@
 <template id="sidebar-entry">
 <div class="root" part="root">
     <figure>
-        <button><img loading="lazy" part="thumbnail" id="sidebar-thumbnail" class="thumbnail"></button>
-        <input class="title" id="sidebar-title">
+        <button class="styleless-button"><img loading="lazy" part="thumbnail" id="sidebar-thumbnail" class="thumbnail"></button>
+        <div class="flex">
+            <button class="simple" toggle-hint onclick="
+                let item = items_getEntry(this.getRootNode().host.getAttribute('data-entry-id'));
+                setPropUI(item.info, 'Priority', item.info.Priority + 1, 'raise priority')
+            ">
+                +
+                <span popover="hint">Raise priority</span>
+            </button>
+            <input class="title" id="sidebar-title">
+            <button class='simple' style='align-self: center;' put-data="Priority" onclick="
+                let item = items_getEntry(this.getRootNode().host.getAttribute('data-entry-id'));
+                promptNumber('new priority', 'not a number', Number).then(res => {
+                    if(res === null) return
+                    setPropUI(item.info, 'Priority', res, 'set priority')
+                })
+            "></button>
+            <button class="simple" toggle-hint onclick="
+                let item = items_getEntry(this.getRootNode().host.getAttribute('data-entry-id'));
+                setPropUI(item.info, 'Priority', item.info.Priority - 1, 'lower priority')
+            ">
+                -
+                <span popover="hint">Lower priority</span>
+            </button>
+        </div>
     </figure>
 </div>
 </template>

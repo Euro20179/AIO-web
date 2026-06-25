@@ -14,7 +14,6 @@ type SidebarMode = {
     render(entries: InfoEntry[], clearRendered?: boolean): any
 
     updateThumbnail(id: bigint, src: string): any
-    modesUpdateHandler(e: CustomEvent): any
     mkobserver(): any
 } & Mode
 
@@ -24,9 +23,6 @@ var SidebarMode: ModeConstructor<SidebarMode> = function(this: SidebarMode, outp
     this.itemsOnScreen = new Set
 
     this.mkobserver()
-
-    //@ts-ignore
-    addEventListener("modes.update-item", this.modesUpdateHandler.bind(this))
 
     this._resizeTO = 0
     this._setToNone = false
@@ -77,17 +73,11 @@ SidebarMode.prototype.mkobserver = function(this: SidebarMode) {
     }
 }
 
-SidebarMode.prototype.modesUpdateHandler = function(this: SidebarMode, e: CustomEvent) {
-    const id = e.detail
-    this.refresh?.(BigInt(id))
-}
-
 SidebarMode.prototype.add = function(this: SidebarMode, item: InfoEntry) {
     return renderSidebarItem.call(this, item, this.output)
 }
 
 SidebarMode.prototype.addList = function(this: SidebarMode, items: InfoEntry[]) {
-    console.log(items);
     (async () => {
         for (let i = 0; i < items.length; i++) {
             if (i !== 0 && i % 20 == 0 && "scheduler" in window) {
@@ -115,7 +105,6 @@ SidebarMode.prototype.close = function(this: SidebarMode) {
     this.clearSelected()
     this.observer.disconnect()
     //@ts-ignore
-    removeEventListener("modes.update-item", this.modesUpdateHandler)
     this.win.removeEventListener("resize", this.resizeHandler)
 }
 
@@ -250,6 +239,8 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         titleEl.setAttribute("data-release-year", String(meta.ReleaseYear))
     else
         titleEl.setAttribute("data-release-year", "unknown")
+
+    updateDeclarativeDSL({}, item, user, meta, el) 
 }
 
 function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
