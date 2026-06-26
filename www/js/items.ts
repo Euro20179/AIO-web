@@ -1504,6 +1504,8 @@ function items_countryOfOrigin2Flag(origin: string) {
         "Italy": "🇮🇹",
         "New Zealand": "🇳🇿",
         "Hungary": "🇭🇺",
+        "Hong Kong": "🇭🇰",
+        "China": "🇨🇳",
     }
     let str = ""
     for(let o of origin.split(",")) {
