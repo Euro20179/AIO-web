@@ -634,6 +634,7 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         En_Title: "",
         Library: 0n,
         RecommendedBy: "[]",
+        Priority: 0,
 
         Tags: []
     }
@@ -871,7 +872,7 @@ sorts.set("rating", (a, b) => {
     return bUInfo?.UserRating - aUInfo?.UserRating
 })
 
-for(let event of ["Added", "Finished", "Viewing", "Planned"]) {
+for (let event of ["Added", "Finished", "Viewing", "Planned"]) {
     sorts.set(event.toLowerCase(), (a, b) => {
         let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === event)
         let be = findUserEventsById(b.ItemId).findLast(v => v.Event === event)
@@ -1174,8 +1175,8 @@ function items_findAllEvents(itemId: bigint, include: bigint, recursive: boolean
  * @returns {number}
 */
 function items_calculateCost(itemId: bigint, include: bigint, recursive: boolean): number {
-    if(Math.sumPrecise) {
-        let items = 
+    if (Math.sumPrecise) {
+        let items =
             items_reduce<number[]>(
                 itemId,
                 include,
@@ -1224,15 +1225,15 @@ function items_eventTimeEstimate(event: UserEvent): number {
  * @returns 0 if they occured at the same time
  * @returns n > 0 if left occured BEFORE right
  */
-function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): number{
+function items_compareEventTiming(left: UserEvent | number, right: UserEvent | number): number {
     let l = typeof left !== 'number' ? items_eventTimeEstimate(left) : left
     let r = typeof right !== 'number' ? items_eventTimeEstimate(right) : right
     let defaultTZ = INTL_OPTIONS.timeZone === "Etc/Unknown" ?
-                        "Atlantic/Reykjavik"
-                    : INTL_OPTIONS.timeZone
+        "Atlantic/Reykjavik"
+        : INTL_OPTIONS.timeZone
 
     return time_compare(
-        BigInt(l) * 1000000n, 
+        BigInt(l) * 1000000n,
         (typeof left !== 'number' && left.TimeZone) || defaultTZ,
         BigInt(r) * 1000000n,
         (typeof right !== 'number' && right.TimeZone) || defaultTZ
@@ -1329,7 +1330,7 @@ function items_hasArtStyle(item: InfoEntry, artStyle: ArtStyle) {
 
 function items_artStyle2Int(artStyles: ASName[]): number {
     let res = 0
-    for(let as_ of artStyles) {
+    for (let as_ of artStyles) {
         res |= {
             "2d": AS_2D,
             "cgi": AS_CGI,
@@ -1506,9 +1507,254 @@ function items_countryOfOrigin2Flag(origin: string) {
         "Hungary": "🇭🇺",
         "Hong Kong": "🇭🇰",
         "China": "🇨🇳",
+        "Ascension Island": "🇦🇨",
+        "Andorra": "🇦🇩",
+        "United Arab Emirates": "🇦🇪",
+        "Afghanistan": "🇦🇫",
+        "Antigua & Barbuda": "🇦🇬",
+        "Anguilla": "🇦🇮",
+        "Albania": "🇦🇱",
+        "Armenia": "🇦🇲",
+        "Angola": "🇦🇴",
+        "Antarctica": "🇦🇶",
+        "Argentina": "🇦🇷",
+        "American Samoa": "🇦🇸",
+        "Austria": "🇦🇹",
+        "Australia": "🇦🇺",
+        "Aruba": "🇦🇼",
+        "Åland Islands": "🇦🇽",
+        "Azerbaijan": "🇦🇿",
+        "Bosnia & Herzegovina": "🇧🇦",
+        "Barbados": "🇧🇧",
+        "Bangladesh": "🇧🇩",
+        "Burkina Faso": "🇧🇫",
+        "Bulgaria": "🇧🇬",
+        "Bahrain": "🇧🇭",
+        "Burundi": "🇧🇮",
+        "Benin": "🇧🇯",
+        "St. Barthélemy": "🇧🇱",
+        "Bermuda": "🇧🇲",
+        "Brunei": "🇧🇳",
+        "Bolivia": "🇧🇴",
+        "Caribbean Netherlands": "🇧🇶",
+        "Bahamas": "🇧🇸",
+        "Bhutan": "🇧🇹",
+        "Bouvet Island": "🇧🇻",
+        "Botswana": "🇧🇼",
+        "Belarus": "🇧🇾",
+        "Belize": "🇧🇿",
+        "Cocos (Keeling) Islands": "🇨🇨",
+        "Congo - Kinshasa": "🇨🇩",
+        "Central African Republic": "🇨🇫",
+        "Congo - Brazzaville": "🇨🇬",
+        "Switzerland": "🇨🇭",
+        "Côte d’Ivoire": "🇨🇮",
+        "Cook Islands": "🇨🇰",
+        "Chile": "🇨🇱",
+        "Cameroon": "🇨🇲",
+        "Colombia": "🇨🇴",
+        "Clipperton Island": "🇨🇵",
+        "Sark": "🇨🇶",
+        "Costa Rica": "🇨🇷",
+        "Cuba": "🇨🇺",
+        "Cape Verde": "🇨🇻",
+        "Curaçao": "🇨🇼",
+        "Christmas Island": "🇨🇽",
+        "Cyprus": "🇨🇾",
+        "Czechia": "🇨🇿",
+        "Germany": "🇩🇪",
+        "Diego Garcia": "🇩🇬",
+        "Djibouti": "🇩🇯",
+        "Dominica": "🇩🇲",
+        "Dominican Republic": "🇩🇴",
+        "Algeria": "🇩🇿",
+        "Ceuta & Melilla": "🇪🇦",
+        "Ecuador": "🇪🇨",
+        "Estonia": "🇪🇪",
+        "Egypt": "🇪🇬",
+        "Western Sahara": "🇪🇭",
+        "Eritrea": "🇪🇷",
+        "Spain": "🇪🇸",
+        "Ethiopia": "🇪🇹",
+        "European Union": "🇪🇺",
+        "Finland": "🇫🇮",
+        "Fiji": "🇫🇯",
+        "Falkland Islands": "🇫🇰",
+        "Micronesia": "🇫🇲",
+        "Faroe Islands": "🇫🇴",
+        "Gabon": "🇬🇦",
+        "Grenada": "🇬🇩",
+        "Georgia": "🇬🇪",
+        "French Guiana": "🇬🇫",
+        "Guernsey": "🇬🇬",
+        "Ghana": "🇬🇭",
+        "Gibraltar": "🇬🇮",
+        "Greenland": "🇬🇱",
+        "Gambia": "🇬🇲",
+        "Guinea": "🇬🇳",
+        "Guadeloupe": "🇬🇵",
+        "Equatorial Guinea": "🇬🇶",
+        "Greece": "🇬🇷",
+        "South Georgia & South Sandwich Islands": "🇬🇸",
+        "Guatemala": "🇬🇹",
+        "Guam": "🇬🇺",
+        "Guinea-Bissau": "🇬🇼",
+        "Guyana": "🇬🇾",
+        "Hong Kong SAR China": "🇭🇰",
+        "Heard & McDonald Islands": "🇭🇲",
+        "Honduras": "🇭🇳",
+        "Croatia": "🇭🇷",
+        "Haiti": "🇭🇹",
+        "Canary Islands": "🇮🇨",
+        "Indonesia": "🇮🇩",
+        "Israel": "🇮🇱",
+        "Isle of Man": "🇮🇲",
+        "India": "🇮🇳",
+        "British Indian Ocean Territory": "🇮🇴",
+        "Iraq": "🇮🇶",
+        "Iran": "🇮🇷",
+        "Iceland": "🇮🇸",
+        "Jersey": "🇯🇪",
+        "Jamaica": "🇯🇲",
+        "Jordan": "🇯🇴",
+        "Kenya": "🇰🇪",
+        "Kyrgyzstan": "🇰🇬",
+        "Cambodia": "🇰🇭",
+        "Kiribati": "🇰🇮",
+        "Comoros": "🇰🇲",
+        "St. Kitts & Nevis": "🇰🇳",
+        "North Korea": "🇰🇵",
+        "Kuwait": "🇰🇼",
+        "Cayman Islands": "🇰🇾",
+        "Kazakhstan": "🇰🇿",
+        "Laos": "🇱🇦",
+        "Lebanon": "🇱🇧",
+        "St. Lucia": "🇱🇨",
+        "Liechtenstein": "🇱🇮",
+        "Sri Lanka": "🇱🇰",
+        "Liberia": "🇱🇷",
+        "Lesotho": "🇱🇸",
+        "Lithuania": "🇱🇹",
+        "Latvia": "🇱🇻",
+        "Libya": "🇱🇾",
+        "Morocco": "🇲🇦",
+        "Monaco": "🇲🇨",
+        "Moldova": "🇲🇩",
+        "Montenegro": "🇲🇪",
+        "St. Martin": "🇲🇫",
+        "Madagascar": "🇲🇬",
+        "Marshall Islands": "🇲🇭",
+        "North Macedonia": "🇲🇰",
+        "Mali": "🇲🇱",
+        "Myanmar (Burma)": "🇲🇲",
+        "Mongolia": "🇲🇳",
+        "Macao SAR China": "🇲🇴",
+        "Northern Mariana Islands": "🇲🇵",
+        "Martinique": "🇲🇶",
+        "Mauritania": "🇲🇷",
+        "Montserrat": "🇲🇸",
+        "Malta": "🇲🇹",
+        "Mauritius": "🇲🇺",
+        "Maldives": "🇲🇻",
+        "Malawi": "🇲🇼",
+        "Mexico": "🇲🇽",
+        "Malaysia": "🇲🇾",
+        "Mozambique": "🇲🇿",
+        "Namibia": "🇳🇦",
+        "New Caledonia": "🇳🇨",
+        "Niger": "🇳🇪",
+        "Norfolk Island": "🇳🇫",
+        "Nigeria": "🇳🇬",
+        "Nicaragua": "🇳🇮",
+        "Norway": "🇳🇴",
+        "Nepal": "🇳🇵",
+        "Nauru": "🇳🇷",
+        "Niue": "🇳🇺",
+        "Oman": "🇴🇲",
+        "Panama": "🇵🇦",
+        "Peru": "🇵🇪",
+        "French Polynesia": "🇵🇫",
+        "Papua New Guinea": "🇵🇬",
+        "Philippines": "🇵🇭",
+        "Pakistan": "🇵🇰",
+        "Poland": "🇵🇱",
+        "St. Pierre & Miquelon": "🇵🇲",
+        "Pitcairn Islands": "🇵🇳",
+        "Puerto Rico": "🇵🇷",
+        "Palestinian Territories": "🇵🇸",
+        "Portugal": "🇵🇹",
+        "Palau": "🇵🇼",
+        "Paraguay": "🇵🇾",
+        "Qatar": "🇶🇦",
+        "Réunion": "🇷🇪",
+        "Romania": "🇷🇴",
+        "Serbia": "🇷🇸",
+        "Russia": "🇷🇺",
+        "Rwanda": "🇷🇼",
+        "Saudi Arabia": "🇸🇦",
+        "Solomon Islands": "🇸🇧",
+        "Seychelles": "🇸🇨",
+        "Sudan": "🇸🇩",
+        "Singapore": "🇸🇬",
+        "St. Helena": "🇸🇭",
+        "Slovenia": "🇸🇮",
+        "Svalbard & Jan Mayen": "🇸🇯",
+        "Slovakia": "🇸🇰",
+        "Sierra Leone": "🇸🇱",
+        "San Marino": "🇸🇲",
+        "Senegal": "🇸🇳",
+        "Somalia": "🇸🇴",
+        "Suriname": "🇸🇷",
+        "South Sudan": "🇸🇸",
+        "São Tomé & Príncipe": "🇸🇹",
+        "El Salvador": "🇸🇻",
+        "Sint Maarten": "🇸🇽",
+        "Syria": "🇸🇾",
+        "Eswatini": "🇸🇿",
+        "Tristan da Cunha": "🇹🇦",
+        "Turks & Caicos Islands": "🇹🇨",
+        "Chad": "🇹🇩",
+        "French Southern Territories": "🇹🇫",
+        "Togo": "🇹🇬",
+        "Thailand": "🇹🇭",
+        "Tajikistan": "🇹🇯",
+        "Tokelau": "🇹🇰",
+        "Timor-Leste": "🇹🇱",
+        "Turkmenistan": "🇹🇲",
+        "Tunisia": "🇹🇳",
+        "Tonga": "🇹🇴",
+        "Türkiye": "🇹🇷",
+        "Trinidad & Tobago": "🇹🇹",
+        "Tuvalu": "🇹🇻",
+        "Taiwan": "🇹🇼",
+        "Tanzania": "🇹🇿",
+        "Ukraine": "🇺🇦",
+        "Uganda": "🇺🇬",
+        "U.S. Outlying Islands": "🇺🇲",
+        "United Nations": "🇺🇳",
+        "Uruguay": "🇺🇾",
+        "Uzbekistan": "🇺🇿",
+        "Vatican City": "🇻🇦",
+        "St. Vincent & Grenadines": "🇻🇨",
+        "Venezuela": "🇻🇪",
+        "British Virgin Islands": "🇻🇬",
+        "U.S. Virgin Islands": "🇻🇮",
+        "Vietnam": "🇻🇳",
+        "Vanuatu": "🇻🇺",
+        "Wallis & Futuna": "🇼🇫",
+        "Samoa": "🇼🇸",
+        "Kosovo": "🇽🇰",
+        "Yemen": "🇾🇪",
+        "Mayotte": "🇾🇹",
+        "South Africa": "🇿🇦",
+        "Zambia": "🇿🇲",
+        "Zimbabwe": "🇿🇼",
+        "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+        "Wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
     }
     let str = ""
-    for(let o of origin.split(",")) {
+    for (let o of origin.split(",")) {
         o = o.trim()
         str += (flags[o as keyof typeof flags] || o) + " "
     }
@@ -1549,7 +1795,8 @@ function items_meta2info(meta: MetadataEntry): InfoEntry {
         Library: 0n,
         PurchasePrice: 0,
         RecommendedBy: "[]",
-        Type: "Movie"
+        Type: "Movie",
+        Priority: 0
     }
 }
 
@@ -1578,14 +1825,14 @@ function items_meta2user(meta: MetadataEntry): UserEntry {
  * @returns {[number, string]} the length followed by a unit
  */
 function items_getLength(mediaData: Record<string, string>): [number, string] {
-    for(let key in mediaData) {
-        for(let possibility of [
+    for (let key in mediaData) {
+        for (let possibility of [
             "episodes",
             "volumes",
             "chapters",
             "page-count"
         ]) {
-            if(key.endsWith(possibility)) {
+            if (key.endsWith(possibility)) {
                 return [parseInt(mediaData[key]), possibility]
             }
         }
