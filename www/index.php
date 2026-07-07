@@ -108,6 +108,8 @@
         <alert-box></alert-box>
     </footer>
 
+    <script src="/ui/js_api.js"></script>
+
     <script>
 
         function delete_account() {
