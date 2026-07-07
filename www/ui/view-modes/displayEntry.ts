@@ -103,44 +103,7 @@ function _mkde_actions() {// {{{
                 if(!rv) return
 
                 if(rv === "view-log") {
-                    const out = dom_getelorthrow("#transactions-log div", this.win.HTMLDivElement, _root)
-
-                    for(let transaction of items_getEntry(item.ItemId).transactions) {
-                        let cur = document.createElement("article")
-                        cur.style.border = "1px solid"
-                        out.append(cur)
-
-                        let event
-                        if(transaction.EventId) {
-                            event = items_getEntry(item.ItemId).getEvent(transaction.EventId)
-                        }
-
-                        let title = document.createElement("h2")
-                        if(event) {
-                            title.innerText = event.Event
-                        } else if(transaction.Price > 0){
-                            title.innerText = "Purchased"
-                        } else {
-                            title.innerText = "Sold"
-                        }
-
-                        cur.append(title)
-
-                        if(transaction.Price > 0) {
-                            title.style.color = "var(--bad)"
-                        } else {
-                            title.style.color = "var(--good)"
-                        }
-
-                        cur.innerHTML += `<p>for ${Math.abs(transaction.Price)} ${transaction.Currency}</p>`
-
-                        if(event) {
-                            cur.innerHTML += `<p>${items_eventTSHTML(event)}</p>`
-                        } else {
-                            cur.innerHTML += `<p>unknown time</p>`
-                        }
-                    }
-                    dom_getelorthrow("#transactions-log", this.win.HTMLDialogElement, _root).showModal()
+                    showTransactionsUI(item.ItemId)
                     return
                 }
 

@@ -50,13 +50,16 @@ async function main() {
         const metadataload = () => {
             removeEventListener("aio-metadata-load", metadataload)
 
-            ua_setfavicon(
-                fixThumbnailURL(
-                    findMetadataById(
-                        items_getSelected()[0].ItemId
-                    ).Thumbnail
+            let selected = items_getSelected()[0]
+            if(selected) {
+                ua_setfavicon(
+                    fixThumbnailURL(
+                        findMetadataById(
+                            selected.ItemId
+                        ).Thumbnail
+                    )
                 )
-            )
+            }
 
             //i think this is to reorder everything?:
             if (urlParams.has("view-all")) {

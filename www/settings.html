@@ -21,7 +21,7 @@
         }
 
         #notifications {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             right: 0;
             background: var(--main);
@@ -54,6 +54,7 @@
     </div>
 
     <section id="forms">
+
         <h3>Startup Script</h3>
         <form method="get" action="javascript:void(0)">
             <input name="setting" value="StartupLang" type="hidden">
@@ -81,6 +82,7 @@
 <script src="/js/api.js"></script>
 <script src="/ui/ui.js"></script>
 <script src="/ui/components.js"></script>
+<script src="/ui/settings.js"></script>
 
 <script>
     const urlData = new URLSearchParams(document.location.search)
@@ -176,7 +178,6 @@
         })
             .then(res => res.status === 200 ? alert("settings saved") : alert("failed to save settings"))
     }
-
 </script>
 
 </html>

@@ -58,6 +58,16 @@
 
     <datalist id="recommended-by"></datalist>
 
+    <dialog id="transactions-log">
+        <form method="dialog" style="position: absolute; top: 0; right: 0;">
+            <button class="close">X</button>
+        </form>
+
+        <div>
+        </div>
+    </dialog>
+
+
     <dialog id="items-listing" popover>
         <close-button></close-button>
 

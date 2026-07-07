@@ -248,6 +248,46 @@ function startupUI({
     }
 }
 
+function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"]}) {
+    out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
+    for(let transaction of items_getEntry(itemid).transactions) {
+        let cur = document.createElement("article")
+        cur.style.border = "1px solid"
+        out.appendChild(cur)
+
+        let event
+        if(transaction.EventId) {
+            event = items_getEntry(itemid).getEvent(transaction.EventId)
+        }
+
+        let title = document.createElement("h2")
+        if(event) {
+            title.innerText = event.Event
+        } else if(transaction.Price > 0){
+            title.innerText = "Purchased"
+        } else {
+            title.innerText = "Sold"
+        }
+
+        cur.append(title)
+
+        if(transaction.Price > 0) {
+            title.style.color = "var(--bad)"
+        } else {
+            title.style.color = "var(--good)"
+        }
+
+        cur.innerHTML += `<p>for ${Math.abs(transaction.Price)} ${transaction.Currency}</p>`
+
+        if(event) {
+            cur.innerHTML += `<p>${items_eventTSHTML(event)}</p>`
+        } else {
+            cur.innerHTML += `<p>unknown time</p>`
+        }
+    }
+     dom_getelorthrow("#transactions-log", currentWindow().HTMLDialogElement).showModal()
+}
+
 /**
  * Creates an element that the user can click to
  * open that element in the current mode
