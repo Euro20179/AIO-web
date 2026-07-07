@@ -46,9 +46,21 @@
     inherits: true;
 }
 
+@property --bad {
+    syntax: "<color>";
+    initial-value: #e78284;
+    inherits: true;
+}
+
 @property --warn {
     syntax: "<color>";
     initial-value: #e5c890;
+    inherits: true;
+}
+
+@property --good {
+    syntax: "<color>";
+    initial-value: #dfffd8;
     inherits: true;
 }
 
@@ -122,7 +134,9 @@
     /* special custom property values that cant be set in initial-value */
     --small-gap: 2ex;
     --error: var(--red);
+    --bad: var(--error);
     --warn: var(--yellow);
+    --good: var(--green);
     --highlight: var(--blue);
     --highlight-text-color: var(--main);
     --scrollbar-bar-color: var(--blue);
