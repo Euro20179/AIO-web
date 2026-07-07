@@ -119,7 +119,7 @@ function mode_add(mode: Mode, properties?: ModeProperties) {
  * @param {Record<string, Partial<{user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry}>>} toUpdate a record containing the item ids to update with their values
  * @param {boolean} [del=false] if the items should be deleted
  */
-function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry }>>, del: boolean = false) {
+function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry, transactions: TransactionEntry[]}>>, del: boolean = false) {
     let updatedLibraries = false
     for (let id in toUpdate) {
         if (del) {
@@ -127,7 +127,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
             continue
         }
 
-        const { user, events, meta, info } = toUpdate[id]
+        const { user, events, meta, info, transactions } = toUpdate[id]
 
         if (info?.Type === "Library") {
             if (del)
@@ -142,7 +142,7 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
             detail: id
         }))
 
-        items_updateEntryById(id, { user, events, meta, info })
+        items_updateEntryById(id, { user, events, meta, info, transactions })
 
         mode_refreshItem(BigInt(id))
 
@@ -154,7 +154,8 @@ function updateInfo2(toUpdate: Record<string, Partial<{ user: UserEntry, events:
                         info: findInfoEntryById(parent),
                         user: findUserEntryById(parent),
                         events: findUserEventsById(parent),
-                        meta: findMetadataById(parent)
+                        meta: findMetadataById(parent),
+                        transactions: findTransactionsById(parent)
                     }
                 })
             }

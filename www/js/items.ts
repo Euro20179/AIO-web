@@ -89,7 +89,6 @@ type InfoEntry = {
     ArtStyle: number
     Location: string
     Native_Title: string
-    PurchasePrice: number
     Type: EntryType
     En_Title: string
     Library: bigint
@@ -128,6 +127,14 @@ type MetadataEntry = {
     ProviderID: string
     Genres: string
     Country: string
+}
+
+type TransactionEntry = {
+    Uid: number,
+    ItemId: bigint,
+    EventId: number,
+    Price: number,
+    Currency: string
 }
 
 
@@ -262,6 +269,7 @@ class items_Entry {
     meta: MetadataEntry
     info: InfoEntry
     relations: items_Relations
+    transactions: TransactionEntry[]
 
     /**
         * Keeps track of if the item is properly loaded from the server
@@ -271,11 +279,12 @@ class items_Entry {
 
     events: UserEvent[]
 
-    constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[]) {
+    constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[], transactions?: TransactionEntry[]) {
         this.info = typeof info === 'bigint' ? genericInfo(info, 0) : info
         this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
         this.events = events || []
+        this.transactions = transactions || []
 
         //items_refreshRelations() must be called to fill all relations
         this.relations = new items_Relations(this.info.ItemId, [], [], [])
@@ -288,6 +297,31 @@ class items_Entry {
         let item = new items_Entry(info)
         item.loaded = false
         return item
+    }
+
+    getEvent(id: number) {
+        for(let event of this.events) {
+            if(event.EventId === id) {
+                return event
+            }
+        }
+    }
+
+    getTransaction(eventId: number) {
+        for(let transaction of this.transactions) {
+            if(transaction.EventId === eventId) {
+                return transaction
+            }
+        }
+    }
+
+    getLastPurchasePrice() {
+        for(let i = this.transactions.length - 1; i >= 0; i--) {
+            if(this.transactions[i].Price < 0) continue
+
+            return this.transactions[i].Price
+        }
+        return 0
     }
 
     get fixedThumbnail() {
@@ -488,16 +522,18 @@ function items_setEntries(items: InfoEntry[]) {
  * @param {string} id The id to update
  * @param {{user: UserEntry, events: UserEvent[], meta: MetadataEntry, info: InfoEntry}} with Update the id with this information
  */
-function items_updateEntryById(id: string, { user, events, meta, info }: Partial<{
+function items_updateEntryById(id: string, { user, events, meta, info, transactions }: Partial<{
     user: UserEntry,
     events: UserEvent[],
     meta: MetadataEntry,
-    info: InfoEntry
+    info: InfoEntry,
+    transactions: TransactionEntry[]
 }>) {
     user && (_globalsNewUi.entries[id].user = user)
     events && (_globalsNewUi.entries[id].events = events)
     meta && (_globalsNewUi.entries[id].meta = meta)
     info && (_globalsNewUi.entries[id].info = info)
+    transactions && (_globalsNewUi.entries[id].transactions = transactions)
 }
 
 /**
@@ -513,8 +549,14 @@ function items_delEntry(item: bigint) {
  * Adds an item to the global entries map
  * @param item - the item to add
 */
-function items_addItem(item: { meta: MetadataEntry, events: UserEvent[], info: InfoEntry, user: UserEntry }) {
-    _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events)
+function items_addItem(item: {
+    meta: MetadataEntry,
+    events: UserEvent[],
+    info: InfoEntry,
+    user: UserEntry,
+    transactions: TransactionEntry[]
+}) {
+    _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
 }
 
 async function loadMetadataById(id: bigint, uid = 0): Promise<MetadataEntry> {
@@ -556,7 +598,7 @@ async function items_getEntryAny(id: bigint) {
             throw new Error(`${id} is not an entry`)
         }
         val = _globalsNewUi.entries[String(id)] = new items_Entry(
-            stuff.info, stuff.user, stuff.meta, stuff.events
+            stuff.info, stuff.user, stuff.meta, stuff.events, stuff.transactions
         )
     }
     return val
@@ -579,6 +621,16 @@ function items_getAllEntries(): Record<string, items_Entry> {
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(_globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
     return _globalsNewUi.entries[String(id)]?.meta || genericMetadata(id, 0)
+}
+
+/**
+    * Finds all transactions for a given item
+    * @param {bigint} id
+    * @returns {TransactionEntry[]}
+    */
+function findTransactionsById(id: bigint): TransactionEntry[] {
+    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `transactions for entry ${id} does not exist`)
+    return _globalsNewUi.entries[String(id)].transactions || []
 }
 
 /**
@@ -629,7 +681,6 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         ArtStyle: 0,
         Location: "",
         Native_Title: "",
-        PurchasePrice: 0,
         Type: "Show",
         En_Title: "",
         Library: 0n,
@@ -848,6 +899,14 @@ async function loadUserEvents(uid: number) {
     }
 }
 
+async function loadTransactions(uid: number) {
+    let transactions = await api_loadList<TransactionEntry>("transact/list", uid)
+    const grouped = Object.groupBy(transactions, k => String(k.ItemId))
+    for(let entry in _globalsNewUi.entries) {
+        _globalsNewUi.entries[entry].transactions = grouped[entry] || []
+    }
+}
+
 /**
  * Sorts a list of events by timestamp (does not account for BeforeTs)
  * @param {UserEvent[]} events The list of events to sort
@@ -893,7 +952,9 @@ sorts.set("release-year", (a, b) => {
 })
 
 sorts.set("cost", (a, b) => {
-    return b.PurchasePrice - a.PurchasePrice
+    let transa = items_getEntry(a.ItemId).getLastPurchasePrice()
+    let transb = items_getEntry(b.ItemId).getLastPurchasePrice()
+    return transb - transa
 })
 
 sorts.set("item-id", (a, b) => Number(b.ItemId - a.ItemId))
@@ -1182,7 +1243,7 @@ function items_calculateCost(itemId: bigint, include: bigint, recursive: boolean
                 include,
                 recursive,
                 (p, c) => {
-                    p.push(findInfoEntryById(c).PurchasePrice)
+                    p.push(items_getEntry(c).getLastPurchasePrice())
                     return p
                 },
                 []
@@ -1191,7 +1252,7 @@ function items_calculateCost(itemId: bigint, include: bigint, recursive: boolean
             items
         )
     }
-    return items_reduce(itemId, include, recursive, (p, c) => p + findInfoEntryById(c).PurchasePrice, 0)
+    return items_reduce(itemId, include, recursive, (p, c) => p + items_getEntry(c).getLastPurchasePrice(), 0)
 }
 
 /**
@@ -1232,12 +1293,12 @@ function items_compareEventTiming(left: UserEvent | number, right: UserEvent | n
         "Atlantic/Reykjavik"
         : INTL_OPTIONS.timeZone
 
-    return time_compare(
+    return Number(time_compare(
         BigInt(l) * 1000000n,
         (typeof left !== 'number' && left.TimeZone) || defaultTZ,
         BigInt(r) * 1000000n,
         (typeof right !== 'number' && right.TimeZone) || defaultTZ
-    )
+    ))
 }
 
 /**
@@ -1449,7 +1510,7 @@ function* items_getEventsWithinTimeRange(items: InfoEntry[], start: number, end:
     for (let item of items) {
         const events = findUserEventsById(item.ItemId)
         for (let ev of events) {
-            if (items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end, ev.TimeZone, ev.TimeZone) >= 0) {
+            if (items_compareEventTiming(ev, start) <= 0 && items_compareEventTiming(ev, end) >= 0) {
                 yield ev
             }
         }
@@ -1793,7 +1854,6 @@ function items_meta2info(meta: MetadataEntry): InfoEntry {
         Location: "",
         Format: 7,
         Library: 0n,
-        PurchasePrice: 0,
         RecommendedBy: "[]",
         Type: "Movie",
         Priority: 0

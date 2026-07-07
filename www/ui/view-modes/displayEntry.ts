@@ -87,6 +87,39 @@ function _mkde_actions() {// {{{
                     alert(`Updated library to ${items_getEntry(item.Library).info.En_Title}`)
                 })
         },
+
+        /**
+            * Creates a buy/sell transaction.
+        */
+        transact: function(item, _root, target) {
+            const modal = openModalUI("buy-sell", _root)
+
+            if(!modal) return
+
+            const onclose = async () => {
+                modal.removeEventListener("close", onclose)
+
+                let rv = modal.returnValue
+                if(!rv) return
+
+                if(!["Purchased", "Sold"].includes(rv)) {
+                    alert(`Transact modal must be one of 'Purchased', 'Sold'`)
+                    return
+                }
+
+                const price = await promptNumber(`${rv === "Purchased" ? "Purchase" : "Sell"} price`, "Not a positive number", nStr => {
+                    let n = Number(nStr)
+                    if(!n) return NaN
+                    if(n < 0) return NaN
+
+                    return n
+                })
+
+                transactUI(item.Uid, item.ItemId, rv as "Purchased" | "Sold", price)
+            }
+            modal.addEventListener("close", onclose)
+        },
+
         /**
          * Deletes a tag based on the target's tag-name
         */
@@ -1272,6 +1305,11 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
     for (let event of eventsToLookAt) {
         tbodyHTML += `<tr>`
 
+        let associatedTransaction
+        if(event.Event === "Purchased" || event.Event === "Sold") {
+            associatedTransaction = items_getEntry(itemId).getTransaction(event.EventId)
+        }
+
         if (hasNonSelfEvent) {
             if (event.ItemId !== itemId) {
                 tbodyHTML += `<td>${findInfoEntryById(event.ItemId).En_Title}</td>`
@@ -1280,10 +1318,15 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
             }
         }
 
+        let eventNameText = event.Event
+        if(associatedTransaction) {
+            eventNameText += ` (${Math.abs(associatedTransaction.Price)} ${associatedTransaction.Currency})`
+        }
+
         tbodyHTML += ` <td>
             <div class="grid column">
                 <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
-                ${event.Event}
+                ${eventNameText}
             </div>
         </td>`
 
@@ -2078,12 +2121,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         }
     })
 
-    renderComponent("#cost", el => {
-        el.onclick = async function() {
-            await updateCostUI(itemId)
-        }
-    })
-
     renderComponent("#create-tag", el => {
         el.onclick = async () => {
             await newTagsUI(itemId)
@@ -2251,7 +2288,6 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         "native-title": item.Native_Title,
         timezone: INTL_OPTIONS.timeZone,
         format: item.Format,
-        price: item.PurchasePrice,
         "art-style": item.ArtStyle,
         libraryId: item.Library || undefined,
         copyOf: item.ItemId,

@@ -50,7 +50,6 @@ function probablyInfoEntry(item: object): item is InfoEntry {
         "ArtStyle",
         "Location",
         "Native_Title",
-        "PurchasePrice",
         "Type",
         "En_Title",
         "Library",
@@ -475,12 +474,16 @@ async function api_getEntryAll(itemId: bigint, uid: number) {
         return null
     }
     const text = await res.text()
-    const [user, meta, info, ...events] = text.split("\n").filter(Boolean)
+    const [user, meta, info, ...lists] = text.split("\n").filter(Boolean)
+    const sepPoint = lists.findIndex(v => v === "TRANSACTIONS")
+    const events = lists.slice(0, sepPoint)
+    const transactions = lists.slice(sepPoint + 1)
     return {
         user: api_deserializeJsonl<UserEntry>(user).next().value,
         meta: api_deserializeJsonl<MetadataEntry>(meta).next().value,
         info: api_deserializeJsonl<InfoEntry>(info).next().value,
         events: [...api_deserializeJsonl<UserEvent>(events)].filter(Boolean),
+        transactions: [...api_deserializeJsonl<TransactionEntry>(transactions)].filter(Boolean)
     }
 }
 
@@ -514,6 +517,29 @@ async function api_username2UID(username: string): Promise<number> {
 
 async function api_setRating(itemId: bigint, rating: string) {
     return await authorizedRequest(`${apiPath}/engagement/mod-entry?id=${itemId}&rating=${rating}`)
+}
+
+/**
+    * Create a transaction for an item
+    * @param {number} uid user the transaction is for
+    * @param {bigint} itemId item the transaction is for
+    * @param {string} [currency] optionally the currency, defaults to user's preferred currency
+*   * @param {string} [tz] timezone, defaults to browser timezone
+*/
+async function api_transact(uid: number, itemId: bigint, price: number, currency?: string, tz?: string) {
+    tz ||= INTL_OPTIONS.timeZone
+    currency ||= settings_get("currency")
+    const params = new URLSearchParams({
+        uid: String(uid),
+        id: String(itemId),
+        price: String(price),
+        currency,
+        timezone: tz
+    })
+
+    return await authorizedRequest(`${apiPath}/transact/do?${params.toString()}`, {
+        ["signin-reason"]: "log a transaction"
+    })
 }
 
 async function api_listAccounts() {
@@ -576,7 +602,7 @@ function api_uiSort2Api(sort: SortKind) {
         case "release-year":
             return "ReleaseYear"
         case "cost":
-            return "PurchasePrice"
+            return "(SELECT price FROM transactions WHERE price > 0 AND ItemId = userViewingInfo.ItemId ORDER BY price LIMIT 1)"
         case "added":
             return "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
         case "viewing":
@@ -587,6 +613,6 @@ function api_uiSort2Api(sort: SortKind) {
             return "entryInfo.itemId"
         //in case the order by doesnt exist on the server
         default:
-            return sort
+            return ""
     }
 }

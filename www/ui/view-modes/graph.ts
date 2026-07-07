@@ -361,10 +361,10 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
     } else if (sortBy === "cost") {
         let sorted = Object.entries(data).sort((a, b) => {
             let aCost = a[1].reduce((p, c) => {
-                return p + (c?.PurchasePrice || 0)
+                return p + items_getEntry(c.ItemId).getLastPurchasePrice()
             }, 0)
             let bCost = b[1].reduce((p, c) => {
-                return p + (c?.PurchasePrice || 0)
+                return p + items_getEntry(c.ItemId).getLastPurchasePrice()
             }, 0)
 
             return bCost - aCost
@@ -489,10 +489,10 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
     })
 
     ChartManager.call(this, "cost-by-format", async (entries) => {
-        entries = entries.filter(v => v.PurchasePrice > 0)
+        entries = entries.filter(v => items_getEntry(v.ItemId).getLastPurchasePrice() > 0)
         let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
         let [labels, data] = await organizeData(entries, sortBy.value)
-        let totals = data.map(v => v.reduce((p, c) => p + c.PurchasePrice, 0))
+        let totals = data.map(v => v.reduce((p, c) => p + items_getEntry(c.ItemId).getLastPurchasePrice(), 0))
 
         return mkXTypeChart(getCtx2.call(this, "cost-by-format"), labels, totals, "Cost by")
     })

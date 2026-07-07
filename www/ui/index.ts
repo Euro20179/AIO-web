@@ -160,6 +160,12 @@ async function main() {
             mode_refreshItem(item.ItemId);
         }
     });
+
+    loadTransactions(uid).then(() => {
+        for(let item of items_getSelected()) {
+            mode_refreshItem(item.ItemId)
+        }
+    })
 }
 
 main();

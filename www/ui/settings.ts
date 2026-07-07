@@ -13,6 +13,8 @@ const settings = {
         ["zero", 0]
     ],
 
+    currency: "USD",
+
     ///styles to use for the tierlist mode
     ///names must be the same as tiers
     tierlist_styles: {

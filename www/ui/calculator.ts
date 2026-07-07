@@ -1769,7 +1769,7 @@ class CalcVarTable {
                 return new Str("id is not a bigint")
             }
 
-            let price = findInfoEntryById(jsId).PurchasePrice || 0
+            let price = items_getEntry(jsId).getLastPurchasePrice()
 
             return new Num(price)
         }, "Get the purchase price of an entry",

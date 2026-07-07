@@ -112,7 +112,7 @@ function startupUI({
 
     if (statsOutput) {
         statistics.push(new Statistic("results", false, () => getFilteredResultsUI().length))
-        statistics.push(new Statistic("totalCost", true, (item, mult) => item.PurchasePrice * mult))
+        statistics.push(new Statistic("totalCost", true, (item, mult) => items_getEntry(item.ItemId).getLastPurchasePrice() * mult))
 
         statistics[0].resetable = false
     }
@@ -327,14 +327,19 @@ async function reloadEventsUI(itemId: bigint) {
  * - updates all loaded entries
  * @returns {Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>]>}
  */
-async function refreshInfoUI(uid: number): Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>]> {
+async function refreshInfoUI(uid: number): Promise<[
+    Awaited<ReturnType<typeof loadUserEvents>>,
+    Awaited<ReturnType<typeof items_refreshMetadata>>,
+    Awaited<ReturnType<typeof loadTransactions>>
+]> {
     await Promise.all([
         loadLibraries(uid),
         loadInfoEntries(uid),
     ])
     return Promise.all([
         loadUserEvents(uid),
-        items_refreshMetadata(uid)
+        items_refreshMetadata(uid),
+        loadTransactions(uid),
     ])
 }
 
@@ -868,9 +873,10 @@ function closeModalUI(
     modalName: string,
     root?: {
         querySelector(query: string): HTMLElement | null
-    }
+    },
+    returnValue?: string
 ) {
-    dom_getel(`#${modalName}`, HTMLDialogElement, root)?.close()
+    dom_getel(`#${modalName}`, HTMLDialogElement, root)?.close(returnValue)
 }
 
 /**
@@ -1567,14 +1573,8 @@ async function newEntryUI(form: HTMLFormElement) {
             console.error("failed to get entry data")
             return
         }
-        let { meta, events, user, info } = res
 
-        items_addItem({
-            meta,
-            user,
-            events,
-            info
-        })
+        items_addItem(res)
 
         ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)
     }).catch((err) => {
@@ -2238,16 +2238,18 @@ async function updateNotesUI(itemId: bigint, note: string) {
     return await setPropUI(findUserEntryById(itemId), "Notes", note, "Update notes")
 }
 
-/**
- * Update the PurchasePrice field of an item (on the server and clientside)
- * @param {bigint} itemId
- * @param {string | null} [newPrice=null] if not given, prompt the user
- */
-async function updateCostUI(itemId: bigint, newPrice: number | null = null) {
-    newPrice ||= await promptNumber("New cost", "not a number", parseFloat)
-    if (newPrice === null) return
+async function transactUI(uid: number, itemId: bigint, transactionType: "Purchased" | "Sold", price: number) {
+    if (transactionType === "Sold") {
+        price *= -1
+    }
+    let rv = await api_transact(uid, itemId, price, settings_get("currency"), INTL_OPTIONS.timeZone)
+    let newInfo = await api_getEntryAll(itemId, uid)
+    if(newInfo)
+        updateInfo2({
+            [String(itemId)]: newInfo
+        })
 
-    return await setPropUI(findInfoEntryById(itemId), "PurchasePrice", newPrice, "Update purchase price")
+    return rv
 }
 
 /**

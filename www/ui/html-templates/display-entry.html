@@ -16,6 +16,13 @@
     <textarea id="notes-edit-box" rows="10" cols="80"></textarea>
 </dialog>
 
+<dialog id="buy-sell">
+    <form method="dialog">
+        <button value="Purchased">Buy</button>
+        <button value="Sold">Sell</button>
+    </form>
+</dialog>
+
 <dialog id="item-identification-form" popover>
     <close-button></close-button>
 
@@ -197,15 +204,19 @@
 
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
 
-            <div style="flex-grow: 1;justify-content: center; gap: 1ch; font-size: 0.9em;" class="flex">
+            <div style="flex-grow: 1;
+                        justify-content: center;
+                        align-items: center;
+                        gap: 1ch;
+                        font-size: 0.9em;" class="flex">
                 <button class="rating styleless-button" id="user-rating"
                     toggle-hint='your-rating-hint'
                     entry-action="setrating">??</button>
                 <span id='your-rating-hint' popover='hint'>Your Rating</span>
 
-                <span style="align-self: center;">(<span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'>??</span>)</span>
+                <span>(<span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'>??</span>)</span>
                 <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
-                <button class="cost styleless-button" id="cost"></button>
+                <span class="cost" id="cost"></span>
             </div>
         </hgroup>
 
