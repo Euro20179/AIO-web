@@ -146,6 +146,19 @@ function dom_getelorthrow<T extends typeof HTMLElement>(
 const getElementOrThrowUI = dom_getel
 
 /**
+ * Loads an html template by name and returns the template element
+ * @param {string} name name of the template to load, will look in `/ui/html-templates/${name}.html`
+ * @returns {HTMLTemplateElement}
+ */
+async function dom_loadtemplate(name: string): HTMLTemplateElement {
+    const res = await fetch(`/ui/html-templates/${name}.html`)
+    const text = await res.text()
+    const div = document.createElement("div")
+    div.innerHTML = text
+    return div.firstElementChild
+}
+
+/**
  * sets a css property on document and if catalogWin is open, also that document
  * @param {string} property the css property to set
  * @param {string} value the value to set property to

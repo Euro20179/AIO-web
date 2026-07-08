@@ -19,27 +19,6 @@
             flex-direction: column;
             gap: 3cap;
         }
-
-        #notifications {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            background: var(--main);
-            padding: 2em;
-
-            .notification {
-                border: 1px solid;
-                padding: 3em;
-                background: var(--main);
-            }
-
-            &:not(:has(.notification)){
-                h4 {
-                    display: none;
-                }
-                display: none;
-            }
-        }
     </style>
 </head>
 
@@ -49,9 +28,6 @@
         <a href="/usage/">助けてよ</a>
     </p>
 
-    <div id="notifications">
-        <h4>Notification</h4>
-    </div>
 
     <section id="forms">
 
@@ -83,8 +59,14 @@
 <script src="/ui/ui.js"></script>
 <script src="/ui/components.js"></script>
 <script src="/ui/settings.js"></script>
+<script src="/ui/js_api.js"></script>
 
 <script>
+
+    dom_loadtemplate("alert-box").then(box => {
+        document.body.append(...box.content.childNodes)
+    })
+
     const urlData = new URLSearchParams(document.location.search)
     const uid = Number(urlData.get("uid") || prompt("uid"))
 
