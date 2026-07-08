@@ -151,7 +151,7 @@ const getElementOrThrowUI = dom_getel
  * @returns {HTMLTemplateElement}
  */
 async function dom_loadtemplate(name: string): HTMLTemplateElement {
-    const res = await fetch(`/ui/html-templates/${name}.html`)
+    const res = await fetch(`${location.protocol}//${location.host}/ui/html-templates/${name}.html`)
     const text = await res.text()
     const div = document.createElement("div")
     div.innerHTML = text
