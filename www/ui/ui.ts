@@ -248,8 +248,11 @@ function startupUI({
     }
 }
 
-function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"]}) {
+function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"], childNodes: NodeListOf<Node>, removeChild: Node["removeChild"]}) {
     out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
+    while(out.childNodes.length) {
+        out.removeChild(out.childNodes[0])
+    }
     const transactions = items_getEntry(itemid).transactions
 
     if(!transactions.length) {
