@@ -584,6 +584,7 @@ type SortKind = "user-title"
                     | "viewing"
                     | "finished"
                     | "item-id"
+                    | "priority"
                     | ""
 
 /**
@@ -611,6 +612,8 @@ function api_uiSort2Api(sort: SortKind) {
             return "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
         case "item-id":
             return "entryInfo.itemId"
+        case "priority":
+            return "entryInfo.priority"
         //in case the order by doesnt exist on the server
         default:
             return ""
