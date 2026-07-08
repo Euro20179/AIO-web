@@ -370,14 +370,14 @@ async function reloadEventsUI(itemId: bigint) {
 }
 
 /**
- * calls: loadLibraries(), loadInfoEntries(), loadUserEvents(), items_refreshMetadata()
+ * calls: loadLibraries(), loadInfoEntries(), loadUserEvents(), items_refreshMetadata(), loadTransactions()
  * only returns the result of [loadUserEvents, items_refreshMetadata]
  * side effects:
  * - causes items' state to be set
  * - fills the library dropdown
  * - sets the error to "Loading items", then ""
  * - updates all loaded entries
- * @returns {Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>]>}
+ * @returns {Promise<[Awaited<ReturnType<typeof loadUserEvents>>, Awaited<ReturnType<typeof items_refreshMetadata>>, Awaited<ReturnType<typeof loadTransactions>>]>}
  */
 async function refreshInfoUI(uid: number): Promise<[
     Awaited<ReturnType<typeof loadUserEvents>>,
