@@ -250,7 +250,14 @@ function startupUI({
 
 function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"]}) {
     out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
-    for(let transaction of items_getEntry(itemid).transactions) {
+    const transactions = items_getEntry(itemid).transactions
+
+    if(!transactions) {
+        alert("No transactions for this item")
+        return
+    }
+
+    for(let transaction of transactions) {
         let cur = document.createElement("article")
         cur.style.border = "1px solid"
         out.appendChild(cur)
