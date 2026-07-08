@@ -252,7 +252,7 @@ function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChil
     out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
     const transactions = items_getEntry(itemid).transactions
 
-    if(!transactions) {
+    if(!transactions.length) {
         alert("No transactions for this item")
         return
     }
