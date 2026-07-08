@@ -117,13 +117,14 @@ async function main() {
         mode_setMode(mode);
     }
 
-    const initialSearch = urlParams.has("item-id")
-        ? urlParams
-            .get("item-id")!
-            .split(",")
-            .map((v) => `metadata.itemid = ${v}`)
-            .join(" OR ")
-        : urlParams.get("q");
+    const initialSearch =
+        urlParams.has("item-id") ?
+            urlParams
+                .get("item-id")!
+                .split(",")
+                .map((v) => `metadata.itemid = ${v}`)
+                .join(" OR ")
+        : urlParams.get("q")
 
     const searchInput = document.querySelector(
         '[name="search-query"]',
@@ -131,6 +132,9 @@ async function main() {
 
     // mode_setMode(curModeName)
 
+    if (urlParams.has("sort")) {
+        sortBySelector.value = String(urlParams.get("sort"))
+    }
     const uid = getUidUI();
 
     //must happen synchronously to make item render properly
