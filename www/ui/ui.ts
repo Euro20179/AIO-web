@@ -248,11 +248,8 @@ function startupUI({
     }
 }
 
-function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"], childNodes: NodeListOf<Node>, removeChild: Node["removeChild"]}) {
+function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"], replaceChildren: Element["replaceChildren"]}) {
     out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
-    while(out.childNodes.length) {
-        out.removeChild(out.childNodes[0])
-    }
     const transactions = items_getEntry(itemid).transactions
 
     if(!transactions.length) {
@@ -260,10 +257,10 @@ function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChil
         return
     }
 
+    let children = []
     for(let transaction of transactions) {
         let cur = document.createElement("article")
-        cur.style.border = "1px solid"
-        out.appendChild(cur)
+        children.push(cur)
 
         let event
         if(transaction.EventId) {
@@ -271,31 +268,36 @@ function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChil
         }
 
         let title = document.createElement("h2")
-        if(event) {
-            title.innerText = event.Event
-        } else if(transaction.Price > 0){
-            title.innerText = "Purchased"
-        } else {
-            title.innerText = "Sold"
-        }
+        title.classList.add(transaction.Price > 0 ? "bad" : "good")
+
+        let displayEvent =
+            event ?
+                event.Event
+            : transaction.Price > 0 ?
+                "Purchased"
+            : "Sold"
+
+        title.append(displayEvent)
 
         cur.append(title)
 
-        if(transaction.Price > 0) {
-            title.style.color = "var(--bad)"
-        } else {
-            title.style.color = "var(--good)"
+        let displayPrice = transaction.Price
+        // only absolute value if the user knows (for sure)
+        // that this is a sale event
+        if (displayEvent.toLowerCase() === "sold") {
+            displayPrice = Math.abs(displayPrice)
         }
 
-        cur.innerHTML += `<p>for ${Math.abs(transaction.Price)} ${transaction.Currency}</p>`
+        cur.innerHTML += `<p>for ${displayPrice} ${transaction.Currency}</p>`
 
-        if(event) {
-            cur.innerHTML += `<p>${items_eventTSHTML(event)}</p>`
-        } else {
-            cur.innerHTML += `<p>unknown time</p>`
-        }
+        cur.innerHTML += event
+            ? `<p>${items_eventTSHTML(event)}</p>`
+            : "<p>unknown time</p>"
     }
-     dom_getelorthrow("#transactions-log", currentWindow().HTMLDialogElement).showModal()
+
+    out.replaceChildren(...children)
+
+    dom_getelorthrow("#transactions-log", currentWindow().HTMLDialogElement).showModal()
 }
 
 /**

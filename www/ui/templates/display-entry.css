@@ -54,16 +54,6 @@
         }
     }
 
-    #transactions-log div {
-        display: flex;
-        gap: var(--small-gap);
-        text-align: center;
-
-        article {
-            padding: var(--small-gap);
-        }
-    }
-
     #library {
         padding-block: 1px;
     }

@@ -50,6 +50,14 @@
     .close {
         margin: 20px;
     }
+
+    .good {
+        color: var(--good);
+    }
+
+    .bad {
+        color: var(--bad);
+    }
 }
 
 @layer components {
@@ -101,6 +109,18 @@
             }
         }
     }/* }}} */
+
+    #transactions-log div {
+        display: flex;
+        gap: var(--small-gap);
+        text-align: center;
+
+        article {
+            padding: var(--small-gap);
+            border: 1px solid;
+        }
+    }
+
 
     .user-script {
         border: 1px solid var(--light-blue);
