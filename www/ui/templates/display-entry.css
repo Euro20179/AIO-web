@@ -110,7 +110,7 @@
 
         color: var(--text-color);
 
-        overflow: auto auto;
+        anchor-name: --root;
     }
 
     :has(> #thumbnail) {
@@ -391,6 +391,24 @@
 
     :host(display-entry:not([data-user-status*="Viewing"])) #entry-progressbar-position-label {
         display: none;
+    }
+
+    #multiple-progress {
+        display: flex;
+        gap: var(--small-gap);
+    }
+
+    .entry-progress {
+        position: sticky;
+        top: 0;
+        left: anchor(left);
+
+        margin: 0;
+        width: 100cqi;
+    }
+
+    de-progress figure {
+        flex-grow: 1;
     }
 
     #entry-progressbar,
