@@ -448,17 +448,15 @@ function items_removeCopy(copy: bigint, copyof: bigint) {
 
 async function items_setResultsWithGetter(items: bigint[], infoGetter: (id: bigint) => Promise<items_Entry>) {
     _globalsNewUi.results = []
-    await Promise.all(items.values().map(infoGetter))
-        .then(
-            res => {
-                res.values().forEach(
-                    item => {
-                        items_addItem(item)
-                        _globalsNewUi.results.push(item)
-                    }
-                )
-            }
-        )
+    for(let val of items.values()) {
+        if(items_entryExists(val)) {
+            _globalsNewUi.results.push(items_getEntry(val))
+        } else {
+            const res = await infoGetter(val)
+            items_addItem(res)
+            _globalsNewUi.results.push(res)
+        }
+    }
 }
 
 /**
@@ -599,6 +597,10 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
         return await loadMetadataById(id)
     }
     return m
+}
+
+function items_entryExists(id: bigint) {
+    return String(id) in _globalsNewUi.entries
 }
 
 function items_getEntry(id: bigint) {
