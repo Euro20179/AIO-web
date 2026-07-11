@@ -867,7 +867,7 @@ DisplayMode.prototype.mkcontainers = function(this: DisplayMode, into: HTMLEleme
 }
 
 DisplayMode.prototype.mkcontainer = function(this: DisplayMode,) {
-    const c = document.createElement("div")
+    const c = this.win.document.createElement("div")
     c.classList.add("overflow")
     c.id = 'entry-output'
     return c
@@ -1998,7 +1998,7 @@ function displayEntryEditTemplate(el: HTMLElement) {
 }
 
 function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string): HTMLElement {
-    let el = document.createElement("display-entry")
+    let el = this.win.document.createElement("display-entry")
     let root = el.shadowRoot
 
     if (!root) {
