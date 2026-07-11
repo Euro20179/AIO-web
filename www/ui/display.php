@@ -68,8 +68,11 @@
 
         let info, meta, user
         let events = []
-        let text = (await res.text()).trim()
+        let transactions = []
+        let [text, transactionsText] = (await res.text()).trim().split("TRANSACTIONS")
+        console.log(text)
         for (let line of api_deserializeJsonl(text)) {
+            if(!line) continue
             if (probablyMetaEntry(line)) {
                 meta = line
             } else if (probablyUserItem(line)) {
@@ -80,7 +83,11 @@
                 events.push(line)
             }
         }
-        items_addItem({meta, events, info, user})
+        for(let line of api_deserializeJsonl(transactionsText)) {
+            if(!line) continue
+            transactions.push(line)
+        }
+        items_addItem({meta, events, info, user, transactions})
         items_setResults([BigInt(id)])
         const m = new DisplayMode(document.body)
         mode_add(m)
