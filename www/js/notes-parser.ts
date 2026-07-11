@@ -150,14 +150,12 @@ class NotesTagNode implements NotesNode {
                 break
             case "img":
                 let properties = this.propertyValue.split(",")
-                let width = "", height = ""
+                let width = "", height = "", id = ""
                 for (let prop of properties) {
                     let [key, value] = prop.split(":")
                     switch (key) {
                         case "id":
-                            let id = value
-                            //the thumbnail should be the item's thumbnail
-                            this.propertyValue = findMetadataById(BigInt(id))?.Thumbnail || ""
+                            id = value
                             break
 
                         case "w":
@@ -168,7 +166,7 @@ class NotesTagNode implements NotesNode {
                             break
                     }
                 }
-                startTag = `<img src="${this.propertyValue}" height="${height}" width="${width}" alt="${this.innerText.replaceAll('"', "")}" style="vertical-align: middle">`
+                startTag = `<img src="${apiPath}/resource/get-thumbnail-by-id?id=${id}" height="${height}" width="${width}" alt="${this.innerText.replaceAll('"', "")}" style="vertical-align: middle">`
                 selfClosing = true
                 break
             case "item":

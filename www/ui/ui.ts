@@ -1634,7 +1634,7 @@ async function newEntryUI(form: HTMLFormElement) {
 
 /**
  * does a search, and fills the item listing with the results
- * @param {string} - search query
+ * @param {string} search - search query
  */
 async function fillItemListingWithSearch(search: string): Promise<HTMLDivElement> {
     let useV3 = false
