@@ -1163,12 +1163,9 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
 
     setResultStatUI("results", entries.length)
 
-    await items_setResultsWithGetter(entries.map(v => v.ItemId), async(id) => {
-        let res = await api_getEntryAll(id, getUidUI())
-        return res
-            ? items_Entry.fromObj(res)
-            : new items_Entry(genericInfo(id, getUidUI()))
-    })
+    const ids = entries.map(v => v.ItemId)
+    await items_addById(ids)
+    items_setResults(ids)
 
     clearUI()
 
@@ -1627,16 +1624,9 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl(text).next().value
 
-    api_getEntryAll(json.ItemId, json.Uid).then(async res => {
-        if (res === null) {
-            console.error("failed to get entry data")
-            return
-        }
-
-        items_addItem(res)
-
+    items_addById(json.ItemId).then(() => {
         ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)
-    }).catch((err) => {
+    }).catch(err => {
         console.error(err)
         alert("Failed to load new item metadata, please reload")
     })

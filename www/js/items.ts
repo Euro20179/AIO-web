@@ -446,16 +446,37 @@ function items_removeCopy(copy: bigint, copyof: bigint) {
     items_getEntry(copy).relations.removeCopy(copyof)
 }
 
-async function items_setResultsWithGetter(items: bigint[], infoGetter: (id: bigint) => Promise<items_Entry>) {
-    _globalsNewUi.results = []
-    for(let val of items.values()) {
-        if(items_entryExists(val)) {
-            _globalsNewUi.results.push(items_getEntry(val))
-        } else {
-            const res = await infoGetter(val)
-            items_addItem(res)
-            _globalsNewUi.results.push(res)
+/**
+    * Adds a list of items by id
+    * For each item, if it does not exist (or replace is true), fetch all information about it
+    * `replace` determines whether or not to replace existing entries
+    * @param {bigint[] | bigint} items
+    * @param {boolean} replace
+    * @returns {Promise<void>}
+*/
+async function items_addById(items: bigint[] | bigint, replace: boolean = false): Promise<void> {
+    if(typeof items === 'bigint') items = [items]
+
+    let idsThatNeedInfo = []
+    for(let item of items) {
+        if(replace && items_entryExists(item)) {
+            items_delEntry(item)
         }
+        if(!items_entryExists(item)) {
+            idsThatNeedInfo.push(item)
+        }
+    }
+
+    if(idsThatNeedInfo.length === 0) return
+
+    const entries = await api_getEntriesAll(idsThatNeedInfo, 0)
+    if(typeof entries === 'string') {
+        console.error("Failed to add entries by id: ", entries)
+        return
+    }
+
+    for(let entry of entries) {
+        items_addItem(entry)
     }
 }
 
@@ -599,7 +620,12 @@ async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
     return m
 }
 
-function items_entryExists(id: bigint) {
+/**
+ * Checks if an id has been loaded into the global entries table
+ * @param {bigint} id
+ * @returns {boolean}
+*/
+function items_entryExists(id: bigint): boolean {
     return String(id) in _globalsNewUi.entries
 }
 

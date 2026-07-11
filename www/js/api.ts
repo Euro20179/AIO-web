@@ -483,6 +483,40 @@ async function api_getEntryAll(itemId: bigint, uid: number) {
     }
 }
 
+async function api_getEntriesAll(itemIds: bigint[], uid: number): Promise<{
+    user: UserEntry,
+    info: InfoEntry,
+    meta: MetadataEntry,
+    events: UserEvent[],
+    transactions: TransactionEntry[]
+}[] | string>{
+    let res = await fetch(`${apiPath}/get-all-for-entries?ids=${itemIds.join(",")}&uid=${uid}`)
+
+    if (res.status !== 200) {
+        return `${res.status}: ${await res.text()}`
+    }
+
+    const text = await res.text()
+    const items = []
+    for(let itemdata of text.split("\n\n")) {
+        if(!itemdata) continue
+
+        const [user, meta, info, ...lists] = itemdata.split("\n").filter(Boolean)
+        const sepPoint = lists.findIndex(v => v === "TRANSACTIONS")
+        const events = lists.slice(0, sepPoint)
+        const transactions = lists.slice(sepPoint + 1)
+        items.push({
+            user: api_deserializeJsonl<UserEntry>(user).next().value,
+            meta: api_deserializeJsonl<MetadataEntry>(meta).next().value,
+            info: api_deserializeJsonl<InfoEntry>(info).next().value,
+            events: [...api_deserializeJsonl<UserEvent>(events)].filter(Boolean),
+            transactions: [...api_deserializeJsonl<TransactionEntry>(transactions)].filter(Boolean)
+        })
+    }
+
+    return items
+}
+
 async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
     let qs = `?uid=${uid}&id=${itemId}`
     if (provider) {
