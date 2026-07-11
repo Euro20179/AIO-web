@@ -291,6 +291,16 @@ class items_Entry {
         this.loaded = true
     }
 
+    static fromObj({info, user, meta, events, transactions}: {
+        info: InfoEntry | bigint,
+        user?: UserEntry,
+        meta?: MetadataEntry,
+        events?: UserEvent[],
+        transactions?: TransactionEntry[]
+    }) {
+        return new items_Entry(info, user, meta, events, transactions)
+    }
+
     static createUnloaded(itemid: bigint) {
         const info = genericInfo(itemid, 0)
         info.En_Title = `UNKNOWN <id:${itemid}>`
@@ -434,6 +444,21 @@ function items_removeChild(child: bigint, parent: bigint) {
 function items_removeCopy(copy: bigint, copyof: bigint) {
     //relations.removeCopy removes both sides of the copy
     items_getEntry(copy).relations.removeCopy(copyof)
+}
+
+async function items_setResultsWithGetter(items: bigint[], infoGetter: (id: bigint) => Promise<items_Entry>) {
+    _globalsNewUi.results = []
+    await Promise.all(items.values().map(infoGetter))
+        .then(
+            res => {
+                res.values().forEach(
+                    item => {
+                        items_addItem(item)
+                        _globalsNewUi.results.push(item)
+                    }
+                )
+            }
+        )
 }
 
 /**

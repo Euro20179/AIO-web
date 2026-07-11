@@ -1152,7 +1152,8 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
                     events: [],
                     info: entries[entries.length - 1],
                     user: items_meta2user(meta),
-                    meta
+                    meta,
+                    transactions: []
                 })
             }
         }
@@ -1162,9 +1163,15 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
 
     setResultStatUI("results", entries.length)
 
-    items_setResults(entries.map(v => v.ItemId))
+    await items_setResultsWithGetter(entries.map(v => v.ItemId), async(id) => {
+        let res = await api_getEntryAll(id, getUidUI())
+        return res
+            ? items_Entry.fromObj(res)
+            : new items_Entry(genericInfo(id, getUidUI()))
+    })
 
     clearUI()
+
     if (entries.length === 0) {
         setError("No results")
         components['sidebarUI']?.clearSelected()
