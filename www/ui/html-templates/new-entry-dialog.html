@@ -68,22 +68,25 @@
         <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
 
         <div class="flex j-space-between wrap" style="align-content: center; gap: 5%;">
-            <select name="libraryId" style="flex-grow: 1; height: fit-content; align-self: center;"></select>
-            <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                <span>Parent</span>
+            <label class="flex column grow">
+                Library
+                <button name="libraryId" value="0">No Library</button>
+            </label>
+            <label class="flex column grow">
+                Parent
                 <input type="button" value="0" title="parent id" name="parentId"
                     onclick="replaceValueWithSelectedItemIdUI(this)">
-            </div>
-            <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                <span>Copy of</span>
+            </label>
+            <label class="flex column grow">
+                Copy of
                 <input type="button" value="0" title="copy of id" name="copyOf"
                     onclick="replaceValueWithSelectedItemIdUI(this)">
-            </div>
-            <div style="display: inline-flex; flex-direction: column; flex-grow: 1;">
-                <span>Requires</span>
+            </label>
+            <label class="flex column grow">
+                Requires
                 <input type="button" value="0" title="prerequiset for this show" name="requires"
                     onclick="replaceValueWithSelectedItemIdUI(this)">
-            </div>
+            </label>
         </div>
         <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
     </form>

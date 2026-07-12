@@ -26,7 +26,7 @@ type StartupUIComponents = {
     viewAllElem: HTMLInputElement,
     statsOutput: HTMLElement,
     itemFilter: HTMLInputElement,
-    newEntryLibrarySelector: HTMLSelectElement,
+    newEntryLibrarySelector: HTMLButtonElement,
     librarySelector: HTMLButtonElement,
     userSelector: HTMLSelectElement,
     sortBySelector: HTMLSelectElement,
@@ -78,8 +78,24 @@ function startupUI({
         throw new Error("view toggle must be a <select>")
     }
 
-    if (!(components["newEntryLibrarySelector"] instanceof HTMLSelectElement)) {
-        throw new Error("new entry's library selector must be a select element")
+    if (!(components["newEntryLibrarySelector"] instanceof HTMLButtonElement)) {
+        throw new Error("new entry's library selector must be a button element")
+    } else {
+        components.newEntryLibrarySelector.addEventListener("click", async(e) => {
+            const container = await fillItemListingWithSearch("3 type = 'Library'")
+            const btn = document.createElement("button")
+            btn.value = "-1"
+            btn.innerText = "NO LIBRARY"
+            container.querySelector("button")?.insertAdjacentElement('afterend', btn)
+            let res = await selectItemUI({
+                container
+            })
+            if(!res) return
+            //@ts-ignore
+            components.newEntryLibrarySelector.value = res < 0n ? 0n : res
+            //@ts-ignore
+            components.newEntryLibrarySelector.innerText = res < 0n ? 'No Library' : items_getEntry(res).info.En_Title
+        })
     }
 
     if (!(components["librarySelector"] instanceof HTMLButtonElement)) {
