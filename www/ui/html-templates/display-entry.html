@@ -17,9 +17,7 @@
 </dialog>
 
 <dialog id="buy-sell">
-    <form method="dialog" style="position: absolute; top: 0; right: 0;">
-        <button class="close">X</button>
-    </form>
+    <close-button></close-button>
 
     <form method="dialog">
         <button value="Purchased">Buy</button>
@@ -103,12 +101,34 @@
     </table>
 </dialog>
 
+<dialog id="art-styles-menu">
+    <close-button></close-button>
+    <h2>Art Styles</h2>
+    <menu aria-label="art styles" class="grid row m-0 p-0">
+        <label for="is-Anime"><input type="checkbox" id="is-Anime" entry-action="toggleartstyle" entry-action-trigger="change">
+            Anime</label>
+        <label for="is-Cartoon"><input type="checkbox" id="is-Cartoon" entry-action="toggleartstyle" entry-action-trigger="change">
+            Cartoon</label>
+        <label for="is-Handdrawn"><input type="checkbox" id="is-Handdrawn" entry-action="toggleartstyle" entry-action-trigger="change">
+            Hand drawn</label>
+        <label for="is-Digital"><input type="checkbox" id="is-Digital" entry-action="toggleartstyle" entry-action-trigger="change">
+            Digitally drawn </label>
+        <label for="is-CGI"><input type="checkbox" name="is-CGI" id="is-cgi" entry-action="toggleartstyle" entry-action-trigger="change"> Cgi</label>
+        <label for="is-2D"><input type="checkbox" name="is-2D" id="is-2D" entry-action="toggleartstyle" entry-action-trigger="change"> 2D</label>
+        <label for="is-3D"><input type="checkbox" name="is-3D" id="is-3D" entry-action="toggleartstyle" entry-action-trigger="change"> 3D</label>
+        <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
+    </menu>
+</dialog>
+
 <div class="root" id="root">
+
+    <button entry-action="close" class="float right sticky" style="top: 0;">X</button>
 
     <figure class="entry-progress">
         <div id="multiple-progress">
         </div>
     </figure>
+
 
     <div class="grid row float right"
         style="margin-inline: var(--small-gap); gap: var(--small-gap);">
@@ -119,23 +139,6 @@
             </menu>
         </details>
 
-        <details id="art-selectors" class="hamburger-menu">
-            <summary>Art Styles</summary>
-            <menu aria-label="art styles" class="grid row m-0 p-0">
-                <label for="is-Anime"><input type="checkbox" id="is-Anime" entry-action="toggleartstyle" entry-action-trigger="change">
-                    Anime</label>
-                <label for="is-Cartoon"><input type="checkbox" id="is-Cartoon" entry-action="toggleartstyle" entry-action-trigger="change">
-                    Cartoon</label>
-                <label for="is-Handdrawn"><input type="checkbox" id="is-Handdrawn" entry-action="toggleartstyle" entry-action-trigger="change">
-                    Hand drawn</label>
-                <label for="is-Digital"><input type="checkbox" id="is-Digital" entry-action="toggleartstyle" entry-action-trigger="change">
-                    Digitally drawn </label>
-                <label for="is-CGI"><input type="checkbox" name="is-CGI" id="is-cgi" entry-action="toggleartstyle" entry-action-trigger="change"> Cgi</label>
-                <label for="is-2D"><input type="checkbox" name="is-2D" id="is-2D" entry-action="toggleartstyle" entry-action-trigger="change"> 2D</label>
-                <label for="is-3D"><input type="checkbox" name="is-3D" id="is-3D" entry-action="toggleartstyle" entry-action-trigger="change"> 3D</label>
-                <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
-            </menu>
-        </details>
 
         <de-cost-calculation-modifiers>
         </de-cost-calculation-modifiers>
@@ -145,16 +148,15 @@
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
 
-            <input id="library" type="button" entry-action="chooselibrary"
-                toggle-hint="library-hint">
-            <span id="library-hint" popover="hint">Library</span>
+            <div style="display: grid;" grid-rows="2" grid-cols="2">
 
-            <select id="type-selector" style="min-width: 50px;"
-                toggle-hint="type-hint"
-                entry-action="settype" entry-action-trigger="change"> </select>
-            <span id="type-hint" popover='hint'>Media Type</span>
+                <select id="type-selector" style="min-width: 50px;"
+                    toggle-hint="type-hint"
+                    entry-action="settype" entry-action-trigger="change"> </select>
+                <span id="type-hint" popover='hint'>Media Type</span>
 
-            <div class="flex wrap">
+                <button command="show-modal" commandfor="art-styles-menu">Art Styles</button>
+
                 <select id="format-selector" toggle-hint='format-hint'
                     style="min-width: 12ch;"
                     entry-action="setformat" entry-action-trigger="change"></select>
@@ -215,11 +217,11 @@
 
             <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
 
-            <div style="flex-grow: 1;
-                        justify-content: center;
-                        align-items: center;
+            <div style="align-items: center;
                         gap: 1ch;
-                        font-size: 0.9em;" class="flex">
+                        font-size: 0.9em;"
+                 class="flex grow wrap j-center">
+
                 <button class="rating styleless-button" id="user-rating"
                     toggle-hint='your-rating-hint'
                     entry-action="setrating">??</button>

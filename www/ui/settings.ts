@@ -73,12 +73,6 @@ background: var(--red)
     enable_unsafe: ENABLE_UNSAFE,
 
     de_item_interactions: {
-        close:  {
-            text: "X",
-            action: "close",
-            title: "remove item from inspection area",
-            shortTitle: "close"
-        },
 
         identify: {
             text: "🔍︎",
@@ -99,7 +93,16 @@ background: var(--red)
         ['fetch-location']: {
             action: "fetchlocation",
             title: "find location",
-            shortTitle: "locate"
+            shortTitle: "🌎︎ locate"
+        },
+
+        ["library"]: {
+            action: "chooselibrary",
+            title: "choose library",
+            shortTitle: "📚︎ library",
+            attributes: {
+                id: "library"
+            }
         },
 
         ['toggle-object-editor']: {
@@ -119,12 +122,12 @@ background: var(--red)
         },
 
         ['edit-template']: {
-            action: "toggle",
             title: "edit item's html template",
             text: "<>",
             shortTitle: "template",
             attributes: {
-                ['elem-id']: "template-editor-container"
+                command: "showmodal",
+                commandfor: "template-editor-container"
             }
         },
 
@@ -132,7 +135,10 @@ background: var(--red)
             action: "delete",
             title: "permanently delete item",
             text: "🗑",
-            shortTitle: "delete"
+            shortTitle: "delete",
+            attributes: {
+                class: "delete"
+            }
         }
     },
 } as const

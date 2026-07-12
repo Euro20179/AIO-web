@@ -119,7 +119,7 @@
         cursor: pointer;
     }
 
-    :where(button, [role="button"]):hover {
+    :where(button, [role="button"], [type="button"]):hover {
         background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
     }
 
@@ -197,6 +197,18 @@
         z-index: 100;
     }
 
+    .sticky {
+        position: sticky;
+    }
+
+    [grid-cols] {
+        grid-template-columns: repeat(attr(grid-cols type(<number>)), 1fr);
+    }
+
+    [grid-rows] {
+        grid-template-columns: repeat(attr(grid-cols type(<number>)), 1fr);
+    }
+
     .center {
         text-align: center;
     }
@@ -268,6 +280,10 @@
 
     .flex.row {
         flex-direction: row;
+    }
+
+    .flex.row-reverse {
+        flex-direction: row-reverse;
     }
 
     .flex.wrap {

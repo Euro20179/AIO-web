@@ -1506,7 +1506,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#library", el => {
         if (!("value" in el)) return
         if (!item.Library) {
-            el.value = "None"
+            el.value = "Library"
             return
         }
         el.value = items_getEntry(item.Library).info.En_Title

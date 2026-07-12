@@ -282,7 +282,7 @@
 
     #item-interaction-menu {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        grid-auto-flow: row;
         gap: calc(var(--small-gap) / 2);
 
         padding: 0;
@@ -404,7 +404,6 @@
         left: anchor(left);
 
         margin: 0;
-        width: 100cqi;
     }
 
     de-progress figure {
