@@ -346,6 +346,25 @@ function _mkde_actions() {// {{{
         },
 
         /**
+         * Opens a note editing menu
+         */
+        editnotes: function(item, root) {
+            const noteBox = dom_getelorthrow("#notes", null, root)
+            let te = dom_getel("textarea", this.win.HTMLTextAreaElement, noteBox)
+            if(te && noteBox.getAttribute("editing-notes") === "true") {
+                noteBox.removeAttribute("editing-notes")
+                noteBox.innerHTML = parseNotes(te.value)
+                return
+            }
+            noteBox.setAttribute("editing-notes", "true")
+            te = this.win.document.createElement("textarea")
+            te.value = items_getEntry(item.ItemId).user.Notes
+            te.onchange = () => updateNotesUI(item.ItemId, String(te.value))
+
+            noteBox.replaceChildren(te)
+        },
+
+        /**
          * Updates the custom styles with the value of this element
          * **NOTE**: DOES NOT SAVE
          */
