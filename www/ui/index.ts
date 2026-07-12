@@ -22,7 +22,7 @@ async function main() {
         ),
         librarySelector: dom_getelorthrow(
             "#library-selector",
-            HTMLSelectElement,
+            HTMLButtonElement,
         ),
         userSelector: dom_getel('[name="uid"]', HTMLSelectElement),
         sortBySelector,

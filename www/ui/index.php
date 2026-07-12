@@ -67,7 +67,6 @@
         </div>
     </dialog>
 
-
     <dialog id="items-listing" popover>
         <close-button></close-button>
 
@@ -172,8 +171,8 @@
                 <div class="sidebar--navigation" id="sidebar-navigation">
                     <label class="center block" style="align-content: center;"><input type="checkbox" name="view-all"
                             id="view-all">View all</label>
-                    <select id="library-selector">
-                    </select>
+
+                    <button id="library-selector" value="0">Library</button>
                 </div>
                 <div class="sidebar--items" id="sidebar-items">
                 </div>

@@ -138,6 +138,10 @@ SidebarMode.prototype.refresh = function(this: SidebarMode, itemId: bigint) {
         return
     }
 
+    if(items_getEntry(itemId).info.Library != items_getCurrentLibrary()) {
+        this.sub(items_getEntry(itemId).info)
+    }
+
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     if (el) {
         changeSidebarItemData(itemId, el)

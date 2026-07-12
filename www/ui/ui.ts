@@ -27,7 +27,7 @@ type StartupUIComponents = {
     statsOutput: HTMLElement,
     itemFilter: HTMLInputElement,
     newEntryLibrarySelector: HTMLSelectElement,
-    librarySelector: HTMLSelectElement,
+    librarySelector: HTMLButtonElement,
     userSelector: HTMLSelectElement,
     sortBySelector: HTMLSelectElement,
     errorOut: HTMLElement,
@@ -82,8 +82,8 @@ function startupUI({
         throw new Error("new entry's library selector must be a select element")
     }
 
-    if (!(components["librarySelector"] instanceof HTMLSelectElement)) {
-        throw new Error("library selector must be a select element")
+    if (!(components["librarySelector"] instanceof HTMLButtonElement)) {
+        throw new Error("library selector must be a button element")
     }
 
     // if (!(components["userSelector"] instanceof HTMLSelectElement)) {
@@ -136,11 +136,27 @@ function startupUI({
         mode_setMode((e.target as HTMLSelectElement).value, currentWindow())
     })
 
-    librarySelector?.addEventListener("change", function() {
-        let val = librarySelector.value
-        items_setCurrentLibrary(BigInt(val))
+    librarySelector?.addEventListener("click", function() {
+        fillItemListingWithSearch(`3 Type = 'Library'`).then(container => {
+            const btn = document.createElement("button")
+            btn.value = "-1"
+            btn.innerText = "NO LIBRARY"
+            container.querySelector("button")?.insertAdjacentElement('afterend', btn)
+            return selectItemUI({ container })
+        }).then(v => {
+            if(!v) {
+                alert("No library selected")
+                return
+            }
 
-        loadSearchUI()
+            librarySelector.innerText = v > 0
+                    ? items_getEntry(v).info.En_Title
+                    : "Library"
+
+            items_setCurrentLibrary(v < 0n ? 0n : v)
+
+            loadSearchUI()
+        })
     })
 
     userSelector?.addEventListener("change", function() {
@@ -406,7 +422,6 @@ async function refreshInfoUI(uid: number): Promise<[
  */
 async function loadLibraries(uid: number): Promise<void> {
     await items_loadLibraries(uid)
-    updateLibraryDropdown()
 }
 
 /**
@@ -513,7 +528,7 @@ function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
 
     const ls = components.librarySelector
     if (ls) {
-        items = items.filter(v => String(v.info.Library) === ls.value)
+        items = items.filter(v => v.info.Library === items_getCurrentLibrary())
     }
 
     if (!components.itemFilter) {
@@ -1263,17 +1278,11 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
  * and creating an option for each one
  */
 function updateLibraryDropdown() {
-    components.librarySelector && (components.librarySelector.innerHTML = '<option value="0">Library</option>')
-    components.newEntryLibrarySelector && (components.newEntryLibrarySelector.innerHTML = '<option value="0">Library</option>')
-    const libraries = items_getLibraries()
-    for (let i in libraries) {
-        let item = libraries[i]
-        const opt = document.createElement("option")
-        opt.value = String(item["ItemId"])
-        opt.innerText = item["En_Title"]
-        components.librarySelector && components.librarySelector.append(opt)
-        components.newEntryLibrarySelector && components.newEntryLibrarySelector.append(opt.cloneNode(true))
-    }
+    let library_data = items_getEntry(items_getCurrentLibrary())
+    if(components.librarySelector)
+        components.librarySelector.innerText = library_data.ItemId == 0n
+            ? "Library"
+            : library_data.info.En_Title
 }
 
 
@@ -1465,8 +1474,6 @@ addClientFilterRuleUI(filter => filter === "!copy", (filter, items) => {
  * @returns {InfoEntry[]}
  */
 function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSearchFilters): InfoEntry[] {
-
-    entries = entries.filter(v => v.Library === items_getCurrentLibrary())
 
     if (filters.sortBy.startsWith("-aiow")) {
         entries = sortEntries(entries, filters.sortBy)

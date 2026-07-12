@@ -55,6 +55,10 @@ function _mkde_actions() {// {{{
                     .map(e => [e[0], items_getEntry(e[1].ItemId)]))
 
             const container = fillItemListingUI(libraries)
+            const btn = document.createElement("button")
+            btn.value = "-1"
+            btn.innerText = "NO LIBRARY"
+            container.querySelector("button")?.insertAdjacentElement('afterend', btn)
             selectItemUI({
                 container,
                 onsearch: async function(search) {
@@ -74,7 +78,7 @@ function _mkde_actions() {// {{{
                 }
             }).then(id => {
                 if (!id) return
-                item.Library = id
+                item.Library = id < 0n ? 0n : id
                 return api_setItem("", item, "Set library of item")
             })
                 .then((res) => {
