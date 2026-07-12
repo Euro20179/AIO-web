@@ -59,9 +59,7 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
-        <form method="dialog" style="position: absolute; top: 0; right: 0;">
-            <button class="close">X</button>
-        </form>
+        <close-button></close-button>
 
         <div>
         </div>
