@@ -1673,12 +1673,12 @@ function fillItemListingArbitraryUI(items: Record<any, HTMLElement>) {
 
     for (let id in items) {
         let el = items[id]
-        if (el.tagName !== "FIGURE") {
-            const f = document.createElement("figure")
+        if (el.tagName !== "BUTTON") {
+            const f = document.createElement("button")
             f.append(el)
             el = f
         }
-        el.setAttribute("data-item-id", id)
+        (el as HTMLButtonElement).value = id
         container.append(el)
     }
     itemsFillDiv.append(container)
@@ -1699,6 +1699,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
     container.classList.add("grid")
     container.classList.add("center")
     container.style.gridTemplateColumns = "1fr 1fr 1fr"
+    container.style.justifyItems = "center"
 
     if (addCancel) {
         entries["0"] = new items_Entry(genericInfo(0n, 0))
@@ -1720,11 +1721,16 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
             title = entry.info.En_Title || entry.info.Native_Title || entry.meta.Title || entry.meta.Native_Title
         }
 
+        const btn = document.createElement("button")
+
+        btn.classList.add("styleless-button")
+        btn.style.width = "fit-content"
+        btn.value = String(id)
+
         const fig = document.createElement("figure")
+        btn.append(fig)
 
         fig.style.cursor = "pointer"
-
-        fig.setAttribute("data-item-id", String(id))
 
         let thumbnail = probablyMetaEntry(entry) ? fixThumbnailURL(entry.Thumbnail) : entry.fixedThumbnail
 
@@ -1738,7 +1744,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
         fig.append(img)
         fig.append(caption)
 
-        container.append(fig)
+        container.append(btn)
     }
 
     itemsFillDiv.append(container)
@@ -1762,7 +1768,7 @@ async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
 
 type SelectItemOptions = Partial<{
     container: HTMLDivElement | null,
-    onsearch: (query: string) => Promise<HTMLDivElement>
+    onsearch: (query: string) => Promise<HTMLDivElement>,
 }>
 
 /**
@@ -1791,23 +1797,14 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
     popover.showModal()
 
     return await new Promise((res) => {
-        function registerFigClickEvents(container: HTMLElement) {
-            for (let fig of container.querySelectorAll("figure")) {
-                const id = fig.getAttribute("data-item-id")
-                fig.onclick = () => {
-                    popover.close(id as string)
-                }
-            }
-        }
         popover.onclose = function() {
             if (popover.returnValue) {
                 res(BigInt(popover.returnValue))
             } else res(null)
         }
         f.onsubmit = function() {
-            onsearch(query.value).then(registerFigClickEvents)
+            onsearch(query.value)
         }
-        registerFigClickEvents(container)
     })
 }
 

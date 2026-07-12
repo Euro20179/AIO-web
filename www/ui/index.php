@@ -79,8 +79,10 @@
                 <input name="items-listing-search" placeholder="new search" type="search">
             </form>
         </center>
-        <div id="put-items-to-select">
-        </div>
+        <form method="dialog">
+            <div id="put-items-to-select">
+            </div>
+        </form>
     </dialog>
 
     <prompt-dialog></prompt-dialog>
