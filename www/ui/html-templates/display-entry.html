@@ -146,7 +146,11 @@
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
 
-            <div style="display: grid;" grid-rows="2" grid-cols="2">
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(2, 1fr)
+            ">
 
                 <select id="type-selector" style="min-width: 50px;"
                     toggle-hint="type-hint"

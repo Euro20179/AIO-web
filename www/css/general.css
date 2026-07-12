@@ -201,14 +201,6 @@
         position: sticky;
     }
 
-    [grid-cols] {
-        grid-template-columns: repeat(attr(grid-cols type(<number>)), 1fr);
-    }
-
-    [grid-rows] {
-        grid-template-columns: repeat(attr(grid-cols type(<number>)), 1fr);
-    }
-
     .center {
         text-align: center;
     }
