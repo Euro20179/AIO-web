@@ -70,7 +70,13 @@
         <div class="flex j-space-between wrap" style="align-content: center; gap: 5%;">
             <label class="flex column grow">
                 Library
-                <button name="libraryId" value="0">No Library</button>
+                <input
+                    name="libraryId"
+                    value="0"
+                    type="button"
+                    title="library"
+                    onclick="fillItemListingWithSearch(`3 type = 'Library'`)
+                                .then((comp) => replaceValueWithSelectedItemIdUI(this, { container: comp }))">
             </label>
             <label class="flex column grow">
                 Parent

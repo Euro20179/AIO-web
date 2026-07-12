@@ -26,7 +26,7 @@ type StartupUIComponents = {
     viewAllElem: HTMLInputElement,
     statsOutput: HTMLElement,
     itemFilter: HTMLInputElement,
-    newEntryLibrarySelector: HTMLButtonElement,
+    newEntryLibrarySelector: HTMLInputElement,
     librarySelector: HTMLButtonElement,
     userSelector: HTMLSelectElement,
     sortBySelector: HTMLSelectElement,
@@ -78,24 +78,8 @@ function startupUI({
         throw new Error("view toggle must be a <select>")
     }
 
-    if (!(components["newEntryLibrarySelector"] instanceof HTMLButtonElement)) {
+    if (!(components["newEntryLibrarySelector"] instanceof HTMLInputElement)) {
         throw new Error("new entry's library selector must be a button element")
-    } else {
-        components.newEntryLibrarySelector.addEventListener("click", async(e) => {
-            const container = await fillItemListingWithSearch("3 type = 'Library'")
-            const btn = document.createElement("button")
-            btn.value = "-1"
-            btn.innerText = "NO LIBRARY"
-            container.querySelector("button")?.insertAdjacentElement('afterend', btn)
-            let res = await selectItemUI({
-                container
-            })
-            if(!res) return
-            //@ts-ignore
-            components.newEntryLibrarySelector.value = res < 0n ? 0n : res
-            //@ts-ignore
-            components.newEntryLibrarySelector.innerText = res < 0n ? 'No Library' : items_getEntry(res).info.En_Title
-        })
     }
 
     if (!(components["librarySelector"] instanceof HTMLButtonElement)) {
@@ -1779,8 +1763,8 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
  * if the user doesn't select anything, the value is set to "0"
  * @param {HTMLInputElement} input
  */
-async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement) {
-    let item = await selectItemUI()
+async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement, options?: SelectItemOptions) {
+    let item = await selectItemUI(options)
     const popover = dom_getelorthrow("#items-listing", HTMLDialogElement)
     if (item === null) {
         input.value = "0"

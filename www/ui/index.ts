@@ -18,7 +18,7 @@ async function main() {
         statsOutput: document.getElementById("result-stats"),
         newEntryLibrarySelector: dom_getelorthrow(
             '[name="libraryId"]',
-            HTMLButtonElement,
+            HTMLInputElement,
         ),
         librarySelector: dom_getelorthrow(
             "#library-selector",
