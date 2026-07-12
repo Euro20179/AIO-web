@@ -348,18 +348,38 @@ function _mkde_actions() {// {{{
         /**
          * Opens a note editing menu
          */
-        editnotes: function(item, root) {
-            const noteBox = dom_getelorthrow("#notes", null, root)
-            let te = dom_getel("textarea", this.win.HTMLTextAreaElement, noteBox)
-            if(te && noteBox.getAttribute("editing-notes") === "true") {
-                noteBox.removeAttribute("editing-notes")
-                noteBox.innerHTML = parseNotes(te.value)
+        editnotes: function(item, root, target) {
+            if(target.hasAttribute("data-editing")) {
+                updateNotesUI(item.ItemId, target.getAttribute("data-editing") as string)
+                target.removeAttribute("data-editing")
                 return
             }
-            noteBox.setAttribute("editing-notes", "true")
+
+
+            const noteBox = dom_getelorthrow("#notes", null, root)
+            let te = dom_getel("textarea", this.win.HTMLTextAreaElement, noteBox)
+
             te = this.win.document.createElement("textarea")
-            te.value = items_getEntry(item.ItemId).user.Notes
-            te.onchange = () => updateNotesUI(item.ItemId, String(te.value))
+            const notes = items_getEntry(item.ItemId).user.Notes
+            te.value = notes
+            target.setAttribute("data-editing", notes)
+
+            const quitEditing = (save: boolean) => {
+                target.removeAttribute("data-editing")
+                updateNotesUI(item.ItemId, save ? String(te.value) : notes)
+            }
+
+            te.onchange = quitEditing.bind(this, true)
+            te.style.width = '80%'
+            te.style.height = '10cqb'
+            te.onkeydown = keyE => {
+                if(keyE.key !== "Escape") return
+                keyE.preventDefault()
+                te.onchange = null
+                confirmUI("Would you like to save notes?").then(e => {
+                    quitEditing(e === true)
+                }).catch(() => {})
+            }
 
             noteBox.replaceChildren(te)
         },
