@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="/css/general.css">
     <link rel="stylesheet" href="/ui/styles.css">
     <link rel="stylesheet" href="/ui/templates/tierlist.css" defer>
+
+    <link rel="prefetch" href="/ui/templates/calc-entry.css">
+    <link rel="prefetch" href="/ui/templates/display-entry.css">
+    <link rel="prefetch" href="/ui/css-styles/rating-styles.css">
 </head>
 
 <body>

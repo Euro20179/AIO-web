@@ -1,6 +1,3 @@
-@import "/css/colors.css";
-@import "/css/general.css";
-
 :host(calc-entry) {
     border: 1px solid #fffc;
     padding: 30px;

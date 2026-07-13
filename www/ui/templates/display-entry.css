@@ -1,7 +1,3 @@
-@import "/css/colors.css";
-@import "/css/general.css";
-@import "/ui/css-styles/rating-styles.css";
-
 @layer general, util, components;
 
 @layer util {
