@@ -75,6 +75,8 @@
                 data-button-type="search"
                 onclick="itemIdentificationUI().then(fillNewItemFormFromMetadataUI)">
             </button>
+
+
             <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
             <select name="user-status" style="flex-grow: 1;">
                 <option value="">Status</option>
@@ -99,6 +101,7 @@
                     style="vertical-align: middle;" name="is-digital"
                     title="Whether or not the item is a digitized/digital version of the format"></label>
             <select name="format" required title="Format type"></select>
+            <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
         </div>
 
         <div class="flex" style="gap: var(--very-small-gap)">
@@ -111,7 +114,6 @@
         </div>
 
         <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
-        <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
 
         <div class="flex row wrap" style="justify-content: space-around; gap: var(--small-gap)">
             <input type="button" onclick="dom_resetform(this.form)" value="reset" style="color: var(--bad)">
