@@ -2592,7 +2592,13 @@ function clearUI(updateStats: boolean = true) {
 }
 
 
-async function titleIdentificationUI(provider: string, search: string, _selectionElemOutput: HTMLElement): Promise<string | null> {
+/**
+    * given a metadata provider, and a search query allow the user to select an item from the metadata provider's results.
+    * @param {string} provider the metadata provider
+    * @param {string} search the search query
+    * @returns {Promise<string | null>} the provider's id for the selected result or null.
+*/
+async function titleIdentificationUI(provider: string, search: string): Promise<string | null> {
     let res = await api_identify(search, provider)
     if (!res) {
         return null
@@ -2695,8 +2701,7 @@ async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | n
 
             switch (queryType) {
                 case "by-title":
-                    let titleSearchContainer = dom_getelorthrow("#identify-items", HTMLDialogElement, paramsForm.getRootNode())
-                    finalItemId = await titleIdentificationUI(provider, search, titleSearchContainer)
+                    finalItemId = await titleIdentificationUI(provider, search)
 
                     if (!finalItemId) {
                         alert("Failed to identify item")

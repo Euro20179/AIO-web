@@ -113,6 +113,8 @@
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
                     <input type="search" name="search-query" placeholder="search query">
+                    <button type="submit" class="styleless-button">🔎</button>
+
                     <span id='sort-by-hint' popover='hint'>Sorting method</span>
                     <select name="sort-by" toggle-hint='sort-by-hint'>
                         <optgroup label="Misc">
@@ -146,7 +148,6 @@
                     <select name="uid">
                         <option value="0">ALL</option>
                     </select>
-                    <button type="submit">🔎</button>
                 </form>
                 <!--used for proper overflow-->
                 <div>

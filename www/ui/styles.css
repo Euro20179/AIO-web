@@ -314,6 +314,15 @@
 
         [name="search-query"] {
             flex-grow: 1;
+            anchor-name: --search-box;
+
+            & + button[type="submit"] {
+                position: absolute;
+                position-anchor: --search-box;
+                left: anchor(right);
+                bottom: anchor(center);
+                transform: translate(-150%, 50%);
+            }
         }
 
         [name="uid"] {
