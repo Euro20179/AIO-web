@@ -171,7 +171,11 @@ function startupUI({
 
     if (newItemForm) {
         const title = dom_getelorthrow('[name="title"]', HTMLInputElement, newItemForm)
-        newItemForm.oninput = function() {
+        newItemForm.oninput = function(e) {
+            if(e.target instanceof currentWindow().HTMLInputElement
+               && e.target.getAttribute("name") === "location")
+                return
+
             const location = dom_getelorthrow('[name="location"]', HTMLInputElement, newItemForm)
             if (typeof settings.location_generator === 'string') {
                 location.value = settings.location_generator.replaceAll("{}", title.value)
