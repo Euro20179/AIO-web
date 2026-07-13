@@ -2740,15 +2740,13 @@ const clearItems = clearUI
  * that the user can edit
  * @param {object} obj
  * @param {HTMLTableElement} objectTbl
- * @param {boolean} [clear=true] whether or not to clear the table before filling it with new object fields
+ * @param {string} [clear='tr:not(:first-child)'] a query selector of which element children to clear
  */
-function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear: boolean = true) {
+function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear: string = 'tr:not(:first-child)') {
 
     if (clear) {
-        const firstTr = objectTbl.firstElementChild
-        //remove all rows except the first
-        while (objectTbl.lastElementChild && objectTbl.lastElementChild !== firstTr) {
-            objectTbl.removeChild(objectTbl.lastElementChild)
+        for(let el of objectTbl.querySelectorAll(clear)) {
+            el.remove()
         }
     }
 

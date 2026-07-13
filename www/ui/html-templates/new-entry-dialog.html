@@ -10,7 +10,7 @@
         onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
     >
 
-        <dialog id="new-entry-edit-metadata-dialog">
+        <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
             <close-button></close-button>
             <button type="button" class="float right" onclick="
                 fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
@@ -86,7 +86,6 @@
                 data-button-type="search"
                 onclick="itemIdentificationUI().then(res => {
                     fillNewItemFormFromMetadataUI(res)
-                    updateObjectTblUI(res, this.form.querySelector('table'))
                 })">
             </button>
 
