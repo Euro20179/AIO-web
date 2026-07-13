@@ -6,13 +6,6 @@
     [part="root"] {
         container-type: inline-size;
 
-        height: minmax(fit-content, 20cqb);
-        align-content: center;
-
-        overflow: hidden;
-
-        font-size: 0.9em;
-
         @container body (width < 800px) {
             width: 25vw;
             height: min-content;
