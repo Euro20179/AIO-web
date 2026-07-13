@@ -4,7 +4,10 @@
 
     <h3>New Entry</h3>
 
-    <form id="new-item-form" method="dialog" action="javascript:void(0)">
+    <form id="new-item-form"
+        action="javascript:void(0)"
+        onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
+    >
         <input type="hidden" name="metadata">
 
         <dialog id="new-item-art-styles-dialog">
@@ -114,8 +117,7 @@
             <input
                 type="submit"
                 value="CREATE!"
-                style="color: var(--good); flex-grow: 1;"
-                onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
+                style="color: var(--good); flex-grow: 1;">
         </div>
 
     </form>
