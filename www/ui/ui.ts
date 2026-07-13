@@ -2655,9 +2655,15 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
     }
 }
 
-async function itemIdentificationUI(forItem?: bigint) {
+/**
+ * Allow the user to perform a metadata search
+ * if forItem is given, apply the selected metadata to that item
+ * @param {bigint} [forItem] the item to apply metadata to
+ * @return {Promise<MetadataEntry | null>
+ */
+async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | null> {
     const modal = openModalUI("item-identification-form")
-    if(!modal) return
+    if(!modal) return null
 
     return await new Promise(async (pres, rej) => {
         modal.oncancel = e => e.preventDefault()

@@ -7,21 +7,74 @@
     <form id="new-item-form" method="dialog" action="javascript:void(0)">
         <input type="hidden" name="metadata">
 
-        <div class="flex wrap" style="width: 100%;">
+        <dialog id="new-item-art-styles-dialog">
+            <close-button></close-button>
+            <h4 class="center">
+                Art styles
+            </h4>
+            <div class="flex column" style="gap: 2ch; width: 100%; overflow:auto">
+                <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
+                    Anime</label>
+                <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
+                    Cartoon</label>
+                <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
+                    Hand drawn</label>
+                <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
+                    Digitally drawn </label>
+                <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
+                <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
+                    action</label>
+                <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
+                    2d</label>
+                <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
+                    3d</label>
+            </div>
+        </dialog>
+
+        <dialog id="new-item-relations-dialog">
+            <div class="flex j-space-between wrap">
+                <label class="flex column grow">
+                    Library
+                    <input
+                        name="libraryId"
+                        value="0"
+                        type="button"
+                        title="library"
+                        onclick="fillItemListingWithSearch(`3 type = 'Library'`)
+                                    .then((comp) => replaceValueWithSelectedItemIdUI(this, { container: comp }))">
+                </label>
+                <label class="flex column grow">
+                    Parent
+                    <input type="button" value="0" title="parent id" name="parentId"
+                        onclick="replaceValueWithSelectedItemIdUI(this)">
+                </label>
+                <label class="flex column grow">
+                    Copy of
+                    <input type="button" value="0" title="copy of id" name="copyOf"
+                        onclick="replaceValueWithSelectedItemIdUI(this)">
+                </label>
+                <label class="flex column grow">
+                    Requires
+                    <input type="button" value="0" title="prerequiset for this show" name="requires"
+                        onclick="replaceValueWithSelectedItemIdUI(this)">
+                </label>
+            </div>
+        </dialog>
+
+        <div style="
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            grid-template-columns: min-content 1fr min-content;
+            gap: calc(var(--small-gap) / 2);
+            width: 100%;
+        ">
             <button
                 type="button"
+                data-button-type="search"
                 onclick="itemIdentificationUI().then(fillNewItemFormFromMetadataUI)">
                 🔍︎
             </button>
-            <input type="text" placeholder="title" name="title" required style="flex-grow: 1; max-width: 100%;">
-            <select name="type" title="The type of media" required style="flex-grow: 1;">
-                <option value="">Type</option>
-            </select>
-        </div>
-
-        <input type="text" placeholder="native title" name="native-title">
-
-        <div class="flex wrap" style="width: 100%;">
+            <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
             <select name="user-status" style="flex-grow: 1;">
                 <option value="">Status</option>
                 <option value="Planned">Planned</option>
@@ -32,73 +85,31 @@
                 <option value="ReViewing">Re viewing</option>
                 <option value="Waiting">Waiting</option>
             </select>
-            <select name="format" required title="Format type"></select>
-            <label for="is-digital" style="text-wrap: nowrap;"><input type="checkbox" id='is-digital'
+
+            <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch;">
+            <input type="text" placeholder="native title" name="native-title">
+            <select name="type" title="The type of media" required style="flex-grow: 1;">
+                <option value="">Type</option>
+            </select>
+
+            <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
+            <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
+                digital
+                <input type="checkbox" id='is-digital'
                     style="vertical-align: middle;" name="is-digital"
-                    title="Whether or not the item is a digitized/digital version of the format"> digital?</label>
+                    title="Whether or not the item is a digitized/digital version of the format"></label>
+            <select name="format" required title="Format type"></select>
         </div>
 
-        <div class="flex wrap" style="width: 100%;">
-            <input type="number" min="0" step="0.01" name="price" placeholder="price">
-
-            <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location">
+        <div class="flex wrap" style="width: 100%; gap: calc(var(--small-gap) / 2);">
+            <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
+            <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;">
         </div>
-
-        <p class="center">
-            Art style
-        </p>
-        <div class="flex" style="gap: 2ch; width: 100%; overflow:auto">
-            <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
-                Anime</label>
-            <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
-                Cartoon</label>
-            <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
-                Hand drawn</label>
-            <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
-                Digitally drawn </label>
-            <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-            <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
-                action</label>
-            <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
-                2d</label>
-            <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
-                3d</label>
-        </div>
-
-        <input type="text" placeholder="tags (',' separated)" name="tags" value="">
-
-        <br>
 
         <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
+        <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
 
-        <div class="flex j-space-between wrap" style="align-content: center; gap: 5%;">
-            <label class="flex column grow">
-                Library
-                <input
-                    name="libraryId"
-                    value="0"
-                    type="button"
-                    title="library"
-                    onclick="fillItemListingWithSearch(`3 type = 'Library'`)
-                                .then((comp) => replaceValueWithSelectedItemIdUI(this, { container: comp }))">
-            </label>
-            <label class="flex column grow">
-                Parent
-                <input type="button" value="0" title="parent id" name="parentId"
-                    onclick="replaceValueWithSelectedItemIdUI(this)">
-            </label>
-            <label class="flex column grow">
-                Copy of
-                <input type="button" value="0" title="copy of id" name="copyOf"
-                    onclick="replaceValueWithSelectedItemIdUI(this)">
-            </label>
-            <label class="flex column grow">
-                Requires
-                <input type="button" value="0" title="prerequiset for this show" name="requires"
-                    onclick="replaceValueWithSelectedItemIdUI(this)">
-            </label>
-        </div>
-        <div class="flex row wrap">
+        <div class="flex row wrap" style="justify-content: space-around; gap: var(--small-gap)">
             <input type="button" onclick="dom_resetform(this.form)" value="reset" style="color: var(--bad)">
             <input
                 type="submit"
