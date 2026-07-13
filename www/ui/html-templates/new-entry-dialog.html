@@ -69,13 +69,7 @@
             </div>
         </dialog>
 
-        <div style="
-            display: grid;
-            grid-template-rows: repeat(3, 1fr);
-            grid-template-columns: min-content 1fr min-content;
-            gap: var(--very-small-gap);
-            width: 100%;
-        ">
+        <div>
             <button
                 type="button"
                 data-button-type="search"
@@ -93,7 +87,7 @@
                 <option value="Waiting">Waiting</option>
             </select>
 
-            <input type="text" placeholder="native title" name="native-title" style="grid-column: 1 / -2">
+            <input type="text" placeholder="native title" name="native-title">
             <select name="type" title="The type of media" required style="flex-grow: 1;">
                 <option value="">Type</option>
             </select>
