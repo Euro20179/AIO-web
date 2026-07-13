@@ -68,14 +68,14 @@
         }
     }
 
+    [role="button"],
+    input,
+    button,
     select {
-        border-width: 1px;
-        border-style: solid;
+        border: var(--input-border);
         border-radius: var(--border-roundness);
 
-        cursor: pointer;
     }
-
 
     a {
         color: unset;
@@ -101,8 +101,6 @@
 
     input {
         padding: 5px;
-        border-radius: var(--border-roundness);
-        border-width: 1px;
     }
 
     form button {
@@ -110,12 +108,11 @@
     }
 
     button,
+    select,
     [role="button"],
     input[type="submit"],
     input[type="reset"],
     input[type="button"] {
-        border: 1px solid var(--input-border-color);
-        border-radius: var(--border-roundness);
         color: var(--text-color);
         cursor: pointer;
     }
