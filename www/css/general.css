@@ -112,6 +112,7 @@
     button,
     [role="button"],
     input[type="submit"],
+    input[type="reset"],
     input[type="button"] {
         border: 1px solid var(--input-border-color);
         border-radius: var(--border-roundness);
@@ -119,7 +120,7 @@
         cursor: pointer;
     }
 
-    :where(button, [role="button"], [type="button"]):hover {
+    :where(button, [role="button"], [type="button"], [type="reset"], [type="submit"]):hover {
         background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
     }
 

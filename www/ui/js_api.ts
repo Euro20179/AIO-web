@@ -104,6 +104,17 @@ function arr_shuf<T>(iter: Iterable<T>): T[] {
 }
 
 /**
+ * Resets a form completely (including type="hidden" inputs)
+ * @param {HTMLFormElement} form
+ */
+function dom_resetform(form: HTMLFormElement) {
+    for(let el of form.querySelectorAll('input[type="hidden"]') as NodeListOf<HTMLInputElement>) {
+        el.value = ''
+    }
+    form.reset()
+}
+
+/**
  * Gets an element by a query selector that's an instanceof {requiredType}
  * If such an element is not found, null is returned
  *

@@ -1561,10 +1561,13 @@ function newEventUI(form: HTMLFormElement) {
  * Side effects:
  * - adds the new item to the global entries list
  * - calls ui_search() with <q>En_Title = 'new-item-name'</q>
+ * - resets the form
  * @param {HTMLFormElement} form - the form to use for creating an entry
  */
 async function newEntryUI(form: HTMLFormElement) {
     const data = new FormData(form)
+
+    dom_resetform(form)
 
     let artStyle = 0
 
@@ -2632,6 +2635,7 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
         console.error("Failed to fill new item form from metadata, no metadata")
         return
     }
+
     form.elements['metadata'].value = api_serializeEntry(metadata)
     form.elements['title'].value = metadata.Title
     if(metadata.MediaDependant != '{}') {

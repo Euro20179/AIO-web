@@ -204,6 +204,11 @@
         flex-direction: column;
         gap: var(--small-gap);
         margin: 0 20%;
+
+        &:has([name="metadata"][value^="{"]) button[type="button"]::after {
+            color: var(--good);
+            content: " ✓"
+        }
     }
 
     #new-entry-button {

@@ -98,7 +98,15 @@
                     onclick="replaceValueWithSelectedItemIdUI(this)">
             </label>
         </div>
-        <input type="submit" value="CREATE!" onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
+        <div class="flex row wrap">
+            <input type="button" onclick="dom_resetform(this.form)" value="reset" style="color: var(--bad)">
+            <input
+                type="submit"
+                value="CREATE!"
+                style="color: var(--good); flex-grow: 1;"
+                onclick="closeModalUI('new-entry', this.getRootNode()); newEntryUI(this.form)">
+        </div>
+
     </form>
 </dialog>
 </template>
