@@ -63,9 +63,8 @@
     #sidebar-thumbnail {
         cursor: pointer;
         /* set a range instead of specific sizes, so that the image can resize to a good size, and so that the image fits within the size of the sidebar */
-        min-height: 50cqi;
         max-height: 70cqi;
-        max-width: 100cqi;
+        max-width: 95cqi;
 
         @container body (width < 800px) {
             justify-self: center;
@@ -73,7 +72,7 @@
     }
 
     #sidebar-thumbnail:not([src]) {
-        height: 70cqb;
+        height: 70cqi;
     }
 
     button:focus {
