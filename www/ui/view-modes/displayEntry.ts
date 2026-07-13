@@ -104,7 +104,7 @@ function _mkde_actions() {// {{{
                 modal.removeEventListener("close", onclose)
 
                 let rv = modal.returnValue
-                if(rv === "_CLOSED") return
+                if(!rv) return
 
                 if(rv === "view-log") {
                     showTransactionsUI(item.ItemId)

@@ -59,18 +59,25 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
         win.document.documentElement.replaceWith(parser.parseFromString(doc, "text/html").documentElement)
     }
 
-    picker: {
-        const cspicker = dom_getel("color-scheme-selector")
-        if(!cspicker) break picker
+    const cspicker = dom_getel("color-scheme-selector")
+    if(cspicker) {
         win.document.body.prepend(cspicker.cloneNode(true))
+    }
 
-        const s = document.createElement("script")
-        s.src = "/ui/components.js"
-        win.document.body.append(s)
+    const closebtn = dom_getel("close-button")
+    if(closebtn) {
+        win.document.body.prepend(closebtn.cloneNode(true))
+    }
 
-        const psel = dom_getel("select", win.self.HTMLSelectElement, win.document)
-        if(!psel) break picker
+    if(!cspicker && !closebtn) return win
 
+    const s = document.createElement("script")
+    s.src = "/ui/components.js"
+    win.document.body.append(s)
+
+    const psel = dom_getel("select", win.self.HTMLSelectElement, win.document)
+
+    if(psel) {
         const v = dom_getel("select", HTMLSelectElement, cspicker)
         if(v)
             psel.value = v.value

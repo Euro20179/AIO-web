@@ -2138,6 +2138,7 @@ function doUserStartupUI(settings: UserSettings) {
             if (!settings[key as keyof typeof settings]) continue
             const tmpl = key.split("template-")[1]
             const tmplEl = currentDocument().getElementById(tmpl)
+            console.log(tmpl, tmplEl)
             if (!tmplEl) continue
             tmplEl.innerHTML = settings[key as keyof typeof settings]
         }
@@ -2225,9 +2226,6 @@ body {
 </style>
 </head>
 <body>
-<div style='float: right; align-content: center;' class='flex' id='settings'>
-    <button class="popout" style='float: right;'>✗</button>
-</div>
 </body>`)
         if (!win) return
 
@@ -2264,7 +2262,7 @@ body {
             }
         }
 
-        const closePopout = dom_getel("button.popout", win.self.HTMLElement, win.document.body)
+        const closePopout = dom_getel("close-button button", win.self.HTMLElement, win.document.body)
         if (closePopout) {
             closePopout.onclick = () => {
                 placeholder.replaceWith(parent)
@@ -2668,7 +2666,7 @@ async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | n
     return await new Promise(async (pres, rej) => {
         modal.oncancel = e => e.preventDefault()
         modal.onclose = async() => {
-            if(modal.returnValue === "_CLOSED") {
+            if(!modal.returnValue) {
                 rej("user cancelled")
                 return
             }

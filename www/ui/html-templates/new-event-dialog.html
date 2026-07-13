@@ -2,7 +2,7 @@
 <dialog id="new-event-form" popover>
     <close-button></close-button>
 
-    <form action="javascript:void(0)" onsubmit="newEventUI(this)" class="block">
+    <form method="dialog" onsubmit="newEventUI(this)" class="block">
         <input type="hidden" name="itemid">
 
         <label for="name">Name: <input id="name" name="name" required></label>
@@ -11,28 +11,25 @@
         </p>
 
         <div class="grid column">
-            <div class="flex column" style="align-items: center;">
-                <label for="after-timestamp">
-                    After:
-                </label>
+            <label for="after-timestamp" class="flex column" style="align-items: center;">
+                After:
                 <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
-            </div>
+            </label>
 
-            <div class="flex column" style="align-items: center;">
-                <label for="timestamp">
-                    On:
-                </label>
+            <label for="timestamp" class="flex column" style="align-items: center;">
+                On:
                 <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
-            </div>
+            </label>
 
-            <div class="flex column" style="align-items: center;">
-                <label for="before-timestamp">
-                    Before:
-                </label>
+            <label for="before-timestamp"  class="flex column" style="align-items: center;">
+                Before:
                 <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
-            </div>
+            </label>
 
-            <input name="timezone" list="tz-selector">
+            <label class="flex column" style="align-items: center;">
+                Timezone:
+                <input name="timezone" list="tz-selector">
+            </label>
         </div>
 
         <br>
