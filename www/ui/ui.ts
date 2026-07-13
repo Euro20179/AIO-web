@@ -2660,6 +2660,7 @@ async function itemIdentificationUI(forItem?: bigint) {
     if(!modal) return
 
     return await new Promise(async (pres, rej) => {
+        modal.oncancel = e => e.preventDefault()
         modal.onclose = async() => {
             if(modal.returnValue === "_CLOSED") {
                 rej("user cancelled")
