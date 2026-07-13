@@ -93,14 +93,16 @@
 
                 <select id="type-selector" style="min-width: 50px;"
                     toggle-hint="type-hint"
-                    entry-action="settype" entry-action-trigger="change"> </select>
+                    entry-action="settype" entry-action-trigger="change"
+                    aria-labelledby="type-hint"> </select>
                 <span id="type-hint" popover='hint'>Media Type</span>
 
                 <button command="show-modal" commandfor="art-styles-menu">Art Styles</button>
 
                 <select id="format-selector" toggle-hint='format-hint'
                     style="min-width: 12ch;"
-                    entry-action="setformat" entry-action-trigger="change"></select>
+                    entry-action="setformat" entry-action-trigger="change"
+                    aria-labelledby="format-hint"></select>
                 <span id="format-hint" popover='hint'>Media Format</span>
 
                 <div class="flex wrap">
@@ -119,7 +121,7 @@
         <input type="file" hidden id="thumbnail-file-upload">
 
         <button class="styleless-button" entry-action="setthumbnail">
-            <img src="" alt="" class="thumbnail" id="thumbnail">
+            <img src="" alt="" class="thumbnail" id="thumbnail" fetchpriority="high">
         </button>
 
 

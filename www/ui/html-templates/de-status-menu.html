@@ -1,5 +1,5 @@
 <template id="de-status-menu">
-<menu role="menu" aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
+<menu aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
     <button entry-action="transact" class="action" title="Create Transaction">$</button>
     <div class="flex">
         <button data-action="Plan" class="action" title="plan">🗓</button>
@@ -9,7 +9,7 @@
     <div class="flex">
         <button data-action="Finish" class="action" title="finish">🏁</button>
         <button data-action="Drop" class="action" title="drop">⏹</button>
-        <select id="status-selector">
+        <select id="status-selector" aria-label="current status">
             <option value="">No status</option>
             <option value="Planned">Planned</option>
             <option value="Viewing">Viewing</option>

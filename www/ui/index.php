@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/colors.css">
     <link rel="stylesheet" href="/css/general.css">
     <link rel="stylesheet" href="/ui/styles.css">
-    <link rel="stylesheet" href="/ui/templates/tierlist.css">
+    <link rel="stylesheet" href="/ui/templates/tierlist.css" defer>
 </head>
 
 <body>
@@ -115,7 +115,7 @@
                     <input type="search" name="search-query" placeholder="search query">
 
                     <span id='sort-by-hint' popover='hint'>Sorting method</span>
-                    <select name="sort-by" toggle-hint='sort-by-hint'>
+                    <select name="sort-by" toggle-hint='sort-by-hint' aria-labelledby="sort-by-hint">
                         <optgroup label="Misc">
                             <option value="">No Sort</option>
                             <option value="item-id">Item Id</option>
@@ -144,7 +144,7 @@
                     </select>
 
                     <!-- ui relies on this to keep track of the uid -->
-                    <select name="uid">
+                    <select name="uid" aria-label="user">
                         <option value="0">ALL</option>
                     </select>
 
@@ -156,7 +156,7 @@
                     </div>
                 </div>
                 <div style="justify-self: end;">
-                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center;'>
+                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center;' aria-label="mode">
                         <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
                         <option value="graph-output" title="Graph mode">📊︎ Graph</option>
                         <option value="calendar-output" title="Calendar mode">📅︎ Calendar</option>
@@ -190,7 +190,6 @@
         </div>
     </div>
 
-    <script src="/js/chart.js" defer></script>
     <script src="/ui/components.js" defer></script>
     <script src="/config.js" defer></script>
     <script src="/js/items.js" defer></script>

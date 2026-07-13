@@ -230,6 +230,7 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //Title
     titleEl.value = item.En_Title
     titleEl.title = meta.Title
+    titleEl.ariaLabel = `Editable title: ${item.En_Title}`
 
     //thumbnail source is updated in `on-screen-appear` event as to make sure it doesn't request 300 images at once
     imgEl.alt = "thumbnail"
