@@ -118,6 +118,12 @@
     inherits: true;
 }
 
+@property --very-small-gap {
+    syntax: "<length-percentage>";
+    initial-value: 5px;
+    inherits: true;
+}
+
 @property --inline-widget-margin {
     syntax: "<length-percentage>";
     initial-value: 1px;
@@ -133,6 +139,7 @@
 :root {
     /* special custom property values that cant be set in initial-value */
     --small-gap: 2ex;
+    --very-small-gap: var(--very-small-gap);
     --error: var(--red);
     --bad: var(--error);
     --warn: var(--yellow);

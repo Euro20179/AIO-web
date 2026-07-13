@@ -87,7 +87,7 @@
         grid-auto-flow: row;
 
         float: left;
-        gap: calc(var(--small-gap) / 2);
+        gap: var(--very-small-gap);
 
         margin: 0.4em 0 0 0.4em;
 
@@ -212,7 +212,7 @@
     #actions {
         justify-content: center;
 
-        --gap-size: calc(var(--small-gap) / 2);
+        --gap-size: var(--very-small-gap);
 
         /*There are a couple of flexboxes within here to group thigns together*/
         &.flex,
@@ -283,7 +283,7 @@
     #item-interaction-menu {
         display: grid;
         grid-auto-flow: row;
-        gap: calc(var(--small-gap) / 2);
+        gap: var(--very-small-gap);
 
         padding: 0;
         button {

@@ -35,7 +35,12 @@
         </dialog>
 
         <dialog id="new-item-relations-dialog">
-            <div class="flex j-space-between wrap">
+            <close-button></close-button>
+            <h4 class="center">
+                Relations
+            </h4>
+
+            <div class="flex j-space-between wrap" style="gap: var(--very-small-gap)">
                 <label class="flex column grow">
                     Library
                     <input
@@ -68,7 +73,7 @@
             display: grid;
             grid-template-rows: repeat(3, 1fr);
             grid-template-columns: min-content 1fr min-content;
-            gap: calc(var(--small-gap) / 2);
+            gap: var(--very-small-gap);
             width: 100%;
         ">
             <button
@@ -102,11 +107,11 @@
             <select name="format" required title="Format type"></select>
         </div>
 
-        <div class="flex" style="gap: calc(var(--small-gap) / 2)">
+        <div class="flex" style="gap: var(--very-small-gap)">
             <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
             <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
         </div>
-        <div class="flex wrap" style="width: 100%; gap: calc(var(--small-gap) / 2);">
+        <div class="flex wrap" style="width: 100%; gap: var(--very-small-gap)">
             <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
             <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;">
         </div>
