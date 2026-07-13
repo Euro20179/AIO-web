@@ -316,7 +316,7 @@
             flex-grow: 1;
             anchor-name: --search-box;
 
-            & + button[type="submit"] {
+            & ~ button[type="submit"] {
                 position: absolute;
                 position-anchor: --search-box;
                 left: anchor(right);
