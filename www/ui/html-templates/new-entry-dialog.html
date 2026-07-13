@@ -89,8 +89,7 @@
                 <option value="Waiting">Waiting</option>
             </select>
 
-            <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch;">
-            <input type="text" placeholder="native title" name="native-title">
+            <input type="text" placeholder="native title" name="native-title" style="grid-column: 1 / -2">
             <select name="type" title="The type of media" required style="flex-grow: 1;">
                 <option value="">Type</option>
             </select>
@@ -104,6 +103,10 @@
             <select name="format" required title="Format type"></select>
         </div>
 
+        <div class="flex" style="gap: calc(var(--small-gap) / 2)">
+            <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
+            <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
+        </div>
         <div class="flex wrap" style="width: 100%; gap: calc(var(--small-gap) / 2);">
             <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
             <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;">

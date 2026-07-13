@@ -203,7 +203,6 @@
         display: flex;
         flex-direction: column;
         gap: var(--small-gap);
-        width: 50vw;
 
         &:has([name="metadata"][value^="{"]) button[data-button-type="search"]::after {
             color: var(--good);
