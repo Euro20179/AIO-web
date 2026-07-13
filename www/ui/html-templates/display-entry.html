@@ -27,52 +27,8 @@
     </form>
 </dialog>
 
-<dialog id="item-identification-form" popover>
-    <close-button></close-button>
+<item-identification-form-dialog></item-identification-form-dialog>
 
-    <form onsubmit="itemIdentification(this)" action="javascript:void(0)">
-        <select name="provider" required>
-            <optgroup label="Anime">
-                <option value="anilist">Anilist</option>
-            </optgroup>
-            <optgroup label="Movies+TV">
-                <option value="omdb">Open Movie Database (imdb)</option>
-            </optgroup>
-            <optgroup label="Books">
-                <option value="openlibrary">Open Library ISBN Lookup</option>
-                <option value="googlebooks">Google Books Search</option>
-            </optgroup>
-            <optgroup label="Games">
-                <option value="steam">Steam</option>
-            </optgroup>
-            <optgroup label="Movies">
-                <option value="radarr">Radarr</option>
-                <option value="seerr">Seerr</option>
-            </optgroup>
-            <optgroup label="Tv">
-                <option value="sonarr">Sonarr</option>
-            </optgroup>
-        </select>
-        <select name="query-type" required>
-            <option value="by-title">By title</option>
-            <option value="by-id">By id</option>
-        </select>
-        <input type="search" name="search" placeholder="search/id (id must be numeric)" required>
-    </form>
-    <p>
-        A search can be made by title or by id.
-    <p>
-        the id is different depending on which provider is chosen.
-    <p>
-        the id that should be used is the id for that provider. For example, the id for steam should be the appid of the
-        steam game you want.
-    <p>
-        the id MUST be an int, (I hope to fix this later), as a consequence the id for omdb is the imdb id with the tt
-        prefix removed.
-</dialog>
-
-<dialog id="identify-items" popover>
-</dialog>
 
 <dialog id="display-info-object-editor-popup" popover style="width: 80vmin; aspect-ratio: 1 / 1;">
     <close-button></close-button>

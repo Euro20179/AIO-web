@@ -354,7 +354,8 @@ const component_templates = [
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
-    "close-button"
+    "close-button",
+    "item-identification-form-dialog"
 ]
 
 for (const name of component_templates) {

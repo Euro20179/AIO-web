@@ -2581,5 +2581,143 @@ function clearUI(updateStats: boolean = true) {
     updateStats && resetStatsUI()
 }
 
+
+async function titleIdentificationUI(provider: string, search: string, _selectionElemOutput: HTMLElement): Promise<string | null> {
+    let res = await api_identify(search, provider)
+    if (!res) {
+        return null
+    }
+    let text = await res.text()
+    let [_, rest] = text.split("\x02")
+
+    let items: any[]
+    try {
+        items = rest.split("\n").filter(Boolean).map(v => JSON.parse(v))
+    }
+    catch (err) {
+        console.error("Could not parse json", rest.split('\n'))
+        return null
+    }
+
+    let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+    const container = fillItemListingUI(obj)
+    let item = await selectItemUI({
+        container,
+        async onsearch(query) {
+            let res = await api_identify(query, provider)
+            if (!res) return document.createElement("div")
+            let text = await res.text()
+            let [_, rest] = text.split("\x02")
+            let items = rest.split("\n").filter(Boolean).map(v => JSON.parse(v))
+            obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+            return fillItemListingUI(obj)
+        },
+    })
+    return item ? String(item) : null
+}
+
+/**
+ * Fills the new item form from metadata
+ * @param {MetadataEntry} [metadata] must be provided or fails
+ * @param {HTMLFormElement} [form] the new item form to fill out
+ */
+function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLFormElement | null) {
+    form ||= components.newItemForm
+    if(!form) {
+        console.error("Failed to fill new item form from metadata, no form")
+        return
+    }
+
+    if(!metadata) {
+        console.error("Failed to fill new item form from metadata, no metadata")
+        return
+    }
+    form.elements['metadata'].value = api_serializeEntry(metadata)
+    form.elements['title'].value = metadata.Title
+    if(metadata.MediaDependant != '{}') {
+        const dep = JSON.parse(metadata.MediaDependant)
+        const ty = Object.keys(dep)[0].split('-')[0]
+        form.elements['type'].value = ty
+    }
+
+    if(metadata.Provider == 'anilist' && form.elements['type'].value === 'Show') {
+        form.elements['is-anime-art'].checked = true
+    } else {
+        form.elements['is-anime-art'].checked = false
+    }
+}
+
+async function itemIdentificationUI(form: HTMLFormElement) {
+    const modal = openModalUI("item-identification-form", form.getRootNode() as ShadowRoot)
+    if(!modal) return
+
+    return await new Promise(async (pres, rej) => {
+        modal.onclose = async() => {
+            const paramsForm = dom_getelorthrow("[name='dialog-form']", currentWindow().HTMLFormElement, modal)
+
+            console.log(modal.returnValue)
+
+            let data = new FormData(paramsForm)
+
+            let provider = data.get("provider") as string
+
+            let queryType = data.get("query-type") as "by-title" | "by-id"
+
+            let search = data.get("search") as string
+
+            if(!search) {
+                rej("No search")
+                return
+            }
+
+            // if we are in a displayEntry itemId will be the itemId to update {{{
+            let shadowRoot = form.getRootNode() as ShadowRoot | null
+            let itemId = shadowRoot?.host?.getAttribute("data-item-id") || undefined
+            // }}}
+
+            let finalItemId: string | null = ""
+
+            switch (queryType) {
+                case "by-title":
+                    let titleSearchContainer = dom_getelorthrow("#identify-items", HTMLDialogElement, paramsForm.getRootNode())
+                    finalItemId = await titleIdentificationUI(provider, search, titleSearchContainer)
+
+                    if (!finalItemId) {
+                        alert("Failed to identify item")
+                        return
+                    }
+
+                    break
+                case "by-id":
+                    finalItemId = search
+                    break
+            }
+            const res = await api_finalizeIdentify(finalItemId, provider, itemId ? BigInt(itemId) : undefined)
+            const json = await res?.text()
+            if(!json) {
+                alert(`Failed to reload meta: ${json}, please refresh`)
+                rej(`Failed to reload meta: ${json}, please refresh`)
+                return
+            }
+
+            const newMeta = [...api_deserializeJsonl<MetadataEntry>(json)][0]
+
+            if(itemId) {
+                //if the provider also has a location provider might as well get the location for it
+                if (["steam", "sonarr", "radarr"].includes(provider)) {
+                    fetchLocationUI(BigInt(itemId), provider)
+                }
+                updateInfo2({
+                    [String(itemId)]: {
+                        meta: newMeta
+                    }
+                })
+            }
+
+            pres(newMeta)
+        }
+    })
+}
+
 //just in case
 const clearItems = clearUI

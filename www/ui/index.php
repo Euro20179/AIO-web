@@ -18,6 +18,7 @@
     foreach([
         "sidebar-entry",
         "new-entry-dialog",
+        "item-identification-form-dialog",
         "login-dialog",
         "gallery-entry",
         "display-entry",
@@ -86,6 +87,7 @@
     <confirm-dialog></confirm-dialog>
     <new-event-dialog></new-event-dialog>
     <login-dialog></login-dialog>
+    <item-identification-form-dialog></item-identification-form-dialog>
     <new-entry-dialog></new-entry-dialog>
 
     <dialog id="script-select">
