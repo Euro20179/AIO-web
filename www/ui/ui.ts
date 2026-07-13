@@ -2734,3 +2734,81 @@ async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | n
 
 //just in case
 const clearItems = clearUI
+
+/**
+ * given an object, and a table, fill the table with fields from the object
+ * that the user can edit
+ * @param {object} obj
+ * @param {HTMLTableElement} objectTbl
+ * @param {boolean} [clear=true] whether or not to clear the table before filling it with new object fields
+ */
+function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear: boolean = true) {
+
+    if (clear) {
+        const firstTr = objectTbl.firstElementChild
+        //remove all rows except the first
+        while (objectTbl.lastElementChild && objectTbl.lastElementChild !== firstTr) {
+            objectTbl.removeChild(objectTbl.lastElementChild)
+        }
+    }
+
+    for (let key in obj) {
+        let val = obj[key as keyof typeof obj] as any
+        //if the key alr is in the table, and we aren't clearing, then skip
+        //otherwise the key will get duplicated
+        if (objectTbl.querySelector(`[data-keyname="${key}"]`) && !clear) {
+            continue;
+        }
+        const tr = document.createElement("tr")
+        const nameTd = document.createElement("td")
+        const valTd = document.createElement("td")
+
+        nameTd.setAttribute("data-keyname", key)
+        nameTd.innerText = key
+
+        valTd.setAttribute("data-type", typeof val)
+        if (typeof val === 'bigint') {
+            val = String(val)
+        }
+        else if (typeof val !== 'string' && typeof val !== 'number') {
+            val = JSON.stringify(val)
+        }
+        valTd.innerText = val
+
+        valTd.contentEditable = "true"
+        nameTd.contentEditable = "true"
+
+        tr.append(nameTd)
+        tr.append(valTd)
+
+        objectTbl.append(tr)
+    }
+}
+
+/**
+ * Given a table element, pull out all k/v pairs into an object
+ * @param {HTMLTableElement} tbl
+ * @param {string[]} skip if a key is in this array, it will not be added to the final object
+ * @return {Record<string, string>}
+ */
+function getObjFromObjEditorUI(tbl: HTMLTableElement, skip: string[] = []): Record<string, string> {
+    let newObj: Record<string, any> = {}
+    for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
+        let key = row.firstElementChild?.textContent || ""
+
+        let valueEl = row.firstElementChild?.nextElementSibling
+        if (!valueEl) continue
+        let value = valueEl?.textContent || ""
+        if (key == "") continue
+
+        let valueType = valueEl.getAttribute("data-type")
+        if (valueType === 'bigint') {
+            newObj[key] = BigInt(value)
+        } else if (valueType === 'number') {
+            newObj[key] = Number(value)
+        } else {
+            newObj[key] = value
+        }
+    }
+    return newObj
+}

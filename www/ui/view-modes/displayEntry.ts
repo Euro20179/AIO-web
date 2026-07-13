@@ -451,25 +451,25 @@ function _mkde_actions() {// {{{
             const meta = findMetadataById(item.ItemId)
             switch (target.value) {
                 case "user-extra":
-                    updateObjectTbl(JSON.parse(user.Extra), objectTbl)
+                    updateObjectTblUI(JSON.parse(user.Extra), objectTbl)
                     break
                 case "meta-datapoints":
-                    updateObjectTbl(JSON.parse(meta.Datapoints), objectTbl)
+                    updateObjectTblUI(JSON.parse(meta.Datapoints), objectTbl)
                     break
                 case "meta-media-dependant":
-                    updateObjectTbl(JSON.parse(meta.MediaDependant), objectTbl)
+                    updateObjectTblUI(JSON.parse(meta.MediaDependant), objectTbl)
                     break
                 case "aio-web":
-                    updateObjectTbl(getAIOWeb(user), objectTbl)
+                    updateObjectTblUI(getAIOWeb(user), objectTbl)
                     break
                 case "user":
-                    updateObjectTbl(user, objectTbl)
+                    updateObjectTblUI(user, objectTbl)
                     break
                 case "meta":
-                    updateObjectTbl(meta, objectTbl)
+                    updateObjectTblUI(meta, objectTbl)
                     break
                 case "entry":
-                    updateObjectTbl(item, objectTbl)
+                    updateObjectTblUI(item, objectTbl)
                     break
 
             }
@@ -592,7 +592,7 @@ function _mkde_actions() {// {{{
          * Saves the current object table
          */
         saveobject: function(item, root) {
-            const tbl = root.getElementById("display-info-object-tbl")
+            const tbl = dom_getelorthrow("display-info-object-tbl", this.win.HTMLTableElement, root)
 
             const editedObject = dom_getelorthrow("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
@@ -633,26 +633,7 @@ function _mkde_actions() {// {{{
                     return
             }
 
-            let newObj: Record<string, any> = {}
-            for (let row of tbl?.querySelectorAll("tr:has(td)") || []) {
-                let key = row.firstElementChild?.textContent || ""
-                //invalid key
-                if (editedObject === "entry" && key === "Tags") continue
-
-                let valueEl = row.firstElementChild?.nextElementSibling
-                if (!valueEl) continue
-                let value = valueEl?.textContent || ""
-                if (key == "") continue
-
-                let valueType = valueEl.getAttribute("data-type")
-                if (valueType === 'bigint') {
-                    newObj[key] = BigInt(value)
-                } else if (valueType === 'number') {
-                    newObj[key] = Number(value)
-                } else {
-                    newObj[key] = value
-                }
-            }
+            const newObj = getObjFromObjEditorUI(tbl, editedObject === "entry" ? ["Tags"] : [])
 
             if (keyName && keyName !== "_AIOWEB")
                 into[keyName] = JSON.stringify(newObj)
@@ -714,7 +695,7 @@ function _mkde_actions() {// {{{
             obj[name] = ""
 
             const objectTbl = dom_getelorthrow("#display-info-object-tbl", this.win.HTMLTableElement, root)
-            updateObjectTbl(obj, objectTbl, false)
+            updateObjectTblUI(obj, objectTbl, false)
         },
 
         /**
@@ -1374,49 +1355,6 @@ function updateStatusDisplay(newStatus: string, display: HTMLElement) {
     // statusText.innerText = newStatus
 }
 
-function updateObjectTbl(obj: object, objectTbl: HTMLTableElement, clear = true) {
-
-    if (clear) {
-        const firstTr = objectTbl.firstElementChild
-        //remove all rows except the first
-        while (objectTbl.lastElementChild && objectTbl.lastElementChild !== firstTr) {
-            objectTbl.removeChild(objectTbl.lastElementChild)
-        }
-    }
-
-    for (let key in obj) {
-        let val = obj[key as keyof typeof obj] as any
-        //if the key alr is in the table, and we aren't clearing, then skip
-        //otherwise the key will get duplicated
-        if (objectTbl.querySelector(`[data-keyname="${key}"]`) && !clear) {
-            continue;
-        }
-        const tr = document.createElement("tr")
-        const nameTd = document.createElement("td")
-        const valTd = document.createElement("td")
-
-        nameTd.setAttribute("data-keyname", key)
-        nameTd.innerText = key
-
-        valTd.setAttribute("data-type", typeof val)
-        if (typeof val === 'bigint') {
-            val = String(val)
-        }
-        else if (typeof val !== 'string' && typeof val !== 'number') {
-            val = JSON.stringify(val)
-        }
-        valTd.innerText = val
-
-        valTd.contentEditable = "true"
-        nameTd.contentEditable = "true"
-
-        tr.append(nameTd)
-        tr.append(valTd)
-
-        objectTbl.append(tr)
-    }
-}
-
 function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
     const editedObject = (el.getElementById("current-edited-object") as HTMLSelectElement).value
     const user = findUserEntryById(itemId) as UserEntry
@@ -1542,7 +1480,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             return
         }
 
-        updateObjectTbl(getCurrentObjectInObjEditor(item.ItemId, el), objTable)
+        updateObjectTblUI(getCurrentObjectInObjEditor(item.ItemId, el), objTable)
     })
 
     renderComponent("#status-selector",

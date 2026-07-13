@@ -1,4 +1,5 @@
 <template id="new-entry-dialog">
+
 <dialog id="new-entry" popover>
     <close-button></close-button>
 
@@ -8,6 +9,16 @@
         action="javascript:void(0)"
         onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
     >
+
+        <dialog id="new-entry-edit-metadata-dialog">
+            <close-button></close-button>
+            <button type="button" class="float right" onclick="
+                fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
+            ">💾︎</button>
+            <table>
+            </table>
+        </dialog>
+
         <input type="hidden" name="metadata">
 
         <dialog id="new-item-art-styles-dialog">
@@ -73,7 +84,10 @@
             <button
                 type="button"
                 data-button-type="search"
-                onclick="itemIdentificationUI().then(fillNewItemFormFromMetadataUI)">
+                onclick="itemIdentificationUI().then(res => {
+                    fillNewItemFormFromMetadataUI(res)
+                    updateObjectTblUI(res, this.form.querySelector('table'))
+                })">
             </button>
 
 
@@ -94,15 +108,24 @@
                 <option value="">Type</option>
             </select>
 
-            <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
-            <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
-                digital
-                <input type="checkbox" id='is-digital'
-                    style="vertical-align: middle;" name="is-digital"
-                    title="Whether or not the item is a digitized/digital version of the format"></label>
+
+            <div>
+                <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
+
+                <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
+                    digital
+                    <input type="checkbox" id='is-digital'
+                        style="vertical-align: middle;" name="is-digital"
+                        title="Whether or not the item is a digitized/digital version of the format"></label>
+            </div>
+
             <select name="format" required title="Format type"></select>
+
             <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
+
+            <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
         </div>
+
 
         <div class="flex" style="gap: var(--very-small-gap)">
             <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
@@ -122,7 +145,6 @@
                 value="CREATE!"
                 style="color: var(--good); flex-grow: 1;">
         </div>
-
     </form>
 </dialog>
 </template>
