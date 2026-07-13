@@ -515,7 +515,14 @@
         gap: 2em;
 
         button {
-            padding: 0.5em;
+            &:not(:has(img)) {
+                padding: 0.5em;
+            }
+            &:has(img) {
+                height: 90%;
+                align-self: center;
+                min-width: fit-content;
+            }
         }
 
         img {
@@ -524,12 +531,6 @@
             /*it's in a flex, the aspect-ratio gets messed up if other images of different heights are here*/
             /* height: fit-content; */
             cursor: pointer;
-        }
-
-        :not(img) {
-            height: 100%;
-            align-self: center;
-            min-width: fit-content;
         }
     }
 
