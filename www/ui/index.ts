@@ -16,6 +16,7 @@ async function main() {
         viewToggle: dom_getelorthrow("#view-toggle", HTMLSelectElement),
         viewAllElem: dom_getelorthrow("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
+        searchBox: dom_getelorthrow("[name='search-query']", HTMLInputElement),
         newEntryLibrarySelector: dom_getelorthrow(
             '[name="libraryId"]',
             HTMLInputElement,
@@ -126,10 +127,6 @@ async function main() {
                 .join(" OR ")
         : urlParams.get("q")
 
-    const searchInput = document.querySelector(
-        '[name="search-query"]',
-    ) as HTMLInputElement;
-
     // mode_setMode(curModeName)
 
     if (urlParams.has("sort")) {
@@ -141,12 +138,12 @@ async function main() {
     await loadInfoEntries(uid);
 
     if (initialSearch) {
-        ui_search(initialSearch || searchInput.value);
-    } else if (searchInput.value) {
+        ui_search(initialSearch);
+    } else if (components.searchBox?.value) {
         //this should be separate because ui_search will add another 3
         // if serachInput.value is something like `3 @hi`
         mkSearchUI({
-            "search-query": searchInput.value,
+            "search-query": components.searchBox.value,
         });
     } else {
         let entries = Object.values(items_getAllEntries()).map((v) => v.info);

@@ -25,6 +25,7 @@ type StartupUIComponents = {
     viewToggle: HTMLSelectElement,
     viewAllElem: HTMLInputElement,
     statsOutput: HTMLElement,
+    searchBox: HTMLInputElement,
     itemFilter: HTMLInputElement,
     newEntryLibrarySelector: HTMLInputElement,
     librarySelector: HTMLButtonElement,
@@ -60,6 +61,7 @@ function startupUI({
     viewAllElem,
     librarySelector,
     userSelector,
+    searchBox,
     sortBySelector,
     statsOutput,
     newItemForm,
@@ -649,7 +651,10 @@ function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => a
 }
 
 registerCTRLShortcutUI("\\", (e) => {
-    const search = dom_getelorthrow("[name=\"search-query\"]", HTMLInputElement, components.searchForm)
+    const search = components.searchBox
+    if(!search) {
+        throw new Error("no searchbox component")
+    }
 
     search.focus()
 
@@ -666,7 +671,7 @@ registerCTRLShortcutUI("\\", (e) => {
 })
 
 registerCTRLShortcutUI("/", e => {
-    const search = dom_getelorthrow('[name="search-query"]', HTMLInputElement, components.searchForm)
+    const search = components.searchBox
     search?.focus()
     search?.select()
     e.preventDefault()

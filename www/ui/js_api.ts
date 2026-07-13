@@ -262,8 +262,9 @@ function ui_sort(by: string): number {
  * @returns 0 on success
  */
 function ui_search(query: string, cb?: (results: items_Entry[]) => any): number {
-    let form = document.getElementById("sidebar-form") as HTMLFormElement
-    (form.querySelector('[name="search-query"]') as HTMLInputElement).value = `3 ${query}`
+    if(components.searchBox) {
+        components.searchBox.value = `3 ${query}`
+    }
 
     loadSearchUI().then(() => {
         cb?.(items_getResults())
