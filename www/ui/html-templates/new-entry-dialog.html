@@ -109,11 +109,11 @@
             <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
         </div>
         <div class="flex wrap" style="width: 100%; gap: var(--very-small-gap)">
-            <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
+            <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
             <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;">
         </div>
 
-        <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
+        <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
 
         <div class="flex row wrap" style="justify-content: space-around; gap: var(--small-gap)">
             <input type="button" onclick="dom_resetform(this.form)" value="reset" style="color: var(--bad)">
