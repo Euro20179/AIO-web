@@ -2661,6 +2661,11 @@ async function itemIdentificationUI(forItem?: bigint) {
 
     return await new Promise(async (pres, rej) => {
         modal.onclose = async() => {
+            if(modal.returnValue === "_CLOSED") {
+                rej("user cancelled")
+                return
+            }
+
             const paramsForm = dom_getelorthrow("[name='dialog-form']", currentWindow().HTMLFormElement, modal)
 
             let data = new FormData(paramsForm)
