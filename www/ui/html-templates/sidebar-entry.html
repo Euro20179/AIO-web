@@ -7,7 +7,7 @@
             <input type="number" put-data="Priority" put-data-mode="value" onchange="
                 let item = items_getEntry(this.getRootNode().host.getAttribute('data-entry-id'));
                 setPropUI(item.info, 'Priority', Number(this.value), 'set priority')
-            " style="field-sizing: content; width: 7ch;" toggle-hint="priority-hint">
+            " style="field-sizing: content; width: 7ch; border-style: none;" toggle-hint="priority-hint">
             <span id='priority-hint' popover='hint'>Priority</span>
         </div>
     </figure>
