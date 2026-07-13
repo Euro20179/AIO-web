@@ -228,6 +228,13 @@ function _mkde_actions() {// {{{
         },
 
         /**
+         * Lets the user identify the metadata for an item
+         */
+        identifymetadata: function(item, root) {
+            itemIdentificationUI(item.ItemId)
+        },
+
+        /**
          * Adds a child to the current object. The child that is added
          * is the child with the id that is the value of this element
          */

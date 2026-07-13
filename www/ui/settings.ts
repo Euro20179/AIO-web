@@ -78,9 +78,7 @@ background: var(--red)
             text: "🔍︎",
             title: "identify item",
             shortTitle: "identify",
-            attributes: {
-                onclick: "openModalUI('item-identification-form', this.getRootNode())"
-            }
+            action: 'identifymetadata',
         },
 
         refresh: {

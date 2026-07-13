@@ -2647,15 +2647,13 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
     }
 }
 
-async function itemIdentificationUI(form: HTMLFormElement) {
-    const modal = openModalUI("item-identification-form", form.getRootNode() as ShadowRoot)
+async function itemIdentificationUI(forItem?: bigint) {
+    const modal = openModalUI("item-identification-form")
     if(!modal) return
 
     return await new Promise(async (pres, rej) => {
         modal.onclose = async() => {
             const paramsForm = dom_getelorthrow("[name='dialog-form']", currentWindow().HTMLFormElement, modal)
-
-            console.log(modal.returnValue)
 
             let data = new FormData(paramsForm)
 
@@ -2669,11 +2667,6 @@ async function itemIdentificationUI(form: HTMLFormElement) {
                 rej("No search")
                 return
             }
-
-            // if we are in a displayEntry itemId will be the itemId to update {{{
-            let shadowRoot = form.getRootNode() as ShadowRoot | null
-            let itemId = shadowRoot?.host?.getAttribute("data-item-id") || undefined
-            // }}}
 
             let finalItemId: string | null = ""
 
@@ -2692,7 +2685,7 @@ async function itemIdentificationUI(form: HTMLFormElement) {
                     finalItemId = search
                     break
             }
-            const res = await api_finalizeIdentify(finalItemId, provider, itemId ? BigInt(itemId) : undefined)
+            const res = await api_finalizeIdentify(finalItemId, provider, forItem)
             const json = await res?.text()
             if(!json) {
                 alert(`Failed to reload meta: ${json}, please refresh`)
@@ -2702,13 +2695,13 @@ async function itemIdentificationUI(form: HTMLFormElement) {
 
             const newMeta = [...api_deserializeJsonl<MetadataEntry>(json)][0]
 
-            if(itemId) {
+            if(forItem) {
                 //if the provider also has a location provider might as well get the location for it
                 if (["steam", "sonarr", "radarr"].includes(provider)) {
-                    fetchLocationUI(BigInt(itemId), provider)
+                    fetchLocationUI(forItem, provider)
                 }
                 updateInfo2({
-                    [String(itemId)]: {
+                    [String(forItem)]: {
                         meta: newMeta
                     }
                 })
