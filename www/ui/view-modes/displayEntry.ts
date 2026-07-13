@@ -1646,7 +1646,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         if (meta.Country) {
             let flags = items_countryOfOrigin2Flag(meta.Country)
             displayEntryTitle.title += ` (${meta.Country})`
-            displayEntryTitle.setAttribute("data-country-origin-flag", flags)
         }
 
         //format
