@@ -107,12 +107,12 @@
                 <div class="flex">
                     <div class="grid row" style="grid-template-rows: 1fr 1fr;">
                         <button onclick="openSettingsUI()">⚙</button>
-                        <button onclick="openModalUI('script-select')">run</button>
+                        <button command="show-modal" commandfor="script-select">run</button>
                     </div>
 
                     <color-scheme-selector></color-scheme-selector>
 
-                    <button onclick="openModalUI('new-entry')" type="button" id="new-entry-button">➕︎</button>
+                    <button command="show-modal" commandfor="new-entry" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
