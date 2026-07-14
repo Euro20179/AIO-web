@@ -1608,6 +1608,10 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["copyOf"]
     }
 
+    if (validEntries["parentId"] && validEntries["parentId"] == "0") {
+        delete validEntries["parentId"]
+    }
+
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
 
     let parentIdEl = form.querySelector("[name=\"parentId\"]")
