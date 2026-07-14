@@ -290,6 +290,10 @@
             }
         }
 
+        #sidebar-form {
+            width: 50cqi;
+        }
+
         [name="search-query"] {
             flex-grow: 1;
             anchor-name: --search-box;
