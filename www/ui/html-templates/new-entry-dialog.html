@@ -51,30 +51,33 @@
                 Relations
             </h4>
 
-            <div class="flex j-space-between wrap" style="gap: var(--very-small-gap)">
+            <div class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
                 <label class="flex column grow">
-                    Library
-                    <input
-                        name="libraryId"
-                        value="0"
-                        type="button"
-                        title="library"
+                    <button type="button"
                         onclick="fillItemListingWithSearch(`3 type = 'Library'`)
-                                    .then((comp) => replaceValueWithSelectedItemIdUI(this, { container: comp }))">
+                        .then((comp) => replaceValueWithSelectedItemIdUI(this.form.elements['libraryId'], { container: comp }))"
+                    >
+                        Library
+                    </button>
+                        <input
+                            name="libraryId"
+                            value="0"
+                            type="number"
+                            title="library"
+                        >
                 </label>
                 <label class="flex column grow">
-                    Parent
-                    <input type="button" value="0" title="parent id" name="parentId"
+                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['parentId'])">Parent</button>
+                    <input type="number" value="0" title="parent id" name="parentId">
+                </label>
+                <label class="flex column grow">
+                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['copyOf'])">Copy Of</button>
+                    <input type="number" value="0" title="copy of id" name="copyOf"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </label>
                 <label class="flex column grow">
-                    Copy of
-                    <input type="button" value="0" title="copy of id" name="copyOf"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </label>
-                <label class="flex column grow">
-                    Requires
-                    <input type="button" value="0" title="prerequiset for this show" name="requires"
+                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['requires'])">Requires</button>
+                    <input type="number" value="0" title="prerequiset for this show" name="requires"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </label>
             </div>

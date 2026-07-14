@@ -255,6 +255,14 @@
         position: relative
     }
 
+    .small-gap {
+        gap: var(--small-gap);
+    }
+
+    .x-small-gap {
+        gap: var(--very-small-gap);
+    }
+
     .flex-column {
         display: inline-flex;
         flex-direction: column;
