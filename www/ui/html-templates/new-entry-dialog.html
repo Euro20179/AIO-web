@@ -90,6 +90,13 @@
 
 
             <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
+
+            <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
+
+            <input type="text" placeholder="native title" name="native-title">
+
+            <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
+
             <select name="user-status" style="flex-grow: 1;">
                 <option value="">Status</option>
                 <option value="Planned">Planned</option>
@@ -101,27 +108,22 @@
                 <option value="Waiting">Waiting</option>
             </select>
 
-            <input type="text" placeholder="native title" name="native-title">
+
             <select name="type" title="The type of media" required style="flex-grow: 1;">
                 <option value="">Type</option>
             </select>
 
+            <select name="format" required title="Format type"></select>
 
             <div>
-                <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
-
                 <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
                     digital
                     <input type="checkbox" id='is-digital'
                         style="vertical-align: middle;" name="is-digital"
                         title="Whether or not the item is a digitized/digital version of the format"></label>
+
+                <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
             </div>
-
-            <select name="format" required title="Format type"></select>
-
-            <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
-
-            <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
         </div>
 
 
