@@ -47,6 +47,11 @@
         grid-auto-flow: row;
     }
 
+    .output {
+        overflow: auto;
+        scrollbar-gutter: stable;
+    }
+
     .close {
         margin: 20px;
     }
@@ -148,18 +153,6 @@
 
     p:has(#login-reason:empty) {
         display: none;
-    }
-
-    /*we NEED 0 specificity here*/
-    :where(#entry-output,
-        #graph-output,
-        #calc-output,
-        #gallery-output,
-        #event-output,
-        #script-output,
-        #calendar-output,
-        #tierlist-output) {
-        display: inherit;
     }
 
     #help-link {
@@ -585,8 +578,6 @@
 
         gap: var(--small-gap);
 
-        width: 100cqw;
-        height: 100cqh;
 
         padding: 0 10ch;
 
