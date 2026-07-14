@@ -64,15 +64,13 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
-        <close-button></close-button>
-
         <div>
         </div>
+
+        <close-button></close-button>
     </dialog>
 
     <dialog id="items-listing" popover>
-        <close-button></close-button>
-
         <center>
             <h3>Find Item</h3>
         </center>
@@ -85,6 +83,8 @@
             <div id="put-items-to-select">
             </div>
         </form>
+
+        <close-button></close-button>
     </dialog>
 
     <prompt-dialog></prompt-dialog>
@@ -155,7 +155,10 @@
                     <button type="submit" class="styleless-button">🔎</button>
                 </form>
                 <!--used for proper overflow-->
-                <div class="result-stats" id="result-stats">
+                <div class="flex" style="width: 100%;">
+                    <button class="popout" onclick="popoutUI(this)" popout-target="result-stats" style="justify-self: end;">↗</button>
+                    <div class="result-stats" id="result-stats">
+                    </div>
                 </div>
                 <div style="justify-self: end;">
                     <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center; vertical-align: top;' aria-label="mode">

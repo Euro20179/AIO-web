@@ -12,27 +12,27 @@
 <de-template-editor></de-template-editor>
 
 <dialog id="notes-edit-dialog" popover>
-    <close-button></close-button>
     <p class="center">Notes save automatically</p>
     <textarea id="notes-edit-box" rows="10" cols="80"></textarea>
+
+    <close-button></close-button>
 </dialog>
 
 <dialog id="buy-sell">
-    <close-button></close-button>
-
     <form method="dialog" class="flex">
         <button value="Purchased">Buy</button>
         <button value="Sold">Sell</button>
 
         <button value="view-log">View Transactions</button>
     </form>
+
+    <close-button></close-button>
 </dialog>
 
 <item-identification-form-dialog></item-identification-form-dialog>
 
 
 <dialog id="display-info-object-editor-popup" popover style="width: 80vmin; aspect-ratio: 1 / 1;">
-    <close-button></close-button>
     <div class="flex j-center small-gap">
         <button id="save-object-editor" style="align-self: center; height: fit-content;"
             entry-action="saveobject">💾︎</button>
@@ -56,10 +56,11 @@
             <th>value</th>
         </tr>
     </table>
+
+    <close-button></close-button>
 </dialog>
 
 <dialog id="art-styles-menu">
-    <close-button></close-button>
     <fieldset class="grid row m-0 p-0">
         <legend>Art Styles</legend>
         <label for="is-Anime"><input type="checkbox" id="is-Anime" entry-action="toggleartstyle" entry-action-trigger="change">
@@ -75,6 +76,8 @@
         <label for="is-3D"><input type="checkbox" name="is-3D" id="is-3D" entry-action="toggleartstyle" entry-action-trigger="change"> 3D</label>
         <label for="is-Liveaction"><input type="checkbox" id="is-Liveaction" entry-action="toggleartstyle" entry-action-trigger="change"> Live action</label>
     </fieldset>
+
+    <close-button></close-button>
 </dialog>
 
 <div class="root" id="root">

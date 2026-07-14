@@ -1,8 +1,6 @@
 <template id="new-entry-dialog">
 
 <dialog id="new-entry" popover>
-    <close-button></close-button>
-
     <h3>New Entry</h3>
 
     <form id="new-item-form"
@@ -11,18 +9,18 @@
     >
 
         <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
-            <close-button></close-button>
             <button type="button" class="float right" onclick="
                 fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
             ">💾︎</button>
             <table>
             </table>
+
+            <close-button></close-button>
         </dialog>
 
         <input type="hidden" name="metadata">
 
         <dialog id="new-item-art-styles-dialog">
-            <close-button></close-button>
             <fieldset class="flex column m-0" style="gap: 2ch; width: 100%; overflow:auto">
                 <legend>Art Style</legend>
                 <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
@@ -40,12 +38,12 @@
                     2d</label>
                 <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
                     3d</label>
-            </div>
+            </fieldset>
+
+            <close-button></close-button>
         </dialog>
 
         <dialog id="new-item-relations-dialog">
-            <close-button></close-button>
-
             <fieldset class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
                 <legend>Relations</legend>
                 <label class="flex column grow x-small-gap">
@@ -77,6 +75,8 @@
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </label>
             </fieldset>
+
+            <close-button></close-button>
         </dialog>
 
         <div>
@@ -146,5 +146,7 @@
                 style="color: var(--good); flex-grow: 1;">
         </div>
     </form>
+
+    <close-button></close-button>
 </dialog>
 </template>

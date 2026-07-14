@@ -2,7 +2,6 @@
     <dialog id="template-editor-container" onclose="
             clearInterval(this.querySelector(`input[type='text']`)._i)
         " style="font-size: 1rem;">
-    <close-button></close-button>
         <script>
             async function _updateTemplate() {
                 try {
@@ -55,6 +54,8 @@
             <button entry-action="previewtemplate" title="preview the template">👁</button>
         </div>
         <textarea id="template-editor" style="width: initial; height: initial;" rows="30" cols="80"></textarea>
+
+        <close-button></close-button>
     </dialog>
 
     <dialog id="template-preview" style="font-size: 1rem; width: 80vw;"></dialog>
