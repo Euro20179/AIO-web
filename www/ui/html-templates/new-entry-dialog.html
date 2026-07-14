@@ -9,11 +9,23 @@
     >
 
         <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
+            <button onclick="
+                    let g = genericMetadata(0, getUidUI());
+                    g.Datapoints = '{}';
+                    updateObjectTblUI(g, this.parentElement.querySelector('table'), '*')" type="button">Generate generic</button>
+            <button class="delete" onclick="updateObjectTblUI({}, this.parentElement.querySelector('table'), '*')" type="button">✗</button>
             <button type="button" class="float right" onclick="
-                fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
+                let obj = getObjFromObjEditorUI(this.nextElementSibling)
+                if(!Object.keys(obj).length) dom_resetform(this.form)
+                else {
+                    fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
+                    alert('metadata applied')
+                }
             ">💾︎</button>
-            <table>
+            <table style="min-width: 300px">
             </table>
+
+            <p>Save must be clicked in order for metadata to apply</p>
 
             <close-button></close-button>
         </dialog>

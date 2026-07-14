@@ -760,7 +760,7 @@ function genericMetadata(itemId: bigint, uid: number): MetadataEntry {
         Description: "",
         ReleaseYear: 0,
         Thumbnail: "",
-        MediaDependant: "",
+        MediaDependant: "{}",
         Datapoints: "{\"_AIO_GENERIC\":true}",
         Title: "",
         Native_Title: "",

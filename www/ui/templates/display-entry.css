@@ -19,11 +19,6 @@
         line-height: 0;
     }
 
-    .delete {
-        color: var(--error);
-        border-color: var(--error);
-    }
-
     .hamburger-menu {
         display: flex;
         flex-direction: column;
