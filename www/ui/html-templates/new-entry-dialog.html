@@ -52,7 +52,7 @@
             </h4>
 
             <div class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
-                <label class="flex column grow">
+                <label class="flex column grow x-small-gap">
                     <button type="button"
                         onclick="fillItemListingWithSearch(`3 type = 'Library'`)
                         .then((comp) => replaceValueWithSelectedItemIdUI(this.form.elements['libraryId'], { container: comp }))"
@@ -66,16 +66,16 @@
                             title="library"
                         >
                 </label>
-                <label class="flex column grow">
+                <label class="flex column grow x-small-gap">
                     <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['parentId'])">Parent</button>
                     <input type="number" value="0" title="parent id" name="parentId">
                 </label>
-                <label class="flex column grow">
+                <label class="flex column grow x-small-gap">
                     <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['copyOf'])">Copy Of</button>
                     <input type="number" value="0" title="copy of id" name="copyOf"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </label>
-                <label class="flex column grow">
+                <label class="flex column grow x-small-gap">
                     <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['requires'])">Requires</button>
                     <input type="number" value="0" title="prerequiset for this show" name="requires"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
@@ -129,18 +129,18 @@
         </div>
 
 
-        <div class="flex" style="gap: var(--very-small-gap)">
+        <div class="flex x-small-gap">
             <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
             <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
         </div>
-        <div class="flex wrap" style="width: 100%; gap: var(--very-small-gap)">
+        <div class="flex wrap x-small-gap" style="width: 100%">
             <input type="text" placeholder="recommeded by" list="recommended-by" name="recommended-by" value="">
             <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;">
         </div>
 
         <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
 
-        <div class="flex row wrap" style="justify-content: space-around; gap: var(--small-gap)">
+        <div class="flex row wrap small-gap" style="justify-content: space-around">
             <input type="button" onclick="dom_resetform(this.form)" value="reset" style="color: var(--bad)">
             <input
                 type="submit"
