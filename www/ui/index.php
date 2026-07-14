@@ -155,12 +155,10 @@
                     <button type="submit" class="styleless-button">🔎</button>
                 </form>
                 <!--used for proper overflow-->
-                <div>
-                    <div class="result-stats" id="result-stats">
-                    </div>
+                <div class="result-stats" id="result-stats">
                 </div>
                 <div style="justify-self: end;">
-                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center;' aria-label="mode">
+                    <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center; vertical-align: top;' aria-label="mode">
                         <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
                         <option value="graph-output" title="Graph mode">📊︎ Graph</option>
                         <option value="calendar-output" title="Calendar mode">📅︎ Calendar</option>

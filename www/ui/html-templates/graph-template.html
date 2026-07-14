@@ -1,7 +1,7 @@
 <template id="graph-template">
 <script src="/js/chart.js"></script>
 <div id="graph-output" class="output">
-    <not-a-div class="flex column">
+    <div class="flex row">
         <form action="javascript:void()">
             <select id="group-by" title="Group by">
                 <option value="Year">Year</option>
@@ -26,14 +26,15 @@
             <textarea type="text" name="group-by-expr" id="group-by-expr"
                 placeholder="Group by expression"></textarea>
         </form>
+
         <form action="javascript:void(0)" id="add-chart">
             <textarea type="text" placeholder="y formula" name="y-formula" id="y-formula"></textarea>
             <textarea type="text" placeholder="x formula" name="x-formula" id="x-formula"></textarea>
             <input type="text" placeholder="name" name="chart-name">
             <input type="submit" value="add chart">
         </form>
-    </not-a-div>
-    <div>
+    </div>
+    <div id="graphs">
         <div>
             <canvas id="by-year"></canvas>
         </div>
