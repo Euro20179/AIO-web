@@ -45,11 +45,9 @@
 
         <dialog id="new-item-relations-dialog">
             <close-button></close-button>
-            <h4 class="center">
-                Relations
-            </h4>
 
-            <div class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
+            <fieldset class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
+                <legend>Relations</legend>
                 <label class="flex column grow x-small-gap">
                     <button type="button"
                         onclick="fillItemListingWithSearch(`3 type = 'Library'`)
@@ -78,7 +76,7 @@
                     <input type="number" value="0" title="prerequiset for this show" name="requires"
                         onclick="replaceValueWithSelectedItemIdUI(this)">
                 </label>
-            </div>
+            </fieldset>
         </dialog>
 
         <div>
