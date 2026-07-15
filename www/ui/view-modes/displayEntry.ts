@@ -592,7 +592,7 @@ function _mkde_actions() {// {{{
          * Saves the current object table
          */
         saveobject: function(item, root) {
-            const tbl = dom_getelorthrow("display-info-object-tbl", this.win.HTMLTableElement, root)
+            const tbl = dom_getelorthrow("#display-info-object-tbl", this.win.HTMLTableElement, root)
 
             const editedObject = dom_getelorthrow("#current-edited-object", this.win.HTMLSelectElement, root)?.value
 
