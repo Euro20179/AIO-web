@@ -179,6 +179,13 @@ class NotesTagNode implements NotesNode {
                     endTag = "</button>"
                 }
                 break
+            case "date": {
+                const time = document.createElement("time")
+                time.setAttribute("datetime", this.propertyValue)
+                time.innerText = "Date: " + (new Date(this.propertyValue)).toLocaleDateString()
+                startTag = time.outerHTML + "<br>"
+                break
+            }
             case "link":
                 startTag = `<a href="${this.propertyValue}">`
                 endTag = "</a>"
