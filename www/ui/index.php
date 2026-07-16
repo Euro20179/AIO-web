@@ -106,7 +106,7 @@
 
                 <div class="flex">
                     <div class="grid row" style="grid-template-rows: 1fr 1fr;">
-                        <button onclick="openSettingsUI()">⚙</button>
+                        <button onclick="openSettingsUI()" style="margin-block-end: var(--inline-widget-margin)">⚙</button>
                         <button command="show-modal" commandfor="script-select">run</button>
                     </div>
 
