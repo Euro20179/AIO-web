@@ -68,6 +68,11 @@ function startupUI({
     sidebarItems,
 }: typeof components) {
 
+    addEventListener("modes.update-item", () => {
+        dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
+            .flatMap(i => i.info.Tags || []).toArray()).values().toArray())
+    })
+
     for (let key in arguments[0]) {
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
@@ -2343,11 +2348,6 @@ async function newRecommendedByUI(itemId: bigint) {
  * @param {string[] | null} [tags=null]
  */
 async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
-    const dl = dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
-        .flatMap(i => i.info.Tags || []).toArray()).values().toArray())
-
-    console.log(dl)
-
     let newTags = null
     if (!tags) {
         newTags = await promptUI("Tag name (, seperated)", "", "tags-dl")
