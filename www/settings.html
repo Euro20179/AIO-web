@@ -9,7 +9,7 @@
     <link href="/css/general.css" rel="stylesheet">
 
     <style>
-        form label:has(textarea){
+        form:has(textarea){
             display: flex;
             flex-direction: column;
         }
@@ -17,8 +17,44 @@
         #forms {
             display: flex;
             flex-direction: column;
-            gap: 3cap;
+            gap: var(--small-gap);
         }
+
+        #templates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: calc(var(--small-gap) * 2);
+
+            div {
+                display: grid;
+                grid-template-rows: 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
+
+                textarea {
+                    width: 50vmin;
+                    height: 50vmin;
+                }
+
+                form {
+                    justify-self: end;
+                }
+
+                p {
+                    text-align: center;
+                    grid-column: 1 / -1;
+                }
+
+                .delete {
+                    justify-self: start;
+                }
+
+                button {
+                    width: 5ch;
+                    aspect-ratio: 1;
+                }
+            }
+        }
+
     </style>
 </head>
 
@@ -50,6 +86,9 @@
         </form>
 
         <h3>Many, Many Templates</h3>
+
+        <section id="templates">
+        </section>
     </section>
 </body>
 
@@ -70,7 +109,7 @@
     const urlData = new URLSearchParams(document.location.search)
     const uid = Number(urlData.get("uid") || prompt("uid"))
 
-    const forms = document.getElementById("forms")
+    const forms = document.getElementById("templates")
 
     function setupComponentForm(component, defaultTemplate = "") {
         let form = document.getElementById(`template-${component}`)
@@ -80,16 +119,30 @@
         } else {
             form = document.createElement("form")
         }
+
+        const container = document.createElement("div")
+
         form.method = "POST"
         form.id = `template-${component}`
         form.action = "javascript:void(0)"
 
-        const label = document.createElement("label")
-        label.innerHTML  = `Template for <code>${component}</code>`
+        const label = document.createElement("p")
+        label.innerHTML = component
+
+        const edit = document.createElement("button")
+        const dialog  = document.createElement("dialog")
+        edit.onclick = () => {
+            dialog.showModal()
+        }
+        edit.innerHTML  = `✏️`
+
         const te = document.createElement("textarea")
+        dialog.append(te)
+
         const settingIn = document.createElement("input")
         settingIn.name = "setting"
         settingIn.value = `template-${component}`
+        settingIn.ariaLabel = `html template for ${component}`
         settingIn.type = 'hidden'
         te.name = "value"
         if(defaultTemplate == "") {
@@ -105,12 +158,11 @@
         te.onchange = function() {
             done(this.form)
         }
-        te.rows="40"
-        te.cols="80"
-        label.append(te)
-        form.append(settingIn, label)
+        form.append(dialog)
+        form.append(edit, settingIn)
 
         const del = document.createElement("button")
+        del.classList.add('delete')
         del.onclick = function() {
             if(!confirm(`Are you sure you want to delete your customized ${component}`)) return
             fetch(`${location.protocol}//${location.host}/settings/delete?uid=${uid}&setting=template-${component}`,{
@@ -120,9 +172,10 @@
                 alert(`${component} setting deleted, reset to default`)
             })
         }
-        del.innerText = `🗑 ${component}`
+        del.innerText = `🗑`
 
-        forms.append(form, del)
+        container.append(label, form, del)
+        forms.append(container)
     }
     for(let component of component_templates.concat(["display-entry"])) {
         setupComponentForm(component)
