@@ -111,6 +111,36 @@ function arr_shuf<T>(iter: Iterable<T>): T[] {
 }
 
 /**
+ * Creates a datalist from a list of items, and appends it into doc
+ * @param {string} name the id to give the datalist, if it is already in document and is NOT a datalist, 1 is returned
+ * @param {string[]} from the list of items to put in the datalist
+ * @param {Document} [doc] the context document
+ * @returns {1 | HTMLDataListElement}
+ */
+function dom_createdatalist(name: string, from: string[], doc: Document = document): 1 | HTMLDataListElement {
+    const preExisting = doc.getElementById(name)
+    if(preExisting && preExisting.tagName !== 'DATALIST') {
+        return 1
+    }
+
+    const dl = preExisting || document.createElement("datalist")
+    dl.id = name
+    const newOpts = []
+    for(let item of from) {
+        const opt = document.createElement("option")
+        opt.value = item
+        opt.innerText = item
+        newOpts.push(opt)
+    }
+
+    dl.replaceChildren(...newOpts)
+
+    doc.body.append(dl)
+
+    return dl as HTMLDataListElement
+}
+
+/**
  * Resets a form completely (including type="hidden" inputs)
  * @param {HTMLFormElement} form
  */

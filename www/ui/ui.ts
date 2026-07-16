@@ -2343,12 +2343,18 @@ async function newRecommendedByUI(itemId: bigint) {
  * @param {string[] | null} [tags=null]
  */
 async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
+    const dl = dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
+        .flatMap(i => i.info.Tags || []).toArray()).values().toArray())
+
+    console.log(dl)
+
     let newTags = null
     if (!tags) {
-        newTags = await promptUI("Tag name (, seperated)")
+        newTags = await promptUI("Tag name (, seperated)", "", "tags-dl")
     }
     if (!newTags) return
     tags = newTags.split(",")
+
 
     try {
         const info = findInfoEntryById(itemId)
