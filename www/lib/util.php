@@ -1,5 +1,7 @@
 <?php
 
+$settings = null;
+
 function settingsroot() {
     $server_settings = parse_ini_file($_SERVER["DOCUMENT_ROOT"] . "/server-config.ini", true);
     $settings_root = $server_settings["data"]["settings_dir"];
@@ -14,6 +16,20 @@ function settingsroot() {
 }
 
 function tmpl($name) {
+    global $settings;
+
+    if (array_key_exists("HTTP_AUTHORIZATION", $_SERVER)) {
+        if ($settings == null) {
+            $auth = $_SERVER["HTTP_AUTHORIZATION"];
+            $pieces = explode(" ", $auth);
+            $uid = ckauth($pieces[1]);
+            $settings = get_settings($uid);
+        }
+
+        if (array_key_exists("template-$name", $settings)) {
+            echo "<template id='$name'>" . $settings["template-$name"] . "</template>";
+        }
+    }
     readfile($_SERVER["DOCUMENT_ROOT"] . "/ui/html-templates/$name.html");
 }
 

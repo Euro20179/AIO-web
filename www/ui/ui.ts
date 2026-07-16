@@ -2142,17 +2142,6 @@ function doUserStartupUI(settings: UserSettings) {
     const script = settings.UIStartupScript
     const lang = settings.StartupLang
 
-    for (let key in settings) {
-        if (key.startsWith("template-")) {
-            if (!settings[key as keyof typeof settings]) continue
-            const tmpl = key.split("template-")[1]
-            const tmplEl = currentDocument().getElementById(tmpl)
-            console.log(tmpl, tmplEl)
-            if (!tmplEl) continue
-            tmplEl.innerHTML = settings[key as keyof typeof settings]
-        }
-    }
-
     if (script === "") return
 
     if (lang == "aiol" || lang == "") {
