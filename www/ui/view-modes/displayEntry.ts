@@ -1245,7 +1245,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
 
         let associatedTransaction
         if(event.Event === "Purchased" || event.Event === "Sold") {
-            associatedTransaction = items_getEntry(itemId).getTransaction(event.EventId)
+            associatedTransaction = items_getEntry(itemId).getTransactionByEventId(event.EventId)
         }
 
         if (hasNonSelfEvent) {

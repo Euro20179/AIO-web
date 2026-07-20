@@ -356,6 +356,7 @@ const component_templates = [
     "color-scheme-selector",
     "close-button",
     "item-identification-form-dialog",
+    "edit-transaction"
 ]
 
 for (const name of component_templates) {

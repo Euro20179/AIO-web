@@ -23,6 +23,7 @@
         "sidebar-entry",
         "new-entry-dialog",
         "item-identification-form-dialog",
+        "edit-transaction",
         "login-dialog",
         "gallery-entry",
         "display-entry",
@@ -90,6 +91,8 @@
 
         <close-button></close-button>
     </dialog>
+
+    <edit-transaction></edit-transaction>
 
     <prompt-dialog></prompt-dialog>
     <confirm-dialog></confirm-dialog>

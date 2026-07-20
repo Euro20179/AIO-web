@@ -135,6 +135,7 @@ type TransactionEntry = {
     EventId: number,
     Price: number,
     Currency: string
+    TransactionId: number,
 }
 
 
@@ -317,11 +318,17 @@ class items_Entry {
         }
     }
 
-    getTransaction(eventId: number) {
+    getTransactionByEventId(eventId: number) {
         for(let transaction of this.transactions) {
             if(transaction.EventId === eventId) {
                 return transaction
             }
+        }
+    }
+
+    getTransactionById(tId: number) {
+        for(let t of this.transactions) {
+            if(t.TransactionId == tId) return t
         }
     }
 

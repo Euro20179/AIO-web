@@ -1,0 +1,21 @@
+<template id="edit-transaction">
+    <dialog id="edit-transaction-dialog">
+        <form method="dialog" onsubmit="editTransactionUI(this)" class="flex small-gap">
+            <input name="id" type="hidden">
+            <input name="itemId" type="hidden">
+
+            <label class="flex column">
+                Price
+                <input name="price" type="number" step="0.01">
+            </label>
+
+            <label class="flex column">
+                Currency
+                <input name="currency">
+            </label>
+            <button title="save">💾</button>
+        </form>
+
+        <close-button></close-button>
+    </dialog>
+</template>

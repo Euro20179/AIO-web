@@ -146,7 +146,7 @@ function* api_deserializeJsonl<T>(jsonl: string | string[]): Generator<T> {
     }
 }
 
-function api_serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent) {
+function api_serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent | TransactionEntry) {
     return _api_mkIntItemId(
         JSON.stringify(
             entry, (_, v) => typeof v === "bigint" ? String(v) : v
@@ -421,6 +421,24 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
 
 async function api_deleteEventV2(eventId: number, uid: number) {
     return await authorizedRequest(`${apiPath}/engagement/delete-event-v2?id=${eventId}&uid=${uid}`)
+}
+
+async function api_deleteTransaction(transactionId: number, uid: number) {
+    return await authorizedRequest(`${apiPath}/transact/delete?uid=${uid}&id=${transactionId}`)
+}
+
+async function api_editTransaction(transactionId: number, newData: Partial<TransactionEntry>, uid: number) {
+    const params =new URLSearchParams([
+        ["uid", String(uid)],
+        ["id", String(transactionId)]
+    ])
+
+    for(let key of Object.keys(newData)) {
+        //@ts-ignore
+        params.set(key, newData[key])
+    }
+
+    return await authorizedRequest(`${apiPath}/transact/edit?${params.toString()}`)
 }
 
 async function api_registerEvent(itemId: bigint, name: string, ts: number, after: number, tz?: string, before: number = 0) {

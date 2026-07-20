@@ -307,13 +307,127 @@ function generateTransactionElementsUI(itemid: bigint) {
             displayPrice = Math.abs(displayPrice)
         }
 
-        cur.innerHTML += `<p>for ${displayPrice} ${transaction.Currency}</p>`
+        const infoP = document.createElement("p")
+        infoP.append(`for ${displayPrice} ${transaction.Currency}`)
 
-        cur.innerHTML += event
-            ? `<p>${items_eventTSHTML(event)}</p>`
-            : "<p>unknown time</p>"
+        const timeP = document.createElement("p")
+        timeP.innerHTML = event ? items_eventTSHTML(event) : "unknown time"
+
+
+        const btnContainer = document.createElement("div")
+        btnContainer.classList.add("flex")
+        const editBtn = document.createElement("button")
+        editBtn.title = "edit transaction"
+        editBtn.append("✏︎")
+        editBtn.onclick = () => {
+            openTransactionEditorUI(transaction)
+            currentWindow().addEventListener("modes.update-item", e => {
+                const trans = items_getEntry(BigInt(e.detail)).getTransactionById(transaction.TransactionId)
+                if(trans)
+                    infoP.innerText = `for ${displayEvent.toLowerCase() === "sold" ? Math.abs(trans.Price) : trans.Price} ${trans.Currency}`
+            }, { once: true })
+        }
+        const delBtn = document.createElement("button")
+        delBtn.title = "delete transaction"
+        delBtn.classList.add("delete")
+        delBtn.onclick = () => {
+            deleteTransactionUI(transaction.TransactionId).then(res => res && cur.remove())
+        }
+        delBtn.append("🗑")
+
+        btnContainer.append(editBtn, delBtn)
+
+        cur.append(infoP, timeP, btnContainer)
     }
+
     return children
+}
+
+/**
+ * Opens the transaction editor for a transaction
+ * @param {TransactionEntry} transaction the transaction to edit
+ * @returns {HTMLDialogElement | null}
+ */
+function openTransactionEditorUI(transaction: TransactionEntry): HTMLDialogElement | null {
+    const modal = openModalUI("edit-transaction-dialog")
+
+    const id = dom_getel("input[name='id']", currentWindow().HTMLInputElement)
+    if(id) {
+        id.value = String(transaction.TransactionId)
+    }
+
+    const iid = dom_getel("input[name='itemId']", currentWindow().HTMLInputElement)
+    if(iid) {
+        iid.value = String(transaction.ItemId)
+    }
+
+    const p = dom_getel("input[name='price']", currentWindow().HTMLInputElement)
+    if(p) {
+        p.value = String(transaction.Price)
+    }
+
+    const c = dom_getel("input[name='currency']", currentWindow().HTMLInputElement)
+    if(c) {
+        c.value = transaction.Currency
+    }
+
+    return modal
+}
+
+async function editTransactionUI(form: HTMLFormElement) {
+    const data = new FormData(form)
+
+    const res = await api_editTransaction(Number(data.get("id")) as number, Object.fromEntries(data.entries()), getUidUI())
+
+    if(data.has("itemId")) {
+        const itemId = BigInt(String(data.get("itemId")))
+        const ts = items_getEntry(itemId).transactions
+        for(let t of ts) {
+            if(t.TransactionId === Number(data.get("id"))) {
+                t.Price = Number(data.get("price"))
+                t.Currency = String(data.get("currency"))
+                break
+            }
+        }
+        updateInfo2({
+            [String(itemId)]: {
+                transactions: ts
+            }
+        })
+    }
+
+    if(res?.status !== 200) {
+        alert("Failed to edit transaction")
+        return
+    }
+}
+
+/**
+ * Deletes a transaction by id
+ * @param {number} transactionId the transaction to delete
+*/
+async function deleteTransactionUI(transactionId: number) {
+    try {
+        var user = await confirmUI("Are you sure you want to delete this transaction?")
+    } catch(err) {
+        return false
+    }
+    if(!(user)) {
+        return false;
+    }
+
+    const res = await api_deleteTransaction(transactionId, getUidUI())
+    if(res && res?.status !== 200) {
+        const text = await res.text()
+        alert(text)
+        return false
+    } else if (res){
+        alert(`Deleted transaction`)
+        return true
+    } else {
+        alert("Failed to delete transaction")
+        return false
+    }
 }
 
 /**
