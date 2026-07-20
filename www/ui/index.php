@@ -64,6 +64,10 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
+        <form method="dialog" class="flex">
+            <button value="Purchased">Buy</button>
+            <button value="Sold">Sell</button>
+        </form>
         <div>
         </div>
 

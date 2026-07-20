@@ -275,17 +275,9 @@ function startupUI({
     }
 }
 
-function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChild"], replaceChildren: Element["replaceChildren"]}) {
-    out ??= dom_getelorthrow("#transactions-log div", null, currentDocument())
-    const transactions = items_getEntry(itemid).transactions
-
-    if(!transactions.length) {
-        alert("No transactions for this item")
-        return
-    }
-
+function generateTransactionElementsUI(itemid: bigint) {
     let children = []
-    for(let transaction of transactions) {
+    for(let transaction of items_getEntry(itemid).transactions) {
         let cur = document.createElement("article")
         children.push(cur)
 
@@ -321,10 +313,7 @@ function showTransactionsUI(itemid: bigint, out?: {appendChild: Node["appendChil
             ? `<p>${items_eventTSHTML(event)}</p>`
             : "<p>unknown time</p>"
     }
-
-    out.replaceChildren(...children)
-
-    dom_getelorthrow("#transactions-log", currentWindow().HTMLDialogElement).showModal()
+    return children
 }
 
 /**

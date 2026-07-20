@@ -96,20 +96,17 @@ function _mkde_actions() {// {{{
             * Creates a buy/sell transaction.
         */
         transact: function(item, _root, target) {
-            const modal = openModalUI("buy-sell", _root)
+            const modal = openModalUI("transactions-log")
 
             if(!modal) return
+
+            modal.querySelector("div")?.replaceChildren(...generateTransactionElementsUI(item.ItemId))
 
             const onclose = async () => {
                 modal.removeEventListener("close", onclose)
 
                 let rv = modal.returnValue
                 if(!rv) return
-
-                if(rv === "view-log") {
-                    showTransactionsUI(item.ItemId)
-                    return
-                }
 
                 if(!["Purchased", "Sold"].includes(rv)) {
                     alert(`Transact modal must be one of 'Purchased', 'Sold'`)
