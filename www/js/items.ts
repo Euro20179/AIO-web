@@ -991,13 +991,19 @@ sorts.set("rating", (a, b) => {
     return bUInfo?.UserRating - aUInfo?.UserRating
 })
 
-for (let event of ["Added", "Finished", "Viewing", "Planned"]) {
+for (let event of ["Added", "Finished", "Planned"]) {
     sorts.set(event.toLowerCase(), (a, b) => {
         let ae = findUserEventsById(a.ItemId).findLast(v => v.Event === event)
         let be = findUserEventsById(b.ItemId).findLast(v => v.Event === event)
         return items_compareEventTiming(ae || 0, be || 0)
     })
 }
+
+sorts.set("Started", (a, b) => {
+    let ae = findUserEventsById(a.ItemId).findLast(v => ["Started", "Viewing"].includes(v.Event))
+    let be = findUserEventsById(b.ItemId).findLast(v => ["Started", "Viewing"].includes(v.Event))
+    return items_compareEventTiming(ae || 0, be || 0)
+})
 
 sorts.set("general-rating", (a, b) => {
     let am = findMetadataById(a.ItemId)

@@ -655,7 +655,7 @@ function api_uiSort2Api(sort: SortKind) {
         case "added":
             return "(SELECT timestamp FROM userEventInfo WHERE event = 'Added' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp LIMIT 1)"
         case "viewing":
-            return "(SELECT timestamp FROM userEventInfo WHERE event = 'Viewing' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
+            return "(SELECT timestamp FROM userEventInfo WHERE (event = 'Started' OR event = 'Viewing') AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
         case "finished":
             return "(SELECT timestamp FROM userEventInfo WHERE event = 'Finished' AND ItemId = userViewingInfo.ItemId ORDER BY timestamp DESC LIMIT 1)"
         case "item-id":

@@ -98,11 +98,11 @@ EventMode.prototype._filterEvents = function(this: EventMode, script: string) {
 
     for (let event of this.eventOrder.list()) {
         let tbl = makeSymbolsTableFromObj(event)
-        for (let status of ["Planned", "Viewing", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
-            let is = event.Event === status
+        for (let eventTy of ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+            let is = event.Event === eventTy
             const n = new Num(Number(is))
-            tbl.set(status.toLowerCase(), n)
-            tbl.set(status.toLowerCase(), n)
+            tbl.set(eventTy.toLowerCase(), n)
+            tbl.set(eventTy.toLowerCase(), n)
         }
         let res = parseExpression(script, tbl)
         if (!res.truthy()) {
