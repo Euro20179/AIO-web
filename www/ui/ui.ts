@@ -402,51 +402,15 @@ async function editTransactionUI(form: HTMLFormElement) {
     }
 }
 
-function editEventUI(form: HTMLFormElement, eventId: number, itemId: bigint) {
-    const event = items_getEntry(itemId).getEvent(eventId)
-    if (!event) {
-        alert(`Could not find event: ${eventId} on item ${itemId}`)
+function openEventEditorUI(itemId: bigint, eventId: number) {
+    const dialog = openEventFormUI(String(itemId), String(eventId))
+
+    if(!dialog) {
+        alert("Failed to open the event editor")
         return
     }
-    if (form.elements["name"].value) {
-        event.Event = form.elements["name"].value
-    }
-    if (form.elements["timestamp"].value) {
-        event.Timestamp = new Date(form.elements["timestamp"].value).getTime()
-    }
-    if (form.elements["after"].value) {
-        event.After = new Date(form.elements["after"].value).getTime()
-    }
-    if (form.elements["before"].value) {
-        event.Before = new Date(form.elements["before"].value).getTime()
-    }
-    if (form.elements["timezone"].value) {
-        event.TimeZone = form.elements["timezone"].value
-    }
-    api_editEvent(eventId, event.Event, event.Timestamp, event.After, event.TimeZone, event.Before)
-        .then(res => {
-            items_replaceEvent(event)
-            updateInfo2({
-                [String(itemId)]: {
-                    events: items_getEntry(itemId).events
-                }
-            })
-        })
-}
 
-function openEventEditorUI(itemId: bigint, eventId: number) {
-    const dialogContainer = currentDocument().createElement("new-event-dialog")
-    currentDocument().body.append(dialogContainer)
-    const dialog = dom_getelorthrow("dialog", currentWindow().HTMLDialogElement, dialogContainer)
-
-    let form = dom_getelorthrow("form", currentWindow().HTMLFormElement, dialogContainer)
-
-    form.onsubmit = () => {
-        editEventUI(form, eventId, itemId)
-        dialog.close()
-    }
-
-    const submitBtn = dom_getel("[type='submit']", null, dialogContainer)
+    const submitBtn = dom_getel("[type='submit']", null, dialog)
     if (submitBtn) {
         submitBtn.innerHTML = "💾"
     }
@@ -457,33 +421,30 @@ function openEventEditorUI(itemId: bigint, eventId: number) {
         return
     }
 
-    let name = dom_getel("[name='name']", currentWindow().HTMLInputElement, dialogContainer)
+    let name = dom_getel("[name='name']", currentWindow().HTMLInputElement, dialog)
     if (name && event.Event) {
         name.value = event.Event
     }
 
-    let after = dom_getel("[name='after']", currentWindow().HTMLInputElement, dialogContainer)
+    let after = dom_getel("[name='after']", currentWindow().HTMLInputElement, dialog)
     if (after && event.After) {
         after.value = new Date(event.After).toISOString().slice(0, 16)
     }
 
-    let before = dom_getel("[name='before']", currentWindow().HTMLInputElement, dialogContainer)
+    let before = dom_getel("[name='before']", currentWindow().HTMLInputElement, dialog)
     if (before && event.Before) {
         before.value = new Date(event.Before).toISOString().slice(0, 16)
     }
 
-    let ts = dom_getel("[name='timestamp']", currentWindow().HTMLInputElement, dialogContainer)
+    let ts = dom_getel("[name='timestamp']", currentWindow().HTMLInputElement, dialog)
     if (ts && event.Timestamp) {
         ts.value = new Date(event.Timestamp).toISOString().slice(0, 16)
     }
 
-    let tz = dom_getel("[name='timezone']", currentWindow().HTMLInputElement, dialogContainer)
+    let tz = dom_getel("[name='timezone']", currentWindow().HTMLInputElement, dialog)
     if (tz && event.TimeZone) {
         tz.value = String(event.TimeZone)
     }
-
-    dialog.onclose = () => dialogContainer.remove()
-    dialog.showModal()
 }
 
 /**
@@ -1694,27 +1655,40 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
 }
 
 /**
-    * Opens the new-event-form dialog fills the itemid input element with {itemid}
-* @param {string} itemid the item id to add the event to
-*/
-function openEventFormUI(itemid: string) {
+ * Opens the new-event-form dialog fills the itemid input element with {itemid}
+ * @param {string} itemid the item id to add the event to
+ * @param {string} [eventId] the event id to edit 
+ * @returns {HTMLDialogElement | null}
+ */
+function openEventFormUI(itemid: string, eventId?: string, resetForm: boolean = true): HTMLDialogElement | null {
     const modal = openModalUI("new-event-form")
-    if (!modal) return
+    if (!modal) return null
 
-    const form = modal.querySelector("form:has(input)")
-    if (!form) return
+    const form = dom_getelorthrow("form:has(input)", currentWindow().HTMLFormElement, modal)
 
-    const itemidEl = dom_getelorthrow('[name="itemid"]', HTMLInputElement, form)
+    if(resetForm) form.reset()
+
+    const itemidEl = dom_getelorthrow('[name="itemid"]', currentWindow().HTMLInputElement, form)
     itemidEl.value = itemid
+
+    const eventidEl = dom_getelorthrow('[name="eventId"]', currentWindow().HTMLInputElement, form)
+    if(eventId) {
+        eventidEl.value = eventId
+    } else {
+        eventidEl.value = "0"
+    }
+
+    return modal
 }
 
 
 
 /**
-    * Creates an event based on a form
-* Side effects:
-    * - assuming the form is within a popover, hide it
-* - reloads events
+ * Creates (or edits) an event based on a form
+ * if the input with name eventId != 0, it edits that event instead of creating a new one
+ * Side effects:
+ * - assuming the form is within a popover, hide it
+ * - reloads events
 */
 async function newEventUI(form: HTMLFormElement) {
     const data = new FormData(form)
@@ -1748,6 +1722,32 @@ async function newEventUI(form: HTMLFormElement) {
     if (!(itemidvalue)) throw new Error("No itemid from new event form")
 
     const itemId = BigInt(itemidvalue)
+
+    const eventId = data.get("eventId")
+    if(eventId && eventId != "0") {
+        const event = items_getEntry(itemId).getEvent(Number(eventId))
+        if(!event) {
+            alert(`Could not find event: ${eventId}`)
+            return
+        }
+        api_editEvent(
+            event.EventId,
+            event.Event = name.toString(),
+            event.Timestamp = ts,
+            event.After = afterts,
+            event.TimeZone = timezone,
+            event.Before = beforets
+        )
+            .then(res => {
+                items_replaceEvent(event)
+                updateInfo2({
+                    [String(event.ItemId)]: {
+                        events: items_getEntry(itemId).events
+                    }
+                })
+            })
+        return
+    }
 
     api_registerEvent(itemId, name.toString(), ts, afterts, timezone, beforets)
         .then(res => res?.text())
