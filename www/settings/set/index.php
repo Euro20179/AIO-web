@@ -17,15 +17,9 @@ if (array_key_exists("auth", $_GET)) {
     exit();
 }
 
-if (!ckauth($auth)) {
+$uid = ckauth($auth);
+if (!$uid) {
     http_response_code(401);
-    exit();
-}
-
-if (!array_key_exists("uid", $_GET)) {
-    http_response_code(400);
-    header("Content-Type: text/plain");
-    echo "Expected ?uid\r\n";
     exit();
 }
 
