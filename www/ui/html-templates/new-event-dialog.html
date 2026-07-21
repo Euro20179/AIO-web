@@ -3,7 +3,19 @@
     <form method="dialog" onsubmit="newEventUI(this)" class="block">
         <input type="hidden" name="itemid">
 
-        <label for="name">Name: <input id="name" name="name" required></label>
+        <datalist id="recommended-event-names">
+            <option value="Added">Added</option>
+            <option value="Planned">Planned</option>
+            <option value="Started">Started</option>
+            <option value="Resuming">Resuming</option>
+            <option value="Dropped">Dropped</option>
+            <option value="Waited">Waited</option>
+            <option value="Paused">Paused</option>
+            <option value="Purchased">Purchased</option>
+            <option value="Sold">Sold</option>
+        </datalist>
+
+        <label for="name">Name: <input id="name" name="name" required list="recommended-event-names"></label>
         <p>
             Not all time slots are required. Exact times are also not required.
         </p>
