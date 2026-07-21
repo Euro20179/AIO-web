@@ -1263,7 +1263,10 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
 
         tbodyHTML += ` <td>
             <div class="grid column">
-                <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
+                <div class="flex x-small-gap">
+                    <button class="edit" onclick="openEventEditorUI(${event.ItemId}n, ${event.EventId})">✏</button>
+                    <button class="delete" onclick="deleteEventByEventId(${event.EventId}).then(res => res && reloadEventsUI(${event.ItemId}n))">🗑</button>
+                </div>
                 ${eventNameText}
             </div>
         </td>`
@@ -1278,7 +1281,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
                     <!-- this nonsense is so that the title lines up with the events -->
                     <th>
                         <div class="grid column">
-                            <button onclick="openEventFormUI('${itemId}')">➕︎</button><span style="text-align: center">Event</span>
+                            <button onclick="openEventFormUI('${itemId}')" style="justify-self: start;">➕︎</button><span style="text-align: center">Event</span>
                         </div>
                     </th>
                     <th>Time</th>

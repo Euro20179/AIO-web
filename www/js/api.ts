@@ -420,6 +420,31 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     return res
 }
 
+async function api_editEvent(eventId: number, name: string, ts?: number, after?: number, tz?: string, before?: number) {
+    const params = new URLSearchParams([
+        ["eventId", String(eventId)],
+        ["name", name],
+    ])
+
+    if(ts != null && !isNaN(ts)) {
+        params.set("timestamp", String(ts))
+    }
+
+    if(after != null && !isNaN(after)) {
+        params.set("after", String(after))
+    }
+
+    if(before != null && !isNaN(before)) {
+        params.set("before", String(before))
+    }
+
+    if(tz != null) {
+        params.set("timezone", tz)
+    }
+
+    return await authorizedRequest(`${apiPath}/engagement/edit-event?${params.toString()}`)
+}
+
 async function api_deleteEventV2(eventId: number, uid: number) {
     return await authorizedRequest(`${apiPath}/engagement/delete-event-v2?id=${eventId}&uid=${uid}`)
 }

@@ -402,6 +402,90 @@ async function editTransactionUI(form: HTMLFormElement) {
     }
 }
 
+function editEventUI(form: HTMLFormElement, eventId: number, itemId: bigint) {
+    const event = items_getEntry(itemId).getEvent(eventId)
+    if(!event) {
+        alert(`Could not find event: ${eventId} on item ${itemId}`)
+        return
+    }
+    if(form.elements["name"].value) {
+        event.Event = form.elements["name"].value
+    }
+    if(form.elements["timestamp"].value) {
+        event.Timestamp = new Date(form.elements["timestamp"].value).getTime()
+    }
+    if(form.elements["after"].value) {
+        event.After = new Date(form.elements["after"].value).getTime()
+    }
+    if(form.elements["before"].value) {
+        event.Before = new Date(form.elements["before"].value).getTime()
+    }
+    if(form.elements["timezone"].value) {
+        event.TimeZone = form.elements["timezone"].value
+    }
+    api_editEvent(eventId, event.Event, event.Timestamp, event.After, event.TimeZone, event.Before)
+    .then(res => {
+         items_replaceEvent(event)
+         updateInfo2({
+             [String(itemId)]: {
+                 events: items_getEntry(itemId).events
+             }
+         })
+     })
+}
+
+function openEventEditorUI(itemId: bigint, eventId: number) {
+    const dialogContainer = currentDocument().createElement("new-event-dialog")
+    currentDocument().body.append(dialogContainer)
+    const dialog = dom_getelorthrow("dialog", currentWindow().HTMLDialogElement, dialogContainer)
+
+    let form = dom_getelorthrow("form", currentWindow().HTMLFormElement, dialogContainer)
+
+    form.onsubmit = () => {
+        editEventUI(form, eventId, itemId)
+        dialog.close()
+    }
+
+    const submitBtn = dom_getel("[type='submit']", null, dialogContainer)
+    if(submitBtn) {
+        submitBtn.innerHTML = "💾"
+    }
+
+    const event = items_getEntry(itemId).getEvent(eventId)
+    if(!event) {
+        alert(`Could not find event: ${eventId}`)
+        return
+    }
+
+    let name = dom_getel("[name='name']", currentWindow().HTMLInputElement, dialogContainer)
+    if(name && event.Event) {
+        name.value = event.Event
+    }
+
+    let after = dom_getel("[name='after']", currentWindow().HTMLInputElement, dialogContainer)
+    if(after && event.After) {
+        after.value = new Date(event.After).toISOString().slice(0, 16)
+    }
+
+    let before = dom_getel("[name='before']", currentWindow().HTMLInputElement, dialogContainer)
+    if(before && event.Before) {
+        before.value = new Date(event.Before).toISOString().slice(0, 16)
+    }
+
+    let ts = dom_getel("[name='timestamp']", currentWindow().HTMLInputElement, dialogContainer)
+    if(ts && event.Timestamp) {
+        ts.value = new Date(event.Timestamp).toISOString().slice(0, 16)
+    }
+
+    let tz = dom_getel("[name='timezone']", currentWindow().HTMLInputElement, dialogContainer)
+    if(tz && event.TimeZone) {
+        tz.value = String(event.TimeZone)
+    }
+
+    dialog.onclose = () => dialogContainer.remove()
+    dialog.showModal()
+}
+
 /**
  * Deletes a transaction by id
  * @param {number} transactionId the transaction to delete
@@ -1632,7 +1716,7 @@ function openEventFormUI(itemid: string) {
  * - assuming the form is within a popover, hide it
  * - reloads events
  */
-function newEventUI(form: HTMLFormElement) {
+async function newEventUI(form: HTMLFormElement) {
     const data = new FormData(form)
     const name = data.get("name")
     if (name == null) {

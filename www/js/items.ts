@@ -370,6 +370,16 @@ function items_getNormalizedRating(meta: MetadataEntry): number {
     return (meta.Rating / meta.RatingMax * 100) || 0
 }
 
+function items_replaceEvent(newEvent: UserEvent) {
+    const events = items_getEntry(newEvent.ItemId).events
+    for(let i = 0; i < events.length; i++) {
+        if(events[i].EventId == newEvent.EventId) {
+            events[i] = newEvent
+            break
+        }
+    }
+}
+
 /**
  * Sets the current library
  * @param {bigint} id The id of the library to set to (can be 0 for no library)
