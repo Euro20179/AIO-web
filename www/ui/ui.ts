@@ -1991,6 +1991,7 @@ async function replaceValueWithSelectedItemIdUI(input: HTMLInputElement, options
 type SelectItemOptions = Partial<{
     container: HTMLDivElement | null,
     onsearch: (query: string) => Promise<HTMLDivElement>,
+    convertToBigInt: boolean
 }>
 
 /**
@@ -1998,9 +1999,10 @@ type SelectItemOptions = Partial<{
 * @param {SelectItemOptions} [options]
 * @returns {Promise<null | bigint>}
 */
-async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint> {
+async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint | any> {
     const popover = dom_getelorthrow("#items-listing", HTMLDialogElement)
 
+    const convert = options?.convertToBigInt ?? true
 
     let f = dom_getelorthrow("#items-listing-search", HTMLFormElement)
     let query = dom_getelorthrow('[name="items-listing-search"]', HTMLInputElement, f)
@@ -2021,7 +2023,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
     return await new Promise((res) => {
         popover.onclose = function() {
             if (popover.returnValue) {
-                res(BigInt(popover.returnValue))
+                res(convert ? BigInt(popover.returnValue) : popover.returnValue)
             } else res(null)
         }
         f.onsubmit = function() {
@@ -2782,7 +2784,9 @@ async function titleIdentificationUI(provider: string, search: string): Promise<
         return null
     }
     let text = await res.text()
-    let [_, rest] = text.split("\x02")
+    let [_, ...restList] = text.split("\x02")
+
+    let rest = restList.join("\x02")
 
     let items: any[]
     try {
@@ -2793,9 +2797,10 @@ async function titleIdentificationUI(provider: string, search: string): Promise<
         return null
     }
 
-    let obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+    let obj = Object.fromEntries(items.map(v => [v.ProviderID || String(v.ItemId), v]))
     const container = fillItemListingUI(obj)
     let item = await selectItemUI({
+        convertToBigInt: false,
         container,
         async onsearch(query) {
             let res = await api_identify(query, provider)

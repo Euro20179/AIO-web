@@ -327,6 +327,7 @@ function mkel(name: string) {
     const el = document.createElement(name)
     const templ = dom_getelorthrow(`#${name}`, HTMLTemplateElement)
     el.replaceChildren(templ.content.cloneNode(true))
+    el.style.display ||= "contents"
     return el
 }
 
