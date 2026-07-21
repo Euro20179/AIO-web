@@ -163,7 +163,7 @@
                     <button type="submit" class="styleless-button">🔎</button>
                 </form>
                 <!--used for proper overflow-->
-                <div class="flex" style="width: 100%;">
+                <div class="flex overflow" style="width: 100%;">
                     <div class="result-stats" id="result-stats">
                     </div>
                 </div>
