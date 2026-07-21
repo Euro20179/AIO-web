@@ -350,6 +350,19 @@ class items_Entry {
     }
 }
 
+function items_sumTransactions(item: bigint) {
+    const transactions = items_getEntry(item).transactions
+    if(Math.sumPrecise) {
+        return Math.sumPrecise(transactions.values().map(v => v.Price))
+    }
+
+    let total = 0
+    for(let transaction of transactions) {
+        total += transaction.Price
+    }
+    return total
+}
+
 /**
  * normalizes a metadata rating, returns 0 if there is no rating
  */
@@ -1309,7 +1322,7 @@ function items_calculateCost(itemId: bigint, include: bigint, recursive: boolean
                 include,
                 recursive,
                 (p, c) => {
-                    p.push(items_getEntry(c).getLastPurchasePrice())
+                    p.push(items_sumTransactions(c))
                     return p
                 },
                 []
@@ -1318,7 +1331,7 @@ function items_calculateCost(itemId: bigint, include: bigint, recursive: boolean
             items
         )
     }
-    return items_reduce(itemId, include, recursive, (p, c) => p + items_getEntry(c).getLastPurchasePrice(), 0)
+    return items_reduce(itemId, include, recursive, (p, c) => p + items_sumTransactions(c), 0)
 }
 
 /**
