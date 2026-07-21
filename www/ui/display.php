@@ -60,6 +60,8 @@
 <script src="/ui/view-modes/displayEntry.js"></script>
 <script src="/ui/ui.js"></script>
 <script>
+(async() => {
+    await settings_load(getUserUID())
     const urlParams = new URLSearchParams(document.location.search)
     let id = urlParams.get("item-id")
 
@@ -70,7 +72,6 @@
         let events = []
         let transactions = []
         let [text, transactionsText] = (await res.text()).trim().split("TRANSACTIONS")
-        console.log(text)
         for (let line of api_deserializeJsonl(text)) {
             if(!line) continue
             if (probablyMetaEntry(line)) {
@@ -98,6 +99,7 @@
         })
         renderDisplayItem.call(m, meta.ItemId)
     })
+})()
 </script>
 
 </html>
