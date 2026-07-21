@@ -1,7 +1,10 @@
 <template id="sidebar-entry">
 <div class="root" part="root">
     <figure>
-        <button class="styleless-button"><img loading="lazy" part="thumbnail" id="sidebar-thumbnail" class="thumbnail"></button>
+        <div class="flex column">
+            <span id="sidebar-item-uid" style="text-align: center;"></span>
+            <button class="styleless-button"><img loading="lazy" part="thumbnail" id="sidebar-thumbnail" class="thumbnail"></button>
+        </div>
         <div class="flex">
             <input class="title" id="sidebar-title">
             <input type="number" put-data="Priority" put-data-mode="value" onchange="
