@@ -761,7 +761,7 @@ function _mkde_actions() {// {{{
          * on the current item
          */
         setviewminutes: async function(item) {
-            let count = await promptNumber("The number of minutes you've spent viewing this entry", 'Not a number, minutes spent')
+            let count = await promptNumber("Enter the number of <strong>minutes</strong> you've spent viewing this entry", 'Not a number, minutes spent')
             if (count === null) return
 
             authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&minutes=${count}`)
@@ -770,7 +770,7 @@ function _mkde_actions() {// {{{
                 .then(() => {
                     let user = findUserEntryById(item.ItemId)
                     if (!user) {
-                        refreshInfo(getUidUI()).then(() => {
+                        refreshInfoUI(getUidUI()).then(() => {
                             refreshDisplayItem.call(this, item.ItemId)
                         })
                     } else {

@@ -65,12 +65,13 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
-        <form method="dialog" class="flex j-center small-gap">
+        <div>
+        </div>
+
+        <form method="dialog" class="flex j-center small-gap" style="margin-block-start: var(--small-gap)">
             <button value="Purchased" class="good">Buy</button>
             <button value="Sold" class="bad">Sell</button>
         </form>
-        <div>
-        </div>
 
         <close-button></close-button>
     </dialog>

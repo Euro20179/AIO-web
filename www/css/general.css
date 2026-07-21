@@ -56,6 +56,10 @@
         border-style: solid;
         background: var(--input-background);
 
+        &.good, &.bad {
+            font-weight: bold;
+        }
+
         &:not([type="checkbox"]) {
             border-color: var(--input-border-color);
         }
@@ -115,10 +119,9 @@
     input[type="button"] {
         color: var(--text-color);
         cursor: pointer;
-    }
-
-    :where(button, [role="button"], [type="button"], [type="reset"], [type="submit"]):hover {
-        background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
+        &:hover {
+            background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
+        }
     }
 
     input[type="checkbox"] {
@@ -138,7 +141,7 @@
 
         background: var(--main);
         border: 1px solid;
-        padding: 5cap 5ch;
+        padding: var(--medium-gap);
 
         * {
             font-size: inherit;
