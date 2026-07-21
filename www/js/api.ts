@@ -142,6 +142,7 @@ function* api_deserializeJsonl<T>(jsonl: string | string[]): Generator<T> {
         jsonl = jsonl.split("\n")
     }
     for (let line of jsonl) {
+        if(!line) continue
         yield _api_parseJsonL(_api_mkStrItemId(line))
     }
 }
@@ -568,22 +569,39 @@ async function api_setRating(itemId: bigint, rating: string) {
 }
 
 /**
+ * Gets the list of transactions for an item
+ */
+async function api_listTransactions(uid: number, itemId: bigint): Promise<TransactionEntry[]> {
+    const res = await fetch(`${apiPath}/transact/list?uid=${uid}&id=${encodeURIComponent(String(itemId))}`)
+    if (res.status !== 200) {
+        res.text().then(console.error)
+        return []
+    }
+    const text = await res.text()
+    return [...api_deserializeJsonl<TransactionEntry>(text)]
+}
+
+/**
     * Create a transaction for an item
     * @param {number} uid user the transaction is for
     * @param {bigint} itemId item the transaction is for
     * @param {string} [currency] optionally the currency, defaults to user's preferred currency
-*   * @param {string} [tz] timezone, defaults to browser timezone
+    * @param {string} [tz] timezone, defaults to browser timezone
+    * @param {number} [eventId], optionally an event to attach to the transaction
 */
-async function api_transact(uid: number, itemId: bigint, price: number, currency?: string, tz?: string) {
+async function api_transact(uid: number, itemId: bigint, price: number, currency?: string, tz?: string, eventId?: number) {
     tz ||= INTL_OPTIONS.timeZone
     currency ||= settings_get("currency")
     const params = new URLSearchParams({
-        uid: String(uid),
         id: String(itemId),
         price: String(price),
         currency,
         timezone: tz
     })
+
+    if (eventId) {
+        params.set("eventId", String(eventId))
+    }
 
     return await authorizedRequest(`${apiPath}/transact/do?${params.toString()}`, {
         ["signin-reason"]: "log a transaction"

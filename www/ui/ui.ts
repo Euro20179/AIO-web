@@ -1639,6 +1639,7 @@ function newEventUI(form: HTMLFormElement) {
         alert("Name required")
         return
     }
+
     const tsStr = data.get("timestamp")?.toString() || ""
 
     const aftertsStr = data.get("after")
