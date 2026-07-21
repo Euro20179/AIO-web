@@ -1638,7 +1638,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
         displayEntryTitle?.setAttribute("data-type-icon", typeIcon)
         if (getUidUI() !== item.Uid)
-            displayEntryTitle?.setAttribute("data-owner", ACCOUNTS[item.Uid] || (item.Uid && `uid ${item.Uid}`) || 'unknown')
+            displayEntryTitle?.setAttribute("data-owner", uid2username(item.Uid))
 
         displayEntryTitle?.setAttribute("data-format-icon", formatIcon)
 

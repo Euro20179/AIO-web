@@ -15,6 +15,10 @@ function alert(text: string) {
     setTimeout(el.remove.bind(el), 15000)
 }
 
+function uid2username(uid: number) {
+    return ACCOUNTS[uid] || (uid && `uid ${uid}`) || 'unknown'
+}
+
 async function promptNumber(text: string, textFail: string, numberConverter: typeof parseInt): Promise<number>
 async function promptNumber(text: string, textFail: string, numberConverter: typeof BigInt): Promise<bigint>
 async function promptNumber(text: string, textFail: string, numberConverter: typeof parseFloat): Promise<number>

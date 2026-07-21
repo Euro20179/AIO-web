@@ -248,7 +248,7 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     //uid
     const uidEl = dom_getel("#sidebar-item-uid", null, el)
     if(uidEl && item.Uid !== getUidUI()) {
-        uidEl.innerHTML = ACCOUNTS[item.Uid] || (item.Uid && `uid ${item.Uid}`) || 'unknown'
+        uidEl.innerHTML = uid2username(item.Uid)
     }
 
     updateDeclarativeDSL({}, item, user, meta, el) 
