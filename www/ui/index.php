@@ -163,7 +163,6 @@
                 </form>
                 <!--used for proper overflow-->
                 <div class="flex" style="width: 100%;">
-                    <button class="popout" onclick="popoutUI(this)" popout-target="result-stats" style="justify-self: end;">↗</button>
                     <div class="result-stats" id="result-stats">
                     </div>
                 </div>
