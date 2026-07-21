@@ -38,6 +38,16 @@
         cursor: pointer;
     }
 
+    progress[max]::-moz-progress-bar,
+    progress[max]::-webkit-progress-bar {
+        background: var(--green);
+    }
+
+    progress {
+        background: var(--blue);
+        appearance: none;
+    }
+
     button,
     [role="button"],
     textarea,
@@ -125,6 +135,7 @@
     }
 
     input[type="checkbox"] {
+        cursor: pointer;
         appearance: none;
         border-style: solid;
         vertical-align: bottom;
@@ -391,5 +402,17 @@
     .spoiler:active {
         background: transparent;
         color: var(--text-color);
+    }
+}
+
+@layer components {
+    progress:where([data-status="Paused"], [data-status="Waiting"])::-moz-progress-bar,
+    progress:where([data-status="Paused"], [data-status="Waiting"])::-webkit-progress-bar {
+        background: var(--warn);
+    }
+
+    progress[data-status="Dropped"]::-moz-progress-bar,
+    progress[data-status="Dropped"]::-webkit-progress-bar {
+        background: var(--bad);
     }
 }

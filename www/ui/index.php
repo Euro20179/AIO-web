@@ -184,7 +184,7 @@
             <nav class="sidebar overflow" id="sidebar" aria-label="item selection">
                 <div class="sidebar--navigation" id="sidebar-navigation">
                     <label class="center block" style="align-content: center;"><input type="checkbox" name="view-all"
-                            id="view-all">View all</label>
+                            id="view-all">All</label>
 
                     <button id="library-selector" value="0">Library</button>
                 </div>

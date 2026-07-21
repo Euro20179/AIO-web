@@ -251,6 +251,25 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         uidEl.innerHTML = uid2username(item.Uid)
     }
 
+
+    //position
+    const posEl = dom_getel("#progress", null, el)
+    pos: if(posEl) {
+        if (!("max" in posEl &&
+            "value" in posEl)) break pos
+        posEl.setAttribute("data-status", user.Status)
+        try {
+            var mediaDependant = JSON.parse(meta.MediaDependant || "{}")
+        } catch (err) {
+            console.error("Could not parse media dependant meta info json")
+            break pos
+        }
+        let lengthInNumber = items_getLength(mediaDependant)[0] || 0
+        let userPos = parseInt(user.CurrentPosition)
+        posEl.max = lengthInNumber || 1
+        posEl.value = userPos || 0
+    }
+
     updateDeclarativeDSL({}, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el) 
 }
 

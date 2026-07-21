@@ -1778,8 +1778,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         //we should still clear all progress bars
         // multipleProgressEl.innerHTML = ""
 
-        if (!/(Re)?Viewing/.test(user.Status)) return
-
         if (!user.CurrentPosition) {
             user = { ...user }
             user.CurrentPosition = "0"
@@ -1818,6 +1816,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 container
             )
             if (!p) break
+            p.setAttribute("data-status", user.Status)
             p.max = parseFloat(String(max))
             p.value = parseFloat(part[2])
 

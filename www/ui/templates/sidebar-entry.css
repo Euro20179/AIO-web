@@ -4,6 +4,7 @@
     }
 
     [part="root"] {
+        display: flow-root;
         container-type: inline-size;
 
         @container body (width < 800px) {
@@ -15,7 +16,7 @@
 
     #sidebar-title {
         font-size: 0.8em;
-        width: 80%;
+        align-self: center;
 
         border-style: none;
 

@@ -406,9 +406,7 @@
         justify-self: center;
         margin: 0;
 
-        background: var(--blue);
         width: 100%;
-        appearance: none;
     }
 
     #entry-progressbar-position-label,
@@ -431,13 +429,6 @@
         &~figcaption {
             display: none;
         }
-    }
-
-    #entry-progressbar[max]::-moz-progress-bar,
-    #entry-progressbar[max]::-webkit-progress-bar,
-    .entry-progressbar[max]::-moz-progress-bar,
-    .entry-progressbar[max]::-webkit-progress-bar {
-        background: var(--green);
     }
 
     #identify-items:popover-open {
