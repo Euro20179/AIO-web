@@ -2285,7 +2285,6 @@ function openCatalogModeUI() {
     let urlParams = new URLSearchParams(location.search)
     urlParams.set("display", "true")
     urlParams.set("no-select", "true")
-    urlParams.set("no-startup", "true")
     urlParams.set("no-mode", "true")
     const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
     const win = open(newURL, "_blank", "popup=true")
