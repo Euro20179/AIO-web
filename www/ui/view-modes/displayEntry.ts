@@ -1859,7 +1859,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //update this last because some legacy elements get filled with new elements
     //that rely on stuff like entry-action
-    updateDeclarativeDSL(this.de_actions, item, user, meta, el)
+    updateDeclarativeDSL(this.de_actions, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el)
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {

@@ -57,7 +57,7 @@ function setupHintPopovers(root: {
 /**
  * @description updates all put-data elements with their respective contents
  */
-function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
+function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, enable_unsafe: boolean, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
     //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
     for (let elem of root.querySelectorAll("[put-data]")) {
         let keys = elem.getAttribute("put-data")?.split(",")
@@ -146,7 +146,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
 
     setupHintPopovers(root)
 
-    if (settings_get(0, "enable_unsafe"))
+    if (enable_unsafe)
         for (let elem of root.querySelectorAll("script")) {
             let script = elem.textContent
             if (!script) continue
@@ -231,7 +231,7 @@ customElements.define("sidebar-entry", class extends HTMLElement {
     connectedCallback() {
         let entry = items_getEntry(BigInt(this.getAttribute("data-entry-id") || "0"))
         if(entry)
-            updateDeclarativeDSL({}, entry.info, entry.user, entry.meta, this.root) 
+            updateDeclarativeDSL({}, false, entry.info, entry.user, entry.meta, this.root) 
     }
 
     focus() {

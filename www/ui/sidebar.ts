@@ -251,7 +251,7 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
         uidEl.innerHTML = uid2username(item.Uid)
     }
 
-    updateDeclarativeDSL({}, item, user, meta, el) 
+    updateDeclarativeDSL({}, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el) 
 }
 
 function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {

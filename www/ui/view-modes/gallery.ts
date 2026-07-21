@@ -24,7 +24,7 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             if (!id) return
             openDisplayWinUI(id)
         }
-    }, item, findUserEntryById(item.ItemId), meta, root)
+    }, settings_get(getUserUID(), "enable_unsafe"), item, findUserEntryById(item.ItemId), meta, root)
     return entry
 }
 
