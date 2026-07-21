@@ -23,7 +23,7 @@ function tmpl($name) {
             $auth = $_SERVER["HTTP_AUTHORIZATION"];
             $pieces = explode(" ", $auth);
             $uid = ckauth($pieces[1]);
-            $settings = get_settings($uid);
+            $settings = get_settings((int)$uid);
         }
 
         if (array_key_exists("template-$name", $settings)) {
@@ -56,6 +56,10 @@ function get_aio_host() {
 }
 
 function get_settings($uid, $raw = false) {
+    if(gettype($uid) != 'integer') {
+        return "{}";
+    }
+
     $root = settingsroot();
     $data = file_get_contents("$root/$uid/settings.json");
 
@@ -70,8 +74,12 @@ function get_settings($uid, $raw = false) {
 }
 
 function set_setting($uid, $key, $value) {
+    if(gettype($uid) != 'integer') {
+        return "{}";
+    }
+
     $root = settingsroot();
-    $settings = get_settings($uid, false);
+    $settings = get_settings((int)$uid, false);
 
     $settings["$key"] = $value;
 
@@ -86,8 +94,12 @@ function set_setting($uid, $key, $value) {
 }
 
 function del_setting($uid, $key) {
+    if(gettype($uid) != 'integer') {
+        return "{}";
+    }
+
     $root = settingsroot();
-    $settings = get_settings($uid, false);
+    $settings = get_settings((int)$uid, false);
 
     unset($settings[$key]);
 

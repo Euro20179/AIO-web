@@ -45,6 +45,6 @@ if ($fail) {
 
 
 $uid = $_GET["uid"];
-del_setting($uid, $_GET["setting"]);
+del_setting((int)$uid, $_GET["setting"]);
 echo "DELETED";
 ?>

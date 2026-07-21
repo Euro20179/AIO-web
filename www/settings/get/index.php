@@ -26,5 +26,5 @@ $uid = $_GET["uid"];
 
 header("Content-Type: application/json");
 
-echo get_settings($uid, true);
+echo get_settings((int)$uid, true);
 ?>

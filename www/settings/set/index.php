@@ -47,5 +47,5 @@ if ($fail) {
 
 
 $uid = $_GET["uid"];
-set_setting($uid, $qs_data["setting"], $qs_data["value"]);
+set_setting((int)$uid, $qs_data["setting"], $qs_data["value"]);
 ?>
