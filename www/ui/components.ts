@@ -146,7 +146,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
 
     setupHintPopovers(root)
 
-    if (settings_get("enable_unsafe"))
+    if (settings_get(0, "enable_unsafe"))
         for (let elem of root.querySelectorAll("script")) {
             let script = elem.textContent
             if (!script) continue
@@ -173,15 +173,12 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
         }
 }
 
-function applyUserRating(rating: number, root: HTMLElement) {
-
-    const tierSettings = settings_get("tiers")
-
+function applyUserRating(tierSettings: Settings["tiers"], rating: number, root: HTMLElement) {
     for (const name of Object.keys(tierSettings)) {
         root.classList.remove(`${name}-tier`)
     }
 
-    let tier = settings_tier_from_rating(rating)
+    let tier = settings_tier_from_rating(tierSettings, rating)
     root.classList.add(`${tier}-tier`)
 }
 

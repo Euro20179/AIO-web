@@ -38,11 +38,27 @@ async function main() {
 
     const urlParams = new URLSearchParams(document.location.search);
 
+    //if the user is logged in, do ui startup script for their user and their user only
+    if (
+        localStorage.getItem("userUID") &&
+        getUserAuth() &&
+        !urlParams.has("no-startup")
+    ) {
+        //prevents error with embeded credentials
+        location.hash ||= "#";
+        let settings = await settings_load(getUserUID())
+
+        if(!settings) return
+        if(settings) settings = settings_all(getUserUID())
+        doUserStartupUI(settings);
+    }
+
     if (urlParams.has("display")) {
         setDisplayModeUI(true);
     } else if (urlParams.has("catalog")) {
         openCatalogModeUI();
     }
+
 
     const onrender = () => {
         //just in case
@@ -83,18 +99,6 @@ async function main() {
     //allow the fetch to happen *after* items are rendered on firefox
     //becasue firefox doesn't render the items until after the fetch for some reason
     addEventListener("aio-search-performed", onrender);
-
-    //if the user is logged in, do ui startup script for their user and their user only
-    if (
-        localStorage.getItem("userUID") &&
-        getUserAuth() &&
-        !urlParams.has("no-startup")
-    ) {
-        //prevents error with embeded credentials
-        location.hash ||= "#";
-        const settings = await getSettings(Number(localStorage.getItem("userUID")));
-        doUserStartupUI(settings);
-    }
 
     fillFormatSelectionUI(
         dom_getelorthrow('[name="format"]', HTMLSelectElement),

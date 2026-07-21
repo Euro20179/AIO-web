@@ -61,7 +61,7 @@ function startupUI({
     viewAllElem,
     librarySelector,
     userSelector,
-    searchBox,
+    searchBox: _searchBox,
     sortBySelector,
     statsOutput,
     newItemForm,
@@ -184,11 +184,11 @@ function startupUI({
                 return
 
             const location = dom_getelorthrow('[name="location"]', HTMLInputElement, newItemForm)
-            if (typeof settings.location_generator === 'string') {
-                location.value = settings.location_generator.replaceAll("{}", title.value)
-            } else if (typeof settings.location_generator === 'function') {
+            if (typeof defaultSettings.location_generator === 'string') {
+                location.value = defaultSettings.location_generator.replaceAll("{}", title.value)
+            } else if (typeof defaultSettings.location_generator === 'function') {
                 const info = new FormData(newItemForm)
-                location.value = settings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
+                location.value = defaultSettings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
             }
         }
     }
@@ -322,6 +322,7 @@ function generateTransactionElementsUI(itemid: bigint) {
         editBtn.onclick = () => {
             openTransactionEditorUI(transaction)
             currentWindow().addEventListener("modes.update-item", e => {
+                //@ts-ignore
                 const trans = items_getEntry(BigInt(e.detail)).getTransactionById(transaction.TransactionId)
                 if (trans)
                     infoP.innerText = `for ${displayEvent.toLowerCase() === "sold" ? Math.abs(trans.Price) : trans.Price} ${trans.Currency}`
@@ -1239,6 +1240,10 @@ function sortEntriesUI() {
 function getUidUI() {
     if (!components.userSelector) return 0
     return Number(components.userSelector.value)
+}
+
+function getSignedInUidUI() {
+
 }
 
 /**
@@ -2333,14 +2338,13 @@ function updatePageInfoWithItemUI(item: InfoEntry) {
     ua_setfavicon(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
 }
 
-type StartupLang = "javascript" | "aiol" | ""
 /**
     * Do a user startup script
 * should only be called if the current uid matches the logged in user uid
     * otherwise we will load random people's settings :)
-* @param {UserSettings} settings
+* @param {Settings} settings
 */
-function doUserStartupUI(settings: UserSettings) {
+function doUserStartupUI(settings: Settings) {
     const script = settings.UIStartupScript
     const lang = settings.StartupLang
 
@@ -2358,7 +2362,7 @@ function doUserStartupUI(settings: UserSettings) {
     * Converts a format number to a displayable symbol
 */
 function formatToSymbolUI(format: number): string {
-    const custom = settings_get("custom_item_formats")
+    const custom = settings_get(getUserUID(), "custom_item_formats")
     let out = ""
     if (items_isDigitized(format)) {
         format -= DIGI_MOD
@@ -2368,28 +2372,6 @@ function formatToSymbolUI(format: number): string {
         return custom[format] + out
     }
     return items_formatToSymbol(format) + out
-}
-
-type UserSettings = {
-    UIStartupScript: string
-    StartupLang: StartupLang
-}
-
-/**
-    * Gets the settings for a user
-* @param {number} uid
-* @returns {Promise<UserSettings>}
-*/
-async function getSettings(uid: number): Promise<UserSettings> {
-    let res = await authorizedRequest(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
-    if (res === null || res.status !== 200) {
-        res?.text().then(text => {
-            console.error(`${res?.status} ${text}`)
-        })
-        return { UIStartupScript: "", StartupLang: "" }
-    }
-    const t = await res.text()
-    return JSON.parse(t) as UserSettings
 }
 
 /**
@@ -2500,7 +2482,7 @@ async function transactUI(uid: number, itemId: bigint, transactionType: "Purchas
     if (transactionType === "Sold") {
         price *= -1
     }
-    let rv = await api_transact(uid, itemId, price, settings_get("currency"), INTL_OPTIONS.timeZone)
+    let rv = await api_transact(uid, itemId, price, settings_get(uid, "currency"), INTL_OPTIONS.timeZone)
     let newInfo = await api_getEntryAll(itemId, uid)
     if (newInfo)
         updateInfo2({

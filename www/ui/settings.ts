@@ -1,4 +1,4 @@
-const settings = {
+const defaultSettings = {
     //list so that the user can determine the tier order
     tiers: {
         //name of the tier, (minimum rating, or a func => boolean), optional css className
@@ -138,17 +138,56 @@ background: var(--red)
             }
         }
     },
-} as const
 
-type Settings = typeof settings
+    UIStartupScript: "",
+    StartupLang: "",
+}
+
+type Settings = typeof defaultSettings
+
+const userSettings = new Map<number, Settings>
+
+/** users who's settings are being loaded (dont load twice at same time) */
+const _loading = new Set
+async function settings_load(uid: number, force: boolean = false): Promise<Settings | boolean >{
+    if(_loading.has(uid)) {
+        return await new Promise(res => {
+            const ck = () => {
+                if(_loading.has(uid)) {
+                    setTimeout(ck, 60)
+                    return
+                }
+                res(true)
+            }
+            setTimeout(ck, 60)
+        })
+    }
+
+    if((!force && userSettings.has(uid))) return false
+
+    _loading.add(uid)
+
+    const newSettings = {...defaultSettings}
+    const res = await fetch(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
+    const serverSettings = await res.json()
+    for(let key in serverSettings) {
+        //@ts-ignore
+        newSettings[key] = serverSettings[key]
+    }
+    userSettings.set(uid, newSettings)
+
+    _loading.delete(uid)
+
+    return newSettings
+}
 
 /**
  * @description Gets a tier from a rating
  * returns false if it could not find the tier
  * @returns string | false
  */
-function settings_tier_from_rating(rating: number): string | false {
-    for (let [name, minRating] of Object.entries(settings_get("tiers"))) {
+function settings_tier_from_rating(tiers: Settings["tiers"], rating: number): string | false {
+    for (let [name, minRating] of Object.entries(tiers)) {
         if (
             (typeof minRating === 'function' && minRating(rating))
             || (typeof minRating === 'number' && rating >= minRating)
@@ -161,13 +200,30 @@ function settings_tier_from_rating(rating: number): string | false {
 }
 
 function settings_isASetting(key: string): key is keyof Settings {
-    return Object.hasOwn(settings, key)
+    return Object.hasOwn(defaultSettings, key)
 }
 
-function settings_set<T extends keyof Settings>(key: T, value: Settings[T]) {
-    settings[key] = value
+function settings_set<T extends keyof Settings>(uid: number, key: T, value: Settings[T]) {
+    if(!userSettings.has(uid)) {
+        throw new Error(`${uid}'s setting have not been loaded`)
+    }
+    userSettings.get(uid)![key] = value
 }
 
-function settings_get<T extends keyof Settings>(key: T): Settings[T] {
-    return settings[key]
+function settings_get<T extends keyof Settings>(uid: number, key: T): Settings[T] {
+    if(uid === 0) {
+        return defaultSettings[key]
+    }
+
+    if(!userSettings.has(uid)) {
+        throw new Error(`${uid}'s setting have not been loaded`)
+    }
+    return userSettings.get(uid)![key]
+}
+
+function settings_all(uid: number): Settings {
+    if(!userSettings.has(uid)) {
+        throw new Error(`${uid}'s setting have not been loaded`)
+    }
+    return userSettings.get(uid)!
 }

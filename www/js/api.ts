@@ -21,8 +21,11 @@ function storeUserUID(id: string) {
     localStorage.setItem("userUID", id)
 }
 
-function getUserUID() {
-    return localStorage.getItem("userUID")
+/**
+ * @returns the signed in user id or 0 if not signed in
+ */
+function getUserUID(): number {
+    return Number(localStorage.getItem("userUID") || "0")
 }
 
 function probablyUserItem(item: object): item is UserEntry {
@@ -616,7 +619,7 @@ async function api_listTransactions(uid: number, itemId: bigint): Promise<Transa
 */
 async function api_transact(uid: number, itemId: bigint, price: number, currency?: string, tz?: string, eventId?: number) {
     tz ||= INTL_OPTIONS.timeZone
-    currency ||= settings_get("currency")
+    currency ||= settings_get(uid, "currency")
     const params = new URLSearchParams({
         id: String(itemId),
         price: String(price),

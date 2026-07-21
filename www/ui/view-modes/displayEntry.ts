@@ -1385,6 +1385,8 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
  * @description updates special-case legacy elements
  */
 async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, _events: UserEvent[], el: ShadowRoot) {
+    await settings_load(user.Uid)
+
     const renderComponent = (query: string,
         fill: (element: HTMLElement, itemId: bigint) => any) => {
         for (let l of el.querySelectorAll(query)) {
@@ -1429,7 +1431,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //item item interaction menu
     renderComponent("#item-interaction-menu", el => {
         if (!(el instanceof this.win.HTMLElement)) return
-        const buttons = settings_get("de_item_interactions")
+        const buttons = settings_get(getUserUID(), "de_item_interactions")
 
         let btns = []
 
@@ -1686,7 +1688,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Rating
     renderComponent("#user-rating", ratingEl => {
-        applyUserRating(user.UserRating, ratingEl)
+        applyUserRating(settings_get(user.Uid, "tiers"), user.UserRating, ratingEl)
         ratingEl.innerHTML = user.UserRating
             ? String(user.UserRating)
             : "Unrated"
@@ -1701,7 +1703,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             if (max !== 0) {
                 normalizedRating = rating / max * 100
             }
-            applyUserRating(normalizedRating, audienceRatingEl)
+            applyUserRating(settings_get(user.Uid, "tiers"), normalizedRating, audienceRatingEl)
             audienceRatingEl.innerHTML = String(rating)
         } else if (audienceRatingEl) {
             audienceRatingEl.innerText = "Unrated"
