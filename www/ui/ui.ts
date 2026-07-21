@@ -2099,7 +2099,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
         "PS5": "Console",
         "XBOXONE": "Console",
         "XBOX360": "Console",
-        "BOARDGAME": "Console",
+        "BOARDGAME": "Misc",
         "MANGA": "Book",
         "BOOK": "Book",
         "VINYL": "Analog",
