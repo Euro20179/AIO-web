@@ -8,7 +8,7 @@ const settings = {
         "c": 70,
         "d": 60,
         "f": 30,
-        "z": 10,
+        "z": 1,
         "zero": 0
     },
 
@@ -54,7 +54,7 @@ background: var(--red)
 `,
         'z': `
     tier-label {
-    backgound: var(--lavender)
+    background: var(--lavender)
     }
 `,
     },

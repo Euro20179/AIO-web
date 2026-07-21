@@ -56,7 +56,7 @@
 }
 
 .z-tier {
-    color: purple;
+    color: var(--lavender);
 }
 .z-tier::before {
     content: "Z "
