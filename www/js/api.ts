@@ -9,6 +9,11 @@ let _api_as_cache: { [key: number]: string } = {}
 
 let _api_types_cache: EntryType[] = []
 
+function logout() {
+    setUserAuth("")
+    localStorage.removeItem("userUID")
+}
+
 function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {
     into.setItem.bind(into)("userAuth", auth)
 }

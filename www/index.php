@@ -79,7 +79,7 @@
             <img src="/assets/github.ico">
         </a>
         <button onclick="signinUI()">Login</button>
-        <button onclick="setUserAuth(''); alert('Logged out')">Logout</button>
+        <button onclick="logout(); alert('Logged out')">Logout</button>
         <a href="/create-account.php"><button>Create account</button></a>
         <button onclick="delete_account()">Delete account</button>
     </nav>
