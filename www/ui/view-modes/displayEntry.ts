@@ -121,6 +121,11 @@ function _mkde_actions() {// {{{
                     return n
                 })
 
+                if(!price) {
+                    alert("Cancelled")
+                    return
+                }
+
                 transactUI(item.Uid, item.ItemId, rv as "Purchased" | "Sold", price)
             }
             modal.addEventListener("close", onclose)

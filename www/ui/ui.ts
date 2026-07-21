@@ -1025,6 +1025,7 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
         submission.removeAttribute("list")
 
     root.innerHTML = html || "<p>prompt</p>"
+    pEl.returnValue = ''
     pEl.showModal()
     return await new Promise((res) => {
         pEl.onclose = () => {
