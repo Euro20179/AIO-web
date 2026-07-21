@@ -177,7 +177,7 @@ function applyUserRating(rating: number, root: HTMLElement) {
 
     const tierSettings = settings_get("tiers")
 
-    for (const [name, _] of tierSettings) {
+    for (const name of Object.keys(tierSettings)) {
         root.classList.remove(`${name}-tier`)
     }
 

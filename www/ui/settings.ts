@@ -1,17 +1,16 @@
 const settings = {
     //list so that the user can determine the tier order
-    tiers: [
+    tiers: {
         //name of the tier, (minimum rating, or a func => boolean), optional css className
-        ["splus", 101],
-        ["s", 95],
-        ["a", 88],
-        ["b", 79],
-        ["c", 70],
-        ["d", 60],
-        ["f", 25],
-        ["z", 1],
-        ["zero", 0]
-    ],
+        "s": 95,
+        "a": 90,
+        "b": 80,
+        "c": 70,
+        "d": 60,
+        "f": 30,
+        "z": 10,
+        "zero": 0
+    },
 
     currency: "USD",
 
@@ -149,7 +148,7 @@ type Settings = typeof settings
  * @returns string | false
  */
 function settings_tier_from_rating(rating: number): string | false {
-    for (let [name, minRating] of settings_get("tiers")) {
+    for (let [name, minRating] of Object.entries(settings_get("tiers"))) {
         if (
             (typeof minRating === 'function' && minRating(rating))
             || (typeof minRating === 'number' && rating >= minRating)

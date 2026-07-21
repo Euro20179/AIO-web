@@ -174,7 +174,7 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
     const style = document.createElement("style")
     this.tierlistEl.append(style)
 
-    for (let tier of settings_get("tiers")) {
+    for (let tier of Object.entries(settings_get("tiers"))) {
         const ul = document.createElement("ul")
         const label = document.createElement("tier-label")
 
