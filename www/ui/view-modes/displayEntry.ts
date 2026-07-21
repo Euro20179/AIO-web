@@ -1580,7 +1580,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
         if (tagTempl)
             for (let tag of item.Tags || []) {
-                tag = tag.trim()
                 if (!tag) continue
 
                 const copy = tagTempl.content.cloneNode(true) as HTMLElement
