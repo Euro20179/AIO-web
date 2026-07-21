@@ -2036,7 +2036,7 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint>
 * @returns {Promise<string>} the login token
 */
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = dom_getelorthrow("#login", HTMLDialogElement)
+    const loginPopover = dom_getelorthrow("#login", currentWindow().HTMLDialogElement)
 
     const loginReasonEl = loginPopover.querySelector("#login-reason")
     if (loginReasonEl instanceof HTMLElement) {
@@ -2058,7 +2058,7 @@ async function signinUI(reason: string): Promise<string> {
 
     loginPopover.showModal()
     return await new Promise((res) => {
-        const form = dom_getelorthrow("#login-form", HTMLFormElement, loginPopover)
+        const form = dom_getelorthrow("#login-form", currentWindow().HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             alert(1)
             let data = new FormData(form)
