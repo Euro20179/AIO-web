@@ -1194,6 +1194,7 @@ function items_formatToSymbol(format: number): string {
         24: "PS5",
         25: "S2",
         26: "EG",
+        27: "G",
     }[format] + out
 }
 

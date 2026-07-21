@@ -2099,6 +2099,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
         "EPIC": "Store",
         "NIN_SWITCH": "Console",
         "NIN_SWITCH2": "Console",
+        "GAMECUBE": "Console",
         "WII": "Console",
         "NIN_DS": "Console",
         "PS1": "Console",
