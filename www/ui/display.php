@@ -29,6 +29,7 @@
     tmpl("color-scheme-selector");
     tmpl("confirm-dialog");
     tmpl("close-button");
+    tmpl("item-identification-form-dialog");
 ?>
 
     <login-dialog></login-dialog>
