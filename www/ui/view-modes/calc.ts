@@ -31,7 +31,7 @@ CalcMode.prototype.mkcontainers = function(this: CalcMode, into: HTMLElement | D
 }
 
 CalcMode.prototype.mkcontainer = function(this: CalcMode, ): HTMLElement {
-    return document.createElement("calc-template")
+    return mkel("calc-template")
 }
 
 CalcMode.prototype.sortCalcDisplay = function(this: CalcMode) {
@@ -157,7 +157,7 @@ function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement, updat
 }
 
 function renderCalcItem(this: CalcMode, item: InfoEntry): HTMLElement {
-    let el = document.createElement("calc-entry")
+    let el = mkel("calc-entry")
     refreshCalcItem.call(this, item, el, true)
     this.output.append(el)
     return el

@@ -347,7 +347,7 @@ TierListMode.prototype.mkcontainers = function(this: TierListMode, into: HTMLEle
 }
 
 TierListMode.prototype.mkcontainer = function(this: TierListMode, ): HTMLElement {
-    return this.win.document.createElement("tierlist-template")
+    return mkel("tierlist-template")
 }
 
 TierListMode.prototype.chwin = function(this: TierListMode, win: Window & typeof globalThis): HTMLElement {
