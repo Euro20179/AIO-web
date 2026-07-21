@@ -1,5 +1,37 @@
 <template id="de-progress">
     <figure style="position: relative; margin: 0;">
+        <style>
+            #entry-progressbar,
+            .entry-progressbar {
+                justify-self: center;
+                margin: 0;
+
+                width: 100%;
+            }
+
+            #entry-progressbar:where(:not([max]), [value="0"]) {
+                display: none;
+
+                /*this figcaption displays the x/y for how far along the user is*/
+                &~figcaption {
+                    display: none;
+                }
+            }
+
+            #entry-progressbar-position-label,
+            .entry-progressbar-position-label {
+                position: absolute;
+                right: 0;
+
+                line-height: 0;
+                margin-top: -1cap;
+                text-align: right;
+                margin-right: calc(1ch);
+
+                color: var(--main);
+            }
+        </style>
+
         <progress class="entry-progressbar"
                 toggle-hint="entry-progress-hint"
                 entry-action="setprogress"

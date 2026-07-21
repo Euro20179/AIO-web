@@ -1,5 +1,7 @@
 function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment) {
     const entry = document.createElement("gallery-entry")
+    parent.appendChild(entry)
+
     const root = entry.shadowRoot
     if (!root) {
         alert("Could not add gallery item, gallery-entry has no shadowroot")
@@ -16,8 +18,61 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
         thumbImg.src = thumb
     }
 
-    parent.appendChild(entry)
+
+    const pbars = dom_getel("#progress-bars", null, root)
+    if(pbars) {
+        const user = findUserEntryById(item.ItemId)
+        const parts = items_getProgressParts(user.CurrentPosition)
+        let lengthInNumber = items_getLength(JSON.parse(meta["MediaDependant"] || "{}"))[0] || 0
+        for (let part of parts) {
+            if (!part) continue
+            let label = part[1]
+
+            let container = document.createElement("de-progress")
+
+            pbars.append(container)
+
+            let max =
+                //if there's no label, and no total is given
+                //use the mediaDependant determined length
+                !label && part[3] === undefined
+                    ? (lengthInNumber || 0)
+                    : (part[3] || 0) //part[3] could be empty string
+
+            let p = dom_getel(
+                "progress",
+                currentWindow().HTMLProgressElement,
+                container
+            )
+            if(!p) break
+            p.setAttribute("data-status", user.Status)
+            p.max = parseFloat(String(max))
+            p.value = parseFloat(part[2])
+
+            let c = dom_getel(
+                ".entry-progressbar-position-label",
+                null,
+                container
+            )
+            if(!c) continue
+            const node = document.createTextNode(`${label || ""}${part[2]}`)
+            if (max) {
+                node.appendData(`/${max}`)
+            }
+            c.append(node)
+
+            const upHint = dom_getel(
+                "#user-progress-hint",
+                null,
+                c
+            )
+            if(!upHint) continue
+            upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(String(max)) * 1000) / 10) || 0}%`
+        }
+    }
+
     updateDeclarativeDSL({
+        setprogress: () => {},
         openitem: target => {
             const root = target.getRootNode() as ShadowRoot
             const id = BigInt(root.host.getAttribute("data-item-id") || 0)
@@ -79,7 +134,6 @@ GalleryMode.prototype.refresh = function(this: GalleryMode, id: bigint) {
     const entry = items_getEntry(id)
     let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
     if (!el) {
-        console.error("Failed to refresh gallery item")
         return
     }
     const frag = new DocumentFragment()

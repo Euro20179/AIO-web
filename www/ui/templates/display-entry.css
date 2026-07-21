@@ -380,10 +380,6 @@
         }
     }
 
-    :host(display-entry:not([data-user-status*="Viewing"])) #entry-progressbar-position-label {
-        display: none;
-    }
-
     #multiple-progress {
         display: flex;
         gap: var(--small-gap);
@@ -401,35 +397,6 @@
         flex-grow: 1;
     }
 
-    #entry-progressbar,
-    .entry-progressbar {
-        justify-self: center;
-        margin: 0;
-
-        width: 100%;
-    }
-
-    #entry-progressbar-position-label,
-    .entry-progressbar-position-label {
-        position: absolute;
-        right: 0;
-
-        line-height: 0;
-        margin-top: -1cap;
-        text-align: right;
-        margin-right: calc(1ch);
-
-        color: var(--main);
-    }
-
-    #entry-progressbar:where(:not([max]), [value="0"]) {
-        display: none;
-
-        /*this figcaption displays the x/y for how far along the user is*/
-        &~figcaption {
-            display: none;
-        }
-    }
 
     #identify-items:popover-open {
         display: flex;

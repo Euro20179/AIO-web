@@ -1790,10 +1790,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
         //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
         //"," is optional
-        const parts =
-            user.CurrentPosition.split(/,\s*|\s+/)
-                .map(v => v.trim())
-                .map(v => v.match(/(\D*)(\d+(?:\.\d+)?)(?:\/(\d+))?/))
+        const parts = items_getProgressParts(user.CurrentPosition)
 
         for (let part of parts) {
             if (!part) continue

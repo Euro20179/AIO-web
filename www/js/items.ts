@@ -1997,3 +1997,10 @@ function items_getLength(mediaData: Record<string, string>): [number, string] {
     }
     return [NaN, "INVALID"]
 }
+
+function items_getProgressParts(currentPosition: string): (RegExpMatchArray | null)[] {
+    return currentPosition.split(/,\s*|\s+/)
+        .map(v => v.trim())
+        .map(v => v.match(/(\D*)(\d+(?:\.\d+)?)(?:\/(\d+))?/))
+
+}
