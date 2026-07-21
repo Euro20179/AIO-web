@@ -2928,7 +2928,7 @@ const clearItems = clearUI
 * @param {HTMLTableElement} objectTbl
 * @param {string} [clear='tr:not(:first-child)'] a query selector of which element children to clear
 */
-function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear: string = 'tr:not(:first-child)') {
+function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear?: string = 'tr:not(:first-child)', skip: string[] = []) {
 
     if (clear) {
         for (let el of objectTbl.querySelectorAll(clear)) {
@@ -2937,6 +2937,8 @@ function updateObjectTblUI(obj: object, objectTbl: HTMLTableElement, clear: stri
     }
 
     for (let key in obj) {
+        if(skip.includes(key)) continue
+
         let val = obj[key as keyof typeof obj] as any
         //if the key alr is in the table, and we aren't clearing, then skip
         //otherwise the key will get duplicated
