@@ -1185,6 +1185,14 @@ function items_formatToSymbol(format: number): string {
         15: "🖼️",
         16: "🚫",
         17: "🎞",
+        18: "W",
+        19: "DS",
+        20: "PS1",
+        21: "PS2",
+        22: "PS3",
+        23: "PS4",
+        24: "PS5",
+        25: "S2",
     }[format] + out
 }
 
