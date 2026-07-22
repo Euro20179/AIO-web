@@ -2835,8 +2835,9 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
 
     form.elements['metadata'].value = api_serializeEntry(metadata)
     form.elements['title'].value = metadata.Title
+    let dep = {}
     if (metadata.MediaDependant != '{}') {
-        const dep = JSON.parse(metadata.MediaDependant)
+        dep = JSON.parse(metadata.MediaDependant)
         const ty = Object.keys(dep)[0].split('-')[0]
         form.elements['type'].value = ty
     }
@@ -2845,6 +2846,26 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
         form.elements['is-anime-art'].checked = true
     } else {
         form.elements['is-anime-art'].checked = false
+    }
+
+    if (metadata.Provider.startsWith("gtdb")) {
+        form.elements["type"].value = "Game"
+        if(dep["Game-console"]) {
+            switch(dep["Game-console"].toLowerCase()) {
+                case "wii":
+                    form.elements["format"].value = 18
+                    break
+                case "gamecube":
+                    form.elements["format"].value = 27
+                    break
+                case "switch":
+                    form.elements["format"].value = 10
+                    break
+                case "ds":
+                    form.elements["format"].value = 19
+                    break
+            }
+        }
     }
 }
 
