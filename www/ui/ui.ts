@@ -2809,7 +2809,7 @@ async function titleIdentificationUI(provider: string, search: string): Promise<
             let text = await res.text()
             let [_, rest] = text.split("\x02")
             let items = rest.split("\n").filter(Boolean).map(v => JSON.parse(v))
-            obj = Object.fromEntries(items.map(v => [String(v.ItemId), v]))
+            obj = Object.fromEntries(items.map(v => [v.ProviderID || String(v.ItemId), v]))
             return fillItemListingUI(obj)
         },
     })
