@@ -1747,7 +1747,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         for (let key in mediaDependant) {
             let title = key.split("-").slice(1).join("-")
             title = title[0].toLocaleUpperCase() + title.slice(1)
-            const val = mediaDependant[key]
+            let val = mediaDependant[key]
+            if (!isNaN(Number(val))) {
+                val = Number(val).toLocaleString()
+            }
             modifiedKeys[title] = val
         }
         mkGenericTbl(mediaInfoTbl, modifiedKeys)
