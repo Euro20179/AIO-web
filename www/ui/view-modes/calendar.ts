@@ -300,7 +300,7 @@ CalendarMode.prototype.mkcontainers = function(this: CalendarMode, into: HTMLEle
     return { container: c, output: dom_getelorthrow(":first-child", null, c) }
 }
 CalendarMode.prototype.mkcontainer = function(this: CalendarMode, ) {
-    return mkel("calendar-template")
+    return document.createElement("calendar-template")
 }
 
 CalendarMode.prototype.chwin = function(this: CalendarMode, win: Window & typeof globalThis) {

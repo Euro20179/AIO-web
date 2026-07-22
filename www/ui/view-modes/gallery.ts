@@ -28,7 +28,7 @@ function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragme
             if (!part) continue
             let label = part[1]
 
-            let container = mkel("de-progress")
+            let container = document.createElement("de-progress")
 
             pbars.append(container)
 

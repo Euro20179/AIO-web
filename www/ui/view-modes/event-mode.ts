@@ -162,7 +162,7 @@ EventMode.prototype.mkcontainers = function(this: EventMode, into: HTMLElement |
 }
 
 EventMode.prototype.mkcontainer = function(this: EventMode, ) {
-    return mkel("event-template")
+    return document.createElement("event-template")
 }
 
 EventMode.prototype.chwin = function(this: EventMode, win: Window & typeof globalThis) {

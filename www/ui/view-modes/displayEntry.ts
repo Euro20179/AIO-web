@@ -1416,7 +1416,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         el.querySelectorAll("div").forEach(div => div.remove())
         let i = 0
         for (let r of items_getRecommendedBy(item.ItemId)) {
-            const recommender = mkel("de-recommender")
+            const recommender = document.createElement("de-recommender")
             el.append(recommender)
 
             const b = dom_getel('[role="button"]', this.win.HTMLElement, recommender)
@@ -1796,7 +1796,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             if (!part) continue
             let label = part[1]
 
-            let container = mkel("de-progress")
+            let container = document.createElement("de-progress")
 
             multipleProgressEl.append(container)
 

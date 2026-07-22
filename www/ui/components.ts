@@ -310,25 +310,18 @@ function _registerElement(name: string) {
                 return
             }
 
-            if(this.childNodes.length) return
-
             let content = this.templ.content.cloneNode(true)
-
-            this.append(content)
+            //this should be replaceContent because
+            //any time this element moves or smth
+            //this callback gets called again, and if we use append()
+            //it will append twice
+            this.replaceChildren(content)
 
             fuckingInsaneFirefoxHackToMakeSelectAppearNormally(this)
 
             this.style.display ||= "contents"
         }
     })
-}
-
-function mkel(name: string) {
-    const el = document.createElement(name)
-    const templ = dom_getelorthrow(`#${name}`, HTMLTemplateElement)
-    el.replaceChildren(templ.content.cloneNode(true))
-    el.style.display ||= "contents"
-    return el
 }
 
 const component_templates = [

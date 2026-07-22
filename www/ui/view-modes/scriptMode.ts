@@ -30,7 +30,7 @@ ScriptMode.prototype.mkcontainers = function(this: ScriptMode, into: HTMLElement
 }
 
 ScriptMode.prototype.mkcontainer = function(this: ScriptMode, ) {
-    return mkel("script-template")
+    return document.createElement("script-template")
 }
 
 ScriptMode.prototype.refresh = function(this: ScriptMode, id: bigint) {

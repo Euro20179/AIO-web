@@ -593,7 +593,7 @@ GraphMode.prototype.mkcontainers = function(this: GraphMode, into: HTMLElement |
 }
 
 GraphMode.prototype.mkcontainer = function(this: GraphMode, ) {
-    return mkel("graph-template")
+    return document.createElement("graph-template")
 }
 
 GraphMode.prototype.chwin = function(this: GraphMode, win: Window & typeof globalThis) {
