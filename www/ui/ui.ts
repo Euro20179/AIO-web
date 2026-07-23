@@ -247,6 +247,24 @@ function startupUI({
     }
 }
 
+function isCatalogModeUI() {
+    const sidebar = dom_getelorthrow("#sidebar", HTMLElement)
+    return sidebar.classList.contains("catalog-mode")
+}
+
+function openCatalogModeUI() {
+    const sidebar = dom_getelorthrow("#sidebar", HTMLElement)
+    const viewingArea = dom_getelorthrow("#viewing-area", HTMLElement)
+    sidebar.classList.add("catalog-mode")
+    viewingArea.classList.add("catalog-mode")
+}
+function closeCatalogModeUI() {
+    const sidebar = dom_getelorthrow("#sidebar", HTMLElement)
+    const viewingArea = dom_getelorthrow("#viewing-area", HTMLElement)
+    sidebar.classList.remove("catalog-mode")
+    viewingArea.classList.remove("catalog-mode")
+}
+
 function generateTransactionElementsUI(itemid: bigint) {
     let children = []
     for (let transaction of items_getEntry(itemid).transactions) {
@@ -825,6 +843,19 @@ registerCTRLShortcutUI("S", e => {
 
 registerCTRLShortcutUI("B", e => {
     toggleUI("sidebar")
+    e.preventDefault()
+})
+
+registerCTRLShortcutUI("V", e => {
+    //we dont want dual-window mode to be toggleable if we are in display mode
+    if (components.mainUI?.classList.contains("display-mode")) {
+        return
+    }
+    if (isCatalogModeUI()) {
+        closeCatalogModeUI()
+    } else {
+        openCatalogModeUI()
+    }
     e.preventDefault()
 })
 

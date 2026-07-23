@@ -176,6 +176,13 @@ function dotests(category: string) {
         }],
     ])
 
+    mktestgroup("catalog", [
+        ["isopen", r(isCatalogModeUI), eq, l(false)],
+        ["openIt", r(openCatalogModeUI), eq, l(undefined)],
+        ["isopen", r(isCatalogModeUI), eq, l(true)],
+        ["closeIt", r(closeCatalogModeUI), eq, l(undefined)],
+    ])
+
     mktestgroup("notes", [
         ["simple note", r(parseNotes, "yes"), eq, l("yes")],
         ["unclosed note", r(parseNotes, '[b]hi'), eq, l("[b]hi")],

@@ -293,6 +293,10 @@
         container-type: size;
         grid-area: main;
 
+        &.catalog-mode {
+            display: none;
+        }
+
         @container body (width < 800px) {
             grid-column: 1 / -1;
             overflow: auto auto;
@@ -381,9 +385,15 @@
         grid-area: sidebar;
         height: 100%;
         width: 200px;
+
         resize: horizontal;
 
         container: sidebar / inline-size;
+
+        &.catalog-mode {
+            width: 100cqi;
+            grid-column: 1 / -1;
+        }
 
         @container body (width < 800px) {
             width: 100%;
