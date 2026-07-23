@@ -346,24 +346,24 @@ function generateTransactionElementsUI(itemid: bigint) {
 * @returns {HTMLDialogElement | null}
 */
 function openTransactionEditorUI(transaction: TransactionEntry): HTMLDialogElement | null {
-    const modal = openModalUI("edit-transaction-dialog")
+    const modal = openModalUI("edit-transaction-dialog", undefined, "edit-transaction")
 
-    const id = dom_getel("input[name='id']", currentWindow().HTMLInputElement)
+    const id = dom_getel("input[name='id']", currentWindow().HTMLInputElement, modal)
     if (id) {
         id.value = String(transaction.TransactionId)
     }
 
-    const iid = dom_getel("input[name='itemId']", currentWindow().HTMLInputElement)
+    const iid = dom_getel("input[name='itemId']", currentWindow().HTMLInputElement, modal)
     if (iid) {
         iid.value = String(transaction.ItemId)
     }
 
-    const p = dom_getel("input[name='price']", currentWindow().HTMLInputElement)
+    const p = dom_getel("input[name='price']", currentWindow().HTMLInputElement, modal)
     if (p) {
         p.value = String(transaction.Price)
     }
 
-    const c = dom_getel("input[name='currency']", currentWindow().HTMLInputElement)
+    const c = dom_getel("input[name='currency']", currentWindow().HTMLInputElement, modal)
     if (c) {
         c.value = transaction.Currency
     }
@@ -373,8 +373,9 @@ function openTransactionEditorUI(transaction: TransactionEntry): HTMLDialogEleme
 
 async function editTransactionUI(form: HTMLFormElement) {
     const data = new FormData(form)
+    console.log(data)
 
-    const res = await api_editTransaction(Number(data.get("id")) as number, Object.fromEntries(data.entries()), getUidUI())
+    const res = await api_editTransaction(Number(data.get("id")) as number, Object.fromEntries(data.entries()), getUserUID())
 
     if (data.has("itemId")) {
         const itemId = BigInt(String(data.get("itemId")))
@@ -1086,15 +1087,26 @@ function resetStatsUI() {
 /**
     * Opens a modal by id
 * @param {string} modalName - the id of the modal to open
-* @param root - the elemnt which is the parent of the modal to find
+* @param {{querySelector(query: string): HTMLElement | null}} [root] - the elemnt which is the parent of the modal to find
 */
 function openModalUI(
     modalName: string,
     root?: {
         querySelector(query: string): HTMLElement | null
-    }
+    },
+    pullFromShadowRootTemplate?: string
 ): HTMLDialogElement | null {
-    const modal = dom_getel(`#${modalName}`, HTMLDialogElement, root)
+    let modal
+    if(pullFromShadowRootTemplate) {
+        const root = currentDocument().createElement(pullFromShadowRootTemplate).shadowRoot
+        if(!root) {
+            throw new Error(`Template: ${pullFromShadowRootTemplate} does not have a shadowroot`)
+        }
+        currentDocument().body.append(root.host)
+        modal = dom_getel(`#${modalName}`, currentWindow().HTMLDialogElement, root)
+        modal?.addEventListener("close", () => root.host.remove())
+    }
+    else modal = dom_getel(`#${modalName}`, currentWindow().HTMLDialogElement, root)
     modal?.showModal()
     return modal
 }
@@ -3034,7 +3046,7 @@ function getObjFromObjEditorUI(tbl: HTMLTableElement, skip: string[] = []): Reco
  * Given an item id make <de-progress> bars for it
  * @param {bigint} forItem
  */
-function mkDeProgressUI(forItem: bigint): HTMLElement[] {
+function mkDeProgressUI(forItem: bigint, actions?: Record<string, (target: HTMLElement, event: Event) => any>): HTMLElement[] {
     const meta = findMetadataById(forItem)
     let user = findUserEntryById(forItem)
 
@@ -3108,7 +3120,11 @@ function mkDeProgressUI(forItem: bigint): HTMLElement[] {
         upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(String(max)) * 1000) / 10) || 0}%`
 
         updateDeclarativeDSL(
-            {},
+            {
+                setprogress: () => {
+                    setProgressUI(forItem)
+                }
+            },
             settings_get(getUserUID(), "enable_unsafe"),
             findInfoEntryById(forItem),
             user,
@@ -3118,6 +3134,22 @@ function mkDeProgressUI(forItem: bigint): HTMLElement[] {
     }
 
     return bars
+}
+
+/**
+ * Given an item id, allow the user to set the CurrentPosition of it
+ * @param {bigint} forItem
+*/
+async function setProgressUI(forItem: bigint) {
+    const user = findUserEntryById(forItem) as UserEntry
+    let newEp = await promptUI("Current position", undefined, undefined, user.CurrentPosition)
+    if (!newEp) return
+
+    await api_setPos(forItem, String(newEp))
+    user.CurrentPosition = String(newEp)
+    updateInfo2({
+        [String(forItem)]: { user }
+    })
 }
 
 /**

@@ -96,8 +96,6 @@
         <close-button></close-button>
     </dialog>
 
-    <edit-transaction></edit-transaction>
-
     <confirm-dialog></confirm-dialog>
     <new-event-dialog></new-event-dialog>
     <login-dialog></login-dialog>

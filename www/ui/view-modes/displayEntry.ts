@@ -818,15 +818,7 @@ function _mkde_actions() {// {{{
          * Asks the user to set the current position of the current item
          */
         setprogress: async function(item, _root) {
-            const user = findUserEntryById(item.ItemId) as UserEntry
-            let newEp = await promptUI("Current position", undefined, undefined, user.CurrentPosition)
-            if (!newEp) return
-
-            await api_setPos(item.ItemId, String(newEp))
-            user.CurrentPosition = String(newEp)
-            updateInfo2({
-                [String(item.ItemId)]: { user }
-            })
+            await setProgressUI(item.ItemId)
         },
 
         /**
@@ -1779,7 +1771,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#multiple-progress", multipleProgressEl => {
         multipleProgressEl.innerHTML = ""
 
-        multipleProgressEl.replaceChildren(...mkDeProgressUI(item.ItemId, this.win))
+        multipleProgressEl.replaceChildren(...mkDeProgressUI(item.ItemId))
     })
 
     //relation elements

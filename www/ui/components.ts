@@ -119,7 +119,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
         for (let i = 0; i < requested_acitons.length; i++) {
             let actionFn = actions[requested_acitons[i] as keyof typeof actions];
             if (!actionFn) {
-                console.error(`Failed to register event: ${actions[i]}`)
+                console.warn(`Failed to register event: ${actions[i]}`)
                 continue
             }
             //@ts-ignore
@@ -365,7 +365,6 @@ const component_templates = [
     "color-scheme-selector",
     "close-button",
     "item-identification-form-dialog",
-    "edit-transaction"
 ]
 
 for (const name of component_templates) {
@@ -376,7 +375,8 @@ for(let name of [
     "prompt-dialog",
     "gallery-entry",
     "item-card",
-    "de-progress"
+    "de-progress",
+    "edit-transaction"
 ]) {
     _registerShadowElement(name)
 }
