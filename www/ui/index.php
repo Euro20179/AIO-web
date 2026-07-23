@@ -96,8 +96,6 @@
         <close-button></close-button>
     </dialog>
 
-    <new-entry-dialog></new-entry-dialog>
-
     <dialog id="script-select">
         <form action="javascript:runFirstUserScriptUI()">
             <input oninput="filterUserScriptsUI(this.value)" placeholder="Filter" />
@@ -110,7 +108,7 @@
 
                 <div class="flex">
                     <button command="show-modal" commandfor="script-select">☰</button>
-                    <button command="show-modal" commandfor="new-entry" type="button" id="new-entry-button">➕︎</button>
+                    <button onclick="newEntryDialogUI()" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">

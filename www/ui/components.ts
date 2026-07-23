@@ -356,7 +356,6 @@ const component_templates = [
     "script-template",
     "graph-template",
 
-    "new-entry-dialog",
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
@@ -380,6 +379,7 @@ for(let name of [
     "edit-transaction",
     "new-event-dialog",
     "item-identification-form-dialog",
+    "new-entry-dialog",
 
     /* general purpose item components */
     "item-card",

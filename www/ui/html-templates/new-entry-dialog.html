@@ -1,164 +1,241 @@
 <template id="new-entry-dialog">
+    <link rel="stylesheet" href="/css/colors.css">
+    <link rel="stylesheet" href="/css/general.css">
 
-<dialog id="new-entry" popover>
-    <h3>New Entry</h3>
+    <style>
+        #new-entry h3 {
+            text-align: center;
+        }
 
-    <form id="new-item-form"
-        action="javascript:void(0)"
-        onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
-    >
+        #new-item-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--small-gap);
 
-        <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
-            <button onclick="
-                    let g = genericMetadata(0, getUidUI());
-                    g.Datapoints = '{}';
-                    updateObjectTblUI(g, this.parentElement.querySelector('table'), '*')" type="button">Generate generic</button>
-            <button class="delete" onclick="updateObjectTblUI({}, this.parentElement.querySelector('table'), '*')" type="button">✗</button>
-            <button type="button" class="float right" onclick="
-                let obj = getObjFromObjEditorUI(this.nextElementSibling)
-                if(!Object.keys(obj).length) dom_resetform(this.form)
-                else {
-                    fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
-                    alert('metadata applied')
+            button[data-button-type="search"]::after {
+                content: "🔍︎"
+            }
+
+            &:has([name="metadata"][value^="{"]) button[data-button-type="search"] {
+                color: var(--good);
+                &::after {
+                    content: "✓";
                 }
-            ">💾︎</button>
-            <table style="min-width: 300px">
-            </table>
+            }
 
-            <p>Save must be clicked in order for metadata to apply</p>
+            div:has([name="title"]) {
+                display: grid;
+                grid-template-areas:
+                    "search title title"
+                    "meta-editor native_title native_title"
+                    "relations status format"
+                    "type type art-and-digital";
+                grid-template-rows: repeat(4, 1fr);
+                grid-template-columns: min-content 1fr min-content;
+                gap: var(--very-small-gap);
+                width: 100%;
 
-            <close-button></close-button>
-        </dialog>
+                [commandfor="new-item-relations-dialog"] {
+                    grid-area: relations;
+                }
 
-        <input type="hidden" name="metadata">
+                [commandfor="new-entry-edit-metadata-dialog"] {
+                    grid-area: meta-editor;
+                }
 
-        <dialog id="new-item-art-styles-dialog">
-            <fieldset class="flex column m-0" style="gap: 2ch; width: 100%; overflow:auto">
-                <legend>Art Style</legend>
-                <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
-                    Anime</label>
-                <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
-                    Cartoon</label>
-                <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
-                    Hand drawn</label>
-                <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
-                    Digitally drawn </label>
-                <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-                <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
-                    action</label>
-                <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
-                    2d</label>
-                <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
-                    3d</label>
-            </fieldset>
+                [name="title"] {
+                    grid-area: title;
+                }
 
-            <close-button></close-button>
-        </dialog>
+                [data-button-type="search"] {
+                    grid-area: search;
+                }
 
-        <dialog id="new-item-relations-dialog">
-            <fieldset class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
-                <legend>Relations</legend>
-                <label class="flex column grow x-small-gap">
-                    <button type="button"
-                        onclick="fillItemListingWithSearch(`3 type = 'Library'`)
-                        .then((comp) => replaceValueWithSelectedItemIdUI(this.form.elements['libraryId'], { container: comp }))"
-                    >
-                        Library
-                    </button>
-                        <input
-                            name="libraryId"
-                            value="0"
-                            type="number"
-                            title="library"
+                [name="user-status"] {
+                    grid-area: status;
+                }
+
+                [name="native-title"] {
+                    grid-area: native_title;
+                }
+
+                [name="type"] {
+                    grid-area: type;
+                }
+
+                [name="format"] {
+                    grid-area: format;
+                }
+
+                div:has(label > [name="is-digital"]) {
+                    display: grid;
+                    grid-template-rows: subgrid;
+                    grid-template-columns: repeat(2, 1fr);
+                    grid-area: art-and-digital;
+                }
+            }
+        }
+    </style>
+
+    <dialog id="new-entry">
+        <h3>New Entry</h3>
+
+        <form id="new-item-form"
+            method="dialog"
+            onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
+        >
+
+            <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
+                <button onclick="
+                        let g = genericMetadata(0, getUidUI());
+                        g.Datapoints = '{}';
+                        updateObjectTblUI(g, this.parentElement.querySelector('table'), '*')" type="button">Generate generic</button>
+                <button class="delete" onclick="updateObjectTblUI({}, this.parentElement.querySelector('table'), '*')" type="button">✗</button>
+                <button type="button" class="float right" onclick="
+                    let obj = getObjFromObjEditorUI(this.nextElementSibling)
+                    if(!Object.keys(obj).length) dom_resetform(this.form)
+                    else {
+                        fillNewItemFormFromMetadataUI(getObjFromObjEditorUI(this.nextElementSibling))
+                        alert('metadata applied')
+                    }
+                ">💾︎</button>
+                <table style="min-width: 300px">
+                </table>
+
+                <p>Save must be clicked in order for metadata to apply</p>
+
+                <close-button></close-button>
+            </dialog>
+
+            <input type="hidden" name="metadata">
+
+            <dialog id="new-item-art-styles-dialog">
+                <fieldset class="flex column m-0" style="gap: 2ch; width: 100%; overflow:auto">
+                    <legend>Art Style</legend>
+                    <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
+                        Anime</label>
+                    <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
+                        Cartoon</label>
+                    <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
+                        Hand drawn</label>
+                    <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
+                        Digitally drawn </label>
+                    <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
+                    <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
+                        action</label>
+                    <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
+                        2d</label>
+                    <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
+                        3d</label>
+                </fieldset>
+
+                <close-button></close-button>
+            </dialog>
+
+            <dialog id="new-item-relations-dialog">
+                <fieldset class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
+                    <legend>Relations</legend>
+                    <label class="flex column grow x-small-gap">
+                        <button type="button"
+                            onclick="fillItemListingWithSearch(`3 type = 'Library'`)
+                            .then((comp) => replaceValueWithSelectedItemIdUI(this.form.elements['libraryId'], { container: comp }))"
                         >
-                </label>
-                <label class="flex column grow x-small-gap">
-                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['parentId'])">Parent</button>
-                    <input type="number" value="0" title="parent id" name="parentId">
-                </label>
-                <label class="flex column grow x-small-gap">
-                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['copyOf'])">Copy Of</button>
-                    <input type="number" value="0" title="copy of id" name="copyOf"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </label>
-                <label class="flex column grow x-small-gap">
-                    <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['requires'])">Requires</button>
-                    <input type="number" value="0" title="prerequiset for this show" name="requires"
-                        onclick="replaceValueWithSelectedItemIdUI(this)">
-                </label>
-            </fieldset>
+                            Library
+                        </button>
+                            <input
+                                name="libraryId"
+                                value="0"
+                                type="number"
+                                title="library"
+                            >
+                    </label>
+                    <label class="flex column grow x-small-gap">
+                        <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['parentId'])">Parent</button>
+                        <input type="number" value="0" title="parent id" name="parentId">
+                    </label>
+                    <label class="flex column grow x-small-gap">
+                        <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['copyOf'])">Copy Of</button>
+                        <input type="number" value="0" title="copy of id" name="copyOf"
+                            onclick="replaceValueWithSelectedItemIdUI(this)">
+                    </label>
+                    <label class="flex column grow x-small-gap">
+                        <button type="button" onclick="replaceValueWithSelectedItemIdUI(this.form.elements['requires'])">Requires</button>
+                        <input type="number" value="0" title="prerequiset for this show" name="requires"
+                            onclick="replaceValueWithSelectedItemIdUI(this)">
+                    </label>
+                </fieldset>
 
-            <close-button></close-button>
-        </dialog>
-
-        <div>
-            <button
-                type="button"
-                data-button-type="search"
-                onclick="itemIdentificationUI().then(res => {
-                    fillNewItemFormFromMetadataUI(res)
-                })">
-            </button>
-
-
-            <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
-
-            <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
-
-            <input type="text" placeholder="native title" name="native-title">
-
-            <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
-
-            <select name="user-status" style="flex-grow: 1;">
-                <option value="">Status</option>
-                <option value="Planned">Planned</option>
-                <option value="Viewing">Viewing</option>
-                <option value="Finished">Finished</option>
-                <option value="Dropped">Dropped</option>
-                <option value="Paused">Paused</option>
-                <option value="ReViewing">Re viewing</option>
-                <option value="Waiting">Waiting</option>
-            </select>
-
-
-            <select name="type" title="The type of media" required style="flex-grow: 1;">
-                <option value="">Type</option>
-            </select>
-
-            <select name="format" required title="Format type"></select>
+                <close-button></close-button>
+            </dialog>
 
             <div>
-                <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
-                    digital
-                    <input type="checkbox" id='is-digital'
-                        style="vertical-align: middle;" name="is-digital"
-                        title="Whether or not the item is a digitized/digital version of the format"></label>
+                <button
+                    type="button"
+                    data-button-type="search"
+                    onclick="itemIdentificationUI().then(res => {
+                        fillNewItemFormFromMetadataUI(res)
+                    })">
+                </button>
 
-                <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
+
+                <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
+
+                <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
+
+                <input type="text" placeholder="native title" name="native-title">
+
+                <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
+
+                <select name="user-status" style="flex-grow: 1;">
+                    <option value="">Status</option>
+                    <option value="Planned">Planned</option>
+                    <option value="Viewing">Viewing</option>
+                    <option value="Finished">Finished</option>
+                    <option value="Dropped">Dropped</option>
+                    <option value="Paused">Paused</option>
+                    <option value="ReViewing">Re viewing</option>
+                    <option value="Waiting">Waiting</option>
+                </select>
+
+
+                <select name="type" title="The type of media" required style="flex-grow: 1;">
+                    <option value="">Type</option>
+                </select>
+
+                <select name="format" required title="Format type"></select>
+
+                <div>
+                    <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
+                        digital
+                        <input type="checkbox" id='is-digital'
+                            style="vertical-align: middle;" name="is-digital"
+                            title="Whether or not the item is a digitized/digital version of the format"></label>
+
+                    <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
+                </div>
             </div>
-        </div>
 
 
-        <div class="flex x-small-gap">
-            <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
-            <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
-        </div>
-        <div class="flex wrap x-small-gap" style="width: 100%">
-            <input type="text" placeholder="recommeded by (',' separated)" list="recommended-by" name="recommended-by" value="">
-            <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;" list="tags-dl">
-        </div>
+            <div class="flex x-small-gap">
+                <input type="number" min="0" step="0.01" name="price" placeholder="price" style="field-sizing: content; min-width: 8ch; flex-grow: 1;">
+                <input type="text" name="currency" placeholder="currency" value="USD" style="field-sizing: content; min-width: 8ch;">
+            </div>
+            <div class="flex wrap x-small-gap" style="width: 100%">
+                <input type="text" placeholder="recommeded by (',' separated)" list="recommended-by" name="recommended-by" value="">
+                <input type="text" placeholder="tags (',' separated)" name="tags" value="" style="flex-grow: 1;" list="tags-dl">
+            </div>
 
-        <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
+            <input type="text" placeholder="item location (eg D:\Movies\bolt, eg: bookshelf)" name="location" style="flex-grow: 1;">
 
-        <div class="flex row wrap small-gap" style="justify-content: space-around">
-            <input type="button" onclick="dom_resetform(this.form)" value="reset" class="bad">
-            <input
-                type="submit"
-                value="CREATE!"
-                class="good" style="flex-grow: 1;">
-        </div>
-    </form>
+            <div class="flex row wrap small-gap" style="justify-content: space-around">
+                <input type="button" onclick="dom_resetform(this.form)" value="reset" class="bad">
+                <input
+                    type="submit"
+                    value="CREATE!"
+                    class="good" style="flex-grow: 1;">
+            </div>
+        </form>
 
-    <close-button></close-button>
-</dialog>
+        <close-button></close-button>
+    </dialog>
 </template>

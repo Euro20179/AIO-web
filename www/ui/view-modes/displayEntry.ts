@@ -96,7 +96,7 @@ function _mkde_actions() {// {{{
             * Creates a buy/sell transaction.
         */
         transact: function(item, _root, target) {
-            const modal = openModalUI("transactions-log")
+            const modal = openModalUI("transactions-log", undefined, undefined, this.win)
 
             if(!modal) return
 
@@ -283,11 +283,14 @@ function _mkde_actions() {// {{{
          * with requires filled in as the current item
          */
         newrequires: function(item ){
-            const newEntryDialog = dom_getelorthrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
+            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
+            if(!newEntryDialog) {
+                console.error("failed to create the new-entry dialog")
+                return
+            }
             const requiresIdEl = dom_getelorthrow(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
 
             requiresIdEl.value = String(item.ItemId)
-            newEntryDialog.showModal()
         },
 
         /**

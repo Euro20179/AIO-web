@@ -27,14 +27,12 @@ type StartupUIComponents = {
     statsOutput: HTMLElement,
     searchBox: HTMLInputElement,
     itemFilter: HTMLInputElement,
-    newEntryLibrarySelector: HTMLInputElement,
     librarySelector: HTMLButtonElement,
     userSelector: HTMLSelectElement,
     sortBySelector: HTMLSelectElement,
     errorOut: HTMLElement,
     searchForm: HTMLFormElement,
     recommenders: HTMLDataListElement,
-    newItemForm: HTMLFormElement,
     sidebarItems: HTMLElement,
     scriptSelect: HTMLDialogElement,
 
@@ -64,7 +62,6 @@ function startupUI({
     searchBox: _searchBox,
     sortBySelector,
     statsOutput,
-    newItemForm,
     sidebarItems,
 }: typeof components) {
 
@@ -83,10 +80,6 @@ function startupUI({
 
     if (!(components["viewToggle"] instanceof HTMLSelectElement)) {
         throw new Error("view toggle must be a <select>")
-    }
-
-    if (!(components["newEntryLibrarySelector"] instanceof HTMLInputElement)) {
-        throw new Error("new entry's library selector must be a button element")
     }
 
     if (!(components["librarySelector"] instanceof HTMLButtonElement)) {
@@ -172,22 +165,6 @@ function startupUI({
         sortEntriesUI()
     })
 
-    if (newItemForm) {
-        const title = dom_getelorthrow('[name="title"]', HTMLInputElement, newItemForm)
-        newItemForm.oninput = function(e) {
-            if (e.target instanceof currentWindow().HTMLInputElement
-                && e.target.getAttribute("name") === "location")
-                return
-
-            const location = dom_getelorthrow('[name="location"]', HTMLInputElement, newItemForm)
-            if (typeof defaultSettings.location_generator === 'string') {
-                location.value = defaultSettings.location_generator.replaceAll("{}", title.value)
-            } else if (typeof defaultSettings.location_generator === 'function') {
-                const info = new FormData(newItemForm)
-                location.value = defaultSettings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
-            }
-        }
-    }
 
     components['itemFilter']?.addEventListener("input", function() {
         const filtered = getFilteredResultsUI()
@@ -1088,13 +1065,16 @@ function resetStatsUI() {
     * Opens a modal by id
 * @param {string} modalName - the id of the modal to open
 * @param {{querySelector(query: string): HTMLElement | null}} [root] - the elemnt which is the parent of the modal to find
+* @param {string} pullFromShadowRootTemplate instead of pulling from root, create an element called `pullFromShadowRootTemplate` which is expected to have a dialog in a shadow root. Use that as the dialog to open
+* @param {Window & typeof globalThis} win current window
 */
 function openModalUI(
     modalName: string,
     root?: {
         querySelector(query: string): HTMLElement | null
     },
-    pullFromShadowRootTemplate?: string
+    pullFromShadowRootTemplate?: string,
+    win?: Window & typeof globalThis
 ): HTMLDialogElement | null {
     let modal
     if(pullFromShadowRootTemplate) {
@@ -1103,10 +1083,10 @@ function openModalUI(
             throw new Error(`Template: ${pullFromShadowRootTemplate} does not have a shadowroot`)
         }
         currentDocument().body.append(root.host)
-        modal = dom_getel(`#${modalName}`, currentWindow().HTMLDialogElement, root)
+        modal = dom_getel(`#${modalName}`, (win || currentWindow()).HTMLDialogElement, root)
         modal?.addEventListener("close", () => root.host.remove())
     }
-    else modal = dom_getel(`#${modalName}`, currentWindow().HTMLDialogElement, root)
+    else modal = dom_getel(`#${modalName}`, (win || currentWindow()).HTMLDialogElement, root)
     modal?.showModal()
     return modal
 }
@@ -1780,6 +1760,42 @@ async function newEventUI(form: HTMLFormElement) {
             form.parentElement?.hidePopover()
         })
         .catch(alert)
+}
+
+/**
+ * Opens the new entry dialog
+ */
+function newEntryDialogUI() {
+    const dialog = openModalUI("new-entry", undefined, "new-entry-dialog")
+    if(!dialog) {
+        alert("Failed to create new entry dialog")
+        return
+    }
+
+    let formatSelector = dom_getel('[name="format"]', currentWindow().HTMLSelectElement, dialog)
+    if(formatSelector)
+        fillFormatSelectionUI(formatSelector)
+
+    let typeSelector = dom_getel('[name="type"]', currentWindow().HTMLSelectElement, dialog)
+    if(typeSelector)
+        fillTypeSelectionUI(typeSelector)
+    const title = dom_getelorthrow('[name="title"]', currentWindow().HTMLInputElement, dialog)
+
+    const form = dom_getelorthrow("#new-item-form", currentWindow().HTMLFormElement, dialog)
+
+    form.oninput = function(e) {
+        if (e.target instanceof currentWindow().HTMLInputElement
+            && e.target.getAttribute("name") === "location")
+            return
+
+        const location = dom_getelorthrow('[name="location"]', currentWindow().HTMLInputElement, form)
+        if (typeof defaultSettings.location_generator === 'string') {
+            location.value = defaultSettings.location_generator.replaceAll("{}", title.value)
+        } else if (typeof defaultSettings.location_generator === 'function') {
+            const info = new FormData(form)
+            location.value = defaultSettings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
+        }
+    }
 }
 
 /**
@@ -2846,10 +2862,17 @@ async function titleIdentificationUI(provider: string, search: string): Promise<
 * @param {HTMLFormElement} [form] the new item form to fill out
 */
 function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLFormElement | null) {
-    form ||= components.newItemForm
     if (!form) {
-        console.error("Failed to fill new item form from metadata, no form")
-        return
+        const dialog = dom_getel("new-entry-dialog", currentWindow().HTMLElement)
+        if(!dialog || !dialog.shadowRoot) {
+            console.error("Failed to fill new item form from metadata, no form")
+            return
+        }
+        form = dom_getel("#new-item-form", currentWindow().HTMLFormElement, dialog.shadowRoot)
+        if(!form) {
+            console.error("Failed to fill new item form from metadata, no form")
+            return
+        }
     }
 
     if (!metadata) {

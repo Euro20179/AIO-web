@@ -18,10 +18,6 @@ async function main() {
         viewAllElem: dom_getelorthrow("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
         searchBox: dom_getelorthrow("[name='search-query']", HTMLInputElement),
-        newEntryLibrarySelector: dom_getelorthrow(
-            '[name="libraryId"]',
-            HTMLInputElement,
-        ),
         librarySelector: dom_getelorthrow(
             "#library-selector",
             HTMLButtonElement,
@@ -31,7 +27,6 @@ async function main() {
         errorOut: document.getElementById("error"),
         searchForm: dom_getelorthrow("#sidebar-form", HTMLFormElement),
         recommenders,
-        newItemForm: dom_getelorthrow("#new-item-form", HTMLFormElement),
         sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement),
         mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });
@@ -99,14 +94,6 @@ async function main() {
     //allow the fetch to happen *after* items are rendered on firefox
     //becasue firefox doesn't render the items until after the fetch for some reason
     addEventListener("aio-search-performed", onrender);
-
-    fillFormatSelectionUI(
-        dom_getelorthrow('[name="format"]', HTMLSelectElement),
-    );
-
-    fillTypeSelectionUI(
-        dom_getelorthrow('#new-item-form [name="type"]', HTMLSelectElement),
-    );
 
     await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
 
