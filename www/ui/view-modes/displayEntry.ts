@@ -386,8 +386,9 @@ function _mkde_actions() {// {{{
                 keyE.preventDefault()
                 te.onchange = null
                 confirmUI("Would you like to save notes?").then(e => {
+                    if(!e) return 
                     quitEditing(e === true)
-                }).catch(() => {})
+                })
             }
 
             noteBox.replaceChildren(te)
@@ -1088,7 +1089,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
             }
 
             confirmUI(`Are you sure you want to ${action} this entry`)
-                .then(() => {
+                .then((ok) => {
+                    if(!ok) return
                     return authorizedRequest(`${apiPath}/engagement/${action?.toLowerCase()}-media?id=${user.ItemId}&timezone=${encodeURIComponent(tz)}`)
                 })
                 .then(res => {
@@ -1123,7 +1125,8 @@ function hookActionButtons(shadowRoot: ShadowRoot, itemId: bigint) {
         btn.addEventListener("click", async (_) => {
             const item = findInfoEntryById(itemId) as InfoEntry
             confirmUI(`Are you sure you want to ${action} this entry`)
-                .then(async () => {
+                .then(async (ok) => {
+                    if(!ok) return
                     let queryParams = `?id=${item.ItemId}`
                     if (action === "Finish") {
                         let rating = await promptNumber("Rating", "Not a number\nRating")
@@ -1319,7 +1322,8 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
             }
 
             confirmUI(confirmationText[relationType])
-                .then(() => {
+                .then((ok) => {
+                    if(!ok) return
                     const [apiFunc, itemsFunc] = ({
                         "copies": [api_delCopy, items_removeCopy],
                         "descendants": [api_delChild, items_removeChild],
@@ -2198,7 +2202,8 @@ async function deleteEventByEventId(eventId: number) {
     const uid = getUidUI()
     return await new Promise(final => {
         confirmUI("Are you sure you want to delete this event")
-            .then(async () => {
+            .then(async (ok) => {
+                if(!ok) return
                 const res = await api_deleteEventV2(eventId, uid)
                 if (res?.status !== 200) {
                     alert(res?.text() || "Failed to delete event")

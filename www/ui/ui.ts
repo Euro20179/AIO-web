@@ -450,12 +450,8 @@ function openEventEditorUI(itemId: bigint, eventId: number) {
 * @param {number} transactionId the transaction to delete
 */
 async function deleteTransactionUI(transactionId: number) {
-    try {
-        var user = await confirmUI("Are you sure you want to delete this transaction?")
-    } catch (err) {
-        return false
-    }
-    if (!(user)) {
+    let user = await confirmUI("Are you sure you want to delete this transaction?")
+    if (!user) {
         return false;
     }
 
@@ -1050,21 +1046,26 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
 * If the user clicks ok, resolve with true
     * otherwise reject with true
 * @param html {string} the html to put in the confirmation box
+* @returns {Promise<boolean>}
 */
-async function confirmUI(html: string) {
-    const cEl = dom_getelorthrow("#confirm", currentWindow().HTMLDialogElement)
+async function confirmUI(html: string): Promise<boolean> {
+    console.log("HI")
+    const cEl = openModalUI("confirm", undefined, "confirm-dialog")
+    if(!cEl) {
+        console.warn('Could not create <confirm-dialog>, falling back to browser builtin')
+        return confirm(html)
+    }
     const close = cEl.querySelector("button:first-child") as HTMLButtonElement
     const cancel = dom_getelorthrow("#cancel", currentWindow().HTMLButtonElement, cEl)
     const ok = dom_getelorthrow("#ok", currentWindow().HTMLButtonElement, cEl)
     const root = dom_getelorthrow("[root]", currentWindow().HTMLElement, cEl)
     root.innerHTML = html || "<p>CONFIRM</p>"
 
-    cEl.showModal()
     return await new Promise((res, rej) => {
         ok.focus()
 
         cEl.onclose = () => {
-            (cEl.returnValue ? res : rej)(true)
+            res(cEl.returnValue ? true : false)
         }
         close.onclick = () => cEl.close("");
         cancel.onclick = () => {
@@ -1389,7 +1390,8 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
 */
 function deleteEntryUI(item: InfoEntry) {
     confirmUI("Are you sure you want to delete this item")
-        .then(() => {
+        .then((ok) => {
+            if(!ok) return
             aio_delete(item.ItemId).then(res => {
                 if (res === 1) {
                     alert("Failed to delete item")
@@ -1434,7 +1436,8 @@ async function fetchLocationUI(id: bigint, provider?: string) {
 */
 function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     confirmUI("Are you sure you want to overwrite the metadata with a refresh")
-        .then(async () => {
+        .then(async (ok) => {
+            if(!ok) return
             const provider = await promptUI("Provider override (optional)")
             api_overwriteMetadataEntry(item.ItemId, provider || "").then(res => {
                 if (res?.status !== 200) {

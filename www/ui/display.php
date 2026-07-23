@@ -33,7 +33,6 @@
 ?>
 
     <login-dialog></login-dialog>
-    <confirm-dialog></confirm-dialog>
 
     <template id="display-entry">
     </template>

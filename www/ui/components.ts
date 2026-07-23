@@ -356,7 +356,6 @@ const component_templates = [
     "script-template",
     "graph-template",
 
-    "confirm-dialog",
     "new-entry-dialog",
     "new-event-dialog",
     "login-dialog",
@@ -372,11 +371,19 @@ for (const name of component_templates) {
 }
 
 for(let name of [
+    /* general purpose */
     "prompt-dialog",
+    "confirm-dialog",
+
+    /* outputs/modes */
     "gallery-entry",
+
+    /* specific dialogs */
+    "edit-transaction",
+
+    /* general purpose item components */
     "item-card",
     "de-progress",
-    "edit-transaction"
 ]) {
     _registerShadowElement(name)
 }
