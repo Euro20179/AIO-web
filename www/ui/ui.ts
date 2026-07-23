@@ -3144,7 +3144,6 @@ function mkItemCardUI(forItem: bigint): HTMLElement {
         const img = document.createElement("img")
         img.slot = "thumbnail"
         img.src = fixThumbnailURL(meta.Thumbnail)
-        img.height = 150
         img.loading = 'lazy'
         card.append(img)
     }

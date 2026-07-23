@@ -9,7 +9,13 @@
         }
         picture {
             display: block;
-            min-height: 150px;
+            height: 150px;
+            align-content: center;
+        }
+
+        ::slotted(img) {
+            max-height: 150px;
+            max-width: 100%;
             box-shadow: 0px 0px 3px currentColor;
         }
         button:has(h2) {
@@ -26,7 +32,9 @@
     </style>
     <article>
         <button entry-action="openitem" class="styleless-button">
-            <picture><slot name="thumbnail"></slot></picture>
+            <picture>
+                <slot name="thumbnail"></slot>
+            </picture>
         </button>
         <button entry-action="openitem" class="styleless-button">
             <h2 class="m-0"><slot name="title" put-data="En_Title"></slot></h2>
