@@ -12,6 +12,7 @@ async function main() {
     );
 
     startupUI({
+        scriptSelect: dom_getelorthrow("#script-select", HTMLDialogElement),
         newWindow: document.getElementById("new-view-window"),
         viewToggle: dom_getelorthrow("#view-toggle", HTMLSelectElement),
         viewAllElem: dom_getelorthrow("#view-all", HTMLInputElement),

@@ -62,9 +62,12 @@
 <script src="/ui/ui.js"></script>
 <script>
 (async() => {
-    await settings_load(getUserUID())
+    const settings = await settings_load(getUserUID())
     const urlParams = new URLSearchParams(document.location.search)
     let id = urlParams.get("item-id")
+    let uid = urlParams.get("uid")
+
+    doUserStartupUI(settings)
 
     fetch(`${apiPath}/get-all-for-entry?id=${id}&uid=0`).then(async (res) => {
         const template = document.getElementById("display-entry")

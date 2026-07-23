@@ -36,7 +36,8 @@ type StartupUIComponents = {
     recommenders: HTMLDataListElement,
     newItemForm: HTMLFormElement,
     promptDialog: HTMLDialogElement,
-    sidebarItems: HTMLElement
+    sidebarItems: HTMLElement,
+    scriptSelect: HTMLDialogElement,
 
     mainUI: HTMLElement
 
@@ -953,7 +954,10 @@ function runUserScriptUI(name: string) {
 * @param {string} desc - what the script does
 */
 function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
-    const scriptSelect = dom_getelorthrow("#script-select", HTMLElement)
+    const scriptSelect = components.scriptSelect
+    if(!scriptSelect) {
+        alert("No script selector on this page")
+    }
 
     const par = document.createElement("div")
     par.classList.add("user-script")
@@ -966,7 +970,7 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     par.replaceChildren(title, d, run)
     title.innerText = name
     run.onclick = () => runUserScriptUI(name)
-    scriptSelect.append(par)
+    scriptSelect?.append(par)
     userScripts.set(name, new UserScript(onrun, desc))
 }
 
