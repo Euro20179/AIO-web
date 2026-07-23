@@ -1,13 +1,15 @@
 <template id="login-dialog">
-<dialog id="login" popover>
-    <h3 class="center">Login</h3>
-    <form id="login-form" action="javascript:void(0)" class="flex column" style="align-content: center">
-        <input type="text" placeholder="username" name="username">
-        <input type="password" placeholder="password" name="password">
-        <input type="submit" value="login">
-    </form>
-    <p>Please sign in to <span id="login-reason"></span></p>
+    <link rel="stylesheet" href="/css/colors.css">
+    <link rel="stylesheet" href="/css/general.css">
+    <dialog id="login" popover>
+        <h3 class="center">Login</h3>
+        <form id="login-form" action="javascript:void(0)" class="flex column" style="align-content: center">
+            <input type="text" placeholder="username" name="username">
+            <input type="password" placeholder="password" name="password">
+            <input type="submit" value="login">
+        </form>
+        <p>Please sign in to <span id="login-reason"></span></p>
 
-    <close-button></close-button>
-</dialog>
+        <close-button></close-button>
+    </dialog>
 </template>

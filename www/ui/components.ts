@@ -357,7 +357,6 @@ const component_templates = [
     "graph-template",
 
     "new-entry-dialog",
-    "login-dialog",
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
@@ -373,6 +372,7 @@ for(let name of [
     /* general purpose */
     "prompt-dialog",
     "confirm-dialog",
+    "login-dialog",
 
     /* outputs/modes */
     "gallery-entry",

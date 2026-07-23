@@ -96,7 +96,6 @@
         <close-button></close-button>
     </dialog>
 
-    <login-dialog></login-dialog>
     <item-identification-form-dialog></item-identification-form-dialog>
     <new-entry-dialog></new-entry-dialog>
 

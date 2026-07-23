@@ -102,8 +102,6 @@
 
     <ul id="users-output"></ul>
 
-    <login-dialog></login-dialog>
-
     <footer>
         <alert-box></alert-box>
     </footer>

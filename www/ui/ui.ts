@@ -2055,16 +2055,10 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint 
 * @param {string} reason
 * @returns {Promise<string>} the login token
 */
+let _signingIn = false
 async function signinUI(reason: string): Promise<string> {
-    const loginPopover = dom_getelorthrow("#login", currentWindow().HTMLDialogElement)
-
-    const loginReasonEl = loginPopover.querySelector("#login-reason")
-    if (loginReasonEl instanceof HTMLElement) {
-        loginReasonEl.innerText = reason || ""
-    }
-
     //if the popover is already open, something already called this function for the user to sign in
-    if (loginPopover.open) {
+    if (_signingIn) {
         return await new Promise((res) => {
             //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
             setInterval(() => {
@@ -2076,11 +2070,23 @@ async function signinUI(reason: string): Promise<string> {
         })
     }
 
-    loginPopover.showModal()
+    const loginPopover = openModalUI("login", currentDocument(), "login-dialog")
+    if(!loginPopover) {
+        console.error("No login dialog")
+        return ""
+    }
+
+    _signingIn = true
+
+    const loginReasonEl = loginPopover.querySelector("#login-reason")
+    if (loginReasonEl instanceof HTMLElement) {
+        loginReasonEl.innerText = reason || ""
+    }
+
     return await new Promise((res) => {
         const form = dom_getelorthrow("#login-form", currentWindow().HTMLFormElement, loginPopover)
         form.onsubmit = function() {
-            alert(1)
+            _signingIn = false
             let data = new FormData(form)
             let username = data.get("username")
             let password = data.get("password")
