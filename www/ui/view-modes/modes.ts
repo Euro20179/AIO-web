@@ -304,6 +304,7 @@ const mode_map = () => new Map<string, ModeConstructor<Mode>>([
     ["calendar-output", CalendarMode],
     ["tierlist-output", TierListMode],
     ["sidebar-items", SidebarMode],
+    ["categorize-output", CategoriesMode],
 ])
 
 /**
@@ -322,6 +323,7 @@ function mode_name2cls(name: string): ModeConstructor<Mode> {
         "event": "event-output",
         "calendar": "calendar-output",
         "tierlist": "tierlist-output",
+        "categorize": "categorize-output",
         "sidebar": "sidebar-items",
     }[name] || name
     let val = mode_map().get(name)

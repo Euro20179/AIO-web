@@ -1156,6 +1156,47 @@ function typeToSymbol(type: string): string {
 }
 
 /**
+ * Given a format, get a human readable name
+*/
+function items_formatToName(format: number): string {
+    let out = ""
+    if (items_isDigitized(format)) {
+        format -= DIGI_MOD
+        out = "+d"
+    }
+    return {
+        0: "VHS",
+        1: "CD",
+        2: "DVD",
+        3: "BLURAY",
+        4: "4KBLURAY",
+        5: "MANGA",
+        6: "BOOK",
+        7: "DIGITAL",
+        8: "BOARDGAME",
+        9: "STEAM",
+        10: "NIN_SWITCH",
+        11: "XBOXONE",
+        12: "XBOX360",
+        13: "OTHER",
+        14: "VINYL",
+        15: "IMAGE",
+        16: "UNOWNED",
+        17: "THEATER",
+        18: "WII",
+        19: "NIN_DS",
+        20: "PS1",
+        21: "PS2",
+        22: "PS3",
+        23: "PS4",
+        24: "PS5",
+        25: "NIN_SWITCH2",
+        26: "EPIC",
+        27: "GAMECUBE",
+    }[format] + out
+}
+
+/**
     * converts an item format to a symbol
     * @param {string} format - the type to convert
     * @returns {string} - a symbol with an optional `+d`

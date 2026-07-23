@@ -1,0 +1,43 @@
+:host(menu-screen) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--medium-gap);
+}
+
+section {
+    position: relative;
+    counter-reset: number-of-items;
+
+    width: 80cqi;
+    margin: 0 auto;
+    box-shadow: 3px 3px 5px var(--text-color);
+
+    padding: var(--small-gap);
+
+    h3 {
+        text-align: center;
+        border-bottom: 1px solid hsl(from currentColor h s l / 50%);
+    }
+
+    div {
+        display: grid;
+        grid-auto-flow: column;
+        overflow: auto;
+
+        gap: var(--medium-gap);
+    }
+
+    p::before {
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin: var(--small-gap);
+
+        content: "(" counter(number-of-items) ")";
+    }
+}
+
+item-card {
+    width: max-content;
+    counter-increment: number-of-items;
+}

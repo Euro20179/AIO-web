@@ -275,11 +275,28 @@ customElements.define("calc-entry", class extends HTMLElement {
     }
 })
 
-customElements.define("gallery-entry", class extends HTMLElement {
+function _registerShadowElement(name: string) {
+    customElements.define(name, class extends HTMLElement {
+        root: ShadowRoot
+        constructor() {
+            super()
+            let template = document.getElementById(name) as HTMLTemplateElement
+            let content = template.content.cloneNode(true)
+            let root = this.attachShadow({ mode: "open" })
+            root.appendChild(content)
+            this.root = root
+        }
+    })
+}
+
+_registerShadowElement("gallery-entry")
+_registerShadowElement("item-card")
+
+customElements.define("menu-screen", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
         super()
-        let template = document.getElementById("gallery-entry") as HTMLTemplateElement
+        let template = document.getElementById("menu-template") as HTMLTemplateElement
         let content = template.content.cloneNode(true)
         let root = this.attachShadow({ mode: "open" })
         root.appendChild(content)

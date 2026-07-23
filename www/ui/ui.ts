@@ -3025,3 +3025,49 @@ function getObjFromObjEditorUI(tbl: HTMLTableElement, skip: string[] = []): Reco
     }
     return newObj
 }
+
+/**
+ * Given an item id, make an <item-card> element
+ * @param {bigint} forItem
+ * @returns {HTMLElement}
+ */
+function mkItemCardUI(forItem: bigint): HTMLElement {
+    const card = document.createElement("item-card");
+    card.setAttribute("data-item-id", String(forItem))
+
+    const user = findUserEntryById(forItem)
+    updateDeclarativeDSL(
+        {
+            openitem: target => {
+                openDisplayWinUI(forItem)
+            }
+        },
+        settings_get(getUserUID(), "enable_unsafe"),
+        findInfoEntryById(forItem),
+        user,
+        findMetadataById(forItem),
+        card.shadowRoot!
+    )
+
+    const meta = findMetadataById(forItem)
+    if(meta.Thumbnail) {
+        const img = document.createElement("img")
+        img.slot = "thumbnail"
+        img.src = fixThumbnailURL(meta.Thumbnail)
+        img.height = 150
+        img.loading = 'lazy'
+        card.append(img)
+    }
+
+    (async() => {
+        await settings_load(meta.Uid)
+
+        applyUserRating(
+            settings_get(meta.Uid, "tiers"),
+            user.UserRating,
+            dom_getelorthrow('slot[name="rating"]', null, card.shadowRoot!)
+        )
+    })()
+
+    return card
+}

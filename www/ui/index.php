@@ -32,6 +32,8 @@
         "color-scheme-selector",
         "close-button",
 
+        "item-card",
+
         "de-status-menu",
         "de-notes",
         "de-description",
@@ -50,6 +52,7 @@
         "script-template",
         "graph-template",
         "calc-entry",
+        "menu-template",
 
         "new-event-dialog",
         "prompt-dialog",
@@ -164,6 +167,7 @@
                 <div style="justify-self: end;">
                     <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center; vertical-align: top;' aria-label="mode">
                         <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
+                        <option value="categorize-output" title="Menu Mode">🔠️ Categorize</option>
                         <option value="graph-output" title="Graph mode">📊︎ Graph</option>
                         <option value="calendar-output" title="Calendar mode">📅︎ Calendar</option>
                         <option value="event-output" hidden title="Event mode">🗓︎</option>
@@ -224,6 +228,7 @@
     <script src="/ui/view-modes/gallery.js" defer></script>
     <script src="/ui/view-modes/scriptMode.js" defer></script>
     <script src="/ui/view-modes/event-mode.js" defer></script>
+    <script src="/ui/view-modes/menu-mode.js" defer></script>
     <script src="/ui/shortcuts.js" defer></script>
     <script src="/ui/ui.js" defer></script>
     <!-- defer because document needs to load first -->

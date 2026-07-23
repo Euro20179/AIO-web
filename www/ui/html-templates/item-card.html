@@ -1,0 +1,29 @@
+<template id="item-card">
+    <link rel="stylesheet" href="/css/colors.css">
+    <link rel="stylesheet" href="/css/general.css">
+    <link rel="stylesheet" href="/ui/css-styles/rating-styles.css">
+    <style>
+        article {
+            text-align: center;
+        }
+        picture {
+            display: block;
+            min-height: 150px;
+            box-shadow: 0px 0px 3px currentColor;
+        }
+        h2 {
+            max-width: 30ch;
+            margin-block: var(--very-small-gap);
+        }
+    </style>
+    <article>
+        <button entry-action="openitem" class="styleless-button">
+            <picture><slot name="thumbnail"></slot></picture>
+        </button>
+        <h2><slot name="title" put-data="En_Title"></slot></h2>
+        <p class="m-0">
+            <slot name="rating" put-data="UserRating"></slot>
+            (<slot name="view-count" put-data="ViewCount"></slot>)
+        </p>
+    </article>
+</template>
