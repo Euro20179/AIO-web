@@ -9,6 +9,19 @@
     * with client-side inputs
 */
 
+
+const userScripts = new Map<string, UserScript>
+
+type UserScript_FN = (selected: InfoEntry[], results: InfoEntry[]) => any
+class UserScript {
+    exec: UserScript_FN
+    desc: string
+    constructor(exec: UserScript_FN, desc: string) {
+        this.desc = desc
+        this.exec = exec
+    }
+}
+
 type ClientSearchFilters = {
     filterRules: string[];
     newSearch: string;
@@ -244,6 +257,118 @@ function startupUI({
                 })
             })
         }
+    }
+
+    registerCTRLShortcutUI("\\", (e) => {
+        const search = components.searchBox
+        if (!search) {
+            throw new Error("no searchbox component")
+        }
+
+        search.focus()
+
+        //3 indicates a query-v3 search
+        //if the user is pressing ctrl-\ they want to do a query-v3 search
+        if (!search.value.startsWith("3")) {
+            //since it does not start with a 3, add one
+            search.value = '3 '
+        }
+        //select everything after '3 '
+        search.setSelectionRange(2, Math.max(search.value.length, 2))
+
+        e.preventDefault()
+    }, "Focus searchbox for search v3")
+
+    registerCTRLShortcutUI("/", e => {
+        const search = components.searchBox
+        search?.focus()
+        search?.select()
+        e.preventDefault()
+    }, "Focus searchbox")
+
+    registerCTRLShortcutUI("A", e => {
+        components.viewAllElem && components.viewAllElem.click()
+        e.preventDefault()
+    }, "Select all")
+
+    registerCTRLShortcutUI("m", e => {
+        e.preventDefault()
+        components.viewToggle?.focus()
+    }, "Focus mode selector")
+
+    registerCTRLShortcutUI(["p", "P"], e => {
+        const modal = openModalUI("script-select")
+        let search = dom_getel("input", HTMLInputElement, modal)
+        if(search) search.value = ""
+        filterUserScriptsUI("")
+        e.preventDefault()
+    }, "Open script palette")
+
+    registerCTRLShortcutUI("N", e => {
+        openModalUI("new-entry")
+        e.preventDefault()
+    }, "Create new entry")
+
+    registerCTRLShortcutUI("S", e => {
+        toggleUI("search-area")
+        e.preventDefault()
+    }, "Toggle visibility of nav bar")
+
+    registerCTRLShortcutUI("B", e => {
+        toggleUI("sidebar")
+        e.preventDefault()
+    }, "Toggle visibility of sidebar")
+
+    registerCTRLShortcutUI("V", e => {
+        //we dont want dual-window mode to be toggleable if we are in display mode
+        if (components.mainUI?.classList.contains("display-mode")) {
+            return
+        }
+        if (isCatalogModeUI()) {
+            closeCatalogModeUI()
+        } else {
+            openCatalogModeUI()
+        }
+        e.preventDefault()
+    }, "Toggle catalog mode")
+
+    registerCTRLShortcutUI("D", e => {
+        setDisplayModeUI()
+        e.preventDefault()
+    }, "Toggle display mode")
+
+    for (let i = 0; i < 10; i++) {
+        registerCTRLShortcutUI(String(i), e => {
+            let event = e as KeyboardEvent
+            clearUI()
+            components['sidebarUI']?.selectNth(Number(event.key))
+            e.preventDefault()
+        }, `Select item ${i + 1}`)
+    }
+
+    if (window.shortcuts) {
+        let curkey = window.shortcuts
+        addEventListener("keydown", e => {
+            if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
+                if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
+                    components['sidebarUI']?.focusNthItem(e.key === "ArrowUp" ? (components['sidebarItems']?.childElementCount || 1) : 1)
+                } else components['sidebarUI']?.focusNextItem(e.key === "ArrowUp")
+                if (e.ctrlKey) {
+                    if (!e.shiftKey) clearUI()
+                    selectFocusedSidebarItem()
+                }
+                e.preventDefault()
+                return
+            }
+
+            const next = curkey?.press(e, e.key, e.ctrlKey, e.altKey, e.shiftKey)
+            if (next instanceof shortcuts_Trie) {
+                e.preventDefault()
+                curkey = next
+            } else {
+                curkey = window.shortcuts
+            }
+        })
     }
 }
 
@@ -770,145 +895,39 @@ class Statistic {
 * @param {string} key the key to add a ctrl+key shortcut for
     * @param {(event: Event) => any} run what to run when {key} is pressed
 */
-function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any) {
+function registerCTRLShortcutUI(key: string | string[], run: (event: Event) => any, description?: string) {
     if (Array.isArray(key)) {
         for (let k of key) {
-            registerCTRLShortcutUI(k, run)
+            registerCTRLShortcutUI(k, run, description)
         }
     } else {
-        //@ts-ignore
-        if (window.shortcuts) {
-            window.shortcuts.nnoremap(key, true, false, /^[A-Z]$/.test(key), run)
-        }
+        registerShortcutUI(key, true, false, /^[A-Z]$/.test(key), run, description)
     }
 }
 
-registerCTRLShortcutUI("\\", (e) => {
-    const search = components.searchBox
-    if (!search) {
-        throw new Error("no searchbox component")
+/**
+ * Registers a shortcut for key (vimlike bindings)
+ * @param {string} key the keysequence to bind, eg: `ga`
+ * @param {boolean} ctrl if ctrl needs to be pressed
+ * @param {boolean} alt if alt needs to be pressed
+ * @param {boolean} shift if shift needs to be pressed
+ * @param {string} [description]
+*/
+function registerShortcutUI(key: string, ctrl: boolean, alt: boolean, shift: boolean, run: (event: Event) => any, description?: string) {
+    //@ts-ignore
+    if (window.shortcuts) {
+        window.shortcuts.nnoremap(key, ctrl, alt, shift, run)
     }
-
-    search.focus()
-
-    //3 indicates a query-v3 search
-    //if the user is pressing ctrl-\ they want to do a query-v3 search
-    if (!search.value.startsWith("3")) {
-        //since it does not start with a 3, add one
-        search.value = '3 '
-    }
-    //select everything after '3 '
-    search.setSelectionRange(2, Math.max(search.value.length, 2))
-
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("/", e => {
-    const search = components.searchBox
-    search?.focus()
-    search?.select()
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("?", e => {
-    components.itemFilter?.focus()
-    components.itemFilter?.select()
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("A", e => {
-    components.viewAllElem && components.viewAllElem.click()
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("m", e => {
-    e.preventDefault()
-    components.viewToggle?.focus()
-})
-
-registerCTRLShortcutUI(["p", "P"], e => {
-    openModalUI("script-select")
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("N", e => {
-    openModalUI("new-entry")
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("S", e => {
-    toggleUI("search-area")
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("B", e => {
-    toggleUI("sidebar")
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("V", e => {
-    //we dont want dual-window mode to be toggleable if we are in display mode
-    if (components.mainUI?.classList.contains("display-mode")) {
-        return
-    }
-    if (isCatalogModeUI()) {
-        closeCatalogModeUI()
-    } else {
-        openCatalogModeUI()
-    }
-    e.preventDefault()
-})
-
-registerCTRLShortcutUI("D", e => {
-    setDisplayModeUI()
-    e.preventDefault()
-})
-
-for (let i = 0; i < 10; i++) {
-    registerCTRLShortcutUI(String(i), e => {
-        let event = e as KeyboardEvent
-        clearUI()
-        components['sidebarUI']?.selectNth(Number(event.key))
-        e.preventDefault()
-    })
+    let display = key
+    if(shift) display = `SHIFT+${display}`
+    if(alt) display = `ALT+${display}`
+    if(ctrl) display = `CTRL+${display}`
+    addUserScriptUI(display, () => run(new KeyboardEvent("keydown", {
+        ctrlKey: true,
+        key: key
+    })), description || "")
 }
 
-if (window.shortcuts) {
-    let curkey = window.shortcuts
-    addEventListener("keydown", e => {
-        if ((e.key === "ArrowUp" || e.key === "ArrowDown") && (e.shiftKey || e.ctrlKey)) {
-            if (!document.activeElement || document.activeElement.tagName !== "SIDEBAR-ENTRY") {
-                components['sidebarUI']?.focusNthItem(e.key === "ArrowUp" ? (components['sidebarItems']?.childElementCount || 1) : 1)
-            } else components['sidebarUI']?.focusNextItem(e.key === "ArrowUp")
-            if (e.ctrlKey) {
-                if (!e.shiftKey) clearUI()
-                selectFocusedSidebarItem()
-            }
-            e.preventDefault()
-            return
-        }
-
-        const next = curkey?.press(e, e.key, e.ctrlKey, e.altKey, e.shiftKey)
-        if (next instanceof shortcuts_Trie) {
-            e.preventDefault()
-            curkey = next
-        } else {
-            curkey = window.shortcuts
-        }
-    })
-}
-
-type UserScript_FN = (selected: InfoEntry[], results: InfoEntry[]) => any
-class UserScript {
-    exec: UserScript_FN
-    desc: string
-    constructor(exec: UserScript_FN, desc: string) {
-        this.desc = desc
-        this.exec = exec
-    }
-}
-
-const userScripts = new Map<string, UserScript>
 
 /**
     * Runs a user script
@@ -948,7 +967,7 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     par.replaceChildren(title, d, run)
     title.innerText = name
     run.onclick = () => runUserScriptUI(name)
-    scriptSelect?.append(par)
+    scriptSelect?.querySelector("div")?.prepend(par)
     userScripts.set(name, new UserScript(onrun, desc))
 }
 
@@ -956,7 +975,7 @@ function addUserScriptUI(name: string, onrun: UserScript_FN, desc: string) {
     * Picks the first script from the dialog and runs it
 */
 function runFirstUserScriptUI() {
-    const scriptName = dom_getelorthrow("#script-select div:not([hidden]) h3", HTMLElement)
+    const scriptName = dom_getelorthrow("#script-select .user-script:not([hidden]) h3", HTMLElement)
     runUserScriptUI(scriptName.textContent)
 }
 
@@ -975,7 +994,7 @@ function filterUserScriptsUI(filter: string) {
     if (!filter) return
 
     for (let el of divs) {
-        if (!el.textContent.includes(filter)) {
+        if (!el.textContent.toLowerCase().includes(filter.toLowerCase())) {
             el.hidden = true
         }
     }

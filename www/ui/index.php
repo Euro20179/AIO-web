@@ -100,6 +100,8 @@
         <form action="javascript:runFirstUserScriptUI()">
             <input oninput="filterUserScriptsUI(this.value)" placeholder="Filter" />
         </form>
+        <div class="flex small-gap wrap">
+        </div>
     </dialog>
 
     <div id="main">
