@@ -2900,7 +2900,7 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
 * @return {Promise<MetadataEntry | null>
     */
 async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | null> {
-    const modal = openModalUI("item-identification-form")
+    const modal = openModalUI("item-identification-form", undefined, "item-identification-form-dialog")
     if (!modal) return null
 
     return await new Promise(async (pres, rej) => {

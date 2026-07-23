@@ -361,7 +361,6 @@ const component_templates = [
     "tz-datalist",
     "color-scheme-selector",
     "close-button",
-    "item-identification-form-dialog",
 ]
 
 for (const name of component_templates) {
@@ -380,6 +379,7 @@ for(let name of [
     /* specific dialogs */
     "edit-transaction",
     "new-event-dialog",
+    "item-identification-form-dialog",
 
     /* general purpose item components */
     "item-card",

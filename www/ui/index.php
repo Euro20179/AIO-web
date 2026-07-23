@@ -96,7 +96,6 @@
         <close-button></close-button>
     </dialog>
 
-    <item-identification-form-dialog></item-identification-form-dialog>
     <new-entry-dialog></new-entry-dialog>
 
     <dialog id="script-select">
