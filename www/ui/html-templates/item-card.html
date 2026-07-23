@@ -23,12 +23,6 @@
             text-overflow: ellipsis;
             text-wrap: nowrap;
         }
-
-        div:has(slot[name="progress"]) {
-            display: flex;
-            overflow: auto;
-            gap: var(--very-small-gap);
-        }
     </style>
     <article>
         <button entry-action="openitem" class="styleless-button">
@@ -37,8 +31,8 @@
         <button entry-action="openitem" class="styleless-button">
             <h2 class="m-0"><slot name="title" put-data="En_Title"></slot></h2>
         </button>
+        <div class="flex overflow j-center x-small-gap"><slot name="progress"></slot></div>
         <p class="m-0">
-            <div class="flex overflow"><slot name="progress"></slot></div>
             <slot name="rating" put-data="UserRating"></slot>
             (<slot name="view-count" put-data="ViewCount"></slot>)
         </p>
