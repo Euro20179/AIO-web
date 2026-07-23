@@ -5,13 +5,15 @@
     <style>
         article {
             text-align: center;
+            width: fit-content;
         }
         picture {
             display: block;
             min-height: 150px;
             box-shadow: 0px 0px 3px currentColor;
         }
-        h2 {
+        button:has(h2) {
+            display: block;
             max-width: 30ch;
             margin-block: var(--very-small-gap);
         }
@@ -20,7 +22,9 @@
         <button entry-action="openitem" class="styleless-button">
             <picture><slot name="thumbnail"></slot></picture>
         </button>
-        <h2><slot name="title" put-data="En_Title"></slot></h2>
+        <button entry-action="openitem" class="styleless-button">
+            <h2 class="m-0"><slot name="title" put-data="En_Title"></slot></h2>
+        </button>
         <p class="m-0">
             <slot name="rating" put-data="UserRating"></slot>
             (<slot name="view-count" put-data="ViewCount"></slot>)

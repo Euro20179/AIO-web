@@ -9,27 +9,39 @@ type CategoriesMode = {
 var CategoriesMode: ModeConstructor<CategoriesMode> = function(this: CategoriesMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     this.slides = new Map
     ModePrimitives.setup.call(this, output, win)
-    this.categorizeSelectors = [this.output.querySelector("#categorize-by")!]
-    this.newCategorizerSelector = this.output.querySelector("#another-category")!
-    this.newCategorizerSelector.onclick = (e) => {
-        let el = this.categorizeSelectors[0].cloneNode(true) as HTMLSelectElement
-        el.oncontextmenu = (e) => {
-            e.preventDefault();
-            el.remove();
-        }
-        this.categorizeSelectors[0].insertAdjacentElement(
-            'afterend',
-            el
-        )
-        el.onchange = () => {
+
+    let cs = dom_getel("#categorize-by", this.win.HTMLSelectElement, this.output)
+    if(cs) {
+        this.categorizeSelectors = [cs]
+        cs.onchange = () => {
             this.clearSelected()
             this.addList(items_getSelected())
         }
-        this.categorizeSelectors.push(el)
+    } else {
+        this.categorizeSelectors = []
     }
-    this.categorizeSelectors[0].onchange = () => {
-        this.clearSelected()
-        this.addList(items_getSelected())
+
+    let anotherCategoryBtn = dom_getel("#another-category", this.win.HTMLButtonElement, this.output)
+    if (anotherCategoryBtn)
+        this.newCategorizerSelector = anotherCategoryBtn
+
+    if(this.newCategorizerSelector) {
+        this.newCategorizerSelector.onclick = (e) => {
+            let el = this.categorizeSelectors[0].cloneNode(true) as HTMLSelectElement
+            el.oncontextmenu = (e) => {
+                e.preventDefault();
+                el.remove();
+            }
+            this.categorizeSelectors[0].insertAdjacentElement(
+                'afterend',
+                el
+            )
+            el.onchange = () => {
+                this.clearSelected()
+                this.addList(items_getSelected())
+            }
+            this.categorizeSelectors.push(el)
+        }
     }
 } as any
 

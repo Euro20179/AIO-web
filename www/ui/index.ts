@@ -90,7 +90,7 @@ async function main() {
 
         addEventListener("aio-metadata-loaded", metadataload)
 
-        Promise.race([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
+        Promise.all([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
             for (let item of items_getSelected()) {
                 mode_refreshItem(item.ItemId);
             }
