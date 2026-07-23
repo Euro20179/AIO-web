@@ -1777,69 +1777,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     })
 
     renderComponent("#multiple-progress", multipleProgressEl => {
-        //even if the status != (Re)?Viewing,
-        //we should still clear all progress bars
-        // multipleProgressEl.innerHTML = ""
-
-        if (!user.CurrentPosition) {
-            user = { ...user }
-            user.CurrentPosition = "0"
-        }
-
         multipleProgressEl.innerHTML = ""
 
-        //for each [P]x[/y] in userPos create a progress element
-        //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
-        //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
-        //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
-        //"," is optional
-        const parts = items_getProgressParts(user.CurrentPosition)
-
-        for (let part of parts) {
-            if (!part) continue
-            let label = part[1]
-
-            let container = document.createElement("de-progress")
-
-            multipleProgressEl.append(container)
-
-            let max =
-                //if there's no label, and no total is given
-                //use the mediaDependant determined length
-                !label && part[3] === undefined
-                    ? (lengthInNumber || 0)
-                    : (part[3] || 0) //part[3] could be empty string
-
-            let p = dom_getel(
-                "progress",
-                this.win.HTMLProgressElement,
-                container.shadowRoot!
-            )
-            if (!p) break
-            p.setAttribute("data-status", user.Status)
-            p.max = parseFloat(String(max))
-            p.value = parseFloat(part[2])
-
-            let c = dom_getel(
-                ".entry-progressbar-position-label",
-                this.win.HTMLElement,
-                container.shadowRoot!
-            )
-            if(!c) continue
-            const node = document.createTextNode(`${label || ""}${part[2]}`)
-            if (max) {
-                node.appendData(`/${max}`)
-            }
-            c.append(node)
-
-            const upHint = dom_getel(
-                "#user-progress-hint",
-                this.win.HTMLElement,
-                c
-            )
-            if(!upHint) continue
-            upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(String(max)) * 1000) / 10) || 0}%`
-        }
+        multipleProgressEl.replaceChildren(...mkDeProgressUI(item.ItemId, this.win))
     })
 
     //relation elements

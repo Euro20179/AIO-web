@@ -3027,6 +3027,96 @@ function getObjFromObjEditorUI(tbl: HTMLTableElement, skip: string[] = []): Reco
 }
 
 /**
+ * Given an item id make <de-progress> bars for it
+ * @param {bigint} forItem
+ */
+function mkDeProgressUI(forItem: bigint): HTMLElement[] {
+    const meta = findMetadataById(forItem)
+    let user = findUserEntryById(forItem)
+
+    try {
+        var mediaDependant = JSON.parse(meta["MediaDependant"] || "{}")
+    } catch (err) {
+        console.error("Could not parse media dependant meta info json")
+        return []
+    }
+
+    let lengthInNumber = items_getLength(mediaDependant)[0] || 0
+
+    if (!user.CurrentPosition) {
+        user = { ...user }
+        user.CurrentPosition = "0"
+    }
+
+    let bars = []
+
+    //for each [P]x[/y] in userPos create a progress element
+    //for example "10, S1/3" would use 10 in the standard progress bar, then create a new progress bar for S with a max of 3 and value of 1
+    //"10/30, S1/3" would use the standard progress bar for 10 but override lengthInNumber with 30, then create a second bar for S with max of 3 and value of 1
+    //"10 S3" would create 2 progress bars, the first uses lengthInNumber as max, the 2nd uses 0 as max, so it would be S3/0
+    //"," is optional
+    const parts = items_getProgressParts(user.CurrentPosition)
+    for (let part of parts) {
+        if (!part) continue
+        let label = part[1]
+
+        let container = document.createElement("de-progress")
+
+        bars.push(container)
+
+        let max =
+            //if there's no label, and no total is given
+            //use the mediaDependant determined length
+            !label && part[3] === undefined
+                ? (lengthInNumber || 0)
+                : (part[3] || 0) //part[3] could be empty string
+
+        let p = dom_getel(
+            "progress",
+            null,
+            container.shadowRoot!
+        )
+        if (!p) break
+        p.setAttribute("data-status", user.Status)
+        if("max" in p && "value" in p) {
+            p.max = parseFloat(String(max))
+            p.value = parseFloat(part[2])
+        }
+
+        let c = dom_getel(
+            ".entry-progressbar-position-label",
+            null,
+            container.shadowRoot!
+        )
+        if(!c) continue
+        const node = document.createTextNode(`${label || ""}${part[2]}`)
+        if (max) {
+            node.appendData(`/${max}`)
+        }
+        c.append(node)
+
+        const upHint = dom_getel(
+            "#user-progress-hint",
+            null,
+            c
+        )
+        if(!upHint) continue
+        upHint.innerHTML = `${(Math.round(parseFloat(part[2]) / parseInt(String(max)) * 1000) / 10) || 0}%`
+
+        updateDeclarativeDSL(
+            {},
+            settings_get(getUserUID(), "enable_unsafe"),
+            findInfoEntryById(forItem),
+            user,
+            meta,
+            container.shadowRoot!
+        )
+    }
+
+    return bars
+}
+
+/**
  * Given an item id, make an <item-card> element
  * @param {bigint} forItem
  * @returns {HTMLElement}
@@ -3059,17 +3149,9 @@ function mkItemCardUI(forItem: bigint): HTMLElement {
         card.append(img)
     }
 
-    try {
-        let mediaDependant = JSON.parse(meta["MediaDependant"] || "{}")
-        let lengthInNumber = items_getLength(mediaDependant)[0] || 0
-        const progress = dom_getel("progress", null, card.shadowRoot!)
-        if(progress && "max" in progress && "value" in progress) {
-            progress.max = lengthInNumber || 1
-            progress.value = parseInt(user.CurrentPosition) || 0
-        }
-    } catch (err) {
-        console.error("Could not parse media dependant meta info json")
-    }
+    const p = mkDeProgressUI(forItem)
+    p.forEach(v => v.slot = "progress")
+    card.append(...p)
 
     settings_load(meta.Uid).then(() => {
         applyUserRating(
