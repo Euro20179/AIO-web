@@ -1,11 +1,13 @@
 <template id="prompt-dialog">
+<link rel="stylesheet" href="/css/colors.css">
+<link rel="stylesheet" href="/css/general.css">
 <dialog id="prompt" style="position: relative; height: max(200px, 20%); width: max(50vw, 500px);">
     <div class="grid" style="grid-auto-rows: 3fr 1fr; height: 100%;">
         <center>
             <div root style="height: 100%; align-content: center;">
             </div>
         </center>
-        <form method="dialog" class="j-center">
+        <form method="dialog" class="j-center flex">
             <input type="text" name="prompt-value" style="width: 50%; height: fit-content; align-self: start;"
                 autofocus>
         </form>

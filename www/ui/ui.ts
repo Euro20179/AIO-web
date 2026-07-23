@@ -35,7 +35,6 @@ type StartupUIComponents = {
     searchForm: HTMLFormElement,
     recommenders: HTMLDataListElement,
     newItemForm: HTMLFormElement,
-    promptDialog: HTMLDialogElement,
     sidebarItems: HTMLElement,
     scriptSelect: HTMLDialogElement,
 
@@ -100,10 +99,6 @@ function startupUI({
 
     if (!(components["sortBySelector"] instanceof HTMLSelectElement)) {
         throw new Error("sort by selector must be a select element")
-    }
-
-    if (!(components["promptDialog"] instanceof HTMLDialogElement)) {
-        throw new Error("prompt dialog must be a dialog element")
     }
 
     if (!(sidebarItems)) {
@@ -1010,13 +1005,17 @@ function filterUserScriptsUI(filter: string) {
     * @returns {Promise<string | null>} the user's response
 */
 async function promptUI(html?: string, _default?: string, uselist?: string, defaultValue: string = ""): Promise<string | null> {
-    const pEl = components["promptDialog"]
-    if (!pEl) {
+    let pElRoot = currentDocument().createElement("prompt-dialog").shadowRoot
+    if (!pElRoot) {
         const parser = new DOMParser
         const doc = parser.parseFromString(html || "", "text/html")
         html = doc.documentElement.outerText
         return prompt(html, _default) || defaultValue
     }
+
+    currentDocument().body.append(pElRoot.host)
+
+    let pEl = dom_getelorthrow("dialog", currentWindow().HTMLDialogElement, pElRoot)
 
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
@@ -1033,6 +1032,7 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
     pEl.showModal()
     return await new Promise((res) => {
         pEl.onclose = () => {
+            pElRoot.host.remove()
             res(pEl.returnValue ?? _default ?? null)
         }
         close.onclick = () => {

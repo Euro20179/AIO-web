@@ -32,7 +32,6 @@ async function main() {
         searchForm: dom_getelorthrow("#sidebar-form", HTMLFormElement),
         recommenders,
         newItemForm: dom_getelorthrow("#new-item-form", HTMLFormElement),
-        promptDialog: dom_getelorthrow("#prompt", HTMLDialogElement),
         sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement),
         mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });

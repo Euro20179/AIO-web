@@ -98,7 +98,6 @@
 
     <edit-transaction></edit-transaction>
 
-    <prompt-dialog></prompt-dialog>
     <confirm-dialog></confirm-dialog>
     <new-event-dialog></new-event-dialog>
     <login-dialog></login-dialog>

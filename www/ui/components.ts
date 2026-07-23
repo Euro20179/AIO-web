@@ -289,10 +289,6 @@ function _registerShadowElement(name: string) {
     })
 }
 
-_registerShadowElement("gallery-entry")
-_registerShadowElement("item-card")
-_registerShadowElement("de-progress")
-
 customElements.define("menu-screen", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
@@ -360,7 +356,6 @@ const component_templates = [
     "script-template",
     "graph-template",
 
-    "prompt-dialog",
     "confirm-dialog",
     "new-entry-dialog",
     "new-event-dialog",
@@ -375,4 +370,13 @@ const component_templates = [
 
 for (const name of component_templates) {
     _registerElement(name)
+}
+
+for(let name of [
+    "prompt-dialog",
+    "gallery-entry",
+    "item-card",
+    "de-progress"
+]) {
+    _registerShadowElement(name)
 }
