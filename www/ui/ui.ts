@@ -129,7 +129,7 @@ function startupUI({
     }
 
     viewToggle?.addEventListener("change", e => {
-        mode_setMode((e.target as HTMLSelectElement).value, currentWindow())
+        mode_setMode((e.target as HTMLSelectElement).value)
     })
 
     librarySelector?.addEventListener("click", function() {
@@ -210,7 +210,7 @@ function startupUI({
         }
 
         newWindow.addEventListener("click", () => {
-            const mode = mode_getFirstModeInWindow(currentWindow())
+            const mode = mode_getFirstModeInWindow(window)
             if (!mode) return
             const name = mode_cls2name(mode.constructor as any)
             if (name)
@@ -293,7 +293,7 @@ function generateTransactionElementsUI(itemid: bigint) {
         editBtn.append("✏︎")
         editBtn.onclick = () => {
             openTransactionEditorUI(transaction)
-            currentWindow().addEventListener("modes.update-item", e => {
+            window.addEventListener("modes.update-item", e => {
                 //@ts-ignore
                 const trans = items_getEntry(BigInt(e.detail)).getTransactionById(transaction.TransactionId)
                 if (trans)
@@ -324,22 +324,22 @@ function generateTransactionElementsUI(itemid: bigint) {
 function openTransactionEditorUI(transaction: TransactionEntry): HTMLDialogElement | null {
     const modal = openModalUI("edit-transaction-dialog", undefined, "edit-transaction")
 
-    const id = dom_getel("input[name='id']", currentWindow().HTMLInputElement, modal)
+    const id = dom_getel("input[name='id']", HTMLInputElement, modal)
     if (id) {
         id.value = String(transaction.TransactionId)
     }
 
-    const iid = dom_getel("input[name='itemId']", currentWindow().HTMLInputElement, modal)
+    const iid = dom_getel("input[name='itemId']", HTMLInputElement, modal)
     if (iid) {
         iid.value = String(transaction.ItemId)
     }
 
-    const p = dom_getel("input[name='price']", currentWindow().HTMLInputElement, modal)
+    const p = dom_getel("input[name='price']", HTMLInputElement, modal)
     if (p) {
         p.value = String(transaction.Price)
     }
 
-    const c = dom_getel("input[name='currency']", currentWindow().HTMLInputElement, modal)
+    const c = dom_getel("input[name='currency']", HTMLInputElement, modal)
     if (c) {
         c.value = transaction.Currency
     }
@@ -395,27 +395,27 @@ function openEventEditorUI(itemId: bigint, eventId: number) {
         return
     }
 
-    let name = dom_getel("[name='name']", currentWindow().HTMLInputElement, dialog)
+    let name = dom_getel("[name='name']", HTMLInputElement, dialog)
     if (name && event.Event) {
         name.value = event.Event
     }
 
-    let after = dom_getel("[name='after']", currentWindow().HTMLInputElement, dialog)
+    let after = dom_getel("[name='after']", HTMLInputElement, dialog)
     if (after && event.After) {
         after.value = new Date(event.After).toISOString().slice(0, 16)
     }
 
-    let before = dom_getel("[name='before']", currentWindow().HTMLInputElement, dialog)
+    let before = dom_getel("[name='before']", HTMLInputElement, dialog)
     if (before && event.Before) {
         before.value = new Date(event.Before).toISOString().slice(0, 16)
     }
 
-    let ts = dom_getel("[name='timestamp']", currentWindow().HTMLInputElement, dialog)
+    let ts = dom_getel("[name='timestamp']", HTMLInputElement, dialog)
     if (ts && event.Timestamp) {
         ts.value = new Date(event.Timestamp).toISOString().slice(0, 16)
     }
 
-    let tz = dom_getel("[name='timezone']", currentWindow().HTMLInputElement, dialog)
+    let tz = dom_getel("[name='timezone']", HTMLInputElement, dialog)
     if (tz && event.TimeZone) {
         tz.value = String(event.TimeZone)
     }
@@ -611,15 +611,7 @@ function addSortUI(category: string, name: string, cb: ((a: InfoEntry, b: InfoEn
 * @returns {HTMLDocument}
 */
 function currentDocument(): HTMLDocument {
-    return modeWin.document
-}
-
-/**
-    * gets the current window (either catalog, or main window)
-* @returns {Window & typeof globalThis}
-*/
-function currentWindow(): Window & typeof globalThis {
-    return modeWin as Window & typeof globalThis
+    return document
 }
 
 /**
@@ -836,19 +828,6 @@ registerCTRLShortcutUI("B", e => {
     e.preventDefault()
 })
 
-registerCTRLShortcutUI("V", e => {
-    //we dont want dual-window mode to be toggleable if we are in display mode
-    if (components.mainUI?.classList.contains("display-mode")) {
-        return
-    }
-    if (isCatalogModeUI()) {
-        closeCatalogModeUI()
-    } else {
-        openCatalogModeUI()
-    }
-    e.preventDefault()
-})
-
 registerCTRLShortcutUI("D", e => {
     setDisplayModeUI()
     e.preventDefault()
@@ -988,7 +967,7 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
 
     currentDocument().body.append(pElRoot.host)
 
-    let pEl = dom_getelorthrow("dialog", currentWindow().HTMLDialogElement, pElRoot)
+    let pEl = dom_getelorthrow("dialog", HTMLDialogElement, pElRoot)
 
     const close = pEl.querySelector("button:first-child") as HTMLButtonElement
     const root = pEl.querySelector("[root]") as HTMLDivElement
@@ -1032,9 +1011,9 @@ async function confirmUI(html: string): Promise<boolean> {
         return confirm(html)
     }
     const close = cEl.querySelector("button:first-child") as HTMLButtonElement
-    const cancel = dom_getelorthrow("#cancel", currentWindow().HTMLButtonElement, cEl)
-    const ok = dom_getelorthrow("#ok", currentWindow().HTMLButtonElement, cEl)
-    const root = dom_getelorthrow("[root]", currentWindow().HTMLElement, cEl)
+    const cancel = dom_getelorthrow("#cancel", HTMLButtonElement, cEl)
+    const ok = dom_getelorthrow("#ok", HTMLButtonElement, cEl)
+    const root = dom_getelorthrow("[root]", HTMLElement, cEl)
     root.innerHTML = html || "<p>CONFIRM</p>"
 
     return await new Promise((res, rej) => {
@@ -1074,7 +1053,7 @@ function openModalUI(
         querySelector(query: string): HTMLElement | null
     },
     pullFromShadowRootTemplate?: string,
-    win?: Window & typeof globalThis
+    win: Window & typeof globalThis = window
 ): HTMLDialogElement | null {
     let modal
     if(pullFromShadowRootTemplate) {
@@ -1083,10 +1062,10 @@ function openModalUI(
             throw new Error(`Template: ${pullFromShadowRootTemplate} does not have a shadowroot`)
         }
         currentDocument().body.append(root.host)
-        modal = dom_getel(`#${modalName}`, (win || currentWindow()).HTMLDialogElement, root)
+        modal = dom_getel(`#${modalName}`, win.HTMLDialogElement, root)
         modal?.addEventListener("close", () => root.host.remove())
     }
-    else modal = dom_getel(`#${modalName}`, (win || currentWindow()).HTMLDialogElement, root)
+    else modal = dom_getel(`#${modalName}`, win.HTMLDialogElement, root)
     modal?.showModal()
     return modal
 }
@@ -1668,14 +1647,14 @@ function openEventFormUI(itemid: string, eventId?: string, resetForm: boolean = 
     const modal = openModalUI("new-event-form", undefined, "new-event-dialog")
     if (!modal) return null
 
-    const form = dom_getelorthrow("form:has(input)", currentWindow().HTMLFormElement, modal)
+    const form = dom_getelorthrow("form:has(input)", HTMLFormElement, modal)
 
     if(resetForm) form.reset()
 
-    const itemidEl = dom_getelorthrow('[name="itemid"]', currentWindow().HTMLInputElement, form)
+    const itemidEl = dom_getelorthrow('[name="itemid"]', HTMLInputElement, form)
     itemidEl.value = itemid
 
-    const eventidEl = dom_getelorthrow('[name="eventId"]', currentWindow().HTMLInputElement, form)
+    const eventidEl = dom_getelorthrow('[name="eventId"]', HTMLInputElement, form)
     if(eventId) {
         eventidEl.value = eventId
     } else {
@@ -1772,23 +1751,23 @@ function newEntryDialogUI() {
         return
     }
 
-    let formatSelector = dom_getel('[name="format"]', currentWindow().HTMLSelectElement, dialog)
+    let formatSelector = dom_getel('[name="format"]', HTMLSelectElement, dialog)
     if(formatSelector)
         fillFormatSelectionUI(formatSelector)
 
-    let typeSelector = dom_getel('[name="type"]', currentWindow().HTMLSelectElement, dialog)
+    let typeSelector = dom_getel('[name="type"]', HTMLSelectElement, dialog)
     if(typeSelector)
         fillTypeSelectionUI(typeSelector)
-    const title = dom_getelorthrow('[name="title"]', currentWindow().HTMLInputElement, dialog)
+    const title = dom_getelorthrow('[name="title"]', HTMLInputElement, dialog)
 
-    const form = dom_getelorthrow("#new-item-form", currentWindow().HTMLFormElement, dialog)
+    const form = dom_getelorthrow("#new-item-form", HTMLFormElement, dialog)
 
     form.oninput = function(e) {
-        if (e.target instanceof currentWindow().HTMLInputElement
+        if (e.target instanceof HTMLInputElement
             && e.target.getAttribute("name") === "location")
             return
 
-        const location = dom_getelorthrow('[name="location"]', currentWindow().HTMLInputElement, form)
+        const location = dom_getelorthrow('[name="location"]', HTMLInputElement, form)
         if (typeof defaultSettings.location_generator === 'string') {
             location.value = defaultSettings.location_generator.replaceAll("{}", title.value)
         } else if (typeof defaultSettings.location_generator === 'function') {
@@ -2100,7 +2079,7 @@ async function signinUI(reason: string): Promise<string> {
     }
 
     return await new Promise((res) => {
-        const form = dom_getelorthrow("#login-form", currentWindow().HTMLFormElement, loginPopover)
+        const form = dom_getelorthrow("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
             _signingIn = false
             let data = new FormData(form)
@@ -2303,71 +2282,6 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
     } else {
         components.mainUI?.classList.remove("display-mode")
     }
-}
-
-/**
-    * @description keeps track of the window being used to display the information selected by view-toggle
-*/
-let modeWin: Window = window
-
-/**
-    * checks if the catalog window is open
-* @returns {boolean}
-*/
-function isCatalogModeUI(): boolean {
-    return modeWin !== window
-}
-
-/**
-    * opens the catalog window
-*/
-function openCatalogModeUI() {
-    let mainUI = components.mainUI
-    if (!mainUI || mainUI.classList.contains("catalog-mode")) return
-
-    let urlParams = new URLSearchParams(location.search)
-    urlParams.set("display", "true")
-    urlParams.set("no-select", "true")
-    urlParams.set("no-mode", "true")
-    const newURL = `${location.origin}${location.pathname}?${urlParams.toString()}${location.hash}`
-    const win = open(newURL, "_blank", "popup=true")
-    if (win) {
-        modeWin = win
-        win.addEventListener("beforeunload", () => {
-            closeCatalogModeUI()
-        })
-        const thisMode = mode_getFirstModeInWindow(window)
-        if (thisMode) {
-            mode_chwin(win as Window & typeof globalThis, thisMode)
-        }
-        mainUI.classList.add("catalog-mode")
-        toggleUI("viewing-area", "none")
-    } else {
-        alert("Failed to track the newly opened window, it will not work")
-    }
-}
-
-/**
-    * closes the catalog window
-*/
-function closeCatalogModeUI() {
-    if (!modeWin) {
-        console.warn("Catalog window is not open")
-        return
-    }
-    const thisMode = mode_getFirstModeInWindow(modeWin)
-    modeWin.close()
-    if (thisMode) {
-        mode_chwin(window, thisMode)
-    }
-    let mainUI = components.mainUI
-    if (!mainUI) {
-        console.warn("could not find main ui")
-        return
-    }
-    mainUI.classList.remove("catalog-mode")
-    toggleUI("viewing-area", "")
-    modeWin = window
 }
 
 /**
@@ -2863,12 +2777,12 @@ async function titleIdentificationUI(provider: string, search: string): Promise<
 */
 function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLFormElement | null) {
     if (!form) {
-        const dialog = dom_getel("new-entry-dialog", currentWindow().HTMLElement)
+        const dialog = dom_getel("new-entry-dialog", HTMLElement)
         if(!dialog || !dialog.shadowRoot) {
             console.error("Failed to fill new item form from metadata, no form")
             return
         }
-        form = dom_getel("#new-item-form", currentWindow().HTMLFormElement, dialog.shadowRoot)
+        form = dom_getel("#new-item-form", HTMLFormElement, dialog.shadowRoot)
         if(!form) {
             console.error("Failed to fill new item form from metadata, no form")
             return
@@ -2934,7 +2848,7 @@ async function itemIdentificationUI(forItem?: bigint): Promise<MetadataEntry | n
                 return
             }
 
-            const paramsForm = dom_getelorthrow("[name='dialog-form']", currentWindow().HTMLFormElement, modal)
+            const paramsForm = dom_getelorthrow("[name='dialog-form']", HTMLFormElement, modal)
 
             let data = new FormData(paramsForm)
 

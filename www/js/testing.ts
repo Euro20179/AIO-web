@@ -190,13 +190,6 @@ function dotests(category: string) {
         ['html', r(parseNotes, '<p align="center">[b]hi[/b]</p>'), eq, l('<p align="center"><b>hi</b></p>')],
     ])
 
-    mktestgroup("catalog", [
-        ["open catalog mode", r(openCatalogModeUI), call, l(isCatalogModeUI)],
-        ["get current doc", r(currentDocument), eq, r(() => modeWin?.document)],
-        ["get current window", r(currentWindow), eq, r(() => modeWin)],
-        ["close catalog mode", r(closeCatalogModeUI), not(call), l(isCatalogModeUI)]
-    ])
-
     mktestgroup("display entry mode", [
         ["render", r(() => ui_render_from(1n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
             return left !== 1 && left !== 2
