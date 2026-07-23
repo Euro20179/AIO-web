@@ -291,6 +291,7 @@ function _registerShadowElement(name: string) {
 
 _registerShadowElement("gallery-entry")
 _registerShadowElement("item-card")
+_registerShadowElement("de-progress")
 
 customElements.define("menu-screen", class extends HTMLElement {
     root: ShadowRoot
@@ -351,7 +352,6 @@ const component_templates = [
     "de-copies",
     "de-template-editor",
     "de-recommender",
-    "de-progress",
 
     "calendar-template",
     "event-template",

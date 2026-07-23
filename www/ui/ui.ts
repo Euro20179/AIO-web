@@ -3059,15 +3059,25 @@ function mkItemCardUI(forItem: bigint): HTMLElement {
         card.append(img)
     }
 
-    (async() => {
-        await settings_load(meta.Uid)
+    try {
+        let mediaDependant = JSON.parse(meta["MediaDependant"] || "{}")
+        let lengthInNumber = items_getLength(mediaDependant)[0] || 0
+        const progress = dom_getel("progress", null, card.shadowRoot!)
+        if(progress && "max" in progress && "value" in progress) {
+            progress.max = lengthInNumber || 1
+            progress.value = parseInt(user.CurrentPosition) || 0
+        }
+    } catch (err) {
+        console.error("Could not parse media dependant meta info json")
+    }
 
+    settings_load(meta.Uid).then(() => {
         applyUserRating(
             settings_get(meta.Uid, "tiers"),
             user.UserRating,
             dom_getelorthrow('slot[name="rating"]', null, card.shadowRoot!)
         )
-    })()
+    })
 
     return card
 }

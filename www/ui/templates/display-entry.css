@@ -393,7 +393,7 @@
         margin: 0;
     }
 
-    de-progress figure {
+    de-progress {
         flex-grow: 1;
     }
 

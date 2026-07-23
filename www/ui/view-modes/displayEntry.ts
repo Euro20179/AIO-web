@@ -1813,7 +1813,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             let p = dom_getel(
                 "progress",
                 this.win.HTMLProgressElement,
-                container
+                container.shadowRoot!
             )
             if (!p) break
             p.setAttribute("data-status", user.Status)
@@ -1823,7 +1823,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             let c = dom_getel(
                 ".entry-progressbar-position-label",
                 this.win.HTMLElement,
-                container
+                container.shadowRoot!
             )
             if(!c) continue
             const node = document.createTextNode(`${label || ""}${part[2]}`)

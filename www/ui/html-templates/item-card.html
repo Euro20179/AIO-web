@@ -14,8 +14,15 @@
         }
         button:has(h2) {
             display: block;
-            max-width: 30ch;
             margin-block: var(--very-small-gap);
+            text-align: center;
+            width: 100%;
+        }
+        h2 {
+            max-width: 20ch;
+            overflow: clip;
+            text-overflow: ellipsis;
+            text-wrap: nowrap;
         }
     </style>
     <article>
@@ -26,6 +33,7 @@
             <h2 class="m-0"><slot name="title" put-data="En_Title"></slot></h2>
         </button>
         <p class="m-0">
+            <progress></progress>
             <slot name="rating" put-data="UserRating"></slot>
             (<slot name="view-count" put-data="ViewCount"></slot>)
         </p>
