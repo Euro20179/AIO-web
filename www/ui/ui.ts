@@ -1686,7 +1686,7 @@ function applyClientsideSearchFiltering(entries: InfoEntry[], filters: ClientSea
  * @returns {HTMLDialogElement | null}
  */
 function openEventFormUI(itemid: string, eventId?: string, resetForm: boolean = true): HTMLDialogElement | null {
-    const modal = openModalUI("new-event-form")
+    const modal = openModalUI("new-event-form", undefined, "new-event-dialog")
     if (!modal) return null
 
     const form = dom_getelorthrow("form:has(input)", currentWindow().HTMLFormElement, modal)

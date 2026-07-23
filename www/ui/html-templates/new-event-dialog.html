@@ -1,56 +1,58 @@
 <template id="new-event-dialog">
-<dialog id="new-event-form" popover>
-    <form method="dialog" onsubmit="newEventUI(this)" class="block">
-        <input type="hidden" name="itemid">
-        <input type="hidden" name="eventId">
+    <link rel="stylesheet" href="/css/colors.css">
+    <link rel="stylesheet" href="/css/general.css">
+    <dialog id="new-event-form" popover>
+        <form method="dialog" onsubmit="newEventUI(this)" class="block">
+            <input type="hidden" name="itemid">
+            <input type="hidden" name="eventId">
 
-        <datalist id="recommended-event-names">
-            <option value="Added">Added</option>
-            <option value="Planned">Planned</option>
-            <option value="Started">Started</option>
-            <option value="Resuming">Resuming</option>
-            <option value="Dropped">Dropped</option>
-            <option value="Waited">Waited</option>
-            <option value="Paused">Paused</option>
-            <option value="Purchased">Purchased</option>
-            <option value="Sold">Sold</option>
-        </datalist>
+            <datalist id="recommended-event-names">
+                <option value="Added">Added</option>
+                <option value="Planned">Planned</option>
+                <option value="Started">Started</option>
+                <option value="Resuming">Resuming</option>
+                <option value="Dropped">Dropped</option>
+                <option value="Waited">Waited</option>
+                <option value="Paused">Paused</option>
+                <option value="Purchased">Purchased</option>
+                <option value="Sold">Sold</option>
+            </datalist>
 
-        <label for="name">Name: <input id="name" name="name" required list="recommended-event-names"></label>
-        <p>
-            Not all time slots are required. Exact times are also not required.
-        </p>
+            <label for="name">Name: <input id="name" name="name" required list="recommended-event-names"></label>
+            <p>
+                Not all time slots are required. Exact times are also not required.
+            </p>
 
-        <div class="grid column">
-            <label for="after-timestamp" class="flex column" style="align-items: center;">
-                After:
-                <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
-            </label>
+            <div class="grid column">
+                <label for="after-timestamp" class="flex column" style="align-items: center;">
+                    After:
+                    <input type="datetime-local" name="after" id="after-timestamp" style="width: fit-content">
+                </label>
 
-            <label for="timestamp" class="flex column" style="align-items: center;">
-                On:
-                <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
-            </label>
+                <label for="timestamp" class="flex column" style="align-items: center;">
+                    On:
+                    <input id="timestamp" name="timestamp" type="datetime-local" style="width: fit-content">
+                </label>
 
-            <label for="before-timestamp"  class="flex column" style="align-items: center;">
-                Before:
-                <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
-            </label>
+                <label for="before-timestamp"  class="flex column" style="align-items: center;">
+                    Before:
+                    <input type="datetime-local" name="before" id="before-timestamp" style="width: fit-content">
+                </label>
 
-            <label class="flex column" style="align-items: center;">
-                Timezone:
-                <input name="timezone" list="tz-selector">
-            </label>
-        </div>
+                <label class="flex column" style="align-items: center;">
+                    Timezone:
+                    <input name="timezone" list="tz-selector">
+                </label>
+            </div>
 
+            <br>
+
+            <div class="flex j-center">
+                <button type="submit">Add</button>
+            </div>
+        </form>
         <br>
 
-        <div class="flex j-center">
-            <button type="submit">Add</button>
-        </div>
-    </form>
-    <br>
-
-    <close-button></close-button>
-</dialog>
+        <close-button></close-button>
+    </dialog>
 </template>

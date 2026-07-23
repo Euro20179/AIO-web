@@ -28,6 +28,7 @@
     tmpl("de-progress");
     tmpl("color-scheme-selector");
     tmpl("confirm-dialog");
+    tmpl("new-event-dialog");
     tmpl("close-button");
     tmpl("item-identification-form-dialog");
 ?>

@@ -357,7 +357,6 @@ const component_templates = [
     "graph-template",
 
     "new-entry-dialog",
-    "new-event-dialog",
     "login-dialog",
     "alert-box",
     "tz-datalist",
@@ -380,6 +379,7 @@ for(let name of [
 
     /* specific dialogs */
     "edit-transaction",
+    "new-event-dialog",
 
     /* general purpose item components */
     "item-card",
