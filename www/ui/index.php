@@ -113,13 +113,7 @@
             <nav id="search-area" aria-label="search and information">
 
                 <div class="flex">
-                    <div class="grid row" style="grid-template-rows: 1fr 1fr;">
-                        <button onclick="openSettingsUI()" style="margin-block-end: var(--inline-widget-margin)">⚙</button>
-                        <button command="show-modal" commandfor="script-select">run</button>
-                    </div>
-
-                    <color-scheme-selector></color-scheme-selector>
-
+                    <button command="show-modal" commandfor="script-select">☰</button>
                     <button command="show-modal" commandfor="new-entry" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
@@ -179,6 +173,14 @@
                         <option value="tierlist-output" title="Tierlist mode">S Tierlist</option>
                         <option value="sidebar-items" title="Tierlist mode" hidden>| Sidebar</option>
                     </select><!-- no whitespace --><button id="new-view-window" style='height: 100%;'>🪟</button>
+                </div>
+
+                <div class="flex">
+
+                    <div class="flex row" style="grid-template-rows: 1fr 1fr;">
+                        <button onclick="openSettingsUI()" style="margin-block-end: var(--inline-widget-margin)">⚙</button>
+                        <color-scheme-selector></color-scheme-selector>
+                    </div>
                 </div>
             </nav>
             <nav class="sidebar overflow" id="sidebar" aria-label="item selection">

@@ -262,8 +262,8 @@
     }
 
     #new-entry-button {
-        height: 100%;
-        min-width: 50px; /*otherwise this button gets *way* too narrow*/
+        aspect-ratio: 1;
+        min-width: 40px; /*otherwise this button gets *way* too narrow*/
     }
 
     #search-area {
@@ -272,7 +272,7 @@
         text-wrap: nowrap;
         overflow-x: auto;
         display: grid;
-        grid-template-columns: min-content max-content auto auto;
+        grid-template-columns: min-content min-content max-content auto min-content;
         width: 100%;
 
         border-bottom: 2px solid var(--secondary);
@@ -281,7 +281,7 @@
             grid-template-areas:
                 "new searching searching"
                 "stats stats view-toggle";
-            grid-template-columns: min-content 1fr auto auto;
+            grid-template-columns: min-content min-content 1fr auto min-content;
         }
 
         @container (width < 600px) {
