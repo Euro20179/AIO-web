@@ -169,6 +169,32 @@ addUserScriptUI(
     "Converts remote (non-data uri) thumbnails to thumbnails hosted on the aio server",
 );
 
+addUserScriptUI(
+    "Copy Item Id",
+    () => {
+        const container = fillItemListingUI(items_getAllEntries())
+        selectItemUI({
+            container
+        }).then(id => {
+            navigator.clipboard.writeText(id.toString())
+                .then(() => alert(`Id coppied (${id})`))
+                .catch(() => alert(`Failed to copy id (${id})`))
+        })
+    },
+    "Select an item, and copy its id"
+)
+
+addUserScriptUI(
+    "Open item",
+    () => {
+        const container = fillItemListingUI(items_getAllEntries())
+        selectItemUI({
+            container
+        }).then(openDisplayWinUI)
+    },
+    "Select an item, and open it in a popup window"
+)
+
 async function remote2LocalThumbService(this: { servicing: boolean }) {
     if (this.servicing) return;
 
