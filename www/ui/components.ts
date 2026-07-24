@@ -188,7 +188,7 @@ customElements.define("display-entry", class extends HTMLElement {
         super()
         let template = document.getElementById("display-entry") as HTMLTemplateElement
         let content = template.content.cloneNode(true) as HTMLElement
-        let root = this.attachShadow({ mode: "open" })
+        let root = this.attachShadow({ mode: "open", clonable: true })
         root.appendChild(content)
 
         fuckingInsaneFirefoxHackToMakeSelectAppearNormally(root)
@@ -222,7 +222,7 @@ customElements.define("sidebar-entry", class extends HTMLElement {
         super()
         let template = (document.getElementById("sidebar-entry")) as HTMLTemplateElement
         let content = template.content.cloneNode(true) as HTMLElement
-        let root = this.attachShadow({ mode: "open" })
+        let root = this.attachShadow({ mode: "open", clonable: true })
         root.appendChild(content)
         root.adoptedStyleSheets.push(...generalStyles, ...sidebarStyles)
         this.root = root
@@ -260,7 +260,7 @@ customElements.define("calc-entry", class extends HTMLElement {
         super()
         let template = document.getElementById("calc-entry") as HTMLTemplateElement
         let content = template.content.cloneNode(true)
-        let root = this.attachShadow({ mode: "open" })
+        let root = this.attachShadow({ mode: "open", clonable: true })
         root.appendChild(content)
         this.root = root
 
@@ -282,7 +282,7 @@ function _registerShadowElement(name: string) {
             super()
             let template = document.getElementById(name) as HTMLTemplateElement
             let content = template.content.cloneNode(true)
-            let root = this.attachShadow({ mode: "open" })
+            let root = this.attachShadow({ mode: "open", clonable: true })
             root.appendChild(content)
             this.root = root
         }
@@ -295,7 +295,7 @@ customElements.define("menu-screen", class extends HTMLElement {
         super()
         let template = document.getElementById("menu-template") as HTMLTemplateElement
         let content = template.content.cloneNode(true)
-        let root = this.attachShadow({ mode: "open" })
+        let root = this.attachShadow({ mode: "open", clonable: true })
         root.appendChild(content)
         this.root = root
     }

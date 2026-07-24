@@ -185,3 +185,7 @@ CategoriesMode.prototype.close = function(this: CategoriesMode) {
         this.container.remove()
     this.clearSelected()
 }
+
+CategoriesMode.prototype.chwin = function(this: CategoriesMode, win: Window & typeof globalThis): HTMLElement {
+    ModePrimitives.chwin.call(this, win)
+}
