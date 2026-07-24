@@ -137,7 +137,6 @@
     input[type="checkbox"] {
         cursor: pointer;
         appearance: none;
-        border-style: solid;
         vertical-align: bottom;
         border-radius: var(--border-roundness);
     }
