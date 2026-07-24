@@ -173,10 +173,12 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
         }
 }
 
-function applyUserRating(tierSettings: Settings["tiers"], rating: number, root: HTMLElement) {
+function applyUserRating(tierSettings: Settings["tiers"], rating: number, max: number, root: HTMLElement) {
     for (const name of Object.keys(tierSettings)) {
         root.classList.remove(`${name}-tier`)
     }
+
+    rating = items_normalizeUserRating(rating, max)
 
     let tier = settings_tier_from_rating(tierSettings, rating)
     root.classList.add(`${tier}-tier`)

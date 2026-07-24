@@ -233,7 +233,7 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
     if (mode === "general") {
         rating = items_getNormalizedRating(meta)
     } else if (mode === "user") {
-        rating = user.UserRating
+        rating = items_normalizeUserRating(user.UserRating, settings_get(user.Uid, "user_rating_max"))
     } else /*custom*/ {
         let customExprEl = dom_getelorthrow("#tierlist-custom", this.win.HTMLTextAreaElement, this.output)
         const expr = customExprEl.value

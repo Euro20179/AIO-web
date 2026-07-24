@@ -3185,8 +3185,9 @@ function mkItemCardUI(forItem: bigint): HTMLElement {
 
     settings_load(meta.Uid).then(() => {
         applyUserRating(
-            settings_get(meta.Uid, "tiers"),
+            settings_get(user.Uid, "tiers"),
             user.UserRating,
+            settings_get(user.Uid, "user_rating_max"),
             dom_getelorthrow('slot[name="rating"]', null, card.shadowRoot!)
         )
     })

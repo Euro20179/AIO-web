@@ -370,6 +370,10 @@ function items_getNormalizedRating(meta: MetadataEntry): number {
     return (meta.Rating / meta.RatingMax * 100) || 0
 }
 
+function items_normalizeUserRating(rating: number, max: number): number {
+    return (rating / max * 100) || 0
+}
+
 function items_replaceEvent(newEvent: UserEvent) {
     const events = items_getEntry(newEvent.ItemId).events
     for(let i = 0; i < events.length; i++) {

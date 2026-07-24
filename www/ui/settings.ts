@@ -12,6 +12,8 @@ const defaultSettings = {
         "zero": 0
     },
 
+    user_rating_max: 100,
+
     currency: "USD",
 
     ///styles to use for the tierlist mode
@@ -192,6 +194,7 @@ async function settings_load(uid: number, force: boolean = false): Promise<Setti
  * @returns string | false
  */
 function settings_tier_from_rating(tiers: Settings["tiers"], rating: number): string | false {
+    console.log(tiers, rating)
     for (let [name, minRating] of Object.entries(tiers)) {
         if (
             (typeof minRating === 'function' && minRating(rating))
