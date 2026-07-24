@@ -66,31 +66,31 @@
 
     <section id="forms">
         <h3>General</h3>
-        <form method="get" action="javasript:void(0)">
+        <form method="get" action="javascript:void(0)" onchange="done(this)">
             <input name="setting" value="user_rating_max" type="hidden">
             <input name="type" value="float" type="hidden">
-            <label>Your max rating <input id="user_rating_max" type="number" name="value" onchange="done(this.form)"></label>
+            <label>Your max rating <input id="user_rating_max" type="number" name="value"></label>
         </form>
 
-        <form method="get" action="javasript:void(0)">
+        <form method="get" action="javascript:void(0)" onchange="done(this)">
             <input name="setting" value="currency" type="hidden">
-            <label>Default currency <input id="currency" name="value" onchange="done(this.form)"></label>
+            <label>Default currency <input id="currency" name="value"></label>
         </form>
 
         <h3>Startup Script</h3>
-        <form method="get" action="javascript:void(0)">
+        <form method="get" action="javascript:void(0)" onchange="done(this)">
             <input name="setting" value="StartupLang" type="hidden">
             <label for="StartupLang">Startup script language</label>
-            <select id="StartupLang" name="value" onchange="done(this.form)">
+            <select id="StartupLang" name="value">
                 <option value="javascript">javascript</option>
                 <option value="aiol">aiol</option>
             </select>
         </form>
 
-        <form method="get" action="javascript:void(0)" id="script-form">
+        <form method="get" action="javascript:void(0)" onchange="done(this)" id="script-form">
             <input name="setting" value="UIStartupScript" type="hidden">
             <label for="UIStartupScript">Startup script
-                <textarea id="UIStartupScript" onchange="done(this.form)" rows="40" cols="80" form="script-form"
+                <textarea id="UIStartupScript" rows="40" cols="80" form="script-form"
                     name="value"></textarea>
             </label>
         </form>
@@ -117,7 +117,12 @@
     })
 
     const urlData = new URLSearchParams(document.location.search)
-    const uid = Number(urlData.get("uid") || prompt("uid"))
+    const uid = Number(urlData.get("uid")) || Number(prompt("uid"))
+    const params = new URLSearchParams(location.search)
+    if(!Number(params.get("uid"))) {
+        params.set("uid", uid)
+        location.search = params.toString()
+    }
 
     const forms = document.getElementById("templates")
 

@@ -412,9 +412,10 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
         try {
             userAuth = await signinUI(options?.["signin-reason"] || "")
         } catch (err) {
-            console.warn("signinUI is undefined, falling back to shitty solution")
-            const username = prompt("username")
-            const password = prompt("password")
+            console.error(err)
+            console.warn("signinUI failed, falling back to shitty solution")
+            const username = prompt("username WARNING: EVERYONE CAN SEE")
+            const password = prompt("password WARNING: EVERYONE CAN SEE")
             setUserAuth(userAuth = btoa(`${username}:${password}`))
         }
     }
