@@ -433,6 +433,7 @@ function _mkde_actions() {// {{{
             for (let el of root.querySelectorAll("#user-actions")) {
                 if (!(el instanceof this.win.HTMLTableElement)) continue
                 updateEventsDisplay.call(this, root, el, item.ItemId)
+                updateNotesDisplay(root, root.querySelector("#notes"), item.ItemId)
             }
         },
 
@@ -1208,6 +1209,20 @@ function whatToInclude(el: ShadowRoot): { include: bigint, recursive: boolean } 
     }
 }
 
+function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigint) {
+    const {include, recursive} = whatToInclude(root)
+    const notesL = items_reduce(itemId, include, recursive, (p, c) => {
+        let note = findUserEntryById(c).Notes
+        if(!note) return p
+        return p.concat([[c, parseNotes(note)]])
+    }, [] as [bigint, string][])
+    if (notesL.length === 1) {
+        notesEl.innerHTML = notesL[0][1]
+    } else {
+        notesEl.innerHTML = notesL.map(([id, n]) => `<article><h5>${findInfoEntryById(id).En_Title}</h5>${n}</article>`).join("<hr>")
+    }
+}
+
 function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if (!costEl) return
@@ -1493,8 +1508,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         el => updateStatusDisplay(user.Status, el))
 
     renderComponent("#cost", l => {
-        const {include, recursive} = whatToInclude(el)
-        l.innerText = String(items_calculateCost(item.ItemId, include, recursive))
+        updateCostDisplay.call(this, el, item.ItemId)
     })
 
     renderComponent("#tz-selector", tzEl => {
@@ -1687,8 +1701,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         notesEditBox.value = user.Notes
     })
 
-    renderComponent("#notes", notesEl =>
-        notesEl.innerHTML = parseNotes(user.Notes))
+    renderComponent("#notes", notesEl => {
+        updateNotesDisplay(el, notesEl, item.ItemId)
+    })
 
     //Rating
     renderComponent("#user-rating", ratingEl => {

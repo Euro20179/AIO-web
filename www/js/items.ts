@@ -235,14 +235,14 @@ class items_Relations {
                 .filter(v => v.relations.isChildOf(this.id))
     }
 
-    *findParents() {
+    *findParents(): Generator<bigint> {
         const entries = items_getAllEntries()
         for (let id in entries) {
             const entry = entries[id]
 
             for (let child of entry.relations.children) {
                 if (child === this.id) {
-                    yield child
+                    yield entry.ItemId
                 }
             }
         }
