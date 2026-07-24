@@ -162,7 +162,6 @@ CategoriesMode.prototype.addList = function(this: CategoriesMode, entries: InfoE
 
 CategoriesMode.prototype.sub = function(this: CategoriesMode, entry: InfoEntry) {
     const el = dom_getel(`item-card[data-item-id="${entry.ItemId}"]`, null, this.output)
-    console.log(el)
     if(!el) return
     el.remove()
 }

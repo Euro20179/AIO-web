@@ -65,12 +65,23 @@
 
 
     <section id="forms">
+        <h3>General</h3>
+        <form method="get" action="javasript:void(0)">
+            <input name="setting" value="user_rating_max" type="hidden">
+            <input name="type" value="float" type="hidden">
+            <label>Your max rating <input id="user_rating_max" type="number" name="value" onchange="done(this.form)"></label>
+        </form>
+
+        <form method="get" action="javasript:void(0)">
+            <input name="setting" value="currency" type="hidden">
+            <label>Default currency <input id="currency" name="value" onchange="done(this.form)"></label>
+        </form>
 
         <h3>Startup Script</h3>
         <form method="get" action="javascript:void(0)">
             <input name="setting" value="StartupLang" type="hidden">
-            <label for="startup-lang">Startup script language</label>
-            <select id="startup-lang" name="value" onchange="done(this.form)">
+            <label for="StartupLang">Startup script language</label>
+            <select id="StartupLang" name="value" onchange="done(this.form)">
                 <option value="javascript">javascript</option>
                 <option value="aiol">aiol</option>
             </select>
@@ -78,8 +89,8 @@
 
         <form method="get" action="javascript:void(0)" id="script-form">
             <input name="setting" value="UIStartupScript" type="hidden">
-            <label for="startup-script">Startup script
-                <textarea id="startup-script" onchange="done(this.form)" rows="40" cols="80" form="script-form"
+            <label for="UIStartupScript">Startup script
+                <textarea id="UIStartupScript" onchange="done(this.form)" rows="40" cols="80" form="script-form"
                     name="value"></textarea>
             </label>
         </form>
@@ -180,29 +191,31 @@
         setupComponentForm(component)
     }
 
-    fetch(`${location.protocol}//${location.host}/settings/get?uid=${uid}`)
-        .then(res => {
-            if(res.status === 401) {
-                alert("You are not logged in, redirecting to login page")
-                location = `/login?location=/settings.html?uid=${uid}`
-                return
+    settings_load(uid).then(settings => {
+            for(let setting in settings) {
+                if(window[setting])
+                    window[setting].value = settings[setting]
             }
-            return res.json()
-        })
-        .then(settings => {
-            window['startup-script'].value = settings["UIStartupScript"]
-            window['startup-lang'].value = settings['StartupLang']
 
             for(let setting in settings) {
                 if(setting.startsWith("template-")) {
                     setupComponentForm(setting.split("template-")[1], settings[setting])
                 }
             }
-        })
+    })
 
     function done(form) {
         const data = new FormData(form)
-        const params = new URLSearchParams({setting: data.get("setting"), value: data.get("value")})
+
+        const params = new URLSearchParams({
+            setting: data.get("setting"),
+            value: data.get("value")
+        })
+
+        if(data.has("type")) {
+            params.set("type", data.get("type"))
+        }
+
         authorizedRequest(`${location.protocol}//${location.host}/settings/set?uid=${uid}`, {
             method: "POST",
             headers: {

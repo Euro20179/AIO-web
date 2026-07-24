@@ -39,7 +39,23 @@ if ($fail) {
     exit();
 }
 
+$val = $qs_data["value"];
+
+$ty = "string";
+if (array_key_exists("type", $qs_data)) {
+    $ty = $qs_data["type"];
+}
+
+if ($ty == "float") {
+    $val = (double)$val;
+}
+if ($ty == "int") {
+    $val = (int)$val;
+}
+if ($ty == "json") {
+    $val = json_decode($val);
+}
 
 $uid = $_GET["uid"];
-set_setting((int)$uid, $qs_data["setting"], $qs_data["value"]);
+set_setting((int)$uid, $qs_data["setting"], $val);
 ?>

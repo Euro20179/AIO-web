@@ -492,7 +492,6 @@ function openTransactionEditorUI(transaction: TransactionEntry): HTMLDialogEleme
 
 async function editTransactionUI(form: HTMLFormElement) {
     const data = new FormData(form)
-    console.log(data)
 
     const res = await api_editTransaction(Number(data.get("id")) as number, Object.fromEntries(data.entries()), getUserUID())
 
@@ -1054,7 +1053,6 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
 * @returns {Promise<boolean>}
 */
 async function confirmUI(html: string): Promise<boolean> {
-    console.log("HI")
     const cEl = openModalUI("confirm", undefined, "confirm-dialog")
     if(!cEl) {
         console.warn('Could not create <confirm-dialog>, falling back to browser builtin')
