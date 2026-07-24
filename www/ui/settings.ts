@@ -72,6 +72,11 @@ background: var(--red)
     enable_unsafe: ENABLE_UNSAFE,
 
     de_item_interactions: {
+        close: {
+            text: "✗ close",
+            title: "close",
+            action: "close",
+        },
 
         identify: {
             text: "🔍︎",
