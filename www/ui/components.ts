@@ -341,53 +341,34 @@ function _registerElement(name: string) {
 }
 
 const component_templates = [
-    "alert-box",
-    "calc-entry",
-    "calc-template",
-    "calendar-template",
-    "close-button",
-    "color-scheme-selector",
-    "confirm-dialog",
-    "de-copies",
-    "de-cost-calculation-modifiers",
-    "de-descendants",
-    "de-description",
-    "de-notes",
-    "de-progress",
-    "de-recommended-by",
-    "de-recommender",
-    "de-requirements",
     "de-status-menu",
+    "de-cost-calculation-modifiers",
+    "de-notes",
+    "de-description",
+    "de-requirements",
+    "de-descendants",
+    "de-copies",
     "de-template-editor",
-    "display-entry",
-    "edit-transaction",
-    "entry-image",
-    "error-text",
+    "de-recommender",
+
+    "calendar-template",
     "event-template",
-    "format-modifier-menu",
-    "gallery-entry",
-    "graph-template",
-    "item-card",
-    "item-identification-form-dialog",
-    "item-identification-form",
-    "login-dialog",
-    "menu-template",
-    "new-entry-dialog",
-    "new-event-dialog",
-    "notification",
-    "prompt-dialog",
-    "script-template",
-    "sidebar-entry",
     "tierlist-template",
-    "tier-row",
+    "calc-template",
+    "script-template",
+    "graph-template",
+
+    "alert-box",
     "tz-datalist",
+    "color-scheme-selector",
+    "close-button",
 ]
 
 for (const name of component_templates) {
     _registerElement(name)
 }
 
-for(let name of [
+const component_shadow_templates = [
     /* general purpose */
     "prompt-dialog",
     "confirm-dialog",
@@ -406,6 +387,8 @@ for(let name of [
     /* general purpose item components */
     "item-card",
     "de-progress",
-]) {
+]
+
+for(let name of component_shadow_templates) {
     _registerShadowElement(name)
 }

@@ -208,7 +208,7 @@
         container.append(label, form, del)
         forms.append(container)
     }
-    for(let component of component_templates.concat(["display-entry"])) {
+    for(let component of component_templates.concat(component_shadow_templates).concat(["display-entry"])) {
         setupComponentForm(component)
     }
 
