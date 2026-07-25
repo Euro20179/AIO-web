@@ -95,7 +95,7 @@ type InfoEntry = {
     Uid: number
     RecommendedBy: string
     Priority: number
-    FormatModifiers: number
+    Format_Modifiers: number
 
     Tags: string[]
 }

@@ -514,9 +514,9 @@ function _mkde_actions() {// {{{
         setdigitization: function(item, _, target) {
             if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
-                item.FormatModifiers |= DIGI_MOD
+                item.Format_Modifiers |= DIGI_MOD
             } else if (items_isDigitized(item.Format)) {
-                item.FormatModifiers -= DIGI_MOD
+                item.Format_Modifiers -= DIGI_MOD
             }
             api_setItem("", item).then(() => {
                 updateInfo2({
@@ -1532,7 +1532,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             console.warn("#format-digitized must be a <input>")
             return
         }
-        digitized.checked = items_isDigitized(item.FormatModifiers)
+        digitized.checked = items_isDigitized(item.Format_Modifiers)
     })
 
 
@@ -1583,12 +1583,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //type icon
     let typeIcon = typeToSymbol(item.Type)
-    let formatIcon = formatToSymbolUI(item.Format, item.FormatModifiers)
+    let formatIcon = formatToSymbolUI(item.Format, item.Format_Modifiers)
     renderComponent("#on-format", async (onFormat) => {
-        const name = await formatToName(item.Format, item.FormatModifiers)
+        const name = await formatToName(item.Format, item.Format_Modifiers)
         if (!(name).startsWith("UNOWNED")) {
             onFormat.title = name
-            onFormat.innerHTML = formatToSymbolUI(item.Format, item.FormatModifiers)
+            onFormat.innerHTML = formatToSymbolUI(item.Format, item.Format_Modifiers)
         }
     })
 
@@ -1623,7 +1623,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         }
 
         //format
-        formatToName(item.Format, item.FormatModifiers).then(name => {
+        formatToName(item.Format, item.Format_Modifiers).then(name => {
             displayEntryTitle?.setAttribute("data-format-name", name)
         })
     })
