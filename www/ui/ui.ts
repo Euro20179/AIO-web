@@ -2398,7 +2398,7 @@ function formatToSymbolUI(format: number, modifiers: number): string {
     const custom = settings_get(getUserUID(), "custom_item_formats")
     let out = ""
     if (format in custom) {
-        return custom[format] + out
+        return custom[format] + items_formatModifiersToName(modifiers)
     }
     return items_formatToSymbol(format, modifiers) + out
 }
