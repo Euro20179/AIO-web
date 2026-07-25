@@ -1790,7 +1790,7 @@ async function newEventUI(form: HTMLFormElement) {
 
 /**
  * Opens the new entry dialog
- * @param {Record<string, string>} params a set of parameters to prefill the new entry form with
+ * @param {Record<string, string>} [params] a set of parameters to prefill the new entry form with
  * parameters:
  * - title: user defined entry name
  * - native-title: user defined entry native title
