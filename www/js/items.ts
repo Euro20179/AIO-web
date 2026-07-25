@@ -846,9 +846,6 @@ function items_getAllMeta() {
 async function items_refreshRelations(uid: number) {
     const relations = await api_getRelations(uid)
     for (let id in relations) {
-        //FIXME: this only throws an error because
-        //api_getRelations does not respect uid
-        //because the /list-relations endpoint does not respect uid
         try {
             const e = items_getEntry(BigInt(id))
             e.relations.children = relations[id].Children?.map((v: any) => BigInt(v)) || []

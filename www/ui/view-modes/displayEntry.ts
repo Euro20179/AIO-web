@@ -318,11 +318,14 @@ function _mkde_actions() {// {{{
          * Creates a new item with the parentId set to the current item
          */
         newchild: function(item) {
-            const newEntryDialog = dom_getelorthrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
+            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
+            if(!newEntryDialog) {
+                console.error("failed to create the new-entry dialog")
+                return
+            }
             const parentIdInput = dom_getelorthrow(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
 
             parentIdInput.value = String(item.ItemId)
-            newEntryDialog.showModal()
         },
 
         /**
@@ -350,11 +353,14 @@ function _mkde_actions() {// {{{
          * Creates a new item with copyOf set to the current item
          */
         newcopy: function(item) {
-            const newEntryDialog = dom_getelorthrow("#new-entry", this.win.HTMLDialogElement, this.output.ownerDocument)
-            const parentIdInput = dom_getelorthrow(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
+            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
+            if(!newEntryDialog) {
+                console.error("failed to create the new-entry dialog")
+                return
+            }
+            const copyOfIdInput = dom_getelorthrow(`[name="copyOf"]`, this.win.HTMLInputElement, newEntryDialog)
 
-            parentIdInput.value = String(item.ItemId)
-            newEntryDialog.showModal()
+            copyOfIdInput.value = String(item.ItemId)
         },
 
         /**
