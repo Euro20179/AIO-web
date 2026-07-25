@@ -1105,7 +1105,7 @@ function openModalUI(
 ): HTMLDialogElement | null {
     let modal
     if(pullFromShadowRootTemplate) {
-        const root = currentDocument().createElement(pullFromShadowRootTemplate).shadowRoot
+        const root = currentDocument().createElement(pullFromShadowRootTemplate)?.shadowRoot
         if(!root) {
             throw new Error(`Template: ${pullFromShadowRootTemplate} does not have a shadowroot`)
         }

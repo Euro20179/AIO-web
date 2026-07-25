@@ -719,3 +719,10 @@ function api_uiSort2Api(sort: SortKind) {
             return ""
     }
 }
+
+async function api_renameAccount(newName: string) {
+    const params = new URLSearchParams([
+        ["new-username", newName]
+    ])
+    return await authorizedRequest(`${AIO}/account/rename?${params.toString()}`)
+}

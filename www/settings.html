@@ -65,6 +65,13 @@
 
 
     <section id="forms">
+        <h3>Server Settings</h3>
+
+        <form method="get" action="javascript:void(0)" onsubmit="api_renameAccount(this.elements['new-username'].value).then(res => { if(res.status === 200) alert('successfully changed username') })">
+            <input name="new-username" id="new-username" placeholder="change username">
+            <button>confirm</button>
+        </form>
+
         <h3>General</h3>
         <form method="get" action="javascript:void(0)" onchange="done(this)">
             <input name="setting" value="user_rating_max" type="hidden">
@@ -111,6 +118,15 @@
 <script src="/ui/js_api.js"></script>
 
 <script>
+
+    fetch('/ui/html-templates/login-dialog.html')
+        .then(res => res.text())
+        .then(body => {
+            const p = new DOMParser
+            const doc = p.parseFromString(`<body>${body}`, 'text/html')
+            document.body.append(doc.querySelector("template"))
+        })
+
 
     dom_loadtemplate("alert-box").then(box => {
         document.body.append(...box.content.childNodes)
