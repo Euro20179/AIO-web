@@ -112,6 +112,12 @@ function dotests(category: string) {
         return () => val
     }
 
+    //for the sake of backwards compat, some default settings must NEVER change
+    mktestgroup("settings backwards compatibility", [
+        ["user rating max", r(settings_get, 0, "user_rating_max"), eq, l(100)],
+        ["currency", r(settings_get, 0, "currency"), eq, l("USD")]
+    ])
+
     mktestgroup("ui stuff", [
         ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
 
