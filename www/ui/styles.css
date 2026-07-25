@@ -222,7 +222,7 @@
             width: 50cqi;
         }
 
-        [name="search-query"] {
+        [name="q"] {
             flex-grow: 1;
             anchor-name: --search-box;
 
@@ -239,7 +239,7 @@
             max-width: 10ch;
         }
 
-        div:has(> [name="sort-by"]) {
+        div:has(> [name="sort"]) {
             flex-shrink: 2;
             grid-template-rows: 1fr 1fr;
             width: min(20cqi, 100px);

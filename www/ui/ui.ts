@@ -83,6 +83,23 @@ function startupUI({
             .flatMap(i => i.info.Tags || []).toArray()).values().toArray())
     })
 
+    navigation.addEventListener("navigate", e => {
+        const url = new URL(e.destination.url)
+        if (!/^\/ui\/?/.test(url.pathname)) return
+
+        const params = new URLSearchParams(url.search)
+        e.intercept({
+            async handler() {
+                const searchEntries: Record<string, string> = {}
+                for (let param of ["q", "uid", "sort"]) {
+                    if(params.has(param))
+                        searchEntries[param] = params.get(param)!
+                }
+                mkSearchUI(searchEntries)
+            }
+        })
+    })
+
     for (let key in arguments[0]) {
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
@@ -169,13 +186,11 @@ function startupUI({
     })
 
     userSelector?.addEventListener("change", function() {
-        refreshInfoUI(getUidUI()).then(() => loadSearchUI())
-        if (components.recommenders)
-            fillRecommendedListUI(components.recommenders, getUidUI())
+        userSelector.form?.submit()
     })
 
     sortBySelector?.addEventListener("change", function() {
-        sortEntriesUI()
+        sortBySelector.form?.submit()
     })
 
 
@@ -728,7 +743,7 @@ function openSettingsUI(uid: number | null = null) {
 /**
     * Adds a new sorting option
 * Side effects:
-    * - adds the new option to the sort-by element
+    * - adds the new option to the sort element
 * @param {string} category - The category to put the sort option in to
 * @param {string} name - Name of the sorting option
 * @param {function(InfoEntry,InfoEntry): number} cb - Sorting function
@@ -1242,7 +1257,7 @@ function changeResultStatsWithItemListUI(items: InfoEntry[], multiplier: number 
 }
 
 /**
-    * Sorts entries, and reorders the sidebar based on the selected sort in the sort-by selector
+    * Sorts entries, and reorders the sidebar based on the selected sort in the sort selector
 */
 function sortEntriesUI() {
     const sortby = components.sortBySelector?.value
@@ -1284,8 +1299,8 @@ function getSearchDataUI(): FormData {
 /**
     * Akin to the user submitting the search form
 * form inputs:
-    * - search-query: string, the search query (processed on the client, so uses client filters, and '3' prefixing)
-* - sort-by: ""
+    * - q: string, the search query (processed on the client, so uses client filters, and '3' prefixing)
+* - sort: ""
 *   | "item-id"
 *   | "release-year"
 *   | "cost"
@@ -1309,7 +1324,8 @@ function mkSearchUI(params: Record<string, string>) {
         if (!inp || !("value" in inp)) continue
         inp.value = params[param]
     }
-    form.submit()
+
+    loadSearchUI(form)
 }
 
 /**
@@ -1548,20 +1564,20 @@ addSearchParserUI("filter-parser", (search, filters) => {
 })
 
 addSearchParserUI("sort-by", (search, filters, form) => {
-    filters["sortBy"] = form.get("sort-by") as string
+    filters["sortBy"] = form.get("sort") as string
     return search
 })
 
 /**
     * pulls out relevant filters for the client
-* has the side effect of modifying search-query, removing any parts deemed filters for the client
+* has the side effect of modifying 'q', removing any parts deemed filters for the client
     * eg: \[start:end\]
-* @param {FormData} searchForm form that contains the search-query key-value pair
+* @param {FormData} searchForm form that contains the 'q' key-value pair
 * @returns {ClientSearchFilters}
 */
 function parseClientsideSearchFiltering(searchForm: FormData): ClientSearchFilters {
 
-    let search = searchForm.get("search-query") as string
+    let search = searchForm.get("q") as string
 
     const filters: ClientSearchFilters = {
         searchType: '4',

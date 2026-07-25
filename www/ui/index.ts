@@ -2,7 +2,7 @@ async function main() {
     setupHintPopovers(document)
 
     const sortBySelector = dom_getelorthrow(
-        '[name="sort-by"]',
+        '[name="sort"]',
         HTMLSelectElement,
     );
 
@@ -17,7 +17,7 @@ async function main() {
         viewToggle: dom_getelorthrow("#view-toggle", HTMLSelectElement),
         viewAllElem: dom_getelorthrow("#view-all", HTMLInputElement),
         statsOutput: document.getElementById("result-stats"),
-        searchBox: dom_getelorthrow("[name='search-query']", HTMLInputElement),
+        searchBox: dom_getelorthrow("[name='q']", HTMLInputElement),
         librarySelector: dom_getelorthrow(
             "#library-selector",
             HTMLButtonElement,
@@ -126,14 +126,10 @@ async function main() {
     //must happen synchronously to make item render properly
     await loadInfoEntries(uid);
 
-    if (initialSearch) {
-        ui_search(initialSearch);
-    } else if (components.searchBox?.value) {
-        //this should be separate because ui_search will add another 3
-        // if serachInput.value is something like `3 @hi`
+    if (initialSearch || components.searchBox?.value) {
         mkSearchUI({
-            "search-query": components.searchBox.value,
-        });
+            "q": urlParams.get("q") || components.searchBox?.value || ""
+        })
     } else {
         let entries = Object.values(items_getAllEntries()).map((v) => v.info);
         entries = sortEntries(entries, sortBySelector.value);

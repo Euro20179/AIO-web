@@ -274,7 +274,7 @@ function ui_delstat(name: string): boolean {
  * @returns 0 on success
  */
 function ui_sort(by: string): number {
-    const sortBySelector = document.querySelector('[name="sort-by"]') as HTMLSelectElement
+    const sortBySelector = document.querySelector('[name="sort"]') as HTMLSelectElement
     sortBySelector.value = by
     sortEntriesUI()
     return 0

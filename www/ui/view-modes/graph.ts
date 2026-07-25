@@ -439,7 +439,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
         }
 
     ChartManager.call(this, "watch-time-by-year", async (entries) => {
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [years, data] = await organizeData(entries, sortBy.value)
 
         let watchTimes = data
@@ -456,7 +456,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
     })
 
     ChartManager.call(this, "adj-rating-by-year", async (entries) => {
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [years, data] = await organizeData(entries, sortBy.value)
 
         let items = data
@@ -490,7 +490,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
 
     ChartManager.call(this, "cost-by-format", async (entries) => {
         entries = entries.filter(v => items_getEntry(v.ItemId).getLastPurchasePrice() > 0)
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [labels, data] = await organizeData(entries, sortBy.value)
         let totals = data.map(v => v.reduce((p, c) => p + items_getEntry(c.ItemId).getLastPurchasePrice(), 0))
 
@@ -499,7 +499,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
 
     ChartManager.call(this, "rating-by-year", async (entries) => {
         const rbyCtx = getCtx2.call(this, "rating-by-year")
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [years, data] = await organizeData(entries, sortBy.value)
         const ratings = data
             .map(v => v
@@ -514,7 +514,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
     })
 
     ChartManager.call(this, "general-rating-by-year", async (entries) => {
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [years, data] = await organizeData(entries, sortBy.value)
         const ratings = data.map(v => {
             return v.map(i => {
@@ -531,7 +531,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
     })
 
     ChartManager.call(this, "rating-disparity-graph", async (entries) => {
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         let [years, data] = await organizeData(entries, sortBy.value)
         const disparity = data.map(v => {
             return v.map(i => {
@@ -550,7 +550,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
     })
 
     ChartManager.call(this, "by-year", async (entries) => {
-        let sortBy = this.win.document.getElementsByName("sort-by")[0] as HTMLInputElement
+        let sortBy = this.win.document.getElementsByName("sort")[0] as HTMLInputElement
         const ctx = getCtx2.call(this, "by-year")
         let [years, data] = await organizeData(entries, sortBy.value)
         const counts = data.map(v => v.length)

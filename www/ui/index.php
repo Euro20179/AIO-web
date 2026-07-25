@@ -113,11 +113,11 @@
                     <button onclick="newEntryDialogUI()" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
-                <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
-                    <input type="search" name="search-query" placeholder="search query">
+                <form action="/ui" id="sidebar-form" class="flex row wrap">
+                    <input type="search" name="q" placeholder="search query">
 
                     <span id='sort-by-hint' popover='hint'>Sorting method</span>
-                    <select name="sort-by" toggle-hint='sort-by-hint' aria-labelledby="sort-by-hint">
+                    <select name="sort" toggle-hint='sort-by-hint' aria-labelledby="sort-by-hint">
                         <optgroup label="Misc">
                             <option value="">No Sort</option>
                             <option value="item-id">Item Id</option>
