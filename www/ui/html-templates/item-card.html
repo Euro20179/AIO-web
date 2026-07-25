@@ -3,6 +3,19 @@
     <link rel="stylesheet" href="/css/general.css">
     <link rel="stylesheet" href="/ui/css-styles/rating-styles.css">
     <style>
+        :host(.image-only) :not(:has(picture), picture, picture *, img) {
+            display: none;
+        }
+
+        :host {
+            height: 100%;
+            overflow: clip;
+        }
+
+        :has(slot[name="thumbnail"]) {
+            height: 100%;
+        }
+
         article {
             text-align: center;
             max-width: 25ch;

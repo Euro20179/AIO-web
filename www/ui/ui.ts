@@ -597,25 +597,10 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
         openDisplayWinUI(id)
     }
 
-    const btn = document.createElement("button")
-    const entry = items_getEntry(id)
-    const t = entry.fixedThumbnail
+    const card = mkItemCardUI(id, openfn as any)
+    card.classList.add("image-only")
 
-    const alt = entry.info.En_Title || entry.info.Native_Title
-
-    if (t) {
-        const img = document.createElement("img")
-        img.src = t
-        img.alt = alt
-        btn.append(img)
-        btn.classList.add("styleless-button")
-    } else {
-        btn.append(alt)
-    }
-
-    btn.addEventListener("click", () => openfn())
-
-    return btn
+    return card
 }
 
 /**
@@ -3172,18 +3157,18 @@ async function setProgressUI(forItem: bigint) {
 /**
  * Given an item id, make an <item-card> element
  * @param {bigint} forItem
+ * @param {Function} openfn function that runs when item is opened, by default opens a popup
  * @returns {HTMLElement}
  */
-function mkItemCardUI(forItem: bigint): HTMLElement {
+function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Event) => void): HTMLElement {
+    openfn ||= (_target: any) => openDisplayWinUI(forItem)
     const card = document.createElement("item-card");
     card.setAttribute("data-item-id", String(forItem))
 
     const user = findUserEntryById(forItem)
     updateDeclarativeDSL(
         {
-            openitem: target => {
-                openDisplayWinUI(forItem)
-            }
+            openitem: openfn
         },
         settings_get(getUserUID(), "enable_unsafe"),
         findInfoEntryById(forItem),
