@@ -4,7 +4,7 @@
  * requires: ui/globals.ts
  */
 
-let formats: { [key: number]: string } = {}
+let _api_formats_cache: { [key: number]: string } = {}
 let _api_as_cache: { [key: number]: string } = {}
 
 let _api_types_cache: EntryType[] = []
@@ -180,7 +180,7 @@ function canWait(status: Status) {
 }
 
 function api_formatsCache() {
-    return formats
+    return _api_formats_cache
 }
 
 async function api_listArtStyles() {
@@ -194,17 +194,17 @@ async function api_listArtStyles() {
 }
 
 async function api_listFormats() {
-    if (Object.keys(formats).length > 0) return formats
+    if (Object.keys(_api_formats_cache).length > 0) return _api_formats_cache
 
     const res = await fetch(`${apiPath}/type/format`)
 
     if (res.status !== 200) {
-        return formats
+        return _api_formats_cache
     }
 
     const json = await res.json()
-    formats = json
-    return formats
+    _api_formats_cache = json
+    return _api_formats_cache
 }
 
 async function api_listTypes() {

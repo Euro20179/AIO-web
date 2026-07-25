@@ -78,6 +78,9 @@ function startupUI({
     sidebarItems,
 }: typeof components) {
 
+    //attempt to warm up the cache
+    api_listFormats()
+
     addEventListener("modes.update-item", () => {
         dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
             .flatMap(i => i.info.Tags || []).toArray()).values().toArray())

@@ -18,6 +18,11 @@
 
 //for format
 const DIGI_MOD = 0b1
+const UNOWNED_MOD = 0b1 << 1
+
+const items_F_MODS = new Set([
+    DIGI_MOD, UNOWNED_MOD
+])
 
 const AS_ANIME = 1
 const AS_CARTOON = 2
@@ -1158,43 +1163,18 @@ function typeToSymbol(type: string): string {
 }
 
 /**
- * Given a format, get a human readable name
-*/
-function items_formatToName(format: number, modifiers: number): string {
+ * Creates a human readable representation of modifiers
+ * @param {number} modifiers
+ * @returns string
+ */
+function items_formatModifiersToName(modifiers: number): string {
     let out = ""
-    if (items_isDigitized(modifiers)) {
-        out = "+d"
+    for(let mod of items_F_MODS) {
+        if(items_hasFMod(modifiers, mod)) {
+            out += `+${{[DIGI_MOD]: "d", [UNOWNED_MOD]: "u"}[mod]}`
+        }
     }
-    return {
-        0: "VHS",
-        1: "CD",
-        2: "DVD",
-        3: "BLURAY",
-        4: "4KBLURAY",
-        5: "MANGA",
-        6: "BOOK",
-        7: "DIGITAL",
-        8: "BOARDGAME",
-        9: "STEAM",
-        10: "NIN_SWITCH",
-        11: "XBOXONE",
-        12: "XBOX360",
-        13: "OTHER",
-        14: "VINYL",
-        15: "IMAGE",
-        16: "UNOWNED",
-        17: "THEATER",
-        18: "WII",
-        19: "NIN_DS",
-        20: "PS1",
-        21: "PS2",
-        22: "PS3",
-        23: "PS4",
-        24: "PS5",
-        25: "NIN_SWITCH2",
-        26: "EPIC",
-        27: "GAMECUBE",
-    }[format] + out
+    return out
 }
 
 /**
@@ -1203,10 +1183,7 @@ function items_formatToName(format: number, modifiers: number): string {
     * @returns {string} - a symbol with an optional `+d`
 */
 function items_formatToSymbol(format: number, modifiers: number): string {
-    let out = ""
-    if (items_isDigitized(modifiers)) {
-        out = "+d"
-    }
+    let out = items_formatModifiersToName(modifiers)
     return {
         0: "📼",
         1: "💿︎",
@@ -1262,13 +1239,25 @@ function fixThumbnailURL(url: string): string {
     * @returns {Promise<string>}
 */
 async function formatToName(format: number, modifiers: number): Promise<string> {
-    let out = ""
-    if ((modifiers & DIGI_MOD) === DIGI_MOD) {
-        out = " +digital"
-    }
+    let out = items_formatModifiersToName(modifiers)
 
     const formats = await api_listFormats()
 
+    if (format >= Object.keys(formats).length) {
+        return `unknown${out}`
+    }
+    return `${formats[format].toUpperCase()}${out}`
+}
+
+/**
+    * converts an item format to a human readable name
+    * IMPORTANT: relies on api_listFormats having been called earlier
+    * @param {number} format - the format
+    * @returns {Promise<string>}
+*/
+function items_formatToNameCached(format: number, modifiers: number): string {
+    let out = items_formatModifiersToName(modifiers)
+    let formats = _api_formats_cache
     if (format >= Object.keys(formats).length) {
         return `unknown${out}`
     }
@@ -1281,7 +1270,17 @@ async function formatToName(format: number, modifiers: number): Promise<string> 
  * @returns {boolean}
  */
 function items_isDigitized(format: number): boolean {
-    return (format & DIGI_MOD) === DIGI_MOD
+    return items_hasFMod(format, DIGI_MOD)
+}
+
+/**
+ * Checks if mod is one of the modifiers
+ * @param {number} modifiers the bitfield of format modifiers
+ * @param {number} mod the modifier to check for
+ * @returns {boolean}
+*/
+function items_hasFMod(modifiers: number, mod: number): boolean {
+    return (modifiers & mod) == mod
 }
 
 /**

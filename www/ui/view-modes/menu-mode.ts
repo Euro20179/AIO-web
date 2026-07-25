@@ -107,7 +107,7 @@ CategoriesMode.prototype.add = function(this: CategoriesMode, item: InfoEntry) {
                 addCategory(item.Type)
                 break
             case "Format":
-                addCategory(items_formatToName(item.Format))
+                addCategory(items_formatToNameCached(item.Format, item.Format_Modifiers))
                 break
             case "Tag":
                 if(item.Tags)

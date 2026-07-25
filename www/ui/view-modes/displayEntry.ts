@@ -518,13 +518,7 @@ function _mkde_actions() {// {{{
             } else if (items_isDigitized(item.Format)) {
                 item.Format_Modifiers -= DIGI_MOD
             }
-            api_setItem("", item).then(() => {
-                updateInfo2({
-                    [String(item.ItemId)]: {
-                        info: item
-                    }
-                })
-            })
+            setPropUI(item, "Format_Modifiers", item.Format_Modifiers, "set digitization")
         },
 
         /**
