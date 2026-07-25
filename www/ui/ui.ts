@@ -2391,17 +2391,13 @@ function doUserStartupUI(settings: Settings) {
 /**
     * Converts a format number to a displayable symbol
 */
-function formatToSymbolUI(format: number): string {
+function formatToSymbolUI(format: number, modifiers: number): string {
     const custom = settings_get(getUserUID(), "custom_item_formats")
     let out = ""
-    if (items_isDigitized(format)) {
-        format -= DIGI_MOD
-        out = "+d"
-    }
     if (format in custom) {
         return custom[format] + out
     }
-    return items_formatToSymbol(format) + out
+    return items_formatToSymbol(format, modifiers) + out
 }
 
 /**

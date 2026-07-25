@@ -17,7 +17,7 @@
 //the EntryRelations instance for each Entry
 
 //for format
-const DIGI_MOD = 0x1000
+const DIGI_MOD = 0b1
 
 const AS_ANIME = 1
 const AS_CARTOON = 2
@@ -95,6 +95,7 @@ type InfoEntry = {
     Uid: number
     RecommendedBy: string
     Priority: number
+    FormatModifiers: number
 
     Tags: string[]
 }
@@ -1159,10 +1160,9 @@ function typeToSymbol(type: string): string {
 /**
  * Given a format, get a human readable name
 */
-function items_formatToName(format: number): string {
+function items_formatToName(format: number, modifiers: number): string {
     let out = ""
-    if (items_isDigitized(format)) {
-        format -= DIGI_MOD
+    if (items_isDigitized(modifiers)) {
         out = "+d"
     }
     return {
@@ -1202,10 +1202,9 @@ function items_formatToName(format: number): string {
     * @param {string} format - the type to convert
     * @returns {string} - a symbol with an optional `+d`
 */
-function items_formatToSymbol(format: number): string {
+function items_formatToSymbol(format: number, modifiers: number): string {
     let out = ""
-    if (items_isDigitized(format)) {
-        format -= DIGI_MOD
+    if (items_isDigitized(modifiers)) {
         out = "+d"
     }
     return {
@@ -1262,11 +1261,9 @@ function fixThumbnailURL(url: string): string {
     * @param {number} format - the format
     * @returns {Promise<string>}
 */
-async function formatToName(format: number): Promise<string> {
-    const DIGI_MOD = 0x1000
+async function formatToName(format: number, modifiers: number): Promise<string> {
     let out = ""
-    if ((format & DIGI_MOD) === DIGI_MOD) {
-        format -= DIGI_MOD
+    if ((modifiers & DIGI_MOD) === DIGI_MOD) {
         out = " +digital"
     }
 
@@ -1292,19 +1289,19 @@ function items_isDigitized(format: number): boolean {
  * @param {string} name The name to convert
  * @returns {PRomise<number>}
  */
-async function nameToFormat(name: string): Promise<number> {
-    const DIGI_MOD = 0x1000
+async function nameToFormat(name: string): Promise<[number, number]> {
+    let mods =0
     let val = 0
     name = name.toLowerCase()
     if (name.includes("+digital")) {
         name = name.replace("+digital", "")
-        val |= DIGI_MOD
+        mods |= DIGI_MOD
     }
 
     const formats = Object.fromEntries(Object.entries(await api_listFormats()).map(([k, v]) => [v, Number(k)]))
 
     val |= formats[name as keyof typeof formats]
-    return val
+    return [val, mods]
 }
 
 const items_reduce_SELF = 1n << 0n

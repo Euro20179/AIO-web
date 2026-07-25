@@ -514,9 +514,9 @@ function _mkde_actions() {// {{{
         setdigitization: function(item, _, target) {
             if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
-                item.Format |= DIGI_MOD
+                item.FormatModifiers |= DIGI_MOD
             } else if (items_isDigitized(item.Format)) {
-                item.Format -= DIGI_MOD
+                item.FormatModifiers -= DIGI_MOD
             }
             api_setItem("", item).then(() => {
                 updateInfo2({
@@ -1521,11 +1521,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             return
         }
         fillFormatSelectionUI(formatSelector).then(() => {
-            if (items_isDigitized(item.Format)) {
-                formatSelector.value = String(item.Format - DIGI_MOD)
-            } else {
-                formatSelector.value = String(item.Format)
-            }
+            formatSelector.value = String(item.Format)
         })
     })
 
@@ -1536,7 +1532,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             console.warn("#format-digitized must be a <input>")
             return
         }
-        digitized.checked = items_isDigitized(item.Format)
+        digitized.checked = items_isDigitized(item.FormatModifiers)
     })
 
 
@@ -1587,12 +1583,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //type icon
     let typeIcon = typeToSymbol(item.Type)
-    let formatIcon = formatToSymbolUI(item.Format)
+    let formatIcon = formatToSymbolUI(item.Format, item.FormatModifiers)
     renderComponent("#on-format", async (onFormat) => {
-        const name = await formatToName(item.Format)
+        const name = await formatToName(item.Format, item.FormatModifiers)
         if (!(name).startsWith("UNOWNED")) {
             onFormat.title = name
-            onFormat.innerHTML = formatToSymbolUI(item.Format)
+            onFormat.innerHTML = formatToSymbolUI(item.Format, item.FormatModifiers)
         }
     })
 
@@ -1627,7 +1623,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         }
 
         //format
-        formatToName(item.Format).then(name => {
+        formatToName(item.Format, item.FormatModifiers).then(name => {
             displayEntryTitle?.setAttribute("data-format-name", name)
         })
     })
