@@ -113,7 +113,7 @@
                     <button onclick="newEntryDialogUI()" type="button" id="new-entry-button">➕︎</button>
                 </div>
 
-                <form action="/ui" id="sidebar-form" class="flex row wrap">
+                <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
                     <input type="search" name="q" placeholder="search query">
 
                     <span id='sort-by-hint' popover='hint'>Sorting method</span>

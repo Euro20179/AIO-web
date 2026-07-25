@@ -83,23 +83,6 @@ function startupUI({
             .flatMap(i => i.info.Tags || []).toArray()).values().toArray())
     })
 
-    navigation.addEventListener("navigate", e => {
-        const url = new URL(e.destination.url)
-        if (!/^\/ui\/?/.test(url.pathname)) return
-
-        const params = new URLSearchParams(url.search)
-        e.intercept({
-            async handler() {
-                const searchEntries: Record<string, string> = {}
-                for (let param of ["q", "uid", "sort"]) {
-                    if(params.has(param))
-                        searchEntries[param] = params.get(param)!
-                }
-                mkSearchUI(searchEntries)
-            }
-        })
-    })
-
     for (let key in arguments[0]) {
         components[key as keyof StartupUIComponents] = arguments[0][key]
     }
