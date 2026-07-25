@@ -774,23 +774,7 @@ function _mkde_actions() {// {{{
             let count = await promptNumber("Enter the number of <strong>minutes</strong> you've spent viewing this entry", 'Not a number, minutes spent')
             if (count === null) return
 
-            authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&minutes=${count}`)
-                .then(res => res?.text())
-                .then(alert)
-                .then(() => {
-                    let user = findUserEntryById(item.ItemId)
-                    if (!user) {
-                        refreshInfoUI(getUidUI()).then(() => {
-                            refreshDisplayItem.call(this, item.ItemId)
-                        })
-                    } else {
-                        user.Minutes = count
-                        updateInfo2({
-                            [String(item.ItemId)]: { user }
-                        })
-                    }
-                })
-                .catch(console.error)
+            setPropUI(findUserEntryById(item.ItemId), "Minutes", count, "set minutes")
         },
 
         /**
@@ -800,23 +784,7 @@ function _mkde_actions() {// {{{
             let count = await promptNumber("New view count", 'Not a number, view count')
             if (count === null) return
 
-            authorizedRequest(`${apiPath}/engagement/mod-entry?id=${item.ItemId}&view-count=${count}`)
-                .then(res => res?.text())
-                .then(alert)
-                .then(() => {
-                    let user = findUserEntryById(item.ItemId)
-                    if (!user) {
-                        refreshInfoUI(getUidUI()).then(() => {
-                            refreshDisplayItem.call(this, item.ItemId)
-                        })
-                    } else {
-                        user.ViewCount = count
-                        updateInfo2({
-                            [String(item.ItemId)]: { user }
-                        })
-                    }
-                })
-                .catch(console.error)
+            setPropUI(findUserEntryById(item.ItemId), "ViewCount", count, "set view count")
         },
 
         /**
