@@ -382,6 +382,7 @@ for(let name of [
     "new-event-dialog",
     "item-identification-form-dialog",
     "new-entry-dialog",
+    "format-modifier-menu",
 
     /* general purpose item components */
     "item-card",

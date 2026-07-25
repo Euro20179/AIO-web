@@ -32,6 +32,8 @@
         "color-scheme-selector",
         "close-button",
 
+        "format-modifier-menu",
+
         "item-card",
 
         "de-status-menu",

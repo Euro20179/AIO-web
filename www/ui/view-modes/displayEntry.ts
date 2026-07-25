@@ -93,6 +93,38 @@ function _mkde_actions() {// {{{
         },
 
         /**
+         * Opens the format mod editor, and allows user to edit the modifiers
+         */
+        openfmodseditor: function(item, _root, target) {
+            const d = openModalUI('format-modifier-selection-dialog', undefined, 'format-modifier-menu', this.win)
+            const f = dom_getelorthrow('form', this.win.HTMLFormElement, d)
+            for(let mod of items_F_MODS) {
+                let inputName = {
+                    [DIGI_MOD]: "digitized",
+                    [UNOWNED_MOD]: "unowned"
+                }[mod]
+
+                if(!inputName) {
+                    console.warn(`${mod} does not have a corresponding input`)
+                    continue
+                }
+
+                if (items_hasFMod(item.Format_Modifiers, mod)) {
+                    f.elements[`is-${inputName}`].checked = true
+                }
+
+                f.elements["is-" + inputName].oninput = e => {
+                    if(e.target.checked) {
+                        item.Format_Modifiers |= mod
+                    } else {
+                        item.Format_Modifiers -= mod
+                    }
+                    setPropUI(item, "Format_Modifiers", item.Format_Modifiers, `set ${inputName}`)
+                }
+            }
+        },
+
+        /**
             * Creates a buy/sell transaction.
         */
         transact: function(item, _root, target) {
