@@ -1282,7 +1282,7 @@ function getSearchDataUI(): FormData {
 /**
     * Akin to the user submitting the search form
 * form inputs:
-    * - q: string, the search query (processed on the client, so uses client filters, and '3' prefixing)
+* - q: string, the search query (processed on the client, so uses client filters, and '3' prefixing)
 * - sort: ""
 *   | "item-id"
 *   | "release-year"
@@ -1790,8 +1790,26 @@ async function newEventUI(form: HTMLFormElement) {
 
 /**
  * Opens the new entry dialog
+ * @param {Record<string, string>} params a set of parameters to prefill the new entry form with
+ * parameters:
+ * - title: user defined entry name
+ * - native-title: user defined entry native title
+ * - user-status: current status for new entry
+ * - type: the type of entry
+ * - format: the format of the entry
+ * - is-digital: whether or not it is a digitized version of the format
+ * - price: purchase/sell price of the item
+ * - recommended-by: "," separated list of recommenders
+ * - tags: "," separated list of tags
+ * - location: physical/digital location of the item (eg a url)
+ * - metadata: a stringified MetadataEntry
+ * - is-{artstyle}: whether or not it has that art style
+ * - libraryId: the parent library id
+ * - parentId: the parent id
+ * - copyOf: id of the copy
+ * - requires: id of a prerequisit
  */
-function newEntryDialogUI() {
+function newEntryDialogUI(params?: Record<string, string>) {
     const dialog = openModalUI("new-entry", undefined, "new-entry-dialog")
     if(!dialog) {
         alert("Failed to create new entry dialog")
@@ -1805,9 +1823,17 @@ function newEntryDialogUI() {
     let typeSelector = dom_getel('[name="type"]', HTMLSelectElement, dialog)
     if(typeSelector)
         fillTypeSelectionUI(typeSelector)
+
     const title = dom_getelorthrow('[name="title"]', HTMLInputElement, dialog)
 
     const form = dom_getelorthrow("#new-item-form", HTMLFormElement, dialog)
+
+    if(params) {
+        for(let [param, val] of Object.entries(params)) {
+            let el = dom_getel(`[name="${param}"]`, null, form)
+            if(el && "value" in el) el.value = val
+        }
+    }
 
     form.oninput = function(e) {
         if (e.target instanceof HTMLInputElement

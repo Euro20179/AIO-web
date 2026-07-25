@@ -283,14 +283,9 @@ function _mkde_actions() {// {{{
          * with requires filled in as the current item
          */
         newrequires: function(item ){
-            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
-            if(!newEntryDialog) {
-                console.error("failed to create the new-entry dialog")
-                return
-            }
-            const requiresIdEl = dom_getelorthrow(`[name="requires"]`, this.win.HTMLInputElement, newEntryDialog)
-
-            requiresIdEl.value = String(item.ItemId)
+            newEntryDialogUI({
+                requires: item.ItemId.toString()
+            })
         },
 
         /**
@@ -318,14 +313,9 @@ function _mkde_actions() {// {{{
          * Creates a new item with the parentId set to the current item
          */
         newchild: function(item) {
-            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
-            if(!newEntryDialog) {
-                console.error("failed to create the new-entry dialog")
-                return
-            }
-            const parentIdInput = dom_getelorthrow(`[name="parentId"]`, this.win.HTMLInputElement, newEntryDialog)
-
-            parentIdInput.value = String(item.ItemId)
+            newEntryDialogUI({
+                parentId: item.ItemId.toString()
+            })
         },
 
         /**
@@ -353,14 +343,9 @@ function _mkde_actions() {// {{{
          * Creates a new item with copyOf set to the current item
          */
         newcopy: function(item) {
-            const newEntryDialog = openModalUI("new-entry", undefined, "new-entry-dialog", this.win)
-            if(!newEntryDialog) {
-                console.error("failed to create the new-entry dialog")
-                return
-            }
-            const copyOfIdInput = dom_getelorthrow(`[name="copyOf"]`, this.win.HTMLInputElement, newEntryDialog)
-
-            copyOfIdInput.value = String(item.ItemId)
+            newEntryDialogUI({
+                copyOf: item.ItemId.toString()
+            })
         },
 
         /**
