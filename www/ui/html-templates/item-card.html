@@ -11,17 +11,20 @@
             height: 100%;
         }
 
-        :has(slot[name="thumbnail"]) {
+        :host(.image-only) :has(slot[name="thumbnail"]) {
             height: 100%;
         }
 
         article {
             text-align: center;
+            display: flex;
+            flex-direction: column;
             max-width: 25ch;
         }
+
         picture {
             display: block;
-            height: 150px;
+            height: 100%;
             align-content: center;
         }
 
@@ -35,7 +38,6 @@
             display: block;
             margin-block: var(--very-small-gap);
             text-align: center;
-            width: 100%;
         }
         h2 {
             overflow: clip;
