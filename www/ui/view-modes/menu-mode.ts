@@ -120,6 +120,13 @@ CategoriesMode.prototype.add = function(this: CategoriesMode, item: InfoEntry) {
                 }
                 break
             }
+            case "Country": {
+                addCategory(
+                    findMetadataById(item.ItemId).Country
+                        .split(",")
+                        .map(v => util_countrycode2name(v.trim()) + " " + items_countryOfOrigin2Flag(v.trim()))
+                )
+            }
         }
     }
 
