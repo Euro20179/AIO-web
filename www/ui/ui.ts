@@ -597,10 +597,18 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
         openDisplayWinUI(id)
     }
 
-    const card = mkItemCardUI(id, openfn as any)
-    card.classList.add("image-only")
+    if(items_getEntry(id).fixedThumbnail) {
+        const card = mkItemCardUI(id, openfn as any)
+        card.classList.add("image-only")
+        return card
+    } else {
+        const btn = document.createElement("button")
+        const entry = items_getEntry(id)
+        btn.append(entry.info.En_Title || entry.info.Native_Title)
+        btn.addEventListener("click", () => openfn())
+        return btn
+    }
 
-    return card
 }
 
 /**
