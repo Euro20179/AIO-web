@@ -59,6 +59,10 @@ background: var(--red)
     background: var(--lavender)
     }
 `,
+        zero: `
+        tier-label {
+            background: var(--secondary)
+        }`
     },
 
     custom_item_formats: {
