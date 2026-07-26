@@ -373,7 +373,9 @@ function items_sumTransactions(item: bigint) {
  * normalizes a metadata rating, returns 0 if there is no rating
  */
 function items_getNormalizedRating(meta: MetadataEntry): number {
-    return (meta.Rating / meta.RatingMax * 100) || 0
+    let max = meta.RatingMax || settings_get(meta.Uid, "user_rating_max")
+    let normal = (meta.Rating / max * 100)
+    return normal
 }
 
 function items_normalizeUserRating(rating: number, max: number): number {

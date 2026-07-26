@@ -1706,10 +1706,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#audience-rating", audienceRatingEl => {
         if (meta.Rating) {
             let rating = meta.Rating
-            let normalizedRating = rating
-            if (max !== 0) {
-                normalizedRating = rating / max * 100
-            }
+            let normalizedRating = items_getNormalizedRating(meta)
             applyUserRating(
                 settings_get(user.Uid, "tiers"),
                 normalizedRating,
