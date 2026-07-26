@@ -56,6 +56,5 @@ if ($ty == "json") {
     $val = json_decode($val);
 }
 
-$uid = $_GET["uid"];
 set_setting((int)$uid, $qs_data["setting"], $val);
 ?>
