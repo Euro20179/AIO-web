@@ -260,7 +260,8 @@ TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTM
     li.append(btn)
 
     if (!(tier !== false)) {
-        throw new Error(`No tier for rating: ${rating}`)
+        console.warn(`No tier for rating: ${rating}`)
+        return li
     }
 
     let ul = this.rows[tier]
