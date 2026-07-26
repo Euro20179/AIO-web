@@ -59,6 +59,9 @@
 
         button {
             align-self: center;
+            &:has(img[src=""], img:not([src])) {
+                min-height: 70cqi;
+            }
         }
     }
 
@@ -71,10 +74,6 @@
         @container body (width < 800px) {
             justify-self: center;
         }
-    }
-
-    #sidebar-thumbnail:not([src]) {
-        height: 70cqi;
     }
 
     button:focus {
