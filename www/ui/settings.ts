@@ -229,6 +229,7 @@ function settings_get<T extends keyof Settings>(uid: number, key: T): Settings[T
     if(!userSettings.has(uid)) {
         settings_load(uid)
         console.warn(`${uid}'s settings have not been loaded, loading for next time`)
+        return defaultSettings[key]
     }
     return userSettings.get(uid)![key]
 }
