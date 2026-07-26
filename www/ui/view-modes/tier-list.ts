@@ -250,9 +250,9 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
 
 TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTMLElement {
     let mode = this._getMode()
+    let li = this.win.document.createElement("li")
     let [rating, tier] = this._findInfo(entry.ItemId, mode)
 
-    let li = this.win.document.createElement("li")
     const btn = createClickableEntryUI(entry.ItemId)
     btn.title = `${entry.En_Title || entry.Native_Title} - (${rating})`
 
