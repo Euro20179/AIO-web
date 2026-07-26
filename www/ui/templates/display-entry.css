@@ -397,6 +397,10 @@
         flex-grow: 1;
     }
 
+    span:has(> #audience-rating:empty) {
+        display: none;
+    }
+
 
     #identify-items:popover-open {
         display: flex;

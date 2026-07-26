@@ -1717,8 +1717,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 audienceRatingEl
             )
             audienceRatingEl.innerHTML = String(rating)
-        } else if (audienceRatingEl) {
-            audienceRatingEl.innerText = "Unrated"
         }
     })
 

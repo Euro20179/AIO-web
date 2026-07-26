@@ -163,7 +163,11 @@
             </div>
             <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
 
-            <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
+            <div class="flex small-gap wrap j-center">
+                <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
+                <span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'></span>
+                <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
+            </div>
 
         </hgroup>
 
@@ -178,8 +182,6 @@
                     entry-action="setrating">??</button>
                 <span id='your-rating-hint' popover='hint'>Your Rating</span>
 
-                <span>(<span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'>??</span>)</span>
-                <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
                 <button class="styleless-button" entry-action="transact"><span class="cost" id="cost"></span></button>
             </div>
 
