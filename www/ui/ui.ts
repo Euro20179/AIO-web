@@ -604,7 +604,15 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
     } else {
         const btn = document.createElement("button")
         const entry = items_getEntry(id)
-        btn.append(entry.info.En_Title || entry.info.Native_Title)
+        let text = entry.info.En_Title || entry.info.Native_Title
+        if(entry.info.Uid !== getUidUI()) {
+            if(ACCOUNTS[entry.info.Uid]) {
+                text += ` (${ACCOUNTS[entry.info.Uid]})`
+            } else {
+                text += ` (uid: ${entry.info.Uid})`
+            }
+        }
+        btn.append(text)
         btn.addEventListener("click", () => openfn())
         return btn
     }
@@ -3172,6 +3180,21 @@ function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Eve
     openfn ||= (_target: any) => openDisplayWinUI(forItem)
     const card = document.createElement("item-card");
     card.setAttribute("data-item-id", String(forItem))
+
+    const item = findInfoEntryById(forItem)
+
+    if(getUidUI() !== item.Uid) {
+        const usernameDisplay = document.createElement("span")
+        usernameDisplay.slot = "username"
+        let tn = document.createTextNode("")
+        if(ACCOUNTS[item.Uid]) {
+            tn.appendData(ACCOUNTS[item.Uid])
+        } else {
+            tn.appendData(`uid: ${item.Uid}`)
+        }
+        usernameDisplay.append(tn)
+        card.append(usernameDisplay)
+    }
 
     const user = findUserEntryById(forItem)
     updateDeclarativeDSL(

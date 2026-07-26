@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="/css/general.css">
     <link rel="stylesheet" href="/ui/css-styles/rating-styles.css">
     <style>
-        :host(.image-only) :not(:has(picture), picture, picture *, img) {
+        :host(.image-only) :not(:has(picture), picture, picture *, img, p:has([name="username"]), [name="username"]) {
             display: none;
         }
 
@@ -46,6 +46,7 @@
         }
     </style>
     <article>
+        <p class="m-0"><slot name="username"></slot></p>
         <button entry-action="openitem" class="styleless-button">
             <picture>
                 <slot name="thumbnail"></slot>
