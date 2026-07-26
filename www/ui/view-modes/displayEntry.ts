@@ -1688,12 +1688,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Rating
     renderComponent("#user-rating", ratingEl => {
-        applyUserRating(
-            settings_get(user.Uid, "tiers"),
-            user.UserRating,
-            settings_get(user.Uid, "user_rating_max"),
-            ratingEl
-        )
+        settings_load(user.Uid).then(() => {
+            applyUserRating(
+                settings_get(user.Uid, "tiers"),
+                user.UserRating,
+                settings_get(user.Uid, "user_rating_max"),
+                ratingEl
+            )
+        })
         ratingEl.innerHTML = user.UserRating
             ? String(user.UserRating)
             : "Unrated"
@@ -1711,7 +1713,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             applyUserRating(
                 settings_get(user.Uid, "tiers"),
                 normalizedRating,
-                settings_get(user.Uid, "user_rating_max"),
+                100,
                 audienceRatingEl
             )
             audienceRatingEl.innerHTML = String(rating)
