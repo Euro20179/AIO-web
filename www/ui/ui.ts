@@ -2207,6 +2207,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
         "NIN_SWITCH2": "Console",
         "GAMECUBE": "Console",
         "WII": "Console",
+        "WII_U": "Console",
         "NIN_DS": "Console",
         "PS1": "Console",
         "PS2": "Console",
@@ -2949,6 +2950,9 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
                     break
                 case "ds":
                     form.elements["format"].value = 19
+                    break
+                case "wiiu":
+                    form.elements["format"].value = 28
                     break
             }
         }

@@ -1215,6 +1215,7 @@ function items_formatToSymbol(format: number, modifiers: number): string {
         25: "S2",
         26: "EG",
         27: "G",
+        28: "WU"
     }[format] + out
 }
 
