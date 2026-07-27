@@ -1190,7 +1190,7 @@ function whatToInclude(el: ShadowRoot): { include: bigint, recursive: boolean } 
     if(checked("requires")) include |= items_reduce_REQUIRES
     return {
         include,
-        recursive: checked("recursively")
+        recursive: checked("recusively")
     }
 }
 

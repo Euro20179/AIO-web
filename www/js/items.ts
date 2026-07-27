@@ -1313,8 +1313,11 @@ const items_reduce_REQUIRES = 1n << 3n
  * @param {boolean} recursive - whether or not to apply this function to copies and children (if include{copies,children} are true)
  * @param {((p: T, c: bigint) => T)} reduction - the reducer function
  * @param {T} initial the starting value
+ * @param {Set<bigint>} [visited] the set of already visited items to prevent infinite recursion
  */
-function items_reduce<T>(itemId: bigint, include: bigint, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T): T {
+function items_reduce<T>(itemId: bigint, include: bigint, recursive: boolean, reduction: ((p: T, c: bigint) => T), initial: T, visited: Set<bigint> = new Set): T {
+    if(visited.has(itemId)) return initial
+    visited.add(itemId)
     const includeSelf = (include & items_reduce_SELF) > 0
     const includeChildren = (include & items_reduce_CHILDREN) > 0
     const includeCopies = (include & items_reduce_COPIES) > 0
@@ -1325,7 +1328,7 @@ function items_reduce<T>(itemId: bigint, include: bigint, recursive: boolean, re
     if (includeChildren) {
         for (let child of findDescendants(itemId)) {
             if (recursive) {
-                initial = items_reduce(child.ItemId, include, true, reduction, initial)
+                initial = items_reduce(child.ItemId, include, true, reduction, initial, visited)
             } else {
                 initial = reduction(initial, child.ItemId)
             }
@@ -1334,7 +1337,7 @@ function items_reduce<T>(itemId: bigint, include: bigint, recursive: boolean, re
     if (includeCopies) {
         for (let copy of findCopies(itemId)) {
             if (recursive) {
-                initial = items_reduce(copy.ItemId, include, true, reduction, initial)
+                initial = items_reduce(copy.ItemId, include, true, reduction, initial, visited)
             } else {
                 initial = reduction(initial, copy.ItemId)
             }
@@ -1343,7 +1346,7 @@ function items_reduce<T>(itemId: bigint, include: bigint, recursive: boolean, re
     if (includeRequires) {
         for (let requirement of findRequirements(itemId)) {
             if (recursive) {
-                initial = items_reduce(requirement.ItemId, include, true, reduction, initial)
+                initial = items_reduce(requirement.ItemId, include, true, reduction, initial, visited)
             } else {
                 initial = reduction(initial, requirement.ItemId)
             }
