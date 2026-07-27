@@ -378,7 +378,7 @@ function items_getNormalizedRating(meta: MetadataEntry): number {
     return normal
 }
 
-function items_normalizeUserRating(rating: number, max: number): number {
+function items_normalizeRating(rating: number, max: number): number {
     return (rating / max * 100) || 0
 }
 
@@ -1063,8 +1063,8 @@ sorts.set("rating-disparity", (a, b) => {
     let bm = findMetadataById(b.ItemId)
     let bu = findUserEntryById(b.ItemId)
     if (!bm || !am) return 0
-    let bGeneral = normalizeRating(bm.Rating, bm.RatingMax || 100)
-    let aGeneral = normalizeRating(am.Rating, am.RatingMax || 100)
+    let bGeneral = items_normalizeRating(bm.Rating, bm.RatingMax || 100)
+    let aGeneral = items_normalizeRating(am.Rating, am.RatingMax || 100)
 
     let aUser = Number(au?.UserRating)
     let bUser = Number(bu?.UserRating)
@@ -1216,10 +1216,6 @@ function items_formatToSymbol(format: number, modifiers: number): string {
         26: "EG",
         27: "G",
     }[format] + out
-}
-
-function normalizeRating(rating: number, maxRating: number) {
-    return rating / maxRating * 100
 }
 
 /**
@@ -2047,4 +2043,8 @@ function items_getProgressParts(currentPosition: string): (RegExpMatchArray | nu
         .map(v => v.trim())
         .map(v => v.match(/(\D*)(\d+(?:\.\d+)?)(?:\/(\d+))?/))
 
+}
+
+function items_(providedMax: number, fallback: number) {
+    return providedMax || fallback
 }

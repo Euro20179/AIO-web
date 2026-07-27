@@ -540,7 +540,7 @@ var GraphMode: ModeConstructor<GraphMode> = function(this: GraphMode, output?: H
                 let rating = meta?.Rating
                 let max = meta?.RatingMax
                 if (rating && max) {
-                    let general = (rating / max) * 100
+                    let general = items_normalizeRating(rating, max)
                     return (user?.UserRating || 0) - general
                 }
                 return user?.UserRating || 0

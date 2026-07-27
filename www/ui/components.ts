@@ -173,30 +173,6 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
         }
 }
 
-function applyUserRating(
-    tierSettings: Settings["tiers"],
-    ratingStyles: Settings["rating_styles"],
-    rating: number,
-    max: number,
-    root: HTMLElement
-) {
-    for (const name of Object.keys(tierSettings)) {
-        root.classList.remove(`${name}-tier`)
-    }
-
-    rating = items_normalizeUserRating(rating, max)
-
-    let tier = settings_tier_from_rating(tierSettings, rating)
-
-    root.innerHTML = ""
-    if(tier) {
-        root.classList.add(`${tier}-tier`)
-        root.style.color = ratingStyles[tier as keyof typeof ratingStyles].color
-        root.append(`${ratingStyles[tier as keyof typeof ratingStyles].label} `)
-    }
-    root.append(rating ? String(rating) : "Unrated")
-}
-
 customElements.define("display-entry", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
