@@ -1824,6 +1824,11 @@ function newEntryDialogUI(params?: Record<string, string>) {
         alert("Failed to create new entry dialog")
         return
     }
+    dialog.append(dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
+                .flatMap(i => i.info.Tags || []).toArray()).values().toArray()) as HTMLDataListElement)
+    if(components.recommenders) {
+        dialog.append(components.recommenders.cloneNode(true))
+    }
 
     let formatSelector = dom_getel('[name="format"]', HTMLSelectElement, dialog)
     if(formatSelector)
