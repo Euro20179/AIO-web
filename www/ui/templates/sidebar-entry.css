@@ -66,6 +66,8 @@
     }
 
     #sidebar-thumbnail {
+        display: block;
+
         cursor: pointer;
         /* set a range instead of specific sizes, so that the image can resize to a good size, and so that the image fits within the size of the sidebar */
         max-height: 70cqi;
