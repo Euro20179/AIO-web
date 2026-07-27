@@ -2537,11 +2537,12 @@ async function transactUI(uid: number, itemId: bigint, transactionType: "Purchas
 * will update the list clientside, and serverside
 * @param {bigint} itemId
 */
-async function newRecommendedByUI(itemId: bigint) {
-    let newRecommendedBy = await promptUI("Names (, separated)", "", "recommended-by")
-    if (!newRecommendedBy) return
+async function newRecommendedByUI(itemId: bigint, newRecommendedBy?: string[]) {
+    if(!newRecommendedBy?.length)
+        newRecommendedBy = (await promptUI("Names (, separated)", "", "recommended-by"))?.split(",").map(v => v.trim()) || []
+    if (!newRecommendedBy.length) return
 
-    let r = newRecommendedBy.split(",")
+    let r = newRecommendedBy
     try {
         const info = findInfoEntryById(itemId)
         info.RecommendedBy = JSON.stringify(
@@ -2561,25 +2562,66 @@ async function newRecommendedByUI(itemId: bigint) {
 }
 
 /**
+ * Given an element (likely a plus button), create an input form (optionally using a datalist)
+ * that allows the user to type a string, and run onsubmit when they are done
+ * this is generally meant for a ui where the user can add multiple things to a list
+ * @param {HTMLElement} adjescentTo the element to put the input element next to
+ * @param {string} placeholder the placeholder text in the input
+ * @param {(this: GlobalEventHandlers, ev: SubmitEvent, val: string) => any} onsubmit the function that runs when the user submits the form/new item (where val is the value the user typed in)
+ * @param {HTMLDataListElement} [datalist] a datalist to use for the input element. If it is not in adjescentElement's root, it will be appended to it
+ * @returns {HTMLFormElement}
+*/
+function inputItemUI(
+    adjescentTo: HTMLElement,
+    placeholder: string,
+    onsubmit: (this: GlobalEventHandlers, ev: SubmitEvent, val: string) => any,
+    datalist?: HTMLDataListElement
+): HTMLFormElement {
+    const f = document.createElement("form")
+
+    const inp = document.createElement("input")
+    inp.placeholder = placeholder
+    inp.onkeydown = e => {
+        if(e.key == "Escape") f.remove()
+    }
+    // inp.onblur = () => f.remove()
+
+    if (datalist) {
+        if(!datalist.isConnected) {
+            adjescentTo.getRootNode()?.appendChild(datalist)
+        }
+        inp.setAttribute("list", datalist.id)
+    }
+
+    f.append(inp)
+    f.action = "javascript:void(0)"
+    f.onsubmit = function(a) {
+        if(!inp.value) return
+        f.remove()
+        return onsubmit.call(this, a, String(inp.value))
+    }
+    adjescentTo.insertAdjacentElement('afterend', f)
+    inp.focus()
+    return f
+}
+
+/**
     * Ask the user for a list of additional tags for an item
 * will update the list clientside, and serverside
 * @param {bigint} itemId
 * @param {string[] | null} [tags=null]
 */
-async function newTagsUI(itemId: bigint, tags: string[] | null = null) {
-    let newTags = null
-    if (!tags) {
-        newTags = await promptUI("Tag name (, seperated)", "", "tags-dl")
+async function newTagsUI(itemId: bigint, newTags: string[] | null = null) {
+    if (!newTags) {
+        newTags = (await promptUI("Tag name (, seperated)", "", "tags-dl"))?.split(",").map(v => v.trim()) || []
     }
-    if (!newTags) return
-    tags = newTags.split(",")
-
+    if (!newTags.length) return
 
     try {
         const info = findInfoEntryById(itemId)
-        info.Tags = info.Tags?.concat(tags) || tags
+        info.Tags = info.Tags?.concat(newTags) || newTags
 
-        var res = await api_addEntryTags(info.ItemId, newTags.split(","))
+        var res = await api_addEntryTags(info.ItemId, newTags)
         if (res?.status !== 200) return ""
 
         updateInfo2({

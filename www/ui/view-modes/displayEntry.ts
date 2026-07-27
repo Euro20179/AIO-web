@@ -1966,13 +1966,21 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
 
     renderComponent("#create-tag", el => {
         el.onclick = async () => {
-            await newTagsUI(itemId)
+            const tagsdl = dom_getel("#tags-dl", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
+            inputItemUI(el, 'tag', (e, tag) => {
+                newTagsUI(itemId, [tag])
+                el.focus()
+            }, tagsdl as HTMLDataListElement || undefined)
         }
     })
 
     renderComponent("#create-recommended-by", el => {
         el.onclick = async () => {
-            await newRecommendedByUI(itemId)
+            const rdl = dom_getel("#recommended-by", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
+            inputItemUI(el, 'recommender', (e, r) => {
+                newRecommendedByUI(itemId, [r])
+                el.focus()
+            }, rdl as HTMLDataListElement || undefined)
         }
     })
 
