@@ -124,7 +124,7 @@ const defaultSettings = {
             text: "<>",
             shortTitle: "template",
             attributes: {
-                command: "showmodal",
+                command: "show-modal",
                 commandfor: "template-editor-container"
             }
         },
