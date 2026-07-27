@@ -132,7 +132,7 @@ function _exportTierlist(root: HTMLElement, as: "application/x-tierlist" | "appl
 }
 
 TierListMode.prototype._setup = function(this: TierListMode, ) {
-    const tierListStyles = settings_get(getUserUID(), "tierlist_styles")
+    const tierListStyles = settings_get(getUserUID(), "rating_styles")
 
     let modeSelector = this.output.querySelector("#tierlist-mode")
     let customExpr = this.output.querySelector("#tierlist-custom")
@@ -171,18 +171,14 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
         this.tierlistEl.firstChild?.remove()
     }
 
-    const style = document.createElement("style")
-    this.tierlistEl.append(style)
-
     for (let tier of Object.entries(settings_get(getUserUID(), "tiers"))) {
-        const ul = document.createElement("ul")
-        const label = document.createElement("tier-label")
-
         const thisTierStyles = tierListStyles[tier[0] as keyof typeof tierListStyles] || ""
 
-        style.innerText += `#tierlist-output .${tier[0]}-tier { ${thisTierStyles} }`
+        const ul = document.createElement("ul")
+        const label = document.createElement("tier-label")
+        label.style.backgroundColor = thisTierStyles.color
 
-        label.innerText = tier[0]
+        label.innerText = thisTierStyles.label || tier[0]
         ul.append(label)
         ul.classList.add(`${tier[0]}-tier`)
         this.rows[tier[0]] = ul

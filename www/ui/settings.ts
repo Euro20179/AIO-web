@@ -16,53 +16,43 @@ const defaultSettings = {
 
     currency: "USD",
 
-    ///styles to use for the tierlist mode
-    ///names must be the same as tiers
-    tierlist_styles: {
-        "splus": `
-tier-label {
-    background: hsl(from var(--green) h 100% 50%);
-}
-`,
-        's': `
-tier-label {
-background: hsl(from var(--green) h 100% 50%)
-}
-`,
-        'a': `
-tier-label {
-background: hsl(from var(--green) h 50% 50%);
-}
-`,
-        'b': `
-tier-label {
-background: color-mix(in srgb, var(--green) 50%, var(--yellow) 50%)
-}
-`,
-        'c': `
-tier-label {
-background: var(--yellow);
-}
-`,
-        'd': `
-tier-label {
-background: color-mix(in srgb, var(--yellow) 50%, var(--red) 50%)
-}
-`,
-        'f': `
-tier-label {
-background: var(--red)
-}
-`,
-        'z': `
-    tier-label {
-    background: var(--lavender)
-    }
-`,
-        zero: `
-        tier-label {
-            background: var(--secondary)
-        }`
+    rating_styles: {
+        "splus": {
+            color: "hsl(from var(--green) h 100% 50%)",
+            label: "S+",
+        },
+        "s": {
+            color: `hsl(from var(--green) h 100% 50%)`,
+            label: "S"
+        },
+        "a": {
+            color: `hsl(from var(--green) h 50% 50%)`,
+            label: "A",
+        },
+        "b": {
+            color: `color-mix(in srgb, var(--green) 50%, var(--yellow) 50%)`,
+            label: "B",
+        },
+        "c": {
+            color: `var(--yellow)`,
+            label: "C",
+        },
+        "d": {
+            color: `color-mix(in srgb, var(--yellow) 50%, var(--red) 50%)`,
+            label: "D",
+        },
+        "f": {
+            color: `var(--red)`,
+            label: "F",
+        },
+        "z": {
+            color: `var(--lavender)`,
+            label: "Z"
+        },
+        zero: {
+            color: "var(--text-color)",
+            label: ""
+        }
     },
 
     custom_item_formats: {

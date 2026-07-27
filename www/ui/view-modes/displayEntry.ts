@@ -1691,28 +1691,24 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         settings_load(user.Uid).then(() => {
             applyUserRating(
                 settings_get(user.Uid, "tiers"),
+                settings_get(user.Uid, "rating_styles"),
                 user.UserRating,
                 settings_get(user.Uid, "user_rating_max"),
                 ratingEl
             )
         })
-        ratingEl.innerHTML = user.UserRating
-            ? String(user.UserRating)
-            : "Unrated"
     })
 
     //Audience Rating
     renderComponent("#audience-rating", audienceRatingEl => {
         if (meta.Rating) {
-            let rating = meta.Rating
-            let normalizedRating = items_getNormalizedRating(meta)
             applyUserRating(
                 settings_get(user.Uid, "tiers"),
-                normalizedRating,
-                100,
+                settings_get(user.Uid, "rating_styles"),
+                meta.Rating,
+                meta.RatingMax || settings_get(meta.Uid, "user_rating_max"),
                 audienceRatingEl
             )
-            audienceRatingEl.innerHTML = String(rating)
         }
     })
 
