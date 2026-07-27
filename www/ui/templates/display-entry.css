@@ -325,10 +325,15 @@
         grid-auto-flow: column;
         gap: var(--very-small-gap);
 
+        overflow: auto;
+
         padding: 0;
         margin: 0;
 
         button {
+            text-wrap: nowrap;
+            text-overflow: ellipsis;
+
             display: flex;
             gap: 1ch;
         }

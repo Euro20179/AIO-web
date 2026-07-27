@@ -430,6 +430,10 @@
 
             width: 100%;
 
+            sidebary-entry {
+                height: fit-content;
+            }
+
             @container body (width < 800px) {
                 display: flex;
                 flex-direction: row;
