@@ -741,9 +741,6 @@ async function dom_loadtemplate(name: string): HTMLTemplateElement {
  */
 function ui_setcss(property: string, value: string): void {
     document.documentElement.style.setProperty(property, value)
-    if (modeWin) {
-        modeWin.document.documentElement.style.setProperty(property, value)
-    }
 }
 
 /**
