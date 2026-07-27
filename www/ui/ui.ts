@@ -1025,8 +1025,13 @@ async function promptUI(html?: string, _default?: string, uselist?: string, defa
     const submission = pEl.querySelector('[name="prompt-value"]') as HTMLInputElement
     submission.value = defaultValue
 
-    if (uselist)
-        submission.setAttribute("list", uselist)
+    if (uselist) {
+        const datalist = dom_getel(`#${uselist}`, null)
+        if(datalist) {
+            pElRoot.append(datalist.cloneNode(true))
+            submission.setAttribute("list", uselist)
+        }
+    }
     else
         submission.removeAttribute("list")
 
