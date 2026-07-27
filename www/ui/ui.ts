@@ -2584,7 +2584,7 @@ function inputItemUI(
     inp.onkeydown = e => {
         if(e.key == "Escape") f.remove()
     }
-    // inp.onblur = () => f.remove()
+    inp.onblur = () => f.remove()
 
     if (datalist) {
         if(!datalist.isConnected) {
