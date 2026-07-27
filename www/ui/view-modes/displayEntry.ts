@@ -1603,7 +1603,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                     ui_search(`#tag:${tag}`)
                 }
 
-                tagsRoot?.prepend(copy)
+                tagsRoot?.append(copy)
             }
     })
 
