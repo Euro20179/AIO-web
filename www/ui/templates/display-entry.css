@@ -21,10 +21,37 @@
 
     .hamburger-menu {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         flex-wrap: wrap;
+
+
+        summary {
+            border: var(--input-border);
+            border-radius: var(--border-roundness);
+            background: var(--input-background);
+
+            padding-inline: 1ch;
+
+            user-select: none;
+
+            &:hover {
+                background: color-mix(in oklab, currentColor 30%, var(--input-background) 70%);
+            }
+
+            &::marker {
+                content: "";
+            }
+        }
+
+        &[open] summary {
+            background: var(--highlight);
+            color: var(--highlight-text-color);
+
+            &::marker {
+                content: "→";
+            }
+        }
     }
-}
 
 @layer components {
     :host(display-entry) {
@@ -51,20 +78,42 @@
 
     #menu-bar {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(10ch, 1fr));
-        gap: min(1cqi, var(--small-gap));
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: var(--very-small-gap);
+        align-content: end;
+
         column-rule: currentColor 1px dashed;
 
-        margin-bottom: var(--small-gap);
+        height: min-content;
+
+        text-wrap: nowrap;
+        text-overflow: ellipsis;
+        overflow: clip;
 
         select { 
             height: fit-content;
         }
 
-        & > :last-child {
-            grid-column: span 2;
-            justify-self: center;
+        @container (width < 400px){
+            display: flex;
+            flex-direction: column;
         }
+    }
+
+    #top-line {
+        align-self: center;
+        display: flex;
+
+        flex-wrap: wrap;
+        flex-direction: row;
+
+        justify-content: space-evenly;
+        align-items: center;
+
+        height: fit-content;
+
+        container: top-line / inline-size;
     }
 
     #art-selectors {
@@ -273,10 +322,12 @@
 
     #item-interaction-menu {
         display: grid;
-        grid-auto-flow: row;
+        grid-auto-flow: column;
         gap: var(--very-small-gap);
 
         padding: 0;
+        margin: 0;
+
         button {
             display: flex;
             gap: 1ch;

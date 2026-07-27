@@ -1702,7 +1702,6 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     })
 
     //Audience Rating
-    let max = meta.RatingMax
     renderComponent("#audience-rating", audienceRatingEl => {
         if (meta.Rating) {
             let rating = meta.Rating

@@ -69,59 +69,27 @@
 <div class="root" id="root">
 
     <art-styles-dialog></art-styles-dialog>
+    <div class="grid column x-small-gap"
+        style="margin-inline: var(--small-gap); width: 100cqi; justify-content: start;">
+        <menu aria-label="item interactions" id="item-interaction-menu">
+            <!-- this gets filled with de_item_interaction settings -->
+        </menu>
+
+        <de-cost-calculation-modifiers>
+        </de-cost-calculation-modifiers>
+    </div>
 
     <figure class="entry-progress">
         <div id="multiple-progress">
         </div>
     </figure>
 
-
-    <div class="grid row float right small-gap"
-        style="margin-inline: var(--small-gap)">
-        <details class="hamburger-menu">
-            <summary>Actions</summary>
-            <menu aria-label="item interactions" class="m-0" id="item-interaction-menu">
-                <!-- this gets filled with de_item_interaction settings -->
-            </menu>
-        </details>
-
-
-        <de-cost-calculation-modifiers>
-        </de-cost-calculation-modifiers>
-    </div>
-
-
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
-        <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
-
-            <div style="
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(2, 1fr)
-            ">
-
-                <select id="type-selector" style="min-width: 50px;"
-                    toggle-hint="type-hint"
-                    entry-action="settype" entry-action-trigger="change"
-                    aria-labelledby="type-hint"> </select>
-                <span id="type-hint" popover='hint'>Media Type</span>
-
-                <button command="show-modal" commandfor="art-styles-menu">Art Styles</button>
-
-                <select id="format-selector" toggle-hint='format-hint'
-                    style="min-width: 12ch;"
-                    entry-action="setformat" entry-action-trigger="change"
-                    aria-labelledby="format-hint"></select>
-                <span id="format-hint" popover='hint'>Media Format</span>
-
-                <div class="flex wrap">
-                    <button entry-action="openfmodseditor" style="width: 100%;">
-                        Format Mods
-                    </button>
-                </div>
-            </div>
-
-        </menu>
+        <div class="center" aria-hidden="true">
+            <span id="media-type"></span>
+            on
+            <span id="on-format"></span>
+        </div>
 
         <input type="file" hidden id="thumbnail-file-upload">
 
@@ -153,48 +121,59 @@
         ></textarea>
     </figure>
 
-    <div id="misc-info" class="flex row wrap j-center">
+    <div id="top-line">
         <hgroup class="flex column center" style="max-width: 50cqb;">
             <div>
-                <span id="on-format"></span>
-                <span id="media-type"></span>
                 <h1 class="m-0 title center inline" id="main-title"></h1>
                 <span id="country-origin"></span>
             </div>
-            <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
-
             <div class="flex small-gap wrap j-center">
+                <h3 class="m-0 center official-native-title" id="official-native-title"></h3>
                 <h4 class="m-0" put-data="ReleaseYear" put-data-fallback="" style="align-self: center;"></h4>
                 <span class="audience-rating" id="audience-rating"  toggle-hint='audience-rating-hint'></span>
                 <span id="audience-rating-hint" popover='hint'>Audience Rating</span>
             </div>
-
         </hgroup>
 
-        <div style=" width: min-content; height: fit-content; flex-grow: 0.5; align-self: center;">
-            <div style="align-items: center;
-                        gap: 1ch;
-                        font-size: 0.9em;"
-                 class="flex grow wrap j-center">
-
+        <div class="flex column x-small-gap" style="align-items: center;">
+            <p class="m-0">
+                Spent
+                <button class="styleless-button" entry-action="transact"><span class="cost" id="cost"></span></button>
+                Viewed
+                <button id="view-count" class="view-count styleless-button" entry-action="setviewcount"
+                    put-data="ViewCount"></button>
+                Times
+                (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
                 <button class="rating styleless-button" id="user-rating"
                     toggle-hint='your-rating-hint'
                     entry-action="setrating">??</button>
                 <span id='your-rating-hint' popover='hint'>Your Rating</span>
-
-                <button class="styleless-button" entry-action="transact"><span class="cost" id="cost"></span></button>
-            </div>
-
-            <p class="m-0 center">
-                Viewed
-                <button id="view-count" class="view-count center styleless-button" entry-action="setviewcount"
-                    put-data="ViewCount"></button>
-                Times
-                (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
             </p>
 
             <de-status-menu></de-status-menu>
         </div>
+
+        <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
+
+
+            <select id="type-selector" style="min-width: 50px;"
+                toggle-hint="type-hint"
+                entry-action="settype" entry-action-trigger="change"
+                aria-labelledby="type-hint"> </select>
+            <span id="type-hint" popover='hint'>Media Type</span>
+
+            <select id="format-selector" toggle-hint='format-hint'
+                style="min-width: 12ch;"
+                entry-action="setformat" entry-action-trigger="change"
+                aria-labelledby="format-hint"></select>
+            <span id="format-hint" popover='hint'>Media Format</span>
+
+            <button command="show-modal" commandfor="art-styles-menu" style="height: fit-content;">Art Styles</button>
+
+            <button entry-action="openfmodseditor" style="height: fit-content;">
+                Format Mods
+            </button>
+        </menu>
 
     </div>
 

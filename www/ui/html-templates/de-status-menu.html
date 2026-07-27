@@ -1,12 +1,12 @@
 <template id="de-status-menu">
 <menu aria-label="status actions" class="actions flex wrap p-0 m-0" id="actions">
-    <div class="flex">
+    <div class="flex wrap">
         <button data-action="Plan" class="action" title="plan">🗓</button>
         <button data-action="Begin+Pause+Resume" class="action" title="begin/pause/resume">⏯</button>
-        <button data-action="Wait" class="action" title="wait">⌚︎</button>
-    </div>
-    <div class="flex">
         <button data-action="Finish" class="action" title="finish">🏁</button>
+    </div>
+    <div class="flex wrap">
+        <button data-action="Wait" class="action" title="wait">⌚︎</button>
         <button data-action="Drop" class="action" title="drop">⏹</button>
         <select id="status-selector" aria-label="current status">
             <option value="">No status</option>
