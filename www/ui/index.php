@@ -10,8 +10,33 @@
     <link rel="stylesheet" href="/ui/styles.css">
 
     <link rel="prefetch" href="/ui/templates/tierlist.css" defer>
-    <link rel="prefetch" href="/ui/templates/calc-entry.css">
+    <link rel="prefetch" href="/ui/templates/calc-entry.css" defer>
     <link rel="prefetch" href="/ui/templates/display-entry.css">
+    <script src="/ui/components.js" defer></script>
+    <script src="/config.js" defer></script>
+    <script src="/js/items.js" defer></script>
+    <script src="/js/api.js" defer></script>
+    <script src="/js/notes-parser.js" defer></script>
+    <script src="/js/testing.js" defer></script>
+    <script src="/ui/js_api.js" defer></script>
+    <script src="/ui/calculator.js" defer></script>
+    <script src="/ui/globals.js" defer></script>
+    <script src="/ui/sidebar.js" defer></script>
+    <script src="/ui/settings.js" defer></script>
+    <script src="/ui/view-modes/modes.js" defer></script>
+    <script src="/ui/view-modes/tier-list.js" defer></script>
+    <script src="/ui/view-modes/calendar.js" defer></script>
+    <script src="/ui/view-modes/graph.js" defer></script>
+    <script src="/ui/view-modes/displayEntry.js" defer></script>
+    <script src="/ui/view-modes/calc.js" defer></script>
+    <script src="/ui/view-modes/gallery.js" defer></script>
+    <script src="/ui/view-modes/scriptMode.js" defer></script>
+    <script src="/ui/view-modes/event-mode.js" defer></script>
+    <script src="/ui/view-modes/menu-mode.js" defer></script>
+    <script src="/ui/shortcuts.js" defer></script>
+    <script src="/ui/ui.js" defer></script>
+    <!-- defer because document needs to load first -->
+    <script src="/ui/index.js" defer></script>
 </head>
 
 <body>
@@ -201,35 +226,7 @@
             <alert-box></alert-box>
         </div>
     </div>
-
-    <script src="/ui/components.js" defer></script>
-    <script src="/config.js" defer></script>
-    <script src="/js/items.js" defer></script>
-    <script src="/js/api.js" defer></script>
-    <script src="/js/notes-parser.js" defer></script>
-    <script src="/js/testing.js" defer></script>
-    <script src="/ui/js_api.js" defer></script>
-    <script src="/ui/calculator.js" defer></script>
-    <script src="/ui/globals.js" defer></script>
-    <script src="/ui/sidebar.js" defer></script>
-    <script src="/ui/settings.js" defer></script>
-    <script src="/ui/view-modes/modes.js" defer></script>
-    <script src="/ui/view-modes/tier-list.js" defer></script>
-    <script src="/ui/view-modes/calendar.js" defer></script>
-    <script src="/ui/view-modes/graph.js" defer></script>
-    <script src="/ui/view-modes/displayEntry.js" defer></script>
-    <script src="/ui/view-modes/calc.js" defer></script>
-    <script src="/ui/view-modes/gallery.js" defer></script>
-    <script src="/ui/view-modes/scriptMode.js" defer></script>
-    <script src="/ui/view-modes/event-mode.js" defer></script>
-    <script src="/ui/view-modes/menu-mode.js" defer></script>
-    <script src="/ui/shortcuts.js" defer></script>
-    <script src="/ui/ui.js" defer></script>
-    <!-- defer because document needs to load first -->
-    <script src="/ui/index.js" defer></script>
 </body>
-
-
 
 </html>
 

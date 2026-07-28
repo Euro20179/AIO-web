@@ -70,8 +70,10 @@
 
         cursor: pointer;
         /* set a range instead of specific sizes, so that the image can resize to a good size, and so that the image fits within the size of the sidebar */
-        max-height: 70cqi;
+        height: 70cqi;
         max-width: 95cqi;
+
+        object-fit: scale-down;
 
         @container body (width < 800px) {
             justify-self: center;

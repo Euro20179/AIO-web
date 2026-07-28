@@ -92,6 +92,7 @@
         overflow: clip;
 
         select { 
+            width: 15ch;
             height: fit-content;
         }
 
@@ -513,10 +514,7 @@
 
         align-items: center;
 
-        &:not(:empty) {
-            height: max(15cqb, 100px);
-        }
-
+        height: max(15cqb, 100px);
         width: 100%;
         overflow: auto;
 
