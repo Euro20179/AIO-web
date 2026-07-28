@@ -17,11 +17,11 @@
 //the EntryRelations instance for each Entry
 
 //for format
-const DIGI_MOD = 0b1
-const UNOWNED_MOD = 0b1 << 1
+const items_F_DIGI_MOD = 0b1
+const items_F_UNOWNED_MOD = 0b1 << 1
 
 const items_F_MODS = new Set([
-    DIGI_MOD, UNOWNED_MOD
+    items_F_DIGI_MOD, items_F_UNOWNED_MOD
 ])
 
 const AS_ANIME = 1
@@ -1173,7 +1173,7 @@ function items_formatModifiersToName(modifiers: number): string {
     let out = ""
     for(let mod of items_F_MODS) {
         if(items_hasFMod(modifiers, mod)) {
-            out += `+${{[DIGI_MOD]: "d", [UNOWNED_MOD]: "u"}[mod]}`
+            out += `+${{[items_F_DIGI_MOD]: "d", [items_F_UNOWNED_MOD]: "u"}[mod]}`
         }
     }
     return out
@@ -1269,7 +1269,7 @@ function items_formatToNameCached(format: number, modifiers: number): string {
  * @returns {boolean}
  */
 function items_isDigitized(format: number): boolean {
-    return items_hasFMod(format, DIGI_MOD)
+    return items_hasFMod(format, items_F_DIGI_MOD)
 }
 
 /**
@@ -1293,7 +1293,7 @@ async function nameToFormat(name: string): Promise<[number, number]> {
     name = name.toLowerCase()
     if (name.includes("+digital")) {
         name = name.replace("+digital", "")
-        mods |= DIGI_MOD
+        mods |= items_F_DIGI_MOD
     }
 
     const formats = Object.fromEntries(Object.entries(await api_listFormats()).map(([k, v]) => [v, Number(k)]))

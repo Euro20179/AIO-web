@@ -100,8 +100,8 @@ function _mkde_actions() {// {{{
             const f = dom_getelorthrow('form', this.win.HTMLFormElement, d)
             for(let mod of items_F_MODS) {
                 let inputName = {
-                    [DIGI_MOD]: "digitized",
-                    [UNOWNED_MOD]: "unowned"
+                    [items_F_DIGI_MOD]: "digitized",
+                    [items_F_UNOWNED_MOD]: "unowned"
                 }[mod]
 
                 if(!inputName) {
@@ -546,9 +546,9 @@ function _mkde_actions() {// {{{
         setdigitization: function(item, _, target) {
             if (!target || !(target instanceof this.win.HTMLInputElement)) return
             if (target.checked) {
-                item.Format_Modifiers |= DIGI_MOD
+                item.Format_Modifiers |= items_F_DIGI_MOD
             } else if (items_isDigitized(item.Format)) {
-                item.Format_Modifiers -= DIGI_MOD
+                item.Format_Modifiers -= items_F_DIGI_MOD
             }
             setPropUI(item, "Format_Modifiers", item.Format_Modifiers, "set digitization")
         },
