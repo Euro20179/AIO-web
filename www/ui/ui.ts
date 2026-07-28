@@ -3270,6 +3270,7 @@ function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Eve
         img.slot = "thumbnail"
         img.src = fixThumbnailURL(meta.Thumbnail)
         img.loading = 'lazy'
+        img.alt = item.En_Title + " thumbnail"
         card.append(img)
     }
 
