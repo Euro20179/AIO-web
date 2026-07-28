@@ -89,8 +89,6 @@
 
 ?>
 
-    <tz-datalist></tz-datalist>
-
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
