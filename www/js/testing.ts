@@ -171,7 +171,7 @@ function dotests(category: string) {
             subtest: () => {
                 const tests: Test[] = []
                 for (let [name, mode] of [...mode_map().entries()].reverse()) {
-                    if (name === 'graph-output') continue
+                    if (name === 'graph') continue
                     tests.push([name, r(ui_setmode, name), call, l(() => {
                         //@ts-ignore
                         return mode_cls2name(mode_getFirstModeInWindow(window)?.constructor) == name

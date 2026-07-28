@@ -7,7 +7,6 @@ type DisplayMode = {
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any): (target: HTMLElement) => any
 } & Mode
 
-
 // de_actions is kinda insane
 // this function (_mkde_actions) is unecessary but is here to just allow me to collapse the object away
 // de_actions gets assigned to the DisplayMode prototype
@@ -2227,3 +2226,5 @@ async function deleteEventByEventId(eventId: number) {
     })
 
 }
+
+mode_register("entry", DisplayMode)

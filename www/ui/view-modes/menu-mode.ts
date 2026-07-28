@@ -195,3 +195,5 @@ CategoriesMode.prototype.close = function(this: CategoriesMode) {
 CategoriesMode.prototype.chwin = function(this: CategoriesMode, win: Window & typeof globalThis): HTMLElement {
     ModePrimitives.chwin.call(this, win)
 }
+
+mode_register("categorize", CategoriesMode)

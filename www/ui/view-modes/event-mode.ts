@@ -181,3 +181,5 @@ EventMode.prototype.clearSelected = function(this: EventMode, ) {
     this.eventOrder.clear()
     this._reRenderEventTable()
 }
+
+mode_register("event", EventMode)

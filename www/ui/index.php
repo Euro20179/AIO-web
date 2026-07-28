@@ -12,6 +12,10 @@
     <link rel="prefetch" href="/ui/templates/tierlist.css" defer>
     <link rel="prefetch" href="/ui/templates/calc-entry.css" defer>
     <link rel="prefetch" href="/ui/templates/display-entry.css">
+
+    <!-- cannot defer as the modes rely on this being loaded -->
+    <script src="/ui/view-modes/modes.js"></script>
+
     <script src="/ui/components.js" defer></script>
     <script src="/config.js" defer></script>
     <script src="/js/items.js" defer></script>
@@ -23,7 +27,6 @@
     <script src="/ui/globals.js" defer></script>
     <script src="/ui/sidebar.js" defer></script>
     <script src="/ui/settings.js" defer></script>
-    <script src="/ui/view-modes/modes.js" defer></script>
     <script src="/ui/view-modes/tier-list.js" defer></script>
     <script src="/ui/view-modes/calendar.js" defer></script>
     <script src="/ui/view-modes/graph.js" defer></script>
@@ -183,16 +186,16 @@
                 </div>
                 <div style="justify-self: end;">
                     <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center; vertical-align: top;' aria-label="mode">
-                        <option value="entry-output" title="Normal mode">🏠︎ Normal</option>
-                        <option value="categorize-output" title="Menu Mode">🔠️ Categorize</option>
-                        <option value="graph-output" title="Graph mode">📊︎ Graph</option>
-                        <option value="calendar-output" title="Calendar mode">📅︎ Calendar</option>
-                        <option value="event-output" hidden title="Event mode">🗓︎</option>
-                        <option value="calc-output" title="Calc mode">🔢︎ Calc</option>
-                        <option value="gallery-output" title="Gallery mode">🖼︎ Gallery</option>
-                        <option value="script-output" title="Script mode">&lt;> Script</option>
-                        <option value="tierlist-output" title="Tierlist mode">S Tierlist</option>
-                        <option value="sidebar-items" title="Tierlist mode" hidden>| Sidebar</option>
+                        <option value="entry" title="Normal mode">🏠︎ Normal</option>
+                        <option value="categorize" title="Menu Mode">🔠️ Categorize</option>
+                        <option value="graph" title="Graph mode">📊︎ Graph</option>
+                        <option value="calendar" title="Calendar mode">📅︎ Calendar</option>
+                        <option value="event" hidden title="Event mode">🗓︎</option>
+                        <option value="calc" title="Calc mode">🔢︎ Calc</option>
+                        <option value="gallery" title="Gallery mode">🖼︎ Gallery</option>
+                        <option value="script" title="Script mode">&lt;> Script</option>
+                        <option value="tierlist" title="Tierlist mode">S Tierlist</option>
+                        <option value="sidebar" title="Tierlist mode" hidden>| Sidebar</option>
                     </select><!-- no whitespace --><button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>
 

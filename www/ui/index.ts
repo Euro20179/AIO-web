@@ -103,7 +103,7 @@ async function main() {
     let toggle = document.getElementById("view-toggle") as HTMLSelectElement;
 
     if (!urlParams.get("no-mode")) {
-        const mode = urlParams.get("mode") ?? toggle?.value ?? "entry-output";
+        const mode = urlParams.get("mode") ?? toggle?.value ?? "entry";
         mode_setMode(mode);
     }
 

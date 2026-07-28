@@ -163,3 +163,5 @@ function renderCalcItem(this: CalcMode, item: InfoEntry): HTMLElement {
     return el
 }
 
+
+mode_register("calc", CalcMode)

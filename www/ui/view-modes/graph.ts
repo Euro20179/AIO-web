@@ -616,3 +616,5 @@ GraphMode.prototype.chwin = function(this: GraphMode, win: Window & typeof globa
 
     return container
 }
+
+mode_register("graph", GraphMode)

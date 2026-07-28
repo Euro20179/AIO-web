@@ -81,3 +81,5 @@ GalleryMode.prototype.close = function(this: GalleryMode, ) {
     else this.clearSelected()
     this.clearSelected()
 }
+
+mode_register("gallery", GalleryMode)

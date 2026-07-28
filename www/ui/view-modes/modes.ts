@@ -294,18 +294,19 @@ function mode_clearItems() {
     }
 }
 
-const mode_map = () => new Map<string, ModeConstructor<Mode>>([
-    ["entry-output", DisplayMode],
-    ["graph-output", GraphMode],
-    ["calc-output", CalcMode],
-    ["gallery-output", GalleryMode],
-    ["script-output", ScriptMode],
-    ["event-output", EventMode],
-    ["calendar-output", CalendarMode],
-    ["tierlist-output", TierListMode],
-    ["sidebar-items", SidebarMode],
-    ["categorize-output", CategoriesMode],
-])
+const {
+    mode_map,
+    mode_register
+} = (() => {
+    let modes = new Map<string, ModeConstructor<Mode>>;
+
+    return {
+        mode_register: (name: string, mode: ModeConstructor<Mode>) => {
+            modes.set(name, mode)
+        },
+        mode_map: () => modes
+    }
+})()
 
 /**
  * Given a mode name, convert it to a mode class
@@ -313,22 +314,9 @@ const mode_map = () => new Map<string, ModeConstructor<Mode>>([
  * @returns {Function}
  */
 function mode_name2cls(name: string): ModeConstructor<Mode> {
-    let ogName = name
-    name = {
-        "entry": "entry-output",
-        "graph": "graph-output",
-        "calc": "calc-output",
-        "gallery": "gallery-output",
-        "script": "script-output",
-        "event": "event-output",
-        "calendar": "calendar-output",
-        "tierlist": "tierlist-output",
-        "categorize": "categorize-output",
-        "sidebar": "sidebar-items",
-    }[name] || name
     let val = mode_map().get(name)
     if(!val) {
-        throw new Error(`${ogName} is not a mode`)
+        throw new Error(`${name} is not a mode`)
     }
     return val
 }

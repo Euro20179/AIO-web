@@ -163,3 +163,5 @@ function execute(this: ScriptMode) {
         this.output.append(value.jsStr())
     }
 }
+
+mode_register("script", ScriptMode)

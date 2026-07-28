@@ -310,3 +310,5 @@ CalendarMode.prototype.chwin = function(this: CalendarMode, win: Window & typeof
     this._setupWin()
     return container
 }
+
+mode_register("calendar", CalendarMode)

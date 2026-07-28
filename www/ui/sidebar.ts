@@ -411,3 +411,5 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
 
     return elem
 }
+
+mode_register("sidebar", SidebarMode)

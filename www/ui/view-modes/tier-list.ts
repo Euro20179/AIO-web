@@ -353,3 +353,5 @@ TierListMode.prototype.chwin = function(this: TierListMode, win: Window & typeof
     this._setup()
     return container
 }
+
+mode_register("tierlist", TierListMode)
