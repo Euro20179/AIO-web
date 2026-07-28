@@ -1204,7 +1204,7 @@ function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigi
     if (notesL.length === 1) {
         notesEl.innerHTML = notesL[0][1]
     } else {
-        notesEl.innerHTML = notesL.map(([id, n]) => `<article><h5>${findInfoEntryById(id).En_Title}</h5>${n}</article>`).join("<hr>")
+        notesEl.innerHTML = notesL.map(([id, n]) => `<article><h4>${findInfoEntryById(id).En_Title}</h4>${n}</article>`).join("<hr>")
     }
 }
 
