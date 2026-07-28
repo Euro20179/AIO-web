@@ -1703,6 +1703,8 @@ function openEventFormUI(itemid: string, eventId?: string, resetForm: boolean = 
     const modal = openModalUI("new-event-form", undefined, "new-event-dialog")
     if (!modal) return null
 
+    modal.append(document.createElement("tz-datalist"))
+
     const form = dom_getelorthrow("form:has(input)", HTMLFormElement, modal)
 
     if(resetForm) form.reset()
