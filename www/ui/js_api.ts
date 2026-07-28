@@ -1336,6 +1336,8 @@ function time_zoneddate2utc(date: string, timezone: string): number {
  */
 function time_compare(t1: bigint, t1zone: string, t2: bigint, t2zone: string) {
     if ("Temporal" in window) {
+        t1zone = t1zone === "Etc/Unknown" ? "Atlantic/Reykjavik" : t1zone
+        t2zone = t2zone === "Etc/Unknown" ? "Atlantic/Reykjavik" : t2zone
         let leftTime = new Temporal.ZonedDateTime(
             t1,
             t1zone 
