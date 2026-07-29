@@ -481,6 +481,11 @@
             width: 100%;
             display: flex;
             flex-wrap: wrap;
+
+            item-card {
+                max-width: 30cqi;
+                height: 30cqb;
+            }
         }
     }/* }}} */
 

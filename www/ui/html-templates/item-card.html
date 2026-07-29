@@ -10,29 +10,40 @@
             height: 100%;
         }
 
-        :host(.image-only) :has(slot[name="thumbnail"]) {
-            height: 100%;
+        :host(.image-only) button:has(slot[name="thumbnail"]) {
+            min-height: 0;
+            flex-grow: 1;
+            picture {
+                height: 100%;
+                display: block;
+            }
         }
 
         article {
             text-align: center;
-            display: flex;
-            flex-direction: column;
+            display: grid;
             max-width: 25ch;
+            height: 100%;
         }
 
         picture {
-            display: block;
-            height: 100%;
             align-content: center;
         }
 
         ::slotted(img) {
-            max-height: 150px;
-            max-width: 100%;
+            /*
+                the img is technically not in the shadow root,
+                thus outside styles have precident,
+                we need this to be more important
+            */
+            height: 100% !important;
+            max-height: 150px !important;
+            max-width: 100% !important;
+            vertical-align: middle !important;
+
             box-shadow: 1px 1px 3px currentColor;
-            vertical-align: middle;
         }
+
         button:has(h2) {
             display: block;
             margin-block: var(--very-small-gap);
@@ -54,7 +65,7 @@
         <button entry-action="openitem" class="styleless-button">
             <h2 class="m-0"><slot name="title" put-data="En_Title"></slot></h2>
         </button>
-        <div class="flex overflow j-center x-small-gap"><slot name="progress"></slot></div>
+        <div class="overflow grid column x-small-gap"><slot name="progress"></slot></div>
         <p class="m-0">
             <slot name="rating" put-data="UserRating"></slot>
             (<slot name="view-count" put-data="ViewCount"></slot>)

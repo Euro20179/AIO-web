@@ -3267,14 +3267,12 @@ function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Eve
     )
 
     const meta = findMetadataById(forItem)
-    if(meta.Thumbnail) {
-        const img = document.createElement("img")
-        img.slot = "thumbnail"
-        img.src = fixThumbnailURL(meta.Thumbnail)
-        img.loading = 'lazy'
-        img.alt = item.En_Title + " thumbnail"
-        card.append(img)
-    }
+    const img = document.createElement("img")
+    img.slot = "thumbnail"
+    img.src = fixThumbnailURL(meta.Thumbnail)
+    img.loading = 'lazy'
+    img.alt = item.En_Title + " thumbnail"
+    card.append(img)
 
     const p = mkDeProgressUI(forItem)
     p.forEach(v => v.slot = "progress")
