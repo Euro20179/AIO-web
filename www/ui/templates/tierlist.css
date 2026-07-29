@@ -19,7 +19,8 @@
 
         item-card {
             display: inline-block;
-            height: 6rem;
+            max-height: 6rem;
+            max-width: 3rem;
             vertical-align: middle;
         }
     }
