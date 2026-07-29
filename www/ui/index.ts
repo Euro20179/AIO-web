@@ -116,6 +116,8 @@ async function main() {
                 .join(" OR ")
         : urlParams.get("q")
 
+    // mode_setMode(curModeName)
+
     if (urlParams.has("sort")) {
         sortBySelector.value = String(urlParams.get("sort"))
     }
