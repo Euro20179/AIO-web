@@ -11,7 +11,7 @@ type SidebarMode = {
     focusNextItem(backward: boolean): any
     selectNth(n: Number): any
     reorder(itemOrder: bigint[], select?: boolean): any
-    render(entries: InfoEntry[], clearRendered?: boolean): any
+    render(entries: InfoEntry[], clearRendered?: boolean, select?: boolean): any
 
     updateThumbnail(id: bigint, src: string): any
     mkobserver(): any
@@ -203,16 +203,24 @@ SidebarMode.prototype.reorder = function(this: SidebarMode, itemOrder: bigint[],
     }
 }
 
-SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true) {
+SidebarMode.prototype.render = async function(this: SidebarMode, entries: InfoEntry[], clearRendered = true, select = true) {
     if (!entries.length) return
+    const chunksize = 100
     const fragments = []
-    for (let i = 0; i < entries.length; i++) {
+    for (let i = 0; i < Math.min(entries.length, chunksize); i++) {
         const frag = new DocumentFragment
         renderSidebarItem.call(this, entries[i], frag)
         fragments.push(frag)
     }
-    this.output.replaceChildren(...fragments)
-    selectSidebarItems(entries, clearRendered)
+
+    this.output.append(...fragments)
+
+    setTimeout(() => {
+        this.render(entries.slice(chunksize), false, false)
+    }, 200)
+
+    if(select)
+        selectSidebarItems(entries, clearRendered)
 }
 
 function selectFocusedSidebarItem() {
