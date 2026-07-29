@@ -13,6 +13,7 @@
 
 <?php
     include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
+    tmpl("alert-box");
     tmpl("prompt-dialog");
     tmpl("login-dialog");
     tmpl("display-entry");
@@ -38,7 +39,7 @@
     <template id="display-entry">
     </template>
     <color-scheme-selector style="display: none;"></color-scheme-selector>
-    <div id="notifications" style="position: absolute;"></div>
+    <alert-box></alert-box>
 </body>
 <script>
     let mode_curWin = window
@@ -54,7 +55,6 @@
 <!-- <script src="/ui/calculator.js"></script> -->
 <script src="/ui/components.js"></script>
 <script src="/ui/globals.js"></script>
-<script src="/ui/sidebar.js"></script>
 <script src="/ui/settings.js"></script>
 <script src="/ui/view-modes/modes.js"></script>
 <script src="/ui/view-modes/displayEntry.js"></script>
