@@ -100,15 +100,15 @@
         <table class="media-info" id="media-info"></table>
 
         <input
+            class="m-0"
+            style="width: 100%;"
             put-data="Location"
             put-data-mode="value"
             placeholder="item location"
             onchange="updateLocationUI(getIdFromDisplayElement(this), this.value)"
             oncontextmenu="if(event.ctrlKey) { open(this.value, '_blank'); } else {this.select()} event.preventDefault()">
 
-        <div style="
-            text-align: center;
-        " class="j-center flex"  id="recommended-bys">
+        <div class="j-center flex wrap center"  id="recommended-bys">
             <button id="create-recommended-by">+</button>
         </div>
 
