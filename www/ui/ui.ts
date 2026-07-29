@@ -3302,9 +3302,7 @@ function applyUserRating(
         root.classList.remove(`${name}-tier`)
     }
 
-    rating = items_normalizeRating(rating, max)
-
-    let tier = settings_tier_from_rating(tierSettings, rating)
+    let tier = settings_tier_from_rating(tierSettings, items_normalizeRating(rating, max))
 
     root.innerHTML = ""
     if(tier) {
