@@ -401,7 +401,7 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
     )
 
     elem.addEventListener("on-screen-appear", async function(e) {
-        let meta = await findMetadataByIdAtAllCosts(item.ItemId)
+        let meta = await items_getMetadataById(item.ItemId)
         if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         }

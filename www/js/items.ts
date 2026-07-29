@@ -316,6 +316,14 @@ class items_Entry {
         return item
     }
 
+    async getUser() {
+        return await items_getUserById(this.ItemId)
+    }
+
+    async getMeta() {
+        return await items_getMetadataById(this.ItemId)
+    }
+
     getEvent(id: number) {
         for(let event of this.events) {
             if(event.EventId === id) {
@@ -646,19 +654,28 @@ function items_addItem(item: {
     _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
 }
 
-async function loadMetadataById(id: bigint, uid = 0): Promise<MetadataEntry> {
-    let m = await api_getEntryMetadata(id, uid)
-    if (m === null) {
-        alert(`Failed to load metadata for id: ${id}`)
-        return _globalsNewUi.entries[String(id)].meta = genericMetadata(id, uid)
+async function items_loadAll(id: bigint, uid = 0): Promise<items_Entry> {
+    let e = await api_getEntryAll(id, uid)
+    if(e) {
+        items_delEntry(id)
+        items_addItem(e)
     }
-    return _globalsNewUi.entries[String(id)].meta = m
+    return items_getEntry(id)
 }
 
-async function findMetadataByIdAtAllCosts(id: bigint): Promise<MetadataEntry> {
+async function items_getUserById(id: bigint, uid = 0): Promise<UserEntry> {
+    let u = findUserEntryById(id)
+    if(u.Extra.match(/"_AIO_GENERIC":true/)) {
+        let e = await items_loadAll(id, uid)
+        return e.user
+    }
+    return u
+}
+
+async function items_getMetadataById(id: bigint): Promise<MetadataEntry> {
     let m = findMetadataById(id)
     if (m.Datapoints.match(/"_AIO_GENERIC":true/)) {
-        return await loadMetadataById(id)
+        return (await items_loadAll(id)).meta
     }
     return m
 }
@@ -829,7 +846,7 @@ function genericUserEntry(itemId: bigint, uid: number): UserEntry {
         UserRating: 0,
         Notes: "",
         CurrentPosition: "",
-        Extra: "{}",
+        Extra: "{\"_AIO_GENERIC\":true}",
         Minutes: 0
     }
 }

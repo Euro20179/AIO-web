@@ -1399,7 +1399,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
-    meta = await findMetadataByIdAtAllCosts(meta.ItemId)
+    meta = await items_getMetadataById(meta.ItemId)
+    user = await items_getUserById(user.ItemId)
 
     renderComponent("#library", el => {
         if (!("value" in el)) return
