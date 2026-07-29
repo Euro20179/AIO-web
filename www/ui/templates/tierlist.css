@@ -20,7 +20,7 @@
         item-card {
             display: inline-block;
             height: 6rem;
-            aspect-ratio: 1 / 2;
+            vertical-align: middle;
         }
     }
 }
