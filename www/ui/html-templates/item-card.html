@@ -11,15 +11,12 @@
         }
 
         :host(.image-only) button:has(slot[name="thumbnail"]) {
+            min-height: 0;
             flex-grow: 1;
             picture {
                 height: 100%;
                 display: block;
             }
-        }
-
-        button:has(slot[name="thumbnail"]) {
-            min-height: 0;
         }
 
         article {
