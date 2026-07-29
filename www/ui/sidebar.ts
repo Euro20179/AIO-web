@@ -5,6 +5,8 @@ type SidebarMode = {
     _resizeTO: number
     _setToNone: boolean
 
+    renderBacklog: InfoEntry[]
+
     resizeHandler(): any
     focusNthItem(n: number): any
     selectFocusedItem(): any
@@ -23,6 +25,8 @@ var SidebarMode: ModeConstructor<SidebarMode> = function(this: SidebarMode, outp
     this.itemsOnScreen = new Set
 
     this.mkobserver()
+
+    this.renderBacklog = []
 
     this._resizeTO = 0
     this._setToNone = false
@@ -204,14 +208,31 @@ SidebarMode.prototype.reorder = function(this: SidebarMode, itemOrder: bigint[],
 }
 
 SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true) {
+    this.renderBacklog = []
     if (!entries.length) return
+
+    const chunksize = 75
     const fragments = []
-    for (let i = 0; i < entries.length; i++) {
+    for (let i = 0; i < Math.min(entries.length, chunksize); i++) {
         const frag = new DocumentFragment
         renderSidebarItem.call(this, entries[i], frag)
         fragments.push(frag)
     }
+
     this.output.replaceChildren(...fragments)
+
+    if(entries.length > chunksize) {
+        const btn = document.createElement("button")
+        this.output.append(btn)
+
+        btn.append("Load the rest")
+        btn.addEventListener("click", e => {
+            this.addList(this.renderBacklog)
+            btn.remove()
+        })
+
+        this.renderBacklog = entries.slice(chunksize)
+    }
     selectSidebarItems(entries, clearRendered)
 }
 
