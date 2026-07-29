@@ -1830,13 +1830,16 @@ function displayEntryEditTemplate(el: HTMLElement) {
     templEditor.hidden = !templEditor.hidden
 }
 
-function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string): HTMLElement {
+function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string, append: boolean = true): HTMLElement {
     let el = this.win.document.createElement("display-entry")
     let root = el.shadowRoot
 
     if (!root) {
         throw new Error("shadow root is falsey while rendering display item")
     }
+
+    if(append)
+        this.output.append(el)
 
     const
         user = findUserEntryById(itemId),
@@ -1865,7 +1868,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string)
         (root.getElementById("root") as HTMLDivElement).innerHTML = template
     }
 
-    this.output.append(el)
 
     hookActionButtons(root, itemId)
 
@@ -2008,20 +2010,29 @@ function removeDisplayItem(this: DisplayMode, itemId: bigint) {
     el.remove()
 }
 
+let _lastTemplates = new Map<bigint, string>
 function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
     let el = this.output.querySelector(`display-entry[data-item-id="${itemId}"]`) as HTMLElement
     let info = findInfoEntryById(itemId)
     if (!info) return
 
-    if (el) {
+
+    let template = getUserExtra(findUserEntryById(itemId), "template")?.trim()
+    let lastTempl = _lastTemplates.get(itemId)
+    _lastTemplates.set(itemId, getUserExtra(findUserEntryById(itemId), "template")?.trim() || "")
+    //if we have a different template, we have to rerender the entire thing
+    if (el && template === lastTempl) {
         let user = findUserEntryById(itemId)
         let events = findUserEventsById(itemId)
         let meta = findMetadataById(itemId)
         if (!info || !user || !events || !meta) return
         changeDisplayItemData.call(this, info, user, meta, events, el)
     } else {
-        renderDisplayItem.call(this, itemId)
+        let newEl = renderDisplayItem.call(this, itemId, undefined, false)
+        //we have to remove the previous element, otherwise we get duplicates
+        if(template !== lastTempl) el.replaceWith(newEl)
     }
+
 }
 
 function getIdFromDisplayElement(element: HTMLElement) {
