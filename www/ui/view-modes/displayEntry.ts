@@ -2039,7 +2039,8 @@ function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
 
     let template = getUserExtra(findUserEntryById(itemId), "template")?.trim()
     let lastTempl = _lastTemplates.get(itemId)
-    _lastTemplates.set(itemId, getUserExtra(findUserEntryById(itemId), "template")?.trim() || "")
+    _lastTemplates.set(itemId, template)
+
     //if we have a different template, we have to rerender the entire thing
     if (el && template === lastTempl) {
         let user = findUserEntryById(itemId)
