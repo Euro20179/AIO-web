@@ -1,5 +1,29 @@
 const generalStyles: CSSStyleSheet[] = [];
 const sidebarStyles: CSSStyleSheet[] = [];
+const displayEntryStyles: CSSStyleSheet[] = []
+
+const labelWrap = async<TLabel, T>(label: TLabel, promise: Promise<T>): Promise<[TLabel, T]> => {
+    return [label, await promise]
+}
+
+
+//gets replaced with colors.css, general.css, sidebar-entry.css in that order
+//the math.random is so that the build system doesn't inline this text, i need the ``
+//the reason i am doing this is because sharing the css styles like this triples the speed at which the sidebar can render
+Promise.all([
+    labelWrap(generalStyles, import("/css/colors.css", { with: { type: "css" } })),
+    labelWrap(generalStyles, import("/css/general.css", { with: { type: "css" } })),
+    labelWrap(sidebarStyles, import("/ui/templates/sidebar-entry.css", { with: { type: "css" } })),
+    labelWrap(displayEntryStyles, import("/ui/templates/display-entry.css", { with: { type: "css" }})),
+]).then(sheets => {
+    for(let [list, sheet] of sheets) {
+        list.push(sheet['default'])
+    }
+}).catch(err => {
+    (new CSSStyleSheet).replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`).then((res) => {
+        sidebarStyles.push(res)
+    })
+});
 
 function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
     const tbl = document.createElement("table")
@@ -182,31 +206,18 @@ customElements.define("display-entry", class extends HTMLElement {
         let root = this.attachShadow({ mode: "open", clonable: true })
         root.appendChild(content)
 
+        if(generalStyles.length) {
+            root.adoptedStyleSheets.push(...generalStyles)
+        }
+        if(displayEntryStyles.length) {
+            root.adoptedStyleSheets.push(...displayEntryStyles)
+        }
+
         fuckingInsaneFirefoxHackToMakeSelectAppearNormally(root)
         this.root = root
     }
 })
 
-const labelWrap = async<TLabel, T>(label: TLabel, promise: Promise<T>): Promise<[TLabel, T]> => {
-    return [label, await promise]
-}
-
-//gets replaced with colors.css, general.css, sidebar-entry.css in that order
-//the math.random is so that the build system doesn't inline this text, i need the ``
-//the reason i am doing this is because sharing the css styles like this triples the speed at which the sidebar can render
-Promise.all([
-    labelWrap(generalStyles, import("/css/colors.css", { with: { type: "css" } })),
-    labelWrap(generalStyles, import("/css/general.css", { with: { type: "css" } })),
-    labelWrap(sidebarStyles, import("/ui/templates/sidebar-entry.css", { with: { type: "css" } })),
-]).then(sheets => {
-    for(let [list, sheet] of sheets) {
-        list.push(sheet['default'])
-    }
-}).catch(err => {
-    (new CSSStyleSheet).replace(`{{{_BUILDTIME_REPLACE_}}}${Math.random()}`).then((res) => {
-        sidebarStyles.push(res)
-    })
-});
 customElements.define("sidebar-entry", class extends HTMLElement {
     root: ShadowRoot
     constructor() {
@@ -274,6 +285,9 @@ function _registerShadowElement(name: string) {
             let template = document.getElementById(name) as HTMLTemplateElement
             let content = template.content.cloneNode(true)
             let root = this.attachShadow({ mode: "open", clonable: true })
+            if(generalStyles.length) {
+                root.adoptedStyleSheets.push(...generalStyles)
+            }
             root.appendChild(content)
             this.root = root
         }
@@ -287,6 +301,9 @@ customElements.define("menu-screen", class extends HTMLElement {
         let template = document.getElementById("menu-template") as HTMLTemplateElement
         let content = template.content.cloneNode(true)
         let root = this.attachShadow({ mode: "open", clonable: true })
+        if(generalStyles.length) {
+            root.adoptedStyleSheets.push(...generalStyles)
+        }
         root.appendChild(content)
         this.root = root
     }
