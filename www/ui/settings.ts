@@ -151,8 +151,6 @@ const userSettings = new Map<number, Settings>
 /** users who's settings are being loaded (dont load twice at same time) */
 const _loading = new Set
 async function settings_load(uid: number, force: boolean = false): Promise<Settings | boolean >{
-    if((!force && userSettings.has(uid))) return false
-
     if(_loading.has(uid)) {
         return await new Promise(res => {
             const ck = () => {
@@ -165,6 +163,8 @@ async function settings_load(uid: number, force: boolean = false): Promise<Setti
             setTimeout(ck, 60)
         })
     }
+
+    if((!force && userSettings.has(uid))) return false
 
     _loading.add(uid)
 
