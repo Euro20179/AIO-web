@@ -202,7 +202,7 @@
                 <div class="flex">
 
                     <div class="flex row" style="grid-template-rows: 1fr 1fr;">
-                        <button onclick="openSettingsUI()" style="margin-block-end: var(--inline-widget-margin)">⚙</button>
+                        <button onclick="openSettingsUI()">⚙</button>
                         <color-scheme-selector></color-scheme-selector>
                     </div>
                 </div>
