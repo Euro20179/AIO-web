@@ -105,10 +105,13 @@
 
     #top-line {
         align-self: center;
+
         display: flex;
 
         flex-wrap: wrap;
         flex-direction: row;
+
+        gap: var(--very-small-gap);
 
         justify-content: space-evenly;
         align-items: center;
@@ -418,9 +421,6 @@
         >* {
             text-wrap: balance;
         }
-
-        flex-grow: 1;
-        margin-bottom: 10px;
     }
 
     #main-title {
