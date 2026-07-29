@@ -112,7 +112,7 @@ async function main() {
             urlParams
                 .get("item-id")!
                 .split(",")
-                .map((v) => `metadata.itemid = ${v}`)
+                .map((v) => `3 metadata.itemid = ${v}`)
                 .join(" OR ")
         : urlParams.get("q")
 
@@ -128,7 +128,7 @@ async function main() {
 
     if (initialSearch || components.searchBox?.value) {
         mkSearchUI({
-            "q": urlParams.get("q") || components.searchBox?.value || ""
+            "q": initialSearch || components.searchBox?.value || ""
         })
     } else {
         let entries = Object.values(items_getAllEntries()).map((v) => v.info);
