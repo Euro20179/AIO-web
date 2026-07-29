@@ -521,7 +521,7 @@
         grid-auto-flow: column;
         grid-auto-rows: max(15cqb, 100px);
 
-        gap: 2em;
+        gap: var(--small-gap);
 
         align-items: center;
         justify-content: start;
@@ -530,24 +530,8 @@
         width: 100%;
         overflow: auto;
 
-
-        button {
-            &:not(:has(img)) {
-                padding: 0.5em;
-            }
-            &:has(img) {
-                height: 90%;
-                align-self: center;
-                min-width: fit-content;
-            }
-        }
-
-        img {
-            max-height: 100%;
-            max-width: 100%;
-            /*it's in a flex, the aspect-ratio gets messed up if other images of different heights are here*/
-            /* height: fit-content; */
-            cursor: pointer;
+        item-card {
+            min-width: 100px;
         }
     }
 
