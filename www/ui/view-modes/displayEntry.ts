@@ -173,7 +173,11 @@ function _mkde_actions() {// {{{
                 return
             }
 
-            api_deleteEntryTags(item.ItemId, [tag])
+            confirmUI(`Are you sure you want to delete the tag: ${tag}`)
+                .then(res => {
+                    if(!res) return
+                    return api_deleteEntryTags(item.ItemId, [tag])
+                })
                 .then(res => {
                     if (res?.status !== 200) return ""
                     res.text().then(() => {
@@ -185,6 +189,7 @@ function _mkde_actions() {// {{{
                         })
                     })
                 })
+
         },
 
         /**
@@ -199,15 +204,21 @@ function _mkde_actions() {// {{{
             }
 
             let idx = Number(r)
-            let recs = items_getRecommendedBy(item.ItemId).filter((_, i) => i !== idx)
-            item.RecommendedBy = JSON.stringify(recs)
-            api_setItem("", item, "Remove recommender").then(() => {
-                updateInfo2({
-                    [String(item.ItemId)]: {
-                        info: item
-                    }
+            const recsAll = items_getRecommendedBy(item.ItemId)
+            let recs = recsAll.filter((_, i) => i !== idx)
+            confirmUI(`Are you sure you want to delete the recommender: ${recsAll[idx]}`)
+                .then(res => {
+                    if(!res) return
+                    item.RecommendedBy = JSON.stringify(recs)
+                    return api_setItem("", item, "Remove recommender")
                 })
-            })
+                .then(() => {
+                    updateInfo2({
+                        [String(item.ItemId)]: {
+                            info: item
+                        }
+                    })
+                })
         },
 
         /**
