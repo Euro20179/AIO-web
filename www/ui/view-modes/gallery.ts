@@ -1,6 +1,6 @@
 function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment) {
     const card = mkItemCardUI(item.ItemId)
-    dom_getel("h2", null, card.shadowRoot!)?.remove()
+    dom_getel("h2", null, card.shadowRoot!)?.parentElement?.remove()
     parent.append(card)
     return card
 }
