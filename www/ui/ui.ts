@@ -3280,8 +3280,8 @@ function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Eve
 
     settings_load(meta.Uid).then(() => {
         applyUserRating(
-            settings_get(user.Uid, "tiers"),
-            settings_get(user.Uid, "rating_styles"),
+            settings_get(getUserUID(), "tiers"),
+            settings_get(getUserUID(), "rating_styles"),
             user.UserRating,
             settings_get(user.Uid, "user_rating_max"),
             dom_getelorthrow('slot[name="rating"]', null, card.shadowRoot!)

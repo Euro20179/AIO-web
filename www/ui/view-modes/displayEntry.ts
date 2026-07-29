@@ -1689,8 +1689,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#user-rating", ratingEl => {
         settings_load(user.Uid).then(() => {
             applyUserRating(
-                settings_get(user.Uid, "tiers"),
-                settings_get(user.Uid, "rating_styles"),
+                settings_get(getUserUID(), "tiers"),
+                settings_get(getUserUID(), "rating_styles"),
                 user.UserRating,
                 settings_get(user.Uid, "user_rating_max"),
                 ratingEl
@@ -1702,8 +1702,8 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#audience-rating", audienceRatingEl => {
         if (meta.Rating) {
             applyUserRating(
-                settings_get(user.Uid, "tiers"),
-                settings_get(user.Uid, "rating_styles"),
+                settings_get(getUserUID(), "tiers"),
+                settings_get(getUserUID(), "rating_styles"),
                 meta.Rating,
                 meta.RatingMax || settings_get(meta.Uid, "user_rating_max"),
                 audienceRatingEl
