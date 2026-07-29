@@ -379,6 +379,7 @@ function items_getNormalizedRating(meta: MetadataEntry): number {
 }
 
 function items_normalizeRating(rating: number, max: number): number {
+    if(max == 100) return rating
     return (rating / max * 100) || 0
 }
 
