@@ -1,9 +1,5 @@
 @layer components {
     #tierlist-output {
-        img {
-            height: 80px;
-        }
-
         ul {
             list-style: none;
             display: flex;
@@ -14,11 +10,17 @@
         }
 
         tier-label {
-            width: 5rem;
+            height: 6rem;
             aspect-ratio: 1;
             text-align: center;
             font-weight: bold;
             color: black;
+        }
+
+        item-card {
+            display: inline-block;
+            height: 6rem;
+            aspect-ratio: 1 / 2;
         }
     }
 }
