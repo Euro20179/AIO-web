@@ -1429,6 +1429,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             const recommender = document.createElement("de-recommender")
             el.append(recommender)
 
+            const outerBtn = dom_getel(".recommender", this.win.HTMLElement, recommender)
+            if(outerBtn) {
+                outerBtn.onclick = e => {
+                    if(e.target?.id === 'delete-recommended-by') return
+                    ui_search(`recommendedBy ~ '%"${r}"%'`)
+                }
+            }
+
             const b = dom_getel('[role="button"]', this.win.HTMLElement, recommender)
             if(!b) continue
             b.setAttribute("recommender", r)
