@@ -164,14 +164,22 @@
 
         #thumbnail {
             max-width: 90cqi;
+            display: block;
         }
     }
 
     #thumbnail-fig {
         container-type: inline-size;
         container-name: thumbnail-fig;
-        width: clamp(20ch, 30cqi, 30ch);
+
         float: left;
+
+        display: flex;
+        flex-direction: column;
+        gap: var(--very-small-gap);
+
+        max-width: 30cqi;
+        width: clamp(20ch, 30cqi, 30ch);
         margin: 0 var(--small-gap) 0 0;
 
         /*this way, everything in the middle of the page is cenetered nicely*/
@@ -180,7 +188,6 @@
 
         font-size: min(1em, 3cqw);
 
-        max-width: 30cqi;
         overflow: auto auto;
 
         hr {
