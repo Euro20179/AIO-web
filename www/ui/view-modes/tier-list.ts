@@ -8,7 +8,7 @@ type TierListMode = {
     _modeSelector(): any
     _customExpr(): any
     _getMode(): "general" | "user" | "custom"
-    _findInfo(id: bigint, mode: "general" | "user" | "custom"): [number, string | false]
+    _findInfo(id: bigint, mode: "general" | "user" | "custom"): Promise<[number, string | false]>
 } & Mode
 
 var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, output?: HTMLElement | DocumentFragment, win ?: Window & typeof globalThis) {
@@ -221,7 +221,7 @@ TierListMode.prototype._getMode = function(this: TierListMode, ): "general" | "u
     return mode
 }
 
-TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode: "general" | "user" | "custom"): [number, string | false] {
+TierListMode.prototype._findInfo = async function(this: TierListMode, id: bigint, mode: "general" | "user" | "custom"): Promise<[number, string | false]> {
     let user = findUserEntryById(id)
     let meta = findMetadataById(id)
 
@@ -247,44 +247,47 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
 TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTMLElement {
     let mode = this._getMode()
     let li = this.win.document.createElement("li")
-    let [rating, tier] = this._findInfo(entry.ItemId, mode)
 
     const btn = createClickableEntryUI(entry.ItemId)
-    btn.title = `${entry.En_Title || entry.Native_Title} - (${rating})`
 
     li.id = `tier-item-${entry.ItemId}`
     li.append(btn)
 
-    if (!(tier !== false)) {
-        console.warn(`No tier for rating: ${rating}`)
-        return li
-    }
+    this._findInfo(entry.ItemId, mode).then(async([rating, tier]) => {
+        btn.title = `${entry.En_Title || entry.Native_Title} - (${rating})`
 
-    let ul = this.rows[tier]
+        if (!(tier !== false)) {
+            console.warn(`No tier for rating: ${rating}`)
+            return li
+        }
 
-    const els = ul.querySelectorAll("li")
+        let ul = this.rows[tier]
 
-    if (els.length === 0) {
-        ul.append(li)
-    } else {
-        for (let el of els) {
-            let elId = BigInt(el.id.split("-item-")[1])
+        const els = ul.querySelectorAll("li")
 
-            let [elRating, _] = this._findInfo(elId, mode)
+        if (els.length === 0) {
+            ul.append(li)
+        } else {
+            for (let el of els) {
+                let elId = BigInt(el.id.split("-item-")[1])
 
-            if (rating < elRating) {
-                //if rating < elRating, there may be another element that 
-                //this new element is closer to in rating, so we can't finish
-                //yet
-                el.after(li)
-            } else {
-                el.before(li)
-                //if rating >= elRating, and because the <li>s are in order,
-                //that means nothing else is greater than it so we can stop
-                break
+                let [elRating, _] = await this._findInfo(elId, mode)
+
+                if (rating < elRating) {
+                    //if rating < elRating, there may be another element that 
+                    //this new element is closer to in rating, so we can't finish
+                    //yet
+                    el.after(li)
+                } else {
+                    el.before(li)
+                    //if rating >= elRating, and because the <li>s are in order,
+                    //that means nothing else is greater than it so we can stop
+                    break
+                }
             }
         }
-    }
+    })
+
 
     return li
 }
