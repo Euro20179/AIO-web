@@ -49,7 +49,11 @@ function ua_setfavicon(path: string) {
 async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
     let win: Window
     if (window.documentPictureInPicture) {
-        win = await documentPictureInPicture.requestWindow(pipOptions)
+        try {
+            win = await documentPictureInPicture.requestWindow(pipOptions)
+        } catch(err) {
+            win = open("", "_blank", "popup=true")
+        }
     } else {
         win = open("", "_blank", "popup=true")
     }
@@ -59,9 +63,11 @@ async function ua_popup(doc?: string, pipOptions = {}): Promise<Window | null> {
         win.document.documentElement.replaceWith(parser.parseFromString(doc, "text/html").documentElement)
     }
 
-    const cspicker = dom_getel("color-scheme-selector")
+    const cspicker = dom_getel("color-scheme-selector select", HTMLSelectElement)
     if(cspicker) {
-        win.document.body.prepend(cspicker.cloneNode(true))
+        const clone = win.document.adoptNode(cspicker.cloneNode(true)) as HTMLSelectElement
+        clone.value = cspicker.value
+        win.document.body.prepend(clone)
     }
 
     const closebtn = dom_getel("close-button")
