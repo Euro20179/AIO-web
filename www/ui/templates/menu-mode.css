@@ -39,6 +39,7 @@ section {
 }
 
 item-card {
-    width: max-content;
+    width: 20%;
+    height: 30cqb;
     counter-increment: number-of-items;
 }
