@@ -483,8 +483,8 @@
             flex-wrap: wrap;
 
             item-card {
-                max-width: 30cqi;
-                height: 30cqb;
+                width: 10cqi;
+                height: 200px;
             }
         }
     }/* }}} */
