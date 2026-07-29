@@ -1206,10 +1206,22 @@ function whatToInclude(el: ShadowRoot): { include: bigint, recursive: boolean } 
 
 function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigint) {
     const {include, recursive} = whatToInclude(root)
+    let unsafe = settings_get(getUserUID(), "enable_unsafe")
     const notesL = items_reduce(itemId, include, recursive, (p, c) => {
         let note = findUserEntryById(c).Notes
         if(!note) return p
-        return p.concat([[c, parseNotes(note)]])
+        let sanitizedNote = parseNotes(note)
+        if(!unsafe) {
+            let doc
+            if("parseHTML" in Document) {
+                doc = Document.parseHTML(sanitizedNote)
+            } else {
+                let doc = Document.parseHTMLUnsafe(sanitizedNote)
+                doc.querySelectorAll(":where(script, iframe, embed, frame, object, use)").forEach(e => e.remove())
+            }
+            sanitizedNote = doc.body.innerHTML
+        }
+        return p.concat([[c, sanitizedNote]])
     }, [] as [bigint, string][])
     if (notesL.length === 1) {
         notesEl.innerHTML = notesL[0][1]
