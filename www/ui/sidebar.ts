@@ -13,7 +13,7 @@ type SidebarMode = {
     focusNextItem(backward: boolean): any
     selectNth(n: Number): any
     reorder(itemOrder: bigint[], select?: boolean): any
-    render(entries: InfoEntry[], clearRendered?: boolean): any
+    render(entries: InfoEntry[], clearRendered?: boolean, select?: boolean): any
 
     updateThumbnail(id: bigint, src: string): any
     mkobserver(): any
@@ -194,20 +194,10 @@ SidebarMode.prototype.focusNextItem = function(backward: boolean = false) {
 }
 
 SidebarMode.prototype.reorder = function(this: SidebarMode, itemOrder: bigint[], select = true) {
-    let elems = []
-    for (let item of itemOrder) {
-        let elem = this.output.querySelector(`[data-entry-id="${item}"]`) as HTMLElement
-        if (!elem) continue
-        elems.push(elem)
-    }
-    this.output.replaceChildren(...elems)
-
-    if (select) {
-        selectSidebarItems(itemOrder.map(v => findInfoEntryById(v)))
-    }
+    this.render(itemOrder.map(v => findInfoEntryById(v)), true, select)
 }
 
-SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true) {
+SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true, select = true) {
     this.renderBacklog = []
     if (!entries.length) return
 
