@@ -95,6 +95,7 @@
     <datalist id="recommended-by"></datalist>
 
     <dialog id="transactions-log">
+        <h3>Transaction History</h3>
         <div>
         </div>
 
