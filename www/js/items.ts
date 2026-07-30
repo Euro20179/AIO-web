@@ -654,11 +654,31 @@ function items_addItem(item: {
     _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
 }
 
+function items_setItem(item:{
+    meta: MetadataEntry,
+    events: UserEvent[],
+    info: InfoEntry,
+    user: UserEntry,
+    transactions: TransactionEntry[]
+}) {
+    let e = _globalsNewUi.entries[String(item.user.ItemId)]
+
+    if(!e) {
+        items_addItem(item)
+        return
+    }
+
+    e.info = item.info
+    e.meta = item.meta
+    e.user = item.user
+    e.transactions = item.transactions
+    e.events = item.events
+}
+
 async function items_loadAll(id: bigint, uid = 0): Promise<items_Entry> {
     let e = await api_getEntryAll(id, uid)
     if(e) {
-        items_delEntry(id)
-        items_addItem(e)
+        items_setItem(e)
     }
     return items_getEntry(id)
 }
@@ -692,7 +712,7 @@ function items_entryExists(id: bigint): boolean {
 function items_getEntry(id: bigint) {
     const val = _globalsNewUi.entries[String(id)]
     if (!(val)) {
-        console.error(`${id} is not an entry or is not loaded`)
+        console.warn(`${id} is not an entry or is not loaded`)
         return _globalsNewUi.entries[String(id)] = items_Entry.createUnloaded(id)
     }
     return val
