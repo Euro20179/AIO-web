@@ -2,9 +2,19 @@
     #tierlist-output {
         ul {
             list-style: none;
+
             display: flex;
             flex-wrap: wrap;
             gap: 0.5em;
+
+            margin: 0;
+
+        }
+
+        div {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-columns: auto 1fr;
 
             border-bottom: 3px solid var(--secondary);
         }

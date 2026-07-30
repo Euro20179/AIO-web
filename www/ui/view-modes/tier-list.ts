@@ -174,15 +174,16 @@ TierListMode.prototype._setup = function(this: TierListMode, ) {
     for (let tier of Object.entries(settings_get(getUserUID(), "tiers"))) {
         const thisTierStyles = tierListStyles[tier[0] as keyof typeof tierListStyles] || ""
 
+        const row = document.createElement("div")
         const ul = document.createElement("ul")
         const label = document.createElement("tier-label")
         label.style.backgroundColor = thisTierStyles.color
 
         label.innerText = thisTierStyles.label || tier[0]
-        ul.append(label)
         ul.classList.add(`${tier[0]}-tier`)
+        row.append(label, ul)
         this.rows[tier[0]] = ul
-        this.tierlistEl.append(ul)
+        this.tierlistEl.append(row)
     }
 }
 
