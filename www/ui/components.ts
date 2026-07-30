@@ -123,7 +123,13 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
 
             const putDataMode = elem.getAttribute("put-data-mode")
             if (putDataMode === "html") {
-                elem.innerHTML = String(data)
+                if(!enable_unsafe && "dom_sanitizehtml" in window) {
+                    dom_sanitizehtml(String(data), elem)
+                } else if(!enable_unsafe) {
+                    elem.textContent = String(data)
+                } else {
+                    elem.innerHTML = String(data)
+                }
             } else if (putDataMode === "value" && "value" in elem) {
                 elem.value = String(data)
             } else {

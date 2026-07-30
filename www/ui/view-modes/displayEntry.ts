@@ -1212,14 +1212,7 @@ function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigi
         if(!note) return p
         let sanitizedNote = parseNotes(note)
         if(!unsafe) {
-            let doc
-            if("parseHTML" in Document) {
-                doc = Document.parseHTML(sanitizedNote)
-            } else {
-                let doc = Document.parseHTMLUnsafe(sanitizedNote)
-                doc.querySelectorAll(":where(script, iframe, embed, frame, object, use)").forEach(e => e.remove())
-            }
-            sanitizedNote = doc.body.innerHTML
+            sanitizedNote = dom_sanitizehtml(sanitizedNote)
         }
         return p.concat([[c, sanitizedNote]])
     }, [] as [bigint, string][])

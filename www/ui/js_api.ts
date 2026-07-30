@@ -741,6 +741,33 @@ async function dom_loadtemplate(name: string): HTMLTemplateElement {
 }
 
 /**
+ * Given an html string, sanitize it, if parent is given, put the sanitized
+ * html into parent.
+ * @param {string} html
+ * @param {HTMLElement} parent
+ */
+function dom_sanitizehtml(html: string, parent?: Element): string {
+    if(parent && "setHTML" in parent && typeof parent.setHTML === 'function') {
+        parent.setHTML(html)
+        return parent.innerHTML
+    }
+
+    let doc
+    if("parseHTML"in Document && typeof Document.parseHTML === 'function') {
+        doc = Document.parseHTML(html)
+    } else {
+        doc = Document.parseHTMLUnsafe(html)
+        doc.querySelectorAll(":where(script, iframe, embed, frame, object, use)").forEach(e => e.remove())
+    }
+
+    if(parent) {
+        parent.setHTMLUnsafe(doc.body.innerHTML)
+    }
+
+    return doc.body.innerHTML
+}
+
+/**
  * sets a css property on document and if catalogWin is open, also that document
  * @param {string} property the css property to set
  * @param {string} value the value to set property to
