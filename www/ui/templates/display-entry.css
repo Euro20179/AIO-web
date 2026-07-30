@@ -408,6 +408,7 @@
         /*if the image does not have a max width, it will cause overflow*/
         img {
             max-width: 100%;
+            height: auto;
         }
     }
 
