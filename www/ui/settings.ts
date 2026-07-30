@@ -123,10 +123,7 @@ const defaultSettings = {
             title: "edit item's html template",
             text: "<>",
             shortTitle: "template",
-            attributes: {
-                command: "show-modal",
-                commandfor: "template-editor-container"
-            }
+            action: 'edittemplate'
         },
 
         ['delete']: {

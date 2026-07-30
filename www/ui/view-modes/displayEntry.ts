@@ -747,11 +747,12 @@ function _mkde_actions() {// {{{
         /**
          * Toggles the hiddenness of the #template-editor element
          */
-        edittemplate: function(_item, root, _elem) {
-            const templEditor = root.getElementById("template-editor")
-            if (!templEditor) return
-
-            templEditor.hidden = !templEditor.hidden
+        edittemplate: function(item, root, _elem) {
+            const modal = openModalUI("template-editor-container", root)
+            const te = dom_getel("textarea", this.win.HTMLTextAreaElement, modal)
+            if(te) {
+                te.value = getUserExtra(findUserEntryById(item.ItemId), "template")
+            }
         },
 
         /**
@@ -1198,6 +1199,12 @@ function whatToInclude(el: ShadowRoot): { include: bigint, recursive: boolean } 
     if(checked("children")) include |= items_reduce_CHILDREN
     if(checked("copies")) include |= items_reduce_COPIES
     if(checked("requires")) include |= items_reduce_REQUIRES
+
+    //if this element doesn't exist we always want to include self
+    if(!el.getElementById(`include-self-in-cost`)) {
+        include |= items_reduce_SELF
+    }
+
     return {
         include,
         recursive: checked("recusively")
