@@ -1879,8 +1879,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         events = findUserEventsById(itemId),
         item = findInfoEntryById(itemId)
 
-    let userStyles = getUserExtra(user, "styles")
-
     const renderComponent = function(query: string,
         fill: (element: HTMLElement, itemId: bigint) => any) {
         for (let el of root.querySelectorAll(query)) {
@@ -1954,7 +1952,9 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
 
     renderComponent("#style-editor", el => {
         if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        el.value = userStyles || ""
+        items_getUserById(item.ItemId).then(u => {
+            el.value = getUserExtra(u, "styles") || ""
+        })
         el.addEventListener("change", e => {
             e.target instanceof HTMLElement &&
                 this.de_actions.updatecustomstyles(e.target)
@@ -1963,7 +1963,9 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
 
     renderComponent("#template-editor", el => {
         if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        el.value = getUserExtra(user, "template") || ""
+        items_getUserById(item.ItemId).then(u => {
+            el.value = getUserExtra(u, "template") || ""
+        })
     })
 
     renderComponent("#new-child", el => {
