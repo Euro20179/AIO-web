@@ -253,17 +253,9 @@
         gap: calc(var(--small-gap) / 5);
         overflow: auto;
 
-        @container (width < 800px) {
-            display: none;
-        }
-
         *:not(:last-child) {
             padding-right: 10px;
             border-right: 1px dashed currentColor;
-        }
-
-        * {
-            align-content: center;
         }
 
         [data-stat-name="totalCost"]::before {
