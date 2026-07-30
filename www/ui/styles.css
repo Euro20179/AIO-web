@@ -115,15 +115,9 @@
         }
     }/* }}} */
 
-    #transactions-log div {
-        display: flex;
-        gap: var(--small-gap);
-        text-align: center;
-
-        article {
-            padding: var(--small-gap);
-            border: 1px solid;
-        }
+    #transactions-log article {
+        padding: var(--small-gap);
+        border: 1px solid;
     }
 
 

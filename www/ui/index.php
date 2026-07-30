@@ -96,7 +96,8 @@
 
     <dialog id="transactions-log">
         <h3>Transaction History</h3>
-        <div>
+
+        <div class="flex small-gap center j-center">
         </div>
 
         <form method="dialog" class="flex j-center small-gap" style="margin-block-start: var(--small-gap)">
