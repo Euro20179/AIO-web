@@ -1808,7 +1808,7 @@ async function newEventUI(form: HTMLFormElement) {
  * - user-status: current status for new entry
  * - type: the type of entry
  * - format: the format of the entry
- * - is-digital: whether or not it is a digitized version of the format
+ * - format-modifiers: a bitfield for the format modifiers to use
  * - price: purchase/sell price of the item
  * - recommended-by: "," separated list of recommenders
  * - tags: "," separated list of tags
@@ -1822,12 +1822,15 @@ async function newEventUI(form: HTMLFormElement) {
  */
 function newEntryDialogUI(params?: Record<string, string>) {
     const dialog = openModalUI("new-entry", undefined, "new-entry-dialog")
+
     if(!dialog) {
         alert("Failed to create new entry dialog")
         return
     }
+
     dialog.append(dom_createdatalist("tags-dl", new Set(Object.values(items_getAllEntries()).values()
                 .flatMap(i => i.info.Tags || []).toArray()).values().toArray()) as HTMLDataListElement)
+
     if(components.recommenders) {
         dialog.append(components.recommenders.cloneNode(true))
     }
@@ -1843,6 +1846,26 @@ function newEntryDialogUI(params?: Record<string, string>) {
     const title = dom_getelorthrow('[name="title"]', HTMLInputElement, dialog)
 
     const form = dom_getelorthrow("#new-item-form", HTMLFormElement, dialog)
+
+    const format_mods = dom_getelorthrow('[name="format-modifiers"]', HTMLInputElement, dialog)
+    let fmt = 0
+
+    const modifier_menu = dom_getel("format-modifier-menu", null, dialog)
+    if(modifier_menu && modifier_menu.shadowRoot) {
+        for(let input of modifier_menu.shadowRoot.querySelectorAll("input")) {
+            fmt |= input.valueAsNumber
+            input.onchange = () => {
+                if (input.checked) {
+                    fmt |= Number(input.value)
+                } else {
+                    fmt -= Number(input.value)
+                }
+                format_mods.value = String(fmt)
+            }
+        }
+
+        format_mods.value = String(fmt)
+    }
 
     if(params) {
         for(let [param, val] of Object.entries(params)) {

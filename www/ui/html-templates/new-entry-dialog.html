@@ -78,12 +78,16 @@
     </style>
 
     <dialog id="new-entry">
+        <format-modifier-menu></format-modifier-menu>
+
         <h3>New Entry</h3>
 
         <form id="new-item-form"
             method="dialog"
             onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
         >
+
+            <input type="hidden" name="format-modifiers">
 
             <dialog id="new-entry-edit-metadata-dialog" ontoggle="updateObjectTblUI(JSON.parse(this.parentElement.elements['metadata'].value), this.querySelector('table'), '*')">
                 <button onclick="
@@ -204,12 +208,19 @@
 
                 <select name="format" required title="Format type"></select>
 
-                <div>
-                    <label for="is-digital" style="text-wrap: nowrap; justify-self: end;">
-                        digital
-                        <input type="checkbox" id='is-digital'
-                            style="vertical-align: middle;" name="is-digital"
-                            title="Whether or not the item is a digitized/digital version of the format"></label>
+                <div class="grid" style="grid-template-rows: subgrid; grid-template-columns: auto 1fr;">
+                    <button
+                        type="button"
+                        onclick="openModalUI('format-modifier-selection-dialog', this.getRootNode().querySelector('format-modifier-menu').shadowRoot)"
+                    >
+                        F Mods
+                    </button>
+
+                    <!-- <label for="is-digital" style="text-wrap: nowrap; justify-self: end;"> -->
+                    <!--     digital -->
+                    <!--     <input type="checkbox" id='is-digital' -->
+                    <!--         style="vertical-align: middle;" name="is-digital" -->
+                    <!--         title="Whether or not the item is a digitized/digital version of the format"></label> -->
 
                     <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
                 </div>
