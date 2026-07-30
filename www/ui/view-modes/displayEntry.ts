@@ -749,10 +749,7 @@ function _mkde_actions() {// {{{
          */
         edittemplate: function(item, root, _elem) {
             const modal = openModalUI("template-editor-container", root)
-            const te = dom_getel("textarea", this.win.HTMLTextAreaElement, modal)
-            if(te) {
-                te.value = getUserExtra(findUserEntryById(item.ItemId), "template")
-            }
+            dom_getel("textarea", this.win.HTMLTextAreaElement, modal)
         },
 
         /**
@@ -1425,6 +1422,20 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     meta = await items_getMetadataById(meta.ItemId)
     user = await items_getUserById(user.ItemId)
 
+    renderComponent("#style-editor", el => {
+        if (!(el instanceof this.win.HTMLTextAreaElement)) return
+        items_getUserById(item.ItemId).then(u => {
+            el.innerHTML = getUserExtra(u, "styles") || ""
+        })
+    })
+
+    renderComponent("#template-editor", el => {
+        if (!(el instanceof this.win.HTMLTextAreaElement)) return
+        items_getUserById(item.ItemId).then(u => {
+            el.innerHTML = getUserExtra(u, "template") || ""
+        })
+    })
+
     renderComponent("#library", el => {
         if (!("value" in el)) return
         if (!item.Library) {
@@ -1948,24 +1959,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
             e =>
                 e.target instanceof this.win.HTMLSelectElement &&
                 this.de_actions.updatestatus(e.target)
-    })
-
-    renderComponent("#style-editor", el => {
-        if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        items_getUserById(item.ItemId).then(u => {
-            el.value = getUserExtra(u, "styles") || ""
-        })
-        el.addEventListener("change", e => {
-            e.target instanceof HTMLElement &&
-                this.de_actions.updatecustomstyles(e.target)
-        })
-    })
-
-    renderComponent("#template-editor", el => {
-        if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        items_getUserById(item.ItemId).then(u => {
-            el.value = getUserExtra(u, "template") || ""
-        })
     })
 
     renderComponent("#new-child", el => {
