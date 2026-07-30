@@ -78,18 +78,20 @@
             grid-template-areas:
                 "form form form"
                 "sidebar main main"
-                "sidebar main main";
+                "sidebar main main"
+                "statusline statusline statusline";
             grid-template-columns: max-content 1fr 1fr;
-            grid-template-rows: min-content 1fr 1fr;
+            grid-template-rows: min-content 1fr 1fr min-content;
         }
 
         @container body (width < 800px) {
-            grid-template-rows: min-content min-content 3fr;
+            grid-template-rows: min-content min-content 3fr min-content;
             grid-template-columns: 1fr 1fr 0.5fr;
             grid-template-areas:
                 "form form form"
                 "sidebar sidebar sidebar"
-                "main main main";
+                "main main main"
+                "statusline statusline statusline";
 
             position: relative;
         }
@@ -194,7 +196,7 @@
         text-wrap: nowrap;
         overflow-x: auto;
         display: grid;
-        grid-template-columns: min-content min-content max-content auto min-content;
+        grid-template-columns: min-content 1fr auto min-content;
         width: 100%;
 
         border-bottom: 2px solid var(--secondary);
@@ -202,8 +204,7 @@
         @container (width < 115ch) {
             grid-template-areas:
                 "new searching searching"
-                "stats stats view-toggle";
-            grid-template-columns: min-content min-content 1fr auto min-content;
+                "view-toggle view-toggle view-toggle";
         }
 
         @container (width < 600px) {
@@ -245,14 +246,6 @@
                 width: 20cqi;
             }
         }
-
-        [data-stat-name="totalCost"]::before {
-            content: "$"
-        }
-
-        [data-stat-name]:not([data-stat-name="totalCost"])::before {
-            content: attr(data-stat-name) ": "
-        }
     }
 
     #result-stats {
@@ -272,6 +265,14 @@
         * {
             align-content: center;
         }
+
+        [data-stat-name="totalCost"]::before {
+            content: "$"
+        }
+
+        [data-stat-name]:not([data-stat-name="totalCost"])::before {
+            content: attr(data-stat-name) ": "
+        }
     }
 
     #result-stats::before {
@@ -281,6 +282,15 @@
 
         padding: 0 10px;
         align-content: center;
+    }
+
+    #statusline {
+        grid-area: statusline;
+
+        width: 100%;
+        padding-inline: var(--small-gap);
+
+        background: var(--secondary);
     }
 
     #viewing-area {

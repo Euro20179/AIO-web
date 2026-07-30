@@ -181,11 +181,6 @@
 
                     <button type="submit" class="styleless-button">🔎</button>
                 </form>
-                <!--used for proper overflow-->
-                <div class="flex overflow" style="width: 100%;">
-                    <div class="result-stats" id="result-stats">
-                    </div>
-                </div>
                 <div style="justify-self: end;">
                     <select name="view-toggle" id="view-toggle" class="view-toggle" style='height: 100%; text-align: center; vertical-align: top;' aria-label="mode">
                         <option value="entry" title="Normal mode">🏠︎ Normal</option>
@@ -224,6 +219,14 @@
 
                 <p id="error"></p>
 
+            </section>
+
+            <section id="statusline">
+                <!--used for proper overflow-->
+                <div class="flex overflow" style="width: 100%;">
+                    <div class="result-stats" id="result-stats">
+                    </div>
+                </div>
             </section>
 
             <alert-box></alert-box>
