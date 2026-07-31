@@ -56,6 +56,7 @@
 <script src="/ui/components.js"></script>
 <script src="/ui/globals.js"></script>
 <script src="/ui/settings.js"></script>
+<script src="/ui/calculator.js"></script>
 <script src="/ui/view-modes/modes.js"></script>
 <script src="/ui/view-modes/displayEntry.js"></script>
 <script src="/ui/ui.js"></script>
