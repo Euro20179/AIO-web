@@ -7,6 +7,7 @@ async function dotests(category: string) {
     type TestGroup = {
         [name: string]: {
             tests: {[name: string]: Test | TestGroup}
+            ondone?: Function
         }
     }
 
@@ -49,6 +50,11 @@ async function dotests(category: string) {
                     doTestGroup(test)
                 }
             }
+
+            if(testOrGroup.ondone) {
+                testOrGroup.ondone()
+            }
+
             const { pass, fail } = passFails.get(name) || { pass: 0n, fail: 0n }
             let style = "color: red;"
             if (fail === 0n) {
@@ -241,7 +247,13 @@ async function dotests(category: string) {
 
     await (async () => {
         tests["display entry mode"] = {
+            ondone: () => setUserExtra(items_getEntry(1n).user, "template", ""),
             tests: await (async() => {
+                setUserExtra(items_getEntry(1n).user, "template", `
+                    <h1 id="main-title"></h1>
+                    <textarea id="style-editor" hidden></textarea>
+                    <section id="notes"></section>
+                `)
                 ui_clear()
                 ui_setmode("entry")
                 let el = ui_select(1n)
