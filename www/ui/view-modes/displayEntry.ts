@@ -748,8 +748,7 @@ function _mkde_actions() {// {{{
          * Toggles the hiddenness of the #template-editor element
          */
         edittemplate: function(item, root, _elem) {
-            const modal = openModalUI("template-editor-container", root)
-            dom_getel("textarea", this.win.HTMLTextAreaElement, modal)
+            openModalUI("template-editor-container", root)
         },
 
         /**
@@ -1867,10 +1866,7 @@ function displayEntryEditStyles(el: HTMLElement) {
  */
 function displayEntryEditTemplate(el: HTMLElement) {
     let root = el.getRootNode() as ShadowRoot
-    const templEditor = root.getElementById("template-editor")
-    if (!templEditor) return
-
-    templEditor.hidden = !templEditor.hidden
+    openModalUI("template-editor-container", root)
 }
 
 function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string, append: boolean = true): HTMLElement {

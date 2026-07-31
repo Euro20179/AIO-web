@@ -1,4 +1,4 @@
-function dotests(category: string) {
+async function dotests(category: string) {
     let testCounts = new Map<string, bigint>
 
     let passFails = new Map<string, { pass: bigint, fail: bigint }>
@@ -34,7 +34,10 @@ function dotests(category: string) {
                         console.debug.apply(null, args)
                     }
                     else {
-                        console.error(testName, l, r)
+                        const args = test[1] === call
+                            ? ["%s %O %O", testName, l, res]
+                            : ["%s %0", testName, l]
+                        console.error.apply(null, args)
                         pf.fail++
                     }
 
@@ -233,20 +236,43 @@ function dotests(category: string) {
 
             }
         },
+    };
 
-        "display entry mode": {
-            tests: (() => {
-                const el = ui_render_from(1n, "entry-output")
+
+    await (async () => {
+        tests["display entry mode"] = {
+            tests: await (async() => {
+                ui_clear()
+                ui_setmode("entry")
+                let el = ui_select(1n)
+                //give element some time to hydrate
+                await new Promise(res => setTimeout(res, 100))
                 const tests: TestGroup[string]["tests"] = {
-                    render: [l(el), not(in_), l([1, 2])]
+                    rendered: [l(el), not(in_), l([1, 2])],
+                }
+                if(el == 1 || el == 2) {
+                    return tests
                 }
 
-                if (el == 1 || el == 2) return tests
-                return tests
+                let qs = el.shadowRoot!.querySelector.bind(el.shadowRoot)
+
+                return {
+                    ...tests,
+                    "fill title": [r(() => qs("#main-title")?.innerHTML), not(eq), l("")],
+                    "notes exist": [r(() => qs("#notes")), not(eq), l(null)],
+                    "style editor has styles": [r(() => qs("#style-editor")?.value), not(eq), l("")],
+                    "template editor has template": [r(() => qs("#template-editor")?.value), not(eq), l("")],
+                    _: {
+                        legacy: {
+                            tests: {
+                                "displayEntryEditStyles()": [r(() => displayEntryEditStyles(qs("#root"))), call, l(() => qs("#style-editor").hidden === false)],
+                            }
+                        }
+                    }
+                }
             })()
         }
-    }
-
+    })()
 
     doTestGroup(tests as TestGroup)
 
