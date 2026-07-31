@@ -273,6 +273,8 @@ async function* api_streamList<T>(endpoint: string, uid: number): AsyncGenerator
             curline += td.decode(cur)
             yield* api_deserializeJsonl<T>(curline)
             curline = td.decode(r.value.slice(r.value.lastIndexOf(10) + 1))
+        } else {
+            curline += td.decode(r.value)
         }
     }
 

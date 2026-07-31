@@ -249,10 +249,25 @@ async function dotests(category: string) {
         tests["display entry mode"] = {
             ondone: () => setUserExtra(items_getEntry(1n).user, "template", ""),
             tests: await (async() => {
-                setUserExtra(items_getEntry(1n).user, "template", `
+                const e = items_getEntry(1n)
+                e.user.Minutes = 300
+                items_addChild(5n, e.ItemId)
+                e.info.Library = 1n
+                setUserExtra(e.user, "template", `
                     <h1 id="main-title"></h1>
                     <textarea id="style-editor" hidden></textarea>
-                    <section id="notes"></section>
+                    <de-notes></de-notes>
+                    <de-descendants></de-descendants>
+                    <de-cost-calculation-modifiers></de-cost-calculation-modifiers>
+                    <span id="user-rating"></span>
+                    <span id="audience-rating"></span>
+                    <span put-data="ViewCount" id="view-count"></span>
+                    <span id="view-time"></span>
+                    <input id="library"/>
+                    <select id="tz-selector">
+                        <option value="k"></option>
+                        <option value="Atlantic/Reykjavik"></option>
+                    </select>
                 `)
                 ui_clear()
                 ui_setmode("entry")
@@ -272,8 +287,16 @@ async function dotests(category: string) {
                     ...tests,
                     "fill title": [r(() => qs("#main-title")?.innerHTML), not(eq), l("")],
                     "notes exist": [r(() => qs("#notes")), not(eq), l(null)],
+                    "descendants exist": [r(() => qs(`item-card[data-item-id="5"]`)), not(eq), l(null)],
+                    "cost calculation modifiers exist": [r(() => qs("#include-recusively-in-cost")), not(eq), l(null)],
                     "style editor has styles": [r(() => qs("#style-editor")?.value), not(eq), l("")],
                     "template editor has template": [r(() => qs("#template-editor")?.value), not(eq), l("")],
+                    "user-rating filled": [r(() => qs("#user-rating")?.innerHTML), not(eq), l("")],
+                    "audience-rating filled": [r(() => qs("#audience-rating")?.innerHTML), not(eq), l("")],
+                    "put-data=ViewCount filled": [r(() => qs("#view-count")?.innerHTML), not(eq), l("")],
+                    "view-time filled": [r(() => qs("#view-time")?.innerHTML), not(eq), l("")],
+                    "library filled": [r(() => qs("#library")?.value), not(eq), l("")],
+                    "tz-selector set to user's tz": [r(() => qs("#tz-selector")?.value), eq, l('Atlantic/Reykjavik')],
                     _: {
                         legacy: {
                             tests: {
