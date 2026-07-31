@@ -799,9 +799,6 @@ function getFilteredResultsUI(list: items_Entry[] | null = null): InfoEntry[] {
     const ls = components.librarySelector
     if (ls) {
         items = items.filter(v => {
-            if(v.info.Library !== items_getCurrentLibrary()) {
-                console.log(v.info, items_getCurrentLibrary())
-            }
             return v.info.Library === items_getCurrentLibrary()
         })
     }

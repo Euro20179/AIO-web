@@ -11,41 +11,43 @@ async function dotests(category: string) {
         }
     }
 
-    function doTest(name: string, test: Test): [boolean, string] {
-        return [test[1](test[0](), test[2]()), ""]
+    function doTest(group: string, name: string, test: Test): [boolean, string] {
+        const pf = passFails.get(group) || { pass: 0n, fail: 0n }
+        let l = test[0](),
+            r = test[2](),
+            res = test[1](l, r)
+
+        if(res) {
+            pf.pass++
+            const args = test[1] === call
+                ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, res]
+                : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
+            console.debug.apply(null, args)
+        }
+        else {
+            const args = test[1] === call
+                ? ["%s %O %O", name, l, res]
+                : ["%s %0", name, l]
+            console.error.apply(null, args)
+            pf.fail++
+        }
+
+        passFails.set(group, {
+            pass: pf.pass,
+            fail: pf.fail
+        })
+
+        return [res, ""]
     }
 
     function doTestGroup(group: TestGroup) {
         for(let name in group) {
             console.group(name)
             let testOrGroup = group[name]
-            const pf = passFails.get(name) || { pass: 0n, fail: 0n }
             for(let testName in testOrGroup.tests) {
                 let test = testOrGroup.tests[testName]
                 if (Array.isArray(test)) {
-                    let l = test[0](),
-                        r = test[2](),
-                        res = test[1](l, r)
-
-                    if(res) {
-                        pf.pass++
-                        const args = test[1] === call
-                            ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", testName, l, res]
-                            : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", testName, l]
-                        console.debug.apply(null, args)
-                    }
-                    else {
-                        const args = test[1] === call
-                            ? ["%s %O %O", testName, l, res]
-                            : ["%s %0", testName, l]
-                        console.error.apply(null, args)
-                        pf.fail++
-                    }
-
-                    passFails.set(name, {
-                        pass: pf.pass,
-                        fail: pf.fail
-                    })
+                    doTest(name, testName, test)
                 } else {
                     doTestGroup(test)
                 }
@@ -135,6 +137,12 @@ async function dotests(category: string) {
                     }),
                     deq,
                     l([1n])
+                ],
+
+                "ui_search": [
+                    r(ui_search, "entryInfo.itemid = 1", () => {
+                        doTest("search results", "resultcount", [r(() => items_getResults().length), eq, l(1)])
+                    }), eq, l(0)
                 ],
 
                 "ui_addsort": [
