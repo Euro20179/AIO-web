@@ -528,7 +528,7 @@ async function api_getEntryAll(itemId: bigint, uid: number) {
         } else if(!/^\d+$/.test(k)) {
             inRArray = false
         }
-        if(inRArray && /^\d+$/.test(k) || k === "ItemId") return BigInt(ctx.source)
+        if(inRArray && /^\d+$/.test(k) || k === "ItemId" || k === "Library") return BigInt(ctx.source)
         return v
     })
     const {
