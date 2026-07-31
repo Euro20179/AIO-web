@@ -6,7 +6,6 @@ function dotests(category: string) {
     type Test = [Function, (left: any, right: any) => boolean, Function]
     type TestGroup = {
         [name: string]: {
-            with?: () => any,
             tests: {[name: string]: Test | TestGroup}
         }
     }
@@ -20,21 +19,17 @@ function dotests(category: string) {
             console.group(name)
             let testOrGroup = group[name]
             const pf = passFails.get(name) || { pass: 0n, fail: 0n }
-            let w
-            if(testOrGroup.with) {
-                w = testOrGroup.with()
-            }
             for(let testName in testOrGroup.tests) {
                 let test = testOrGroup.tests[testName]
                 if (Array.isArray(test)) {
-                    let l = test[0](w),
-                        r = test[2](w),
+                    let l = test[0](),
+                        r = test[2](),
                         res = test[1](l, r)
 
                     if(res) {
                         pf.pass++
                         const args = test[1] === call
-                            ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", testName, l, r]
+                            ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", testName, l, res]
                             : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", testName, l]
                         console.debug.apply(null, args)
                     }
@@ -240,21 +235,19 @@ function dotests(category: string) {
         },
 
         "display entry mode": {
-            tests: {
-                "render": [
-                    r(() => ui_render_from(1n, "entry-output")),
-                    call,
-                    l((left: 1 | 2 | HTMLElement) => {
-                        return left !== 1 && left !== 2
-                    })
-                ],
+            tests: (() => {
+                const el = ui_render_from(1n, "entry-output")
+                const tests: TestGroup[string]["tests"] = {
+                    render: [l(el), not(in_), l([1, 2])]
+                }
 
-                "presense of elements": {
+                if (el == 1 || el == 2) return tests
+
+                tests["_"] = {
                     "presense of elements": {
-                        with: () => ui_render_from(1n, "entry-output"),
                         tests: {
                             'user actions filled': [
-                                l((left: HTMLElement) => left.querySelector("#user-actions td:has(.delete)")),
+                                l(() => el.querySelector("#user-actions td:has(.delete)")),
                                 not(eq),
                                 l(null)
                             ],
@@ -263,7 +256,7 @@ function dotests(category: string) {
                                     return left.querySelector("#description")?.innerHTML
                                 }),
                                 call,
-                                ((left: string | null) => {
+                                l((left: string | null) => {
                                     alert(left)
                                     return true
                                 })
@@ -271,7 +264,8 @@ function dotests(category: string) {
                         }
                     }
                 }
-            }
+                return tests
+            })()
         }
     }
 
