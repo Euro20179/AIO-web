@@ -151,16 +151,14 @@ function* api_deserializeJsonl<T>(jsonl: string | string[]): Generator<T> {
     }
     for (let line of jsonl) {
         if(!line) continue
-        yield _api_parseJsonL(_api_mkStrItemId(line))
+        yield _api_parseJsonL(line)
     }
 }
 
 function api_serializeEntry(entry: UserEntry | InfoEntry | MetadataEntry | UserEvent | TransactionEntry) {
-    return _api_mkIntItemId(
-        JSON.stringify(
-            entry, (_, v) => typeof v === "bigint" ? String(v) : v
+    return JSON.stringify(
+            entry, (_, v) => typeof v === "bigint" ? JSON.rawJSON(v) : v
         )
-    )
 }
 
 function canBegin(status: Status) {
@@ -518,21 +516,40 @@ async function api_getEntryMetadata(itemId: bigint, uid: number) {
 }
 
 async function api_getEntryAll(itemId: bigint, uid: number) {
-    let res = await fetch(`${apiPath}/get-all-for-entry?id=${itemId}&uid=${uid}`)
+    let res = await fetch(`${apiPath}/entry/allfor?id=${itemId}&uid=${uid}`)
     if (res.status !== 200) {
         return null
     }
     const text = await res.text()
-    const [user, meta, info, ...lists] = text.split("\n").filter(Boolean)
-    const sepPoint = lists.findIndex(v => v === "TRANSACTIONS")
-    const events = lists.slice(0, sepPoint)
-    const transactions = lists.slice(sepPoint + 1)
+    let inRArray = false
+    const json = JSON.parse(text, (k, v, ctx) => {
+        if(["Children", "Requirements", "Copies"].includes(k)) {
+            inRArray = true
+        } else if(!/^\d+$/.test(k)) {
+            inRArray = false
+        }
+        if(inRArray && /^\d+$/.test(k) || k === "ItemId") return BigInt(ctx.source)
+        return v
+    })
+    const {
+        User,
+        Meta,
+        Info,
+        Events,
+        Transactions,
+        Children,
+        Copies,
+        Requirements
+    } = json
     return {
-        user: api_deserializeJsonl<UserEntry>(user).next().value,
-        meta: api_deserializeJsonl<MetadataEntry>(meta).next().value,
-        info: api_deserializeJsonl<InfoEntry>(info).next().value,
-        events: [...api_deserializeJsonl<UserEvent>(events)].filter(Boolean),
-        transactions: [...api_deserializeJsonl<TransactionEntry>(transactions)].filter(Boolean)
+        user: User,
+        meta: Meta,
+        info: Info,
+        events: Events,
+        transactions: Transactions,
+        children: Children,
+        copies: Copies,
+        requirements: Requirements
     }
 }
 

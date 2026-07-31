@@ -157,6 +157,24 @@ class items_Relations {
         }
     }
 
+    setChildren(children: bigint[]) {
+        this.children = children
+    }
+
+    setCopies(copies: bigint[]) {
+        for(let copy of this.copies) {
+            this.removeCopy(copy)
+        }
+
+        for(let copy of copies) {
+            items_addCopy(this.id, copy)
+        }
+    }
+
+    setRequires(requires: bigint[]) {
+        this.requires = requires
+    }
+
     removeRequires(id: bigint) {
         if (this.requires.includes(id)) {
             this.requires = this.requires.filter(v => v !== id)
@@ -176,8 +194,6 @@ class items_Relations {
     }
 
     removeCopy(id: bigint) {
-        const e = items_getEntry(id)
-
         //prevent infinite recursion
         if (this.copies.includes(id)) {
             this.copies = this.copies.filter(v => v !== id)
@@ -194,7 +210,8 @@ class items_Relations {
     }
 
     addChild(id: bigint) {
-        items_getEntry(id).relations.setParent(this.id)
+        this.children.push(id)
+        // items_getEntry(id).relations.setParent(this.id)
     }
 
     addRequires(id: bigint) {
@@ -235,10 +252,7 @@ class items_Relations {
     }
 
     *findDescendants(): Generator<items_Entry> {
-        yield*
-            Object.values(items_getAllEntries())
-                .values()
-                .filter(v => v.relations.isChildOf(this.id))
+        yield* this.children.values().map(v => items_getEntry(v))
     }
 
     *findParents(): Generator<bigint> {
@@ -298,14 +312,37 @@ class items_Entry {
         this.loaded = true
     }
 
-    static fromObj({info, user, meta, events, transactions}: {
+    static fromObj({
+        info,
+        user,
+        meta,
+        events,
+        transactions,
+        children,
+        copies,
+        requirements,
+    }: {
         info: InfoEntry | bigint,
         user?: UserEntry,
         meta?: MetadataEntry,
         events?: UserEvent[],
-        transactions?: TransactionEntry[]
+        transactions?: TransactionEntry[],
+        children?: bigint[],
+        copies?: bigint[],
+        requirements?: bigint[]
     }) {
-        return new items_Entry(info, user, meta, events, transactions)
+        let e = new items_Entry(info, user, meta, events, transactions)
+        if(children) for(let child of children) {
+            e.relations.addChild(child)
+        }
+
+        if(copies) for (let copy of copies) {
+            items_addCopy(e.ItemId, copy)
+        }
+
+        if(requirements) for (let requirement of requirements) {
+            e.relations.addRequires(requirement)
+        }
     }
 
     static createUnloaded(itemid: bigint) {
@@ -659,7 +696,10 @@ function items_setItem(item:{
     events: UserEvent[],
     info: InfoEntry,
     user: UserEntry,
-    transactions: TransactionEntry[]
+    transactions: TransactionEntry[],
+    children: bigint[],
+    requirements: bigint[],
+    copies: bigint[]
 }) {
     let e = _globalsNewUi.entries[String(item.user.ItemId)]
 
@@ -673,6 +713,10 @@ function items_setItem(item:{
     e.user = item.user
     e.transactions = item.transactions
     e.events = item.events
+
+    e.relations.setChildren(item.children)
+    e.relations.setCopies(item.copies)
+    e.relations.setRequires(item.requirements)
 }
 
 async function items_loadAll(id: bigint, uid = 0): Promise<items_Entry> {
