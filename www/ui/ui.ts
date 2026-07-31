@@ -315,6 +315,11 @@ function startupUI({
         e.preventDefault()
     }, "Toggle visibility of nav bar")
 
+    registerCTRLShortcutUI("L", e => {
+        toggleUI("statusline")
+        e.preventDefault()
+    }, "Toggle visibility of statusline")
+
     registerCTRLShortcutUI("B", e => {
         toggleUI("sidebar")
         e.preventDefault()
