@@ -3,63 +3,64 @@ function dotests(category: string) {
 
     let passFails = new Map<string, { pass: bigint, fail: bigint }>
 
-    type TestGroup = Function
+    type Test = [Function, (left: any, right: any) => boolean, Function]
+    type TestGroup = {
+        [name: string]: {
+            with?: () => any,
+            tests: {[name: string]: Test | TestGroup}
+        }
+    }
 
-    type TestGroups = Record<string, TestGroup>
+    function doTest(name: string, test: Test): [boolean, string] {
+        return [test[1](test[0](), test[2]()), ""]
+    }
 
-    type Test = [string, Function, (left: any, right: any) => boolean, Function, {
-        subtest: (left: any, right: any) => Function
-    }?]
+    function doTestGroup(group: TestGroup) {
+        for(let name in group) {
+            console.group(name)
+            let testOrGroup = group[name]
+            const pf = passFails.get(name) || { pass: 0n, fail: 0n }
+            let w
+            if(testOrGroup.with) {
+                w = testOrGroup.with()
+            }
+            for(let testName in testOrGroup.tests) {
+                let test = testOrGroup.tests[testName]
+                if (Array.isArray(test)) {
+                    let l = test[0](w),
+                        r = test[2](w),
+                        res = test[1](l, r)
 
-    const testgroups: TestGroups = {}
+                    if(res) {
+                        pf.pass++
+                        const args = test[1] === call
+                            ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", testName, l, r]
+                            : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", testName, l]
+                        console.debug.apply(null, args)
+                    }
+                    else {
+                        console.error(testName, l, r)
+                        pf.fail++
+                    }
 
-    function mktestgroup(
-        groupName: string,
-        tests: Test[]
-    ) {
-        testCounts.set(groupName, 0n)
-        const fn = () => {
-            console.group(groupName)
-            for (let test of tests) {
-                const [
-                    name, left, comp, right, options
-                ] = test
-                testCounts.set(groupName, (testCounts.get(groupName) || 0n) + 1n);
-                const pf = passFails.get(groupName) || { pass: 0n, fail: 0n }
-                let l, r;
-                if (comp(l = left(), r = right())) {
-                    passFails.set(groupName, {
-                        pass: pf.pass + 1n,
+                    passFails.set(name, {
+                        pass: pf.pass,
                         fail: pf.fail
                     })
-                    const args = comp === call
-                        ? ["%c [✓] %c %s %O %O", "background: limegreen; color: black", "background: transparent", name, l, r]
-                        : ["%c [✓] %c %s %O", "background: limegreen; color: black", "background: transparent", name, l]
-                    console.debug.apply(null, args)
                 } else {
-                    passFails.set(groupName, {
-                        pass: pf.pass,
-                        fail: pf.fail + 1n
-                    })
-                    console.error(name, l, r)
-                }
-
-                if (options?.subtest) {
-                    options?.subtest(l, r)()
+                    doTestGroup(test)
                 }
             }
-            const { pass, fail } = passFails.get(groupName) || { pass: 0n, fail: 0n }
+            const { pass, fail } = passFails.get(name) || { pass: 0n, fail: 0n }
             let style = "color: red;"
             if (fail === 0n) {
                 style = "color: limegreen"
             }
-            console.info("%s %c%d/%d (%f%%)", groupName, style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
+            console.info("%s %c%d/%d (%f%%)", name, style, pass, (pass + fail), Number(pass) / Number(pass + fail) * 100)
             console.groupEnd()
-            return { pass, fail }
         }
-        testgroups[groupName] = fn
-        return fn
     }
+
 
     function eq(left: any, right: any) {
         return left === right
@@ -112,137 +113,298 @@ function dotests(category: string) {
         return () => val
     }
 
-    //for the sake of backwards compat, some default settings must NEVER change
-    mktestgroup("settings backwards compatibility", [
-        ["user rating max", r(settings_get, 0, "user_rating_max"), eq, l(100)],
-        ["currency", r(settings_get, 0, "currency"), eq, l("USD")]
-    ])
+    const tests: TestGroup = {
+        "settings backwards compatibility": {
+            tests: {
+                "user rating max": [r(settings_get, 0, "user_rating_max"), eq, l(100)],
+                "currency": [r(settings_get, 0, "currency"), eq, l("USD")]
+            }
+        },
+        "ui stuff": {
+            tests: {
+                ui_render: [r(ui_render, 1n), is, l(HTMLElement)],
 
-    mktestgroup("ui stuff", [
-        ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
+                "set and get selected": [
+                    r(() => {
+                        items_setSelected([findInfoEntryById(1n)])
+                        return ui_selected().map(v => v.ItemId)
+                    }),
+                    deq,
+                    l([1n])
+                ],
 
-        ["set and get selected", r(() => {
-            items_setSelected([findInfoEntryById(1n)])
-            return ui_selected().map(v => v.ItemId)
-        }), deq, l([1n])],
+                "ui_addsort": [
+                    r(ui_addsort, "TEST", () => 1),
+                    call,
+                    l(() => {
+                        return Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
+                    })
+                ],
 
-        ["ui_addsort", r(ui_addsort, "TEST", () => 1), call, l(() => {
-            return Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
-        })],
+                "ui_delsort": [
+                    r(ui_delsort, "TEST"),
+                    call,
+                    l(() => {
+                        return !Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
+                    })
+                ],
 
-        ["ui_delsort", r(ui_delsort, "TEST"), call, l(() => {
-            return !Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
-        })],
+                "ui_seterr": [
+                    r(ui_seterr, "TESTING ERROR"),
+                    call,
+                    l(() => {
+                        const err = components.errorOut
+                        if (!err) return true
+                        return err.getAttribute("data-error") === "TESTING ERROR"
+                    })
+                ],
 
-        ["ui_seterr", r(ui_seterr, "TESTING ERROR"), call, l(() => {
-            const err = components.errorOut
-            if (!err) return true
-            return err.getAttribute("data-error") === "TESTING ERROR"
-        })],
+                "ui_newscript": [
+                    r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"),
+                    call,
+                    l(() => {
+                        const scriptSelect = dom_getel("#script-select", HTMLElement)
+                        if (!scriptSelect) return false
+                        return Boolean(userScripts.get("TESTING SCRIPT")) &&
+                            Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
+                    })
+                ],
 
-        ["ui_newscript", r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"), call, l(() => {
-            const scriptSelect = dom_getel("#script-select", HTMLElement)
-            if (!scriptSelect) return false
-            return Boolean(userScripts.get("TESTING SCRIPT")) &&
-                Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
-        })],
+                "ui_clearSelected": [r(ui_clear), eq, l(0)],
 
-        ["ui_clearSelected", r(ui_clear), eq, l(0)],
+                "ui_select": [r(ui_select, 1n), not(in_), l([1, 2])],
 
-        ["ui_select", r(ui_select, 1n), not(in_), l([1, 2])],
+                "ui create stats": {
+                    "ui create stats": {
+                        tests: {
+                            ui_createstat: [r<typeof ui_createstat>(ui_createstat, 'test', true, (e, mult) => 1 * mult), eq, l(0)],
 
-        ["ui_createstat", r<typeof ui_createstat>(ui_createstat, 'test', true, (e, mult) => 1 * mult), eq, l(0), {
-            subtest: (left) => {
-                return mktestgroup("stat tests", [
-                    ["ui_setstat (to 3)", r(ui_setstat, 'test', 3), eq, l(3)],
-                    ["change stat (inc by 1)", r(changeResultStatsWithItemUI, items_getEntry(1n)), call, l(() => {
-                        for (let stat of statistics) {
-                            if (stat.name !== 'test') continue
+                            "ui_setstat (to 3)": [r(ui_setstat, 'test', 3), eq, l(3)],
 
-                            return stat.value === 4
+                            "change stat (inc by 1)": [r(changeResultStatsWithItemUI, items_getEntry(1n)), call, l(() => {
+                                for (let stat of statistics) {
+                                    if (stat.name !== 'test') continue
+
+                                    return stat.value === 4
+                                }
+                            })],
+
+                            "delete stat": [r(ui_delstat, 'test'), eq, l(true)]
                         }
-                    })],
-                    ["delete stat", r(ui_delstat, 'test'), eq, l(true)]
-                ])
-            }
-        }],
+                    }
+                },
 
-        ["set modes", l(0), eq, l(0), {
-            subtest: () => {
-                const tests: Test[] = []
-                for (let [name, mode] of [...mode_map().entries()].reverse()) {
-                    if (name === 'graph') continue
-                    tests.push([name, r(ui_setmode, name), call, l(() => {
-                        //@ts-ignore
-                        return mode_cls2name(mode_getFirstModeInWindow(window)?.constructor) == name
-                    })])
+                "set modes": {
+                    "set modes": {
+                        tests: (() => {
+                            let tests: Record<string, Test> = {}
+                            for (let [name, mode] of [...mode_map().entries()].reverse()) {
+                                if (name === 'graph') continue
+                                tests[name] = [r(ui_setmode, name), call, l(() => {
+                                    //@ts-ignore
+                                    return mode_cls2name(mode_getFirstModeInWindow(window)?.constructor) == name
+                                })]
+                            }
+                            return tests
+                        })()
+                    }
                 }
-                return mktestgroup("each mode", tests)
             }
-        }],
-    ])
+        },
 
-    mktestgroup("catalog", [
-        ["isopen", r(isCatalogModeUI), eq, l(false)],
-        ["openIt", r(openCatalogModeUI), eq, l(undefined)],
-        ["isopen", r(isCatalogModeUI), eq, l(true)],
-        ["closeIt", r(closeCatalogModeUI), eq, l(undefined)],
-    ])
+        catalog: {
+            tests: {
+               "isopen": [r(isCatalogModeUI), eq, l(false)],
+               "openIt": [r(openCatalogModeUI), eq, l(undefined)],
+               "isopenafteropen": [r(isCatalogModeUI), eq, l(true)],
+               "closeIt": [r(closeCatalogModeUI), eq, l(undefined)],
+               "isopenafterclose": [r(isCatalogModeUI), eq, l(false)],
+            }
+        },
 
-    mktestgroup("notes", [
-        ["simple note", r(parseNotes, "yes"), eq, l("yes")],
-        ["unclosed note", r(parseNotes, '[b]hi'), eq, l("[b]hi")],
-        ["complex unclosed note", r(parseNotes, '[b]hi[i]hi[/i]'), eq, l("[b]hi[i]hi[/i]")],
-        ["complex note", r(parseNotes, '[b]hi[i]hi[/i][/b]'), eq, l("<b>hi<i>hi</i></b>")],
-        ["[item]", r(parseNotes, "[item=1]my item[/item] cool item"), eq, l(`<button onclick="items_getEntryAny(1).then(res => res.ItemId && toggleItem(res.info))">my item</button> cool item`)],
-        ["[spoiler]", r(parseNotes, '[b]SPOILER[/b] [spoiler]hi[/spoiler]'), eq, l("<b>SPOILER</b> <span class='spoiler'>hi</span>")],
-        ["complex + [list]", r(parseNotes, `[list]
+        notes: {
+            tests: {
+                    "simple note": [r(parseNotes, "yes"), eq, l("yes")],
+                    "unclosed note": [r(parseNotes, '[b]hi'), eq, l("[b]hi")],
+                    "complex unclosed note": [r(parseNotes, '[b]hi[i]hi[/i]'), eq, l("[b]hi[i]hi[/i]")],
+                    "complex note": [r(parseNotes, '[b]hi[i]hi[/i][/b]'), eq, l("<b>hi<i>hi</i></b>")],
+                    "[item]": [r(parseNotes, "[item=1]my item[/item] cool item"), eq, l(`<button onclick="items_getEntryAny(1).then(res => res.ItemId && toggleItem(res.info))">my item</button> cool item`)],
+                    "[spoiler]": [r(parseNotes, '[b]SPOILER[/b] [spoiler]hi[/spoiler]'), eq, l("<b>SPOILER</b> <span class='spoiler'>hi</span>")],
+                    "complex + [list]": [r(parseNotes, `[list]
 - [b]one[/b]
 - two
 [/list]`), eq, l('• <b>one</b>\n• two')],
-        ['html', r(parseNotes, '<p align="center">[b]hi[/b]</p>'), eq, l('<p align="center"><b>hi</b></p>')],
-    ])
+                    'html': [r(parseNotes, '<p align="center">[b]hi[/b]</p>'), eq, l('<p align="center"><b>hi</b></p>')],
 
-    mktestgroup("display entry mode", [
-        ["render", r(() => ui_render_from(1n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
-            return left !== 1 && left !== 2
-        }), {
-                subtest: left => {
-                    return mktestgroup("presense of elements", [
-                        ['user actions filled', l(() => left.querySelector("#user-actions td:has(.delete)")), not(eq), l(null)],
-                        ['description not empty', l(() => left.querySelector("#description")?.innerHTML), call, l((left: string | null) => {
-                            return true
-                        }), {
-                                subtest: left => mktestgroup("description not empty", [
-                                    ['not null', l(left), not(eq), l(null)],
-                                    ['not empty string', l(left), not(eq), l("")]
-                                ])
-                            }]
-                    ])
+            }
+        },
+
+        "display entry mode": {
+            tests: {
+                "render": [
+                    r(() => ui_render_from(1n, "entry-output")),
+                    call,
+                    l((left: 1 | 2 | HTMLElement) => {
+                        return left !== 1 && left !== 2
+                    })
+                ],
+
+                "presense of elements": {
+                    "presense of elements": {
+                        with: () => ui_render_from(1n, "entry-output"),
+                        tests: {
+                            'user actions filled': [
+                                l((left: HTMLElement) => left.querySelector("#user-actions td:has(.delete)")),
+                                not(eq),
+                                l(null)
+                            ],
+                            'description not empty': [
+                                l((left: HTMLElement) => {
+                                    return left.querySelector("#description")?.innerHTML
+                                }),
+                                call,
+                                ((left: string | null) => {
+                                    alert(left)
+                                    return true
+                                })
+                            ],
+                        }
+                    }
                 }
-            }],
-    ])
-
-    const pitemsTests: Test[] = []
-    for (let probably of [probablyUserItem, probablyInfoEntry, probablyMetaEntry]) {
-        let pname = probably.name.match(/probably(.+?)(?:Item|Entry)/)?.[1] || "name"
-        if (pname === 'Meta') pname = 'Metadata'
-        for (let generic of [genericInfo, genericMetadata, genericUserEntry]) {
-            let gname = generic.name.match(/generic(.+)(?:Entry)?/)?.[1] || "name"
-            if (gname === 'UserEntry') gname = 'User'
-            pitemsTests.push([`probably ${pname} with generic ${gname} (${gname === pname})`, r(probably, generic(1n, 1)), eq, l(gname == pname)])
+            }
         }
     }
-    testgroups['probablyItems'] = mktestgroup("item object type heuristics", pitemsTests)
 
-    if (category) {
-        testgroups[category as keyof typeof testgroups]()
-    } else {
-        for (let test in testgroups) {
-            if (!Object.hasOwn(testgroups, test)) continue
-            testgroups[test as keyof typeof testgroups]()
-        }
-    }
+
+    doTestGroup(tests as TestGroup)
+
+
+    //for the sake of backwards compat, some default settings must NEVER change
+//     mktestgroup("ui stuff", [
+//         ["ui_render", r(ui_render, 1n), is, l(HTMLElement)],
+//
+//         ["set and get selected", r(() => {
+//             items_setSelected([findInfoEntryById(1n)])
+//             return ui_selected().map(v => v.ItemId)
+//         }), deq, l([1n])],
+//
+//         ["ui_addsort", r(ui_addsort, "TEST", () => 1), call, l(() => {
+//             return Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
+//         })],
+//
+//         ["ui_delsort", r(ui_delsort, "TEST"), call, l(() => {
+//             return !Boolean(components["sortBySelector"]?.querySelector('option[value="TEST"]'))
+//         })],
+//
+//         ["ui_seterr", r(ui_seterr, "TESTING ERROR"), call, l(() => {
+//             const err = components.errorOut
+//             if (!err) return true
+//             return err.getAttribute("data-error") === "TESTING ERROR"
+//         })],
+//
+//         ["ui_newscript", r(ui_newscript, "TESTING SCRIPT", () => 1, "TESTING SCRIPT"), call, l(() => {
+//             const scriptSelect = dom_getel("#script-select", HTMLElement)
+//             if (!scriptSelect) return false
+//             return Boolean(userScripts.get("TESTING SCRIPT")) &&
+//                 Boolean(scriptSelect.querySelector("#user-script-TESTING\\ SCRIPT"))
+//         })],
+//
+//         ["ui_clearSelected", r(ui_clear), eq, l(0)],
+//
+//         ["ui_select", r(ui_select, 1n), not(in_), l([1, 2])],
+//
+//         ["ui_createstat", r<typeof ui_createstat>(ui_createstat, 'test', true, (e, mult) => 1 * mult), eq, l(0), {
+//             subtest: (left) => {
+//                 return mktestgroup("stat tests", [
+//                     ["ui_setstat (to 3)", r(ui_setstat, 'test', 3), eq, l(3)],
+//                     ["change stat (inc by 1)", r(changeResultStatsWithItemUI, items_getEntry(1n)), call, l(() => {
+//                         for (let stat of statistics) {
+//                             if (stat.name !== 'test') continue
+//
+//                             return stat.value === 4
+//                         }
+//                     })],
+//                     ["delete stat", r(ui_delstat, 'test'), eq, l(true)]
+//                 ])
+//             }
+//         }],
+//
+//         ["set modes", l(0), eq, l(0), {
+//             subtest: () => {
+//                 const tests: Test[] = []
+//                 for (let [name, mode] of [...mode_map().entries()].reverse()) {
+//                     if (name === 'graph') continue
+//                     tests.push([name, r(ui_setmode, name), call, l(() => {
+//                         //@ts-ignore
+//                         return mode_cls2name(mode_getFirstModeInWindow(window)?.constructor) == name
+//                     })])
+//                 }
+//                 return mktestgroup("each mode", tests)
+//             }
+//         }],
+//     ])
+//
+//     mktestgroup("catalog", [
+//         ["isopen", r(isCatalogModeUI), eq, l(false)],
+//         ["openIt", r(openCatalogModeUI), eq, l(undefined)],
+//         ["isopen", r(isCatalogModeUI), eq, l(true)],
+//         ["closeIt", r(closeCatalogModeUI), eq, l(undefined)],
+//     ])
+//
+//     mktestgroup("notes", [
+//         ["simple note", r(parseNotes, "yes"), eq, l("yes")],
+//         ["unclosed note", r(parseNotes, '[b]hi'), eq, l("[b]hi")],
+//         ["complex unclosed note", r(parseNotes, '[b]hi[i]hi[/i]'), eq, l("[b]hi[i]hi[/i]")],
+//         ["complex note", r(parseNotes, '[b]hi[i]hi[/i][/b]'), eq, l("<b>hi<i>hi</i></b>")],
+//         ["[item]", r(parseNotes, "[item=1]my item[/item] cool item"), eq, l(`<button onclick="items_getEntryAny(1).then(res => res.ItemId && toggleItem(res.info))">my item</button> cool item`)],
+//         ["[spoiler]", r(parseNotes, '[b]SPOILER[/b] [spoiler]hi[/spoiler]'), eq, l("<b>SPOILER</b> <span class='spoiler'>hi</span>")],
+//         ["complex + [list]", r(parseNotes, `[list]
+// - [b]one[/b]
+// - two
+// [/list]`), eq, l('• <b>one</b>\n• two')],
+//         ['html', r(parseNotes, '<p align="center">[b]hi[/b]</p>'), eq, l('<p align="center"><b>hi</b></p>')],
+//     ])
+//
+//     mktestgroup("display entry mode", [
+//         ["render", r(() => ui_render_from(1n, "entry-output")), call, l((left: 1 | 2 | HTMLElement) => {
+//             return left !== 1 && left !== 2
+//         }), {
+//                 subtest: left => {
+//                     return mktestgroup("presense of elements", [
+//                         ['user actions filled', l(() => left.querySelector("#user-actions td:has(.delete)")), not(eq), l(null)],
+//                         ['description not empty', l(() => left.querySelector("#description")?.innerHTML), call, l((left: string | null) => {
+//                             return true
+//                         }), {
+//                                 subtest: left => mktestgroup("description not empty", [
+//                                     ['not null', l(left), not(eq), l(null)],
+//                                     ['not empty string', l(left), not(eq), l("")]
+//                                 ])
+//                             }]
+//                     ])
+//                 }
+//             }],
+//     ])
+//
+//     const pitemsTests: Test[] = []
+//     for (let probably of [probablyUserItem, probablyInfoEntry, probablyMetaEntry]) {
+//         let pname = probably.name.match(/probably(.+?)(?:Item|Entry)/)?.[1] || "name"
+//         if (pname === 'Meta') pname = 'Metadata'
+//         for (let generic of [genericInfo, genericMetadata, genericUserEntry]) {
+//             let gname = generic.name.match(/generic(.+)(?:Entry)?/)?.[1] || "name"
+//             if (gname === 'UserEntry') gname = 'User'
+//             pitemsTests.push([`probably ${pname} with generic ${gname} (${gname === pname})`, r(probably, generic(1n, 1)), eq, l(gname == pname)])
+//         }
+//     }
+//     testgroups['probablyItems'] = mktestgroup("item object type heuristics", pitemsTests)
+//
+//     if (category) {
+//         testgroups[category as keyof typeof testgroups]()
+//     } else {
+//         for (let test in testgroups) {
+//             if (!Object.hasOwn(testgroups, test)) continue
+//             testgroups[test as keyof typeof testgroups]()
+//         }
+//     }
     const { pass, fail } = passFails.values()
         .reduce((p, c) => ({ pass: p.pass + c.pass, fail: p.fail + c.fail }), { pass: 0n, fail: 0n })
     let style = "color: red;"
