@@ -951,8 +951,7 @@ async function items_refreshRelations(uid: number) {
     * loads all user info, and updates the global entries list
 */
 async function items_refreshUserEntries(uid: number) {
-    let items = await api_loadList<UserEntry>("engagement/list-entries", uid)
-    for (let item of items) {
+    for await(let item of api_streamList<UserEntry>("engagement/list-entries", uid)) {
         try {
             _globalsNewUi.entries[String(item.ItemId)].user = item
         } catch (err) {
@@ -965,9 +964,7 @@ async function items_refreshUserEntries(uid: number) {
     * loads all info, and updates the global entries list, creating new entries if they dont exist
 */
 async function items_refreshInfoEntries(uid: number) {
-    let items = await api_loadList<InfoEntry>("list-entries", uid)
-
-    for (let item of items) {
+    for await(let item of api_streamList<InfoEntry>("list-entries", uid)) {
         let stashed = _globalsNewUi.entries[String(item.ItemId)]
         if (!stashed) {
             _globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item)
@@ -976,7 +973,6 @@ async function items_refreshInfoEntries(uid: number) {
             stashed.info = item
         }
     }
-
 }
 
 /**
@@ -997,13 +993,11 @@ async function items_loadLibraries(uid: number) {
  * @param {number} uid
 */
 async function items_refreshMetadata(uid: number) {
-    let items = await api_loadList<MetadataEntry>("metadata/list-entries", uid)
-    for (let item of items) {
+    for await(let item of api_streamList<MetadataEntry>("metadata/list-entries", uid)) {
         _globalsNewUi.entries[String(item.ItemId)].meta = item
     }
 
-    const ev = new CustomEvent("aio-metadata-loaded");
-    dispatchEvent(ev);
+    dispatchEvent(new CustomEvent("aio-metadata-loaded"));
 }
 
 /**

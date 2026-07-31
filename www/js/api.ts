@@ -223,6 +223,12 @@ async function api_getRelations(uid: number) {
     return JSON.parse(text.replace(/(?<!")(\d+)(?=,|\])(?!")/g, '"$1"'))
 }
 
+/**
+ * Given an endpoint that returns a jsonl stream, load all results into a list
+ * @param {string} endpoint
+ * @param {number} uid
+ * @reutrns {Promise<T[]>}
+ */
 async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
     const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
     if (!res) {
@@ -236,6 +242,43 @@ async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
 
     const lines = text.split("\n").filter(Boolean)
     return [...api_deserializeJsonl<T>(lines)]
+}
+
+/**
+ * Similar to api_loadList, however instead of loading the entire list at once
+ * as soon as data is recieved, yield it
+ * @param {string} endpoint
+ * @param {number} uid
+ * @returns {AsyncGenerator<T>}
+ */
+async function* api_streamList<T>(endpoint: string, uid: number): AsyncGenerator<T>{
+    const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
+    if(!res) {
+        return
+    }
+
+    const reader = res.body?.getReader()
+    if(!reader) {
+        return
+    }
+
+    const td = new TextDecoder()
+
+    let curline = ""
+
+    let r
+    while(!(r = await reader.read()).done) {
+        if(r.value.includes(10)) {
+            let cur = r.value.slice(0, r.value.lastIndexOf(10))
+            curline += td.decode(cur)
+            yield* api_deserializeJsonl<T>(curline)
+            curline = td.decode(r.value.slice(r.value.lastIndexOf(10) + 1))
+        }
+    }
+
+    if(curline) {
+        yield* api_deserializeJsonl<T>(curline)
+    }
 }
 
 async function api_copyUserInfo(oldid: bigint, newid: bigint) {
