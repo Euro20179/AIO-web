@@ -27,7 +27,7 @@ async function dotests(category: string) {
         else {
             const args = test[1] === call
                 ? ["%s %O %O", name, l, res]
-                : ["%s %0", name, l]
+                : ["%s %O", name, l]
             console.error.apply(null, args)
             pf.fail++
         }
@@ -118,6 +118,25 @@ async function dotests(category: string) {
     function l(val: any) {
         return () => val
     }
+
+    const username = '__TEST__'
+
+    await (async() => {
+        const group = "account creation"
+        let params = new URLSearchParams([
+            ["username", username],
+            ["password", "password"]
+        ])
+
+        let res = await fetch(`${AIO}/account/create`, {
+            method: "POST",
+            body: params.toString()
+        })
+
+        doTest(group, "create", [
+            l(res.status), eq, l(200)
+        ])
+    })()
 
     const tests: TestGroup = {
         "settings backwards compatibility": {
@@ -318,6 +337,21 @@ async function dotests(category: string) {
     })()
 
     doTestGroup(tests as TestGroup)
+
+    await (async() => {
+        const group = "account deletion"
+
+        let res = await fetch(`${AIO}/account/delete`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Basic ${btoa(`${username}:password`)}`
+            }
+        })
+
+        doTest(group, "delete", [
+            l(res.status), eq, l(200)
+        ])
+    })()
 
 
     const { pass, fail } = passFails.values()
