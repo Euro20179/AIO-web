@@ -550,17 +550,23 @@ function openEventEditorUI(itemId: bigint, eventId: number) {
 
     let after = dom_getel("[name='after']", HTMLInputElement, dialog)
     if (after && event.After) {
-        after.value = new Date(event.After).toISOString().slice(0, 16)
+        if(window.Temporal)
+            after.value = (new Temporal.ZonedDateTime(BigInt(event.After) * 1000000n, event.TimeZone || INTL_OPTIONS.timeZone)).toString().slice(0, 16)
+        else after.value = new Date(event.After).toISOString().slice(0, 16)
     }
 
     let before = dom_getel("[name='before']", HTMLInputElement, dialog)
     if (before && event.Before) {
-        before.value = new Date(event.Before).toISOString().slice(0, 16)
+        if(window.Temporal)
+            before.value = (new Temporal.ZonedDateTime(BigInt(event.Before) * 1000000n, event.TimeZone || INTL_OPTIONS.timeZone)).toString().slice(0, 16)
+        else before.value = new Date(event.Before).toISOString().slice(0, 16)
     }
 
     let ts = dom_getel("[name='timestamp']", HTMLInputElement, dialog)
     if (ts && event.Timestamp) {
-        ts.value = new Date(event.Timestamp).toISOString().slice(0, 16)
+        if(window.Temporal)
+            ts.value = (new Temporal.ZonedDateTime(BigInt(event.Timestamp) * 1000000n, event.TimeZone || INTL_OPTIONS.timeZone)).toString().slice(0, 16)
+        else ts.value = new Date(event.Timestamp).toISOString().slice(0, 16)
     }
 
     let tz = dom_getel("[name='timezone']", HTMLInputElement, dialog)
