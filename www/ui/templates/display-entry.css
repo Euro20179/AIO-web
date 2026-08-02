@@ -1,5 +1,11 @@
 @layer general, util, components;
 
+@layer general {
+    time[title] {
+        border-bottom: 1px dotted;
+    }
+}
+
 @layer util {
 
     /*for begin/finish/etc... action buttons*/
