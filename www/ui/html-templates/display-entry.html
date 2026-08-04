@@ -67,13 +67,20 @@
 
 <div class="root" id="root">
     <div class="grid column x-small-gap"
-        style="width: 100cqi; justify-content: start;">
+        style="
+            width: 100cqi;
+            grid-template-columns: min-content auto 1fr;
+        ">
         <menu aria-label="item interactions" id="item-interaction-menu">
             <!-- this gets filled with de_item_interaction settings -->
         </menu>
 
         <de-cost-calculation-modifiers>
         </de-cost-calculation-modifiers>
+
+        <button entry-action="close" style="justify-self: end;">
+            ✗ Close
+        </button>
     </div>
 
     <figure class="entry-progress">
