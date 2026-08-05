@@ -95,7 +95,13 @@ function _mkde_actions() {// {{{
          * Opens the format mod editor, and allows user to edit the modifiers
          */
         openfmodseditor: function(item, _root, target) {
-            let d = dom_getel('format-modifier-popover', this.win.HTMLElement, _root) || document.createElement("format-modifier-popover")
+            let d = dom_getel('format-modifier-popover', this.win.HTMLElement, _root)
+            if(d) {
+                d.remove()
+                return
+            }
+
+            d = document.createElement("format-modifier-popover")
             _root.append(d)
             d = dom_getelorthrow('dialog', this.win.HTMLDialogElement, d)
             d.togglePopover({source: target})
