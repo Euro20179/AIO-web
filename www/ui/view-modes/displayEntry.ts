@@ -92,51 +92,6 @@ function _mkde_actions() {// {{{
         },
 
         /**
-         * Opens the format mod editor, and allows user to edit the modifiers
-         */
-        openfmodseditor: function(item, _root, target) {
-            let d = dom_getel('format-modifier-popover', this.win.HTMLElement, _root)
-            if(d) {
-                d.remove()
-                return
-            }
-
-            d = document.createElement("format-modifier-popover")
-            _root.append(d)
-            d = dom_getelorthrow('dialog', this.win.HTMLDialogElement, d)
-            d.togglePopover({source: target})
-            for(let mod of items_F_MODS) {
-                let inputName = {
-                    [items_F_DIGI_MOD]: "digitized",
-                    [items_F_UNOWNED_MOD]: "unowned"
-                }[mod]
-
-                if(!inputName) {
-                    console.warn(`${mod} does not have a corresponding input`)
-                    continue
-                }
-
-                let cb = dom_getel(`[name="is-${inputName}"]`, this.win.HTMLInputElement, d)
-                if (items_hasFMod(item.Format_Modifiers, mod)) {
-                    if(cb) {
-                        cb.checked = true
-                    }
-                }
-
-                if(cb) {
-                    cb.oninput = e => {
-                        if(e.target.checked) {
-                            item.Format_Modifiers |= mod
-                        } else {
-                            item.Format_Modifiers -= mod
-                        }
-                        setPropUI(item, "Format_Modifiers", item.Format_Modifiers, `set ${inputName}`)
-                    }
-                }
-            }
-        },
-
-        /**
             * Creates a buy/sell transaction.
         */
         transact: function(item, _root, target) {
@@ -1946,6 +1901,36 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
                     e.target instanceof this.win.HTMLElement &&
                     this.de_actions.setobjtable(e.target)
         })
+
+    for(let mod of items_F_MODS) {
+        let inputName = {
+            [items_F_DIGI_MOD]: "digitized",
+            [items_F_UNOWNED_MOD]: "unowned"
+        }[mod]
+
+        if(!inputName) {
+            console.warn(`${mod} does not have a corresponding input`)
+            continue
+        }
+
+        let cb = dom_getel(`[name="is-${inputName}"]`, this.win.HTMLInputElement, root)
+        if (items_hasFMod(item.Format_Modifiers, mod)) {
+            if(cb) {
+                cb.checked = true
+            }
+        }
+
+        if(cb) {
+            cb.oninput = e => {
+                if(e.target.checked) {
+                    item.Format_Modifiers |= mod
+                } else {
+                    item.Format_Modifiers -= mod
+                }
+                setPropUI(item, "Format_Modifiers", item.Format_Modifiers, `set ${inputName}`)
+            }
+        }
+    }
 
     for (let input of [
         "include-self-in-cost",

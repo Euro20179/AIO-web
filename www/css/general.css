@@ -171,6 +171,9 @@
         padding: 0;
 
         border-radius: var(--border-roundness);
+
+        position-area: block-end;
+        position-try: normal flip-block;
     }
 
     mark {

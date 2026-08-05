@@ -371,6 +371,7 @@ const component_templates = [
     "graph-template",
 
     "format-modifier-popover",
+    "art-styles-popover",
 
     "alert-box",
     "tz-datalist",

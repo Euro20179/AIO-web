@@ -113,28 +113,7 @@
 
             <input type="hidden" name="metadata">
 
-            <dialog id="new-item-art-styles-dialog">
-                <fieldset class="flex column m-0" style="gap: 2ch; width: 100%; overflow:auto">
-                    <legend>Art Style</legend>
-                    <label for="is-anime-art"><input type="checkbox" name="is-anime-art" id="is-anime-art">
-                        Anime</label>
-                    <label for="is-cartoon"><input type="checkbox" name="is-cartoon" id="is-cartoon">
-                        Cartoon</label>
-                    <label for="is-handrawn"><input type="checkbox" name="is-handrawn" id="is-handrawn">
-                        Hand drawn</label>
-                    <label for="is-digital-art"><input type="checkbox" name="is-digital-art" id="is-digital-art">
-                        Digitally drawn </label>
-                    <label for="is-cgi"><input type="checkbox" name="is-cgi" id="is-cgi"> Cgi</label>
-                    <label for="is-live-action"><input type="checkbox" name="is-live-action" id="is-live-action"> Live
-                        action</label>
-                    <label for="is-2d"><input type="checkbox" name="is-2d" id="is-2d">
-                        2d</label>
-                    <label for="is-3d"><input type="checkbox" name="is-3d" id="is-3d">
-                        3d</label>
-                </fieldset>
-
-                <close-button></close-button>
-            </dialog>
+            <art-styles-popover></art-styles-popover>
 
             <dialog id="new-item-relations-dialog">
                 <fieldset class="grid column small-gap" style="grid-template-columns: repeat(4, 10ch);">
@@ -223,7 +202,7 @@
                     <!--         style="vertical-align: middle;" name="is-digital" -->
                     <!--         title="Whether or not the item is a digitized/digital version of the format"></label> -->
 
-                    <button type="button" command="show-modal" commandfor="new-item-art-styles-dialog">🖌</button>
+                    <button type="button" command="toggle-popover" commandfor="art-styles-menu">🖌</button>
                 </div>
             </div>
 

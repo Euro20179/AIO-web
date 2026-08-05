@@ -61,6 +61,7 @@
 
         "format-modifier-menu",
         "format-modifier-popover",
+        "art-styles-popover",
 
         "item-card",
 

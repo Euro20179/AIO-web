@@ -1917,14 +1917,25 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let artStyle = 0
 
-    const styles = ['is-anime-art', 'is-cartoon', 'is-handrawn', 'is-digital-art', 'is-cgi', 'is-live-action', 'is-2d', 'is-3d']
+    const styles = [
+        'is-Anime',
+        'is-Cartoon',
+        'is-Handdrawn',
+        'is-Digital',
+        'is-CGI',
+        'is-Liveaction',
+        'is-2D',
+        'is-3D'
+    ]
     for (let i = 0; i < styles.length; i++) {
         let style = styles[i]
         if (data.get(style)) {
             artStyle |= 2 ** i
             data.delete(style)
         }
+        console.log(data, style)
     }
+    console.log(artStyle)
 
     let validEntries: Record<string, FormDataEntryValue> = {}
 
