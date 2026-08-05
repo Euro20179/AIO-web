@@ -316,7 +316,6 @@
         flex-wrap: wrap;
     }
 
-
     .flex.grow {
         flex-grow: 1;
     }
@@ -387,6 +386,10 @@
 
     .center {
         text-align: center;
+    }
+
+    .nowrap {
+        text-wrap: nowrap;
     }
 
     .m-0 {

@@ -1,36 +1,35 @@
 <template id="de-cost-calculation-modifiers">
-<details id="cost-calculation-modifiers" class="hamburger-menu">
-    <summary>
-        include
-    </summary>
+    <button command="toggle-popover" commandfor="cost-calculation-modifiers">
+        Include
+    </button>
+    <dialog id="cost-calculation-modifiers" popover style="padding: var(--very-small-gap)">
+        <menu aria-label="Related item inclusions"
+                aria-description="Select kinds of related items that should be included in the cost, and events table"
+                class="grid row p-0 m-0">
+            <label for="include-self-in-cost">
+                <input type="checkbox" id="include-self-in-cost" checked style="vertical-align: middle;">
+                Self
+            </label>
 
-    <menu aria-label="Related item inclusions"
-            aria-description="Select kinds of related items that should be included in the cost, and events table"
-            class="grid column p-0 m-0">
-        <label for="include-self-in-cost">
-            <input type="checkbox" id="include-self-in-cost" checked style="vertical-align: middle;">
-            Self
-        </label>
+            <label for="include-children-in-cost">
+                <input type="checkbox" id="include-children-in-cost" style="vertical-align: middle;">
+                Children
+            </label>
 
-        <label for="include-children-in-cost">
-            <input type="checkbox" id="include-children-in-cost" style="vertical-align: middle;">
-            Children
-        </label>
+            <label for="include-copies-in-cost">
+                <input type="checkbox" id="include-copies-in-cost" style="vertical-align: middle;">
+                Copies
+            </label>
 
-        <label for="include-copies-in-cost">
-            <input type="checkbox" id="include-copies-in-cost" style="vertical-align: middle;">
-            Copies
-        </label>
+            <label for="include-requires-in-cost">
+                <input type="checkbox" id="include-requires-in-cost" style="vertical-align: middle;">
+                Requires
+            </label>
 
-        <label for="include-requires-in-cost">
-            <input type="checkbox" id="include-requires-in-cost" style="vertical-align: middle;">
-            Requires
-        </label>
-
-        <label for="include-recusively-in-cost">
-            <input type="checkbox" id="include-recusively-in-cost" style="vertical-align: middle;">
-            Recursive
-        </label>
-    </menu>
-</details>
+            <label for="include-recusively-in-cost">
+                <input type="checkbox" id="include-recusively-in-cost" style="vertical-align: middle;">
+                Recursive
+            </label>
+        </menu>
+    </dialog>
 </template>
