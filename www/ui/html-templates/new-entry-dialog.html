@@ -78,7 +78,7 @@
     </style>
 
     <dialog id="new-entry">
-        <format-modifier-menu></format-modifier-menu>
+        <format-modifier-popover></format-modifier-popover>
 
         <h3>New Entry</h3>
 
@@ -211,7 +211,8 @@
                 <div class="grid" style="grid-template-rows: subgrid; grid-template-columns: auto 1fr;">
                     <button
                         type="button"
-                        onclick="openModalUI('format-modifier-selection-dialog', this.getRootNode().querySelector('format-modifier-menu').shadowRoot)"
+                        command="show-popover"
+                        commandfor="format-modifier-selection-popover"
                     >
                         F Mods
                     </button>

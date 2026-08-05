@@ -60,6 +60,7 @@
         "close-button",
 
         "format-modifier-menu",
+        "format-modifier-popover",
 
         "item-card",
 
@@ -108,7 +109,7 @@
         <close-button></close-button>
     </dialog>
 
-    <dialog id="items-listing" popover>
+    <dialog id="items-listing">
         <center>
             <h3>Find Item</h3>
         </center>

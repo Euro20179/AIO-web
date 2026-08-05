@@ -159,11 +159,18 @@
 
     }
 
-    dialog::backdrop {
+    dialog:not([popover])::backdrop {
         background-color: #00000077;
         backdrop-filter: blur(1px);
         user-select: none;
         pointer-events: none;
+    }
+
+    dialog[popover] {
+        margin: 0;
+        padding: 0;
+
+        border-radius: var(--border-roundness);
     }
 
     mark {

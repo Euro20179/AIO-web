@@ -1,0 +1,24 @@
+<template id="format-modifier-popover">
+    <style>
+        @scope {
+            dialog {
+                position-area: block-end;
+            }
+            fieldset {
+                border: none;
+            }
+        }
+    </style>
+    <dialog id="format-modifier-selection-popover" popover>
+        <fieldset class="flex column">
+            <label>
+                <input type="checkbox" name="is-digitized" value="1">
+                Digitized
+            </label>
+            <label>
+                <input type="checkbox" name="is-unowned" value="2">
+                Unowned
+            </label>
+        </fieldset>
+    </dialog>
+</template>

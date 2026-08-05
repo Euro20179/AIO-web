@@ -370,6 +370,8 @@ const component_templates = [
     "script-template",
     "graph-template",
 
+    "format-modifier-popover",
+
     "alert-box",
     "tz-datalist",
     "color-scheme-selector",
