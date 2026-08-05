@@ -98,7 +98,7 @@ function _mkde_actions() {// {{{
             let d = dom_getel('format-modifier-popover', this.win.HTMLElement, _root) || document.createElement("format-modifier-popover")
             _root.append(d)
             d = dom_getelorthrow('dialog', this.win.HTMLDialogElement, d)
-            d.showPopover({source: target})
+            d.togglePopover({source: target})
             for(let mod of items_F_MODS) {
                 let inputName = {
                     [items_F_DIGI_MOD]: "digitized",
