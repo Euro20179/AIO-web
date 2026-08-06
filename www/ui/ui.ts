@@ -1833,7 +1833,7 @@ async function newEventUI(form: HTMLFormElement) {
  * - copyOf: id of the copy
  * - requires: id of a prerequisit
  */
-function newEntryDialogUI(params?: Record<string, string>) {
+async function newEntryDialogUI(params?: Record<string, string>) {
     const dialog = openModalUI("new-entry", undefined, "new-entry-dialog")
 
     if(!dialog) {
@@ -1900,6 +1900,16 @@ function newEntryDialogUI(params?: Record<string, string>) {
             location.value = defaultSettings.location_generator(Object.fromEntries(info.entries().toArray()) as any)
         }
     }
+
+    return await new Promise((res, rej) => {
+        dialog.addEventListener("close", () => {
+            rej()
+        }, { once: true })
+
+        form.addEventListener("submit", () => {
+            res(form)
+        }, { once: true })
+    })
 }
 
 /**
@@ -1994,6 +2004,9 @@ async function newEntryUI(form: HTMLFormElement) {
     let json = api_deserializeJsonl(text).next().value
 
     items_addById(json.ItemId).then(() => {
+        dispatchEvent(new CustomEvent("aio-entry-created", {
+            detail: json
+        }))
         ui_search(`En_Title = '${quoteEscape(json.En_Title, "'")}'`)
     }).catch(err => {
         console.error(err)
@@ -3356,4 +3369,21 @@ function applyUserRating(
         root.append(`${ratingStyles[tier as keyof typeof ratingStyles].label} `)
     }
     root.append(rating ? String(rating) : "Unrated")
+}
+
+/**
+ * adds requires as a requirement of item
+ * @param {bigint} item
+ * @param {bigint} requires
+ * @returns {Promise<Response | null>}
+ */
+async function addRequirementUI(item: bigint, requires: bigint): Promise<Response | null> {
+    const res = await api_addRequires(getUidUI(), item, requires)
+    let requirement = findInfoEntryById(requires)
+    items_addRequires(item, requires)
+    updateInfo2({
+        [String(item)]: { info: items_getEntry(item).info },
+        [String(requirement.ItemId)]: { info: requirement }
+    })
+    return res
 }

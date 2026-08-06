@@ -293,10 +293,40 @@ function _mkde_actions() {// {{{
          * with requires filled in as the current item
          */
         newrequires: function(item ){
+            newEntryDialogUI().then(form => {
+                //@ts-ignore
+                addEventListener("aio-entry-created", (e: CustomEvent) => {
+                    const info: InfoEntry = e.detail
+                    addRequirementUI(item.ItemId, info.ItemId)
+                })
+            })
+            .catch(nop)
+        },
+
+        /**
+         * Opens the new entry dialog
+         * with requires filled in as the current item
+         */
+        newdependant: function(item ){
             newEntryDialogUI({
                 requires: item.ItemId.toString()
             })
         },
+
+        /**
+         * Lets the user select an item to be added as a dependant of
+         * the current item
+         */
+        selectnewdependant: function(item ){
+            selectItemUI().then(id => {
+                if (!id) {
+                    alert("Could not add requirement")
+                    return
+                }
+                addRequirementUI(id, item.ItemId)
+            })
+        },
+
 
         /**
          * Lets the user select an item to be added as a child of

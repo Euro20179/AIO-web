@@ -108,6 +108,11 @@ function util_debounce(cb: Function, timeout: number) {
 }
 
 /**
+ * Does nothing
+ */
+function nop() {}
+
+/**
  * Given an iso 3166-1 country code, or a flag, attempt to normalize into a name
  */
 function util_countrycode2name(name: string): string {
