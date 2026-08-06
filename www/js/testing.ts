@@ -11,10 +11,10 @@ async function dotests(category: string) {
         }
     }
 
-    function doTest(group: string, name: string, test: Test): [boolean, string] {
+    async function doTest(group: string, name: string, test: Test): Promise<[boolean, string]> {
         const pf = passFails.get(group) || { pass: 0n, fail: 0n }
-        let l = test[0](),
-            r = test[2](),
+        let l = await test[0](),
+            r = await test[2](),
             res = test[1](l, r)
 
         if(res) {
@@ -40,16 +40,16 @@ async function dotests(category: string) {
         return [res, ""]
     }
 
-    function doTestGroup(group: TestGroup) {
+    async function doTestGroup(group: TestGroup) {
         for(let name in group) {
             console.group(name)
             let testOrGroup = group[name]
             for(let testName in testOrGroup.tests) {
                 let test = testOrGroup.tests[testName]
                 if (Array.isArray(test)) {
-                    doTest(name, testName, test)
+                    await doTest(name, testName, test)
                 } else {
-                    doTestGroup(test)
+                    await doTestGroup(test)
                 }
             }
 
@@ -114,35 +114,75 @@ async function dotests(category: string) {
         return () => fn.apply(null, args)
     }
 
+    //async run
+    function ar<T extends (...args: any[]) => any>(fn: Function, ...args: Parameters<T>) {
+        return async() => await fn.apply(null, args)
+    }
+
     //literal
     function l(val: any) {
         return () => val
     }
 
     const username = '__TEST__'
-
-    await (async() => {
-        const group = "account creation"
-        let params = new URLSearchParams([
-            ["username", username],
-            ["password", "password"]
-        ])
-
-        let res = await fetch(`${AIO}/account/create`, {
-            method: "POST",
-            body: params.toString()
-        })
-
-        doTest(group, "create", [
-            l(res.status), eq, l(200)
-        ])
-    })()
+    const password = "password"
 
     const tests: TestGroup = {
+        "account creation": {
+            tests: {
+                create: [
+                    ar(async() => {
+                        let params = new URLSearchParams([
+                            ["username", username],
+                            ["password", password]
+                        ])
+
+                        let res = await fetch(`${AIO}/account/create`, {
+                            method: "POST",
+                            body: params.toString()
+                        })
+
+                        return res.status
+                    }),
+                    eq,
+                    l(200)
+                ],
+
+                "ui signin": [
+                    ar(async() => {
+                        setUserAuth(btoa(`${username}:${password}`))
+                        const uid = await api_username2UID(username)
+                        storeUserUID(String(uid))
+                    }),
+                    call,
+                    l(() => {
+                        return getUserAuth() == btoa(`${username}:${password}`)
+                    })
+                ]
+            }
+        },
         "settings backwards compatibility": {
             tests: {
                 "user rating max": [r(settings_get, 0, "user_rating_max"), eq, l(100)],
                 "currency": [r(settings_get, 0, "currency"), eq, l("USD")]
+            }
+        },
+        api: {
+            tests: {
+                create: [
+                    ar(async() => {
+                        const res = await api_createEntry({
+                            title: "TEST ENTRY",
+                            timezone: "UTC",
+                            type: "Show",
+                            format: 1,
+                            "native-title": ""
+                        })
+                        return res?.status
+                    }),
+                    eq,
+                    l(200)
+                ],
             }
         },
         "ui stuff": {
@@ -336,7 +376,7 @@ async function dotests(category: string) {
         }
     })()
 
-    doTestGroup(tests as TestGroup)
+    await doTestGroup(tests as TestGroup)
 
     await (async() => {
         const group = "account deletion"
