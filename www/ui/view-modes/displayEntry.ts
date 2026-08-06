@@ -1308,7 +1308,7 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
                 "descendants": "Would you like to remove this item as a descendant of it's parent",
                 "copies": "Would you like to remove this item as a copy",
                 "required-items": "Would you like to remove this item as a requirement",
-                "required-by-items": "THIS DOES NOTHING CURRENTLY",
+                "required-by-items": "Would you like to remove this item as a dependant",
             }
 
             confirmUI(confirmationText[relationType])
@@ -1317,7 +1317,10 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
                     const [apiFunc, itemsFunc] = ({
                         "copies": [api_delCopy, items_removeCopy],
                         "descendants": [api_delChild, items_removeChild],
-                        "required-by-items": [async() => {}, async() => {}],
+                        "required-by-items": [
+                            (uid: number, left: bigint, right: bigint) => api_delRequires(uid, left, right),
+                            (left: bigint, right: bigint) => items_removeRequires(left, right)
+                        ],
                         "required-items": [
                             (uid: number, right: bigint, left: bigint) => api_delRequires(uid, left, right),
                             (right: bigint, left: bigint) => items_removeRequires(left, right)
