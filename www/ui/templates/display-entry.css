@@ -495,6 +495,10 @@
         flex-grow: 1;
     }
 
+    #required-section {
+        flex-grow: 1;
+    }
+
     #descendants-section,
     #required-section,
     #copies-section {
@@ -529,6 +533,11 @@
     #required-items,
     #descendants,
     #copies {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-rows: max(15cqb, 100px);
+
+        gap: var(--small-gap);
         align-items: center;
         justify-content: start;
 
@@ -539,16 +548,6 @@
             min-width: 100px;
             width: 100px;
         }
-    }
-
-    #required-items,
-    #descendants,
-    #copies {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-rows: max(15cqb, 100px);
-
-        gap: var(--small-gap);
     }
 
     #descendants,
