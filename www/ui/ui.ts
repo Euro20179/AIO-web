@@ -1933,9 +1933,7 @@ async function newEntryUI(form: HTMLFormElement) {
             artStyle |= 2 ** i
             data.delete(style)
         }
-        console.log(data, style)
     }
-    console.log(artStyle)
 
     let validEntries: Record<string, FormDataEntryValue> = {}
 

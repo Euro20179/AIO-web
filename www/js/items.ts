@@ -24,6 +24,10 @@ const items_F_MODS = new Set([
     items_F_DIGI_MOD, items_F_UNOWNED_MOD
 ])
 
+const items_R_CHILD = 1
+const items_R_REQUIRES = 2
+const items_R_COPY = 3
+
 const AS_ANIME = 1
 const AS_CARTOON = 2
 const AS_HANDRAWN = 4
@@ -148,7 +152,11 @@ type TransactionEntry = {
 class items_Relations {
     children: bigint[]
 
+    requiredBy: bigint[]
+
     constructor(public id: bigint, children: bigint[] | bigint, public copies: bigint[], public requires: bigint[]) {
+        this.requiredBy = []
+
         //accept a parent for legacy compat
         if (typeof children === 'bigint') {
             this.children = []
@@ -575,7 +583,7 @@ async function items_addById(items: bigint[] | bigint, replace: boolean = false)
 function items_setResults(items: bigint[]) {
     _globalsNewUi.results = []
     for (let id of items) {
-        _globalsNewUi.results.push(_globalsNewUi.entries[String(id)])
+        _globalsNewUi.results.push(items_getEntry(id))
     }
 }
 
@@ -609,7 +617,7 @@ function items_clearSelected() {
  * @param {bigint} id The id to select
  */
 function items_selectById(id: bigint): void {
-    _globalsNewUi.selectedEntries.push(_globalsNewUi.entries[String(id)].info)
+    _globalsNewUi.selectedEntries.push(items_getEntry(id).info)
 }
 
 /**
@@ -636,7 +644,7 @@ function items_deselectById(id: bigint) {
 */
 function items_setEntries(items: InfoEntry[]) {
     for (let item of items) {
-        let stashed = _globalsNewUi.entries[String(item.ItemId)]
+        let stashed = items_getEntry(item.ItemId)
         if (!stashed) {
             _globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item, findUserEntryById(item.ItemId), findMetadataById(item.ItemId), findUserEventsById(item.ItemId))
         }
@@ -661,11 +669,12 @@ function items_updateEntryById(id: string, { user, events, meta, info, transacti
     info: InfoEntry,
     transactions: TransactionEntry[]
 }>) {
-    user && (_globalsNewUi.entries[id].user = user)
-    events && (_globalsNewUi.entries[id].events = events)
-    meta && (_globalsNewUi.entries[id].meta = meta)
-    info && (_globalsNewUi.entries[id].info = info)
-    transactions && (_globalsNewUi.entries[id].transactions = transactions)
+    let b_id = BigInt(id)
+    user && (items_getEntry(b_id).user = user)
+    events && (items_getEntry(b_id).events = events)
+    meta && (items_getEntry(b_id).meta = meta)
+    info && (items_getEntry(b_id).info = info)
+    transactions && (items_getEntry(b_id).transactions = transactions)
 }
 
 /**
@@ -796,8 +805,8 @@ function items_getAllEntries(): Record<string, items_Entry> {
     * @returns {MetadataEntry}
 */
 function findMetadataById(id: bigint): MetadataEntry {
-    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `metadata entry for ${id} does not exist`)
-    return _globalsNewUi.entries[String(id)]?.meta || genericMetadata(id, 0)
+    console.assert(items_entryExists(id) == true, `metadata entry for ${id} does not exist`)
+    return items_getEntry(id).meta || genericMetadata(id, 0)
 }
 
 /**
@@ -806,8 +815,8 @@ function findMetadataById(id: bigint): MetadataEntry {
     * @returns {TransactionEntry[]}
     */
 function findTransactionsById(id: bigint): TransactionEntry[] {
-    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `transactions for entry ${id} does not exist`)
-    return _globalsNewUi.entries[String(id)].transactions || []
+    console.assert(items_entryExists(id) == true, `transactions for entry ${id} does not exist`)
+    return items_getEntry(id).transactions || []
 }
 
 /**
@@ -817,8 +826,8 @@ function findTransactionsById(id: bigint): TransactionEntry[] {
     * @returns {UserEntry}
 */
 function findUserEntryById(id: bigint): UserEntry {
-    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `user entry for ${id} does not exist`)
-    return _globalsNewUi.entries[String(id)]?.user || genericUserEntry(id, 0)
+    console.assert(items_entryExists(id) == true, `user entry for ${id} does not exist`)
+    return items_getEntry(id).user || genericUserEntry(id, 0)
 }
 
 /**
@@ -828,8 +837,8 @@ function findUserEntryById(id: bigint): UserEntry {
     * @returns {UserEvent[]}
 */
 function findUserEventsById(id: bigint): UserEvent[] {
-    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `user events for ${id} does not exist`)
-    return _globalsNewUi.entries[String(id)]?.events || []
+    console.assert(items_entryExists(id) == true, `user events for ${id} does not exist`)
+    return items_getEntry(id).events || []
 }
 
 /**
@@ -839,8 +848,8 @@ function findUserEventsById(id: bigint): UserEvent[] {
     * @returns {InfoEntry}
 */
 function findInfoEntryById(id: bigint): InfoEntry {
-    console.assert(_globalsNewUi.entries[String(id)] !== undefined, `info entry for ${id} does not exist`)
-    return _globalsNewUi.entries[String(id)]?.info || genericInfo(id, 0)
+    console.assert(items_entryExists(id) == true, `info entry for ${id} does not exist`)
+    return items_getEntry(id).info || genericInfo(id, 0)
 }
 
 /**
@@ -863,6 +872,7 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         Library: 0n,
         RecommendedBy: "[]",
         Priority: 0,
+        Format_Modifiers: 0,
 
         Tags: []
     }
@@ -921,8 +931,8 @@ function genericUserEntry(itemId: bigint, uid: number): UserEntry {
 */
 function items_getAllMeta() {
     let meta: Record<string, MetadataEntry> = {}
-    for (let key in _globalsNewUi.entries) {
-        meta[key] = _globalsNewUi.entries[key].meta
+    for (let entry of Object.values(items_getAllEntries())) {
+        meta[String(entry.ItemId)] = entry.meta
     }
     return meta
 }
@@ -953,7 +963,7 @@ async function items_refreshRelations(uid: number) {
 async function items_refreshUserEntries(uid: number) {
     for await(let item of api_streamList<UserEntry>("engagement/list-entries", uid)) {
         try {
-            _globalsNewUi.entries[String(item.ItemId)].user = item
+            items_getEntry(item.ItemId).user = item
         } catch (err) {
             console.error(`${item.ItemId} is an orphaned user entry`)
         }
@@ -994,7 +1004,7 @@ async function items_loadLibraries(uid: number) {
 */
 async function items_refreshMetadata(uid: number) {
     for await(let item of api_streamList<MetadataEntry>("metadata/list-entries", uid)) {
-        _globalsNewUi.entries[String(item.ItemId)].meta = item
+        items_getEntry(item.ItemId).meta = item
     }
 
     dispatchEvent(new CustomEvent("aio-metadata-loaded"));
@@ -1029,6 +1039,9 @@ function* findRequirements(itemId: bigint): Generator<items_Entry> {
     yield* items_getEntry(itemId).relations.findRequirements()
 }
 
+function* items_findRequiredBy(itemId: bigint): Generator<items_Entry> {
+}
+
 /**
  * Gets a list of recommenders for an item
  * @param {bigint} itemId The item to get the recommenders of
@@ -1059,19 +1072,19 @@ function items_addRecommendedBy(itemId: bigint, recommender: string) {
 async function loadUserEvents(uid: number) {
     let events = await api_loadList<UserEvent>("engagement/list-events", uid)
     const grouped = Object.groupBy(events, k => String(k.ItemId))
-    for (let entry in _globalsNewUi.entries) {
+    for (let entry in items_getAllEntries()) {
         //we must loop through all entries because :
         //if an item had an event, but now has 0 events, if we loop through the new events, it will never hit that item that now has no events
         //therefore it will never be updated
-        _globalsNewUi.entries[entry].events = grouped[entry] || []
+        items_getEntry(BigInt(entry)).events = grouped[entry] || []
     }
 }
 
 async function loadTransactions(uid: number) {
     let transactions = await api_loadList<TransactionEntry>("transact/list", uid)
     const grouped = Object.groupBy(transactions, k => String(k.ItemId))
-    for(let entry in _globalsNewUi.entries) {
-        _globalsNewUi.entries[entry].transactions = grouped[entry] || []
+    for(let entry in items_getAllEntries()) {
+        items_getEntry(BigInt(entry)).transactions = grouped[entry] || []
     }
 }
 
