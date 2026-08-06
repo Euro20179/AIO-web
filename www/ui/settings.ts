@@ -141,6 +141,13 @@ const userSettings = new Map<number, Settings>
 
 /** users who's settings are being loaded (dont load twice at same time) */
 const _loading = new Set
+
+/**
+ * Load a user's settings
+ * @param {number} uid id of the user to load settings for
+ * @param {boolean} [force=false] if true, load even if settings have already been loaded
+ * @returns {Promise<Settings | boolean>} returns true if this function is in the process of loading settings
+ */
 async function settings_load(uid: number, force: boolean = false): Promise<Settings | boolean >{
     if(_loading.has(uid)) {
         return await new Promise(res => {
@@ -191,10 +198,21 @@ function settings_tier_from_rating(tiers: Settings["tiers"], rating: number): st
     return false
 }
 
+/**
+ * Checks if a name is a setting
+ * @param {string} key
+ * @returns {boolean}
+ */
 function settings_isASetting(key: string): key is keyof Settings {
     return Object.hasOwn(defaultSettings, key)
 }
 
+/**
+ * Given a uid, setting, and value, set that setting clientside for that user
+ * @param {number} uid
+ * @param {string} key
+ * @param {any} value
+ */
 function settings_set<T extends keyof Settings>(uid: number, key: T, value: Settings[T]) {
     if(!userSettings.has(uid)) {
         throw new Error(`${uid}'s setting have not been loaded`)
@@ -202,6 +220,14 @@ function settings_set<T extends keyof Settings>(uid: number, key: T, value: Sett
     userSettings.get(uid)![key] = value
 }
 
+/**
+ * Given a user id, and setting name, get the setting for that user
+ * side effects:
+ * - if that user's settings are not loaded, load them (however this function will <b>NOT</b> wait for settings to load)
+ * @param {number} uid
+ * @param {string} key
+ * @returns {any}
+ */
 function settings_get<T extends keyof Settings>(uid: number, key: T): Settings[T] {
     if(uid === 0) {
         return defaultSettings[key]
@@ -215,6 +241,11 @@ function settings_get<T extends keyof Settings>(uid: number, key: T): Settings[T
     return userSettings.get(uid)![key]
 }
 
+/**
+ * Get the loaded settings of a user
+ * @param {number} uid
+ * @returns {Settings}
+ */
 function settings_all(uid: number): Settings {
     if(!userSettings.has(uid)) {
         throw new Error(`${uid}'s setting have not been loaded`)

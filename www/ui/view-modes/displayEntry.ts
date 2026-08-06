@@ -2108,7 +2108,13 @@ function refreshDisplayItem(this: DisplayMode, itemId: bigint) {
 
 }
 
-function getIdFromDisplayElement(element: HTMLElement) {
+/**
+ * Given an element from within a shadow root of a &lt;display-entry&gt;
+ * find the id based on the data-item-id attribute of the host element.
+ * @param {HTMLElement} element an element within the shadowroot
+ * @returns {bigint} 0 if not found
+ */
+function getIdFromDisplayElement(element: HTMLElement): bigint {
     let rootNode = element.getRootNode() as ShadowRoot
     let host = rootNode.host
     if (!host) {

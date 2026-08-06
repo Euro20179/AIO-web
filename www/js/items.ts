@@ -736,7 +736,13 @@ function items_setItem(item:{
     e.relations.setRequires(item.requirements)
 }
 
-async function items_loadAll(id: bigint, uid = 0): Promise<items_Entry> {
+/**
+ * Given an entry id, load all information about it (even if it has already been loaded)
+ * @param {bigint} id
+ * @param {number} uid the user id of the entry to load
+ * @returns {Promise<items_Entry>}
+ */
+async function items_loadAll(id: bigint, uid: number = 0): Promise<items_Entry> {
     let e = await api_getEntryAll(id, uid)
     if(e) {
         items_setItem(e)
@@ -744,7 +750,13 @@ async function items_loadAll(id: bigint, uid = 0): Promise<items_Entry> {
     return items_getEntry(id)
 }
 
-async function items_getUserById(id: bigint, uid = 0): Promise<UserEntry> {
+/**
+ * Given an entry id, get it's user viewing info, if it has not been loaded, load it
+ * @param {bigint} id
+ * @param {number} uid the user id of the entry
+ * @returns {Promise<UserEntry>}
+ */
+async function items_getUserById(id: bigint, uid: number = 0): Promise<UserEntry> {
     let u = findUserEntryById(id)
     if(u.Extra.match(/"_AIO_GENERIC":true/)) {
         let e = await items_loadAll(id, uid)
@@ -753,6 +765,11 @@ async function items_getUserById(id: bigint, uid = 0): Promise<UserEntry> {
     return u
 }
 
+/**
+ * Given an entry id, get it's metadata, if it has not been loaded load it
+ * @param {bigint} id
+ * @returns {Promise<MetadataEntry>}
+ */
 async function items_getMetadataById(id: bigint): Promise<MetadataEntry> {
     let m = findMetadataById(id)
     if (m.Datapoints.match(/"_AIO_GENERIC":true/)) {
@@ -770,7 +787,12 @@ function items_entryExists(id: bigint): boolean {
     return String(id) in _globalsNewUi.entries
 }
 
-function items_getEntry(id: bigint) {
+/**
+ * Given an entry id, get it's corresponding object
+ * @param {bigint} id
+ * @returns {items_Entry}
+ */
+function items_getEntry(id: bigint): items_Entry {
     const val = _globalsNewUi.entries[String(id)]
     if (!(val)) {
         console.warn(`${id} is not an entry or is not loaded`)
@@ -2145,8 +2167,4 @@ function items_getProgressParts(currentPosition: string): (RegExpMatchArray | nu
         .map(v => v.trim())
         .map(v => v.match(/(\D*)(\d+(?:\.\d+)?)(?:\/(\d+))?/))
 
-}
-
-function items_(providedMax: number, fallback: number) {
-    return providedMax || fallback
 }
