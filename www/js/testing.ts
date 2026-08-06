@@ -1,6 +1,4 @@
 async function dotests(category: string) {
-    let testCounts = new Map<string, bigint>
-
     let passFails = new Map<string, { pass: bigint, fail: bigint }>
 
     type Test = [Function, (left: any, right: any) => boolean, Function]
@@ -127,40 +125,37 @@ async function dotests(category: string) {
     const username = '__TEST__'
     const password = "password"
 
+    await (async() => {
+        let params = new URLSearchParams([
+            ["username", username],
+            ["password", password]
+        ])
+
+        let res = await fetch(`${AIO}/account/create`, {
+            method: "POST",
+            body: params.toString()
+        })
+
+        await doTest("account creation", "create", [
+            l(res.status),
+            eq,
+            l(200)
+        ])
+
+        await doTest("account creation", "ui signin", [
+            ar(async() => {
+                setUserAuth(btoa(`${username}:${password}`))
+                const uid = await api_username2UID(username)
+                storeUserUID(String(uid))
+            }),
+            call,
+            l(() => {
+                return getUserAuth() == btoa(`${username}:${password}`)
+            })
+        ])
+    })()
+
     const tests: TestGroup = {
-        "account creation": {
-            tests: {
-                create: [
-                    ar(async() => {
-                        let params = new URLSearchParams([
-                            ["username", username],
-                            ["password", password]
-                        ])
-
-                        let res = await fetch(`${AIO}/account/create`, {
-                            method: "POST",
-                            body: params.toString()
-                        })
-
-                        return res.status
-                    }),
-                    eq,
-                    l(200)
-                ],
-
-                "ui signin": [
-                    ar(async() => {
-                        setUserAuth(btoa(`${username}:${password}`))
-                        const uid = await api_username2UID(username)
-                        storeUserUID(String(uid))
-                    }),
-                    call,
-                    l(() => {
-                        return getUserAuth() == btoa(`${username}:${password}`)
-                    })
-                ]
-            }
-        },
         "settings backwards compatibility": {
             tests: {
                 "user rating max": [r(settings_get, 0, "user_rating_max"), eq, l(100)],
@@ -183,6 +178,22 @@ async function dotests(category: string) {
                     eq,
                     l(200)
                 ],
+                q4legacy: [
+                    ar(async() => {
+                        const res = await api_query("TEST ENTRY", getUserUID(), 4)
+                        return res[0].En_Title
+                    }),
+                    eq,
+                    l("TEST ENTRY")
+                ],
+                q3legacy: [
+                    ar(async() => {
+                        const res = await api_query("@TEST\\ ENTRY", getUserUID(), 3)
+                        return res[0].En_Title
+                    }),
+                    eq,
+                    l("TEST ENTRY")
+                ]
             }
         },
         "ui stuff": {
@@ -376,7 +387,11 @@ async function dotests(category: string) {
         }
     })()
 
-    await doTestGroup(tests as TestGroup)
+    if(category) {
+        await doTestGroup({[category]: tests[category]})
+    } else {
+        await doTestGroup(tests as TestGroup)
+    }
 
     await (async() => {
         const group = "account deletion"
