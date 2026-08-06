@@ -345,32 +345,20 @@
 
     #entry-output {/* {{{ */
         --grid-size: 50%;
+        grid-area: main;
 
-        gap: calc(var(--small-gap) / 5);
+        display: grid;
+        grid-auto-flow: column;
+
+        gap: var(--very-small-gap);
 
         height: 100%;
         overflow: auto auto;
 
-        grid-area: main;
-
-        display: flex;
-
-        @container viewing-area (width >=800px) {
-            flex-wrap: wrap;
-        }
-
-        @container viewing-area (max-width: 800px) {
-            display: grid;
-            grid-auto-flow: column;
-
-            /*if there are at least 2 children, column size should be 80%*/
-            &:has(:nth-child(2)) {
-                grid-auto-columns: 80%;
-            }
-
-            /*otherwise, the 1 item should get all the width*/
-            &:not(:has(:nth-child(2))) {
-                grid-auto-columns: 100%;
+        display-entry {
+            width: 80cqi;
+            &:first-child:last-child {
+                width: 100cqi;
             }
         }
     }/* }}} */
