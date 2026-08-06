@@ -375,7 +375,7 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
             this.observer.observe(elem)
         }
     }
-    function handleMouse(button: number, altKey: boolean, ctrlKey: boolean) {
+    function handleMouse(button: number, altKey: boolean, ctrlKey: boolean, shiftKey: boolean) {
         if (button === 1) {
             displayItemInWindow(item.ItemId)
         }
@@ -384,6 +384,10 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
         }
         else if (ctrlKey) {
             sidebarEntryOpenMultiple(item)
+        } else if (shiftKey) {
+            dom_getel(`display-entry[data-item-id="${item.ItemId}"]`)?.scrollIntoView({
+                behavior: "smooth"
+            })
         } else {
             sidebarEntryOpenOne(item)
         }
@@ -393,13 +397,13 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
     btn.addEventListener("mousedown", e => {
         if (e.button === 1 || e.button === 0) {
             elem.focus()
-            handleMouse(e.button, e.altKey, e.ctrlKey)
+            handleMouse(e.button, e.altKey, e.ctrlKey, e.shiftKey)
             e.preventDefault()
         }
     })
     btn.addEventListener("keydown", e => {
         if (e.key === " " || e.key === "Enter") {
-            handleMouse(0, e.altKey, e.ctrlKey)
+            handleMouse(0, e.altKey, e.ctrlKey, e.shiftKey)
             e.preventDefault()
         }
     })

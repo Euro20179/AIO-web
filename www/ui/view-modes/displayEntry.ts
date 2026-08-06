@@ -1327,9 +1327,15 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
         let el = createClickableEntryUI(
             child.ItemId,
             () => {
-                let res = toggleItemUI(findInfoEntryById(child.ItemId))
-                if(res) {
-                    res[res.length - 1].scrollIntoView()
+                if(items_isSelected(child.ItemId)) {
+                    dom_getel(`display-entry[data-item-id="${child.ItemId}"]`)?.scrollIntoView({
+                        behavior: "smooth"
+                    })
+                } else {
+                    let res = selectUI(findInfoEntryById(child.ItemId))
+                    res[res.length - 1].scrollIntoView({
+                        behavior: "smooth"
+                    })
                 }
             }
         )
