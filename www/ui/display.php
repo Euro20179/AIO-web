@@ -69,39 +69,15 @@
 
     doUserStartupUI(settings)
 
-    fetch(`${apiPath}/get-all-for-entry?id=${id}&uid=0`).then(async (res) => {
-        const template = document.getElementById("display-entry")
-
-        let info, meta, user
-        let events = []
-        let transactions = []
-        let [text, transactionsText] = (await res.text()).trim().split("TRANSACTIONS")
-        for (let line of api_deserializeJsonl(text)) {
-            if(!line) continue
-            if (probablyMetaEntry(line)) {
-                meta = line
-            } else if (probablyUserItem(line)) {
-                user = line
-            } else if (probablyInfoEntry(line)) {
-                info = line
-            } else {
-                events.push(line)
-            }
-        }
-        for(let line of api_deserializeJsonl(transactionsText)) {
-            if(!line) continue
-            transactions.push(line)
-        }
-        items_addItem({meta, events, info, user, transactions})
+    api_getEntryAll(id, 0).then((e) => {
+        items_addItem(e)
         items_setResults([BigInt(id)])
         const m = new DisplayMode(document.body)
         mode_add(m)
         updateInfo2({
-            [id]: {
-                info, user, events, meta
-            }
+            [id]: e
         })
-        renderDisplayItem.call(m, meta.ItemId)
+        renderDisplayItem.call(m, e.meta.ItemId)
     })
 })()
 </script>

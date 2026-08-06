@@ -178,6 +178,7 @@ async function dotests(category: string) {
                     eq,
                     l(200)
                 ],
+
                 q4legacy: [
                     ar(async() => {
                         const res = await api_query("TEST ENTRY", getUserUID(), 4)
@@ -186,6 +187,7 @@ async function dotests(category: string) {
                     eq,
                     l("TEST ENTRY")
                 ],
+
                 q3legacy: [
                     ar(async() => {
                         const res = await api_query("@TEST\\ ENTRY", getUserUID(), 3)
@@ -193,7 +195,7 @@ async function dotests(category: string) {
                     }),
                     eq,
                     l("TEST ENTRY")
-                ]
+                ],
             }
         },
         "ui stuff": {
