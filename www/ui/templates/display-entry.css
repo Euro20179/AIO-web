@@ -79,6 +79,15 @@
         }
     }
 
+    button[data-view-count="0"] {
+        background: var(--error);
+    }
+
+    button[data-view-count]:not([data-view-count="0"]) {
+        background: var(--green);
+    }
+
+
     #library {
         padding-block: 1px;
     }
@@ -515,17 +524,6 @@
         div:first-child {
             display: flex;
             gap: var(--small-gap);
-        }
-    }
-
-    #required-items,
-    #required-by-items {
-        img[data-view-count="0"] {
-            border: 2px solid var(--error);
-        }
-
-        img:not([data-view-count="0"]) {
-            border: 2px solid var(--green);
         }
     }
 

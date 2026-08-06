@@ -10,6 +10,14 @@
             height: 100%;
         }
 
+        :host([data-view-count="0"]) button {
+            background: var(--error);
+        }
+
+        :host(:not([data-view-count="0"])) button {
+            background: var(--green);
+        }
+
         :host(.image-only) button:has(slot[name="thumbnail"]) {
             flex-grow: 1;
             picture {
@@ -18,8 +26,16 @@
             }
         }
 
-        button:has(slot[name="thumbnail"]) {
-            min-height: 0;
+        button {
+            padding: 0.2ch;
+            &:has(slot[name="thumbnail"]) {
+                min-height: 0;
+            }
+            &:has(h2) {
+                display: block;
+                margin-block: var(--very-small-gap);
+                text-align: center;
+            }
         }
 
         article {
@@ -42,14 +58,9 @@
             max-width: 100% !important;
             vertical-align: middle !important;
 
-            box-shadow: 1px 1px 3px currentColor;
+            box-shadow: 1px 1px 3px var(--shadow-color);
         }
 
-        button:has(h2) {
-            display: block;
-            margin-block: var(--very-small-gap);
-            text-align: center;
-        }
         h2 {
             overflow: clip;
             text-overflow: ellipsis;
