@@ -340,7 +340,7 @@ function _mkde_actions() {// {{{
                 let info = findInfoEntryById(id)
 
                 api_setItem("", info, "update the requirement")
-                items_getEntry(id).relations.requires.push(itemid)
+                items_getEntry(id).relations.addRequires(itemid)
                 updateInfo2({
                     [String(id)]: {
                         info

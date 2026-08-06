@@ -180,12 +180,19 @@ class items_Relations {
     }
 
     setRequires(requires: bigint[]) {
-        this.requires = requires
+        for(let req of this.requires) {
+            this.removeRequires(req)
+        }
+
+        for(let req of requires) {
+            this.addRequires(req)
+        }
     }
 
     removeRequires(id: bigint) {
         if (this.requires.includes(id)) {
             this.requires = this.requires.filter(v => v !== id)
+            items_getEntry(id).relations.requiredBy = items_getEntry(id).relations.requiredBy.filter(v => v !== this.id)
         }
     }
 
@@ -224,6 +231,7 @@ class items_Relations {
 
     addRequires(id: bigint) {
         this.requires.push(id)
+        items_getEntry(id).relations.requiredBy.push(this.id)
     }
 
     isChild() {
@@ -948,9 +956,9 @@ async function items_refreshRelations(uid: number) {
     for (let id in relations) {
         try {
             const e = items_getEntry(BigInt(id))
-            e.relations.children = relations[id].Children?.map((v: any) => BigInt(v)) || []
-            e.relations.requires = relations[id].Requires?.map((v: any) => BigInt(v)) || []
-            e.relations.copies = relations[id].Copies?.map((v: any) => BigInt(v)) || []
+            e.relations.setChildren(relations[id].Children?.map((v: any) => BigInt(v)) || [])
+            e.relations.setRequires(relations[id].Requires?.map((v: any) => BigInt(v)) || [])
+            e.relations.setCopies(relations[id].Copies?.map((v: any) => BigInt(v)) || [])
         } catch (err) {
             continue
         }
