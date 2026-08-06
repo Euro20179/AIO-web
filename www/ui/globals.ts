@@ -5,6 +5,10 @@ const ACCOUNTS: Record<number, string> = {}
 let INTL_OPTIONS: Intl.ResolvedDateTimeFormatOptions =
     Intl.DateTimeFormat().resolvedOptions()
 
+if (INTL_OPTIONS.timeZone === "Etc/Unknown") {
+    INTL_OPTIONS.timeZone = "UTC"
+}
+
 function alert(text: string) {
     const notificationsArea = document.getElementById("notifications") as HTMLDivElement
     const el = document.createElement("div")
