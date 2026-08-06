@@ -160,6 +160,12 @@ async function main() {
 main();
 
 addUserScriptUI(
+    "Put selected in sidebar",
+    () => components["sidebarUI"]?.render(items_getSelected()),
+    "Replaces all items in the sidebar with selected items instead"
+)
+
+addUserScriptUI(
     "Remote -> local thumbnail",
     remote2LocalThumbService,
     "Converts remote (non-data uri) thumbnails to thumbnails hosted on the aio server",
