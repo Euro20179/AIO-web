@@ -1326,7 +1326,12 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
         child = await items_getEntryAny(child.ItemId)
         let el = createClickableEntryUI(
             child.ItemId,
-            () => toggleItemUI(findInfoEntryById(child.ItemId))
+            () => {
+                let res = toggleItemUI(findInfoEntryById(child.ItemId))
+                if(res) {
+                    res[res.length - 1].scrollIntoView()
+                }
+            }
         )
 
         el.setAttribute("data-view-count", String(child.user.ViewCount))

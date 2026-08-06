@@ -2881,15 +2881,17 @@ function deselectUI(item: InfoEntry, updateStats: boolean = true) {
     * - updates stats (if updateStats is true)
 * @param {InfoEntry} item
 * @param {boolean} [updateStats=true]
+* @returns {HTMLElement[] | false} false if items were deselected, otherwise an array of all elements that were selected
 */
-function toggleItemUI(item: InfoEntry, updateStats: boolean = true) {
+function toggleItemUI(item: InfoEntry, updateStats: boolean = true): false | HTMLElement[] {
     if (items_isSelected(item.ItemId)) {
         deselectUI(item, updateStats)
         //by definition we are no longer viewing everything
         setViewingAllUI(false)
+        return false
     }
     else {
-        selectUI(item, updateStats)
+        return selectUI(item, updateStats)
     }
 }
 //just in case
