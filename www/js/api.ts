@@ -353,14 +353,18 @@ async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
  */
 async function api_query(searchString: string, uid: number, version: 3 | 4, orderby: SortKind = ""): Promise<InfoEntry[]> {
     let apiOrder = api_uiSort2Api(orderby)
-    let qs = `?search=${encodeURIComponent(searchString)}&uid=${uid}`
+    let qs = `?q=${encodeURIComponent(searchString)}&uid=${uid}`
     if(apiOrder !== "") {
         qs += `&order-by=${encodeURIComponent(apiOrder)}`
     }
 
-    const endPoint = version === 3 ? "query-v3" : "query-v4"
+    if (version === 3) {
+        qs += "&v=3"
+    }
 
-    const res = await fetch(`${apiPath}/${endPoint}${qs}`).catch(console.error)
+    const res = await fetch(`${apiPath}/entry${qs}`, {
+        method: "QUERY"
+    }).catch(console.error)
     if (!res) return []
 
     let itemsText = await res.text()

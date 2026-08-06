@@ -179,7 +179,7 @@ async function dotests(category: string) {
                     l(200)
                 ],
 
-                q4legacy: [
+                QUERY4: [
                     ar(async() => {
                         const res = await api_query("TEST ENTRY", getUserUID(), 4)
                         return res[0].En_Title
@@ -188,7 +188,7 @@ async function dotests(category: string) {
                     l("TEST ENTRY")
                 ],
 
-                q3legacy: [
+                QUERY3: [
                     ar(async() => {
                         const res = await api_query("@TEST\\ ENTRY", getUserUID(), 3)
                         return res[0].En_Title
