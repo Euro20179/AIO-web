@@ -1970,27 +1970,6 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
 
-    let parentIdEl = form.querySelector("[name=\"parentId\"]")
-    if (!(parentIdEl !== null && "value" in parentIdEl)) throw new Error("name=parentId did not return an input kind element")
-    const parentId = parentIdEl.value
-
-    let copyOfIdEl = form.querySelector("[name=\"copyOf\"]")
-    if (!(copyOfIdEl !== null && "value" in copyOfIdEl)) throw new Error("name=copyOf did not return an input kind element")
-    const copyOfId = copyOfIdEl.value
-
-    let requiresEl = form.querySelector("[name=\"requires\"]")
-    if (!(requiresEl !== null && "value" in requiresEl)) throw new Error("name=requires did not return an input kind element")
-    const requires = requiresEl.value
-
-    if (parentId !== "0") {
-        queryString += `&parentId=${parentId}`
-    }
-    if (copyOfId !== "0") {
-        queryString += `&copyOf=${copyOfId}`
-    }
-    if (requires !== "0") {
-        queryString += `&requires=${requires}`
-    }
 
     const tz = INTL_OPTIONS.timeZone
 
@@ -2001,9 +1980,29 @@ async function newEntryUI(form: HTMLFormElement) {
         return
     }
 
-    let json = api_deserializeJsonl(text).next().value
+    let json = api_deserializeJsonl<InfoEntry>(text).next().value
 
     items_addById(json.ItemId).then(() => {
+        let toUpdate: Parameters<typeof updateInfo2>["0"] = {
+            [String(json.ItemId)]: {
+                info: json
+            },
+        }
+        if(validEntries["requires"] && validEntries["requires"] !== "0") {
+            items_addRequires(json.ItemId, BigInt(validEntries["requires"] as string))
+            toUpdate[validEntries["requires"] as string] = {}
+        }
+        if(validEntries["parentId"] && validEntries["parentId"] !== "0") {
+            items_addChild(json.ItemId, BigInt(validEntries["parentId"] as string))
+            toUpdate[validEntries["parentId"] as string] = {}
+        }
+        if(validEntries["copyOf"] && validEntries["copyOf"] !== "0") {
+            items_addCopy(json.ItemId, BigInt(validEntries["copyOf"] as string))
+            toUpdate[validEntries["copyOf"] as string] = {}
+        }
+
+        updateInfo2(toUpdate)
+
         dispatchEvent(new CustomEvent("aio-entry-created", {
             detail: json
         }))
