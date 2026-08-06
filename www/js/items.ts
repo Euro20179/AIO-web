@@ -1048,6 +1048,7 @@ function* findRequirements(itemId: bigint): Generator<items_Entry> {
 }
 
 function* items_findRequiredBy(itemId: bigint): Generator<items_Entry> {
+    yield* items_getEntry(itemId).relations.requiredBy.values().map(items_getEntry)
 }
 
 /**

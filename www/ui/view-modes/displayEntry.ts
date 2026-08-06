@@ -1282,7 +1282,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
         `
 }
 
-async function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items") {
+async function createRelationButtons(thisId: bigint, elementParent: HTMLElement, relationGenerator: Generator<items_Entry>, relationType: "descendants" | "copies" | "required-items" | "required-by-items") {
     var relationships = relationGenerator.toArray()
     let titles = relationships.map(i => i.info.En_Title)
 
@@ -1307,7 +1307,8 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
             const confirmationText = {
                 "descendants": "Would you like to remove this item as a descendant of it's parent",
                 "copies": "Would you like to remove this item as a copy",
-                "required-items": "Would you like to remove this item as a requirement"
+                "required-items": "Would you like to remove this item as a requirement",
+                "required-by-items": "THIS DOES NOTHING CURRENTLY",
             }
 
             confirmUI(confirmationText[relationType])
@@ -1316,6 +1317,7 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
                     const [apiFunc, itemsFunc] = ({
                         "copies": [api_delCopy, items_removeCopy],
                         "descendants": [api_delChild, items_removeChild],
+                        "required-by-items": [async() => {}, async() => {}],
                         "required-items": [
                             (uid: number, right: bigint, left: bigint) => api_delRequires(uid, left, right),
                             (right: bigint, left: bigint) => items_removeRequires(left, right)
@@ -1789,7 +1791,12 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     })
 
     //relation elements
-    for (let relationship of [["descendants", findDescendants], ["copies", findCopies], ["required-items", findRequirements]] as const) {
+    for (let relationship of [
+        ["descendants", findDescendants],
+        ["copies", findCopies],
+        ["required-items", findRequirements],
+        ["required-by-items", items_findRequiredBy],
+    ] as const) {
         renderComponent(`#${relationship[0]}`, relationshipEl => {
             relationshipEl.innerHTML = ""
             createRelationButtons(
