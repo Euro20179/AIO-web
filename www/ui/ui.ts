@@ -361,7 +361,7 @@ function startupUI({
                 } else components['sidebarUI']?.focusNextItem(e.key === "ArrowUp")
                 if (e.ctrlKey) {
                     if (!e.shiftKey) clearUI()
-                    selectFocusedSidebarItem()
+                    sidebar_selectFocused()
                 }
                 e.preventDefault()
                 return

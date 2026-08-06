@@ -148,7 +148,7 @@ SidebarMode.prototype.refresh = function(this: SidebarMode, itemId: bigint) {
 
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     if (el) {
-        changeSidebarItemData(itemId, el)
+        _changeSidebarItemData(itemId, el)
         let meta = findMetadataById(itemId)
         if (meta)
             this.updateThumbnail(itemId, meta?.Thumbnail)
@@ -226,15 +226,20 @@ SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[],
     selectSidebarItems(entries, clearRendered)
 }
 
-function selectFocusedSidebarItem() {
+/**
+ * select the focused sidebar item
+ */
+function sidebar_selectFocused() {
     if (document.activeElement?.tagName !== "SIDEBAR-ENTRY") return
 
     const id = document.activeElement.getAttribute("data-entry-id") as string
     selectUI(findInfoEntryById(BigInt(id)))
 }
 
+var selectFocusedSidebarItem = sidebar_selectFocused
 
-function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, el: ShadowRoot) {
+
+function _updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: MetadataEntry, el: ShadowRoot) {
     const titleEl = el.getElementById("sidebar-title") as HTMLInputElement
     const imgEl = el.getElementById("sidebar-thumbnail") as HTMLImageElement
 
@@ -284,7 +289,12 @@ function updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Meta
     updateDeclarativeDSL({}, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el) 
 }
 
-function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
+/**
+ * Given a list of info entries, select them
+ * @param {InfoEntry[]} entries
+ * @param {boolean} [clearSelected=true]
+ */
+function sidebar_selectList(entries: InfoEntry[], clearSelected: boolean = true) {
     if (clearSelected) {
         clearUI()
     }
@@ -294,40 +304,63 @@ function selectSidebarItems(entries: InfoEntry[], clearSelected = true) {
         selectUI(entries[0])
     }
 }
+var selectSidebarItems = sidebar_selectList
 
-function changeSidebarItemData(id: bigint, el: HTMLElement) {
-    updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
+function _changeSidebarItemData(id: bigint, el: HTMLElement) {
+    _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
     el.setAttribute("data-entry-id", String(id))
 }
 
-function sidebarEntryOpenOne(item: InfoEntry) {
+/**
+ * Clears all selected items, and selects one new one
+ * @param {InfoEntry} item
+ */
+function sidebar_openOne(item: InfoEntry) {
     clearUI()
     selectUI(item)
 
     setViewingAllUI(false)
 }
+var sidebarEntryOpenOne = sidebar_openOne
 
-function sidebarEntryOpenMultiple(item: InfoEntry) {
-    toggleItemUI(item)
-}
-
-async function renderSidebarItemList(this: SidebarMode, items: InfoEntry[], sidebarParent: HTMLElement | DocumentFragment, options?: {
-    below?: string,
-    renderImg?: boolean
-}) {
+/**
+ * renders a list of sidebar entry elements into parent
+ * <code>this</code> must be set to an instance of SidebarMode (usually components.sidebarUI)
+ * @param {SidebarMode} this must be set with .call, .apply, .bind, ...
+ * @param {InfoEntry[]} items
+ * @param {HTMLElement | DocumentFragment} parent
+ * @param {Partial<{below: string, renderImg: boolean}>} options below is an entry id to render below, renderImg controls whether the image should be rendered immediately or later
+*/
+async function sidebar_renderItemList(
+    this: SidebarMode,
+    items: InfoEntry[],
+    parent: HTMLElement | DocumentFragment,
+    options?: {
+        below?: string,
+        renderImg?: boolean
+    }
+) {
     for (let i = 0; i < items.length; i++) {
         if (i !== 0 && i % 20 == 0 && "scheduler" in window) {
             //@ts-ignore
             await scheduler.yield()
         }
-        renderSidebarItem.call(this, items[i], sidebarParent, options)
+        renderSidebarItem.call(this, items[i], parent, options)
     }
 }
 
+var renderSidebarItemList = sidebar_renderItemList
+
 /**
- * Renders a sidebar item with fake data
+ * Renders a sidebar item into parent with fake data
+ * @param {InfoEntry} item
+ * @param {HTMLElement | DocumentFragment} parent
+ * @returns {HTMLElement}
  */
-function renderFakeSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | DocumentFragment): HTMLElement {
+function sidebar_renderFakeItem(
+    item: InfoEntry,
+    parent: HTMLElement | DocumentFragment
+): HTMLElement {
     let elem = document.createElement("sidebar-entry")
     let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
     let img = elem.shadowRoot?.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
@@ -338,20 +371,26 @@ function renderFakeSidebarItem(item: InfoEntry, sidebarParent: HTMLElement | Doc
         img.replaceWith(x)
     }
     title.value = item.En_Title
-    sidebarParent.append(elem)
+    parent.append(elem)
     return elem
 }
+var renderFakeSidebarItem = sidebar_renderFakeItem
 
 /**
-  * @description below is an itemid that the item gets rendered below
-*/
-function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: HTMLElement | DocumentFragment, options?: {
+ * given an item, render it into parent
+ * <code>this</code> must be set to an instance of SidebarMode, usually components.sidebarUI
+ * @param {SidebarMode} this
+ * @param {InfoEntry} item
+ * @param {HTMLElement | DocumetnFragment} parent
+ * @param {Partial<{below: string, renderImg: boolean}>} options same as sidebar_renderItemList
+ */
+function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLElement | DocumentFragment, options?: {
     below?: string,
     renderImg?: boolean
 }) {
     let elem = document.createElement("sidebar-entry")
 
-    sidebarParent ||= this.output
+    parent ||= this.output
 
     let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
@@ -360,10 +399,10 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
     elem.shadowRoot.querySelector("figure")?.setAttribute("aria-label", `${item.En_Title || item.Native_Title} thumbnail`)
 
     if (options?.below) {
-        const renderBelow = sidebarParent.querySelector(`[data-entry-id="${options.below}"]`) as HTMLElement
+        const renderBelow = parent.querySelector(`[data-entry-id="${options.below}"]`) as HTMLElement
         renderBelow?.insertAdjacentElement("afterend", elem)
     } else {
-        sidebarParent.append(elem)
+        parent.append(elem)
     }
 
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
@@ -383,7 +422,7 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
             displayItemInWindow(item.ItemId, "_blank", true)
         }
         else if (ctrlKey) {
-            sidebarEntryOpenMultiple(item)
+            toggleItemUI(item)
         } else if (shiftKey) {
             dom_getel(`display-entry[data-item-id="${item.ItemId}"]`)?.scrollIntoView({
                 behavior: "smooth"
@@ -422,9 +461,11 @@ function renderSidebarItem(this: SidebarMode, item: InfoEntry, sidebarParent?: H
         }
     })
 
-    changeSidebarItemData(item.ItemId, elem)
+    _changeSidebarItemData(item.ItemId, elem)
 
     return elem
 }
+
+var renderSidebarItem = sidebar_renderItem
 
 mode_register("sidebar", SidebarMode)
