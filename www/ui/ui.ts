@@ -2998,9 +2998,9 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
     }
 
     if (metadata.Provider == 'anilist' && form.elements['type'].value === 'Show') {
-        form.elements['is-anime-art'].checked = true
+        form.elements['is-Anime'].checked = true
     } else {
-        form.elements['is-anime-art'].checked = false
+        form.elements['is-Anime'].checked = false
     }
 
     if (metadata.Provider.startsWith("gtdb")) {
