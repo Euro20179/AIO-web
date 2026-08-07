@@ -424,9 +424,16 @@ function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLEle
         else if (ctrlKey) {
             toggleItemUI(item)
         } else if (shiftKey) {
-            dom_getel(`display-entry[data-item-id="${item.ItemId}"]`)?.scrollIntoView({
-                behavior: "smooth"
-            })
+            if(items_isSelected(item.ItemId)) {
+                dom_getel(`display-entry[data-item-id="${item.ItemId}"]`)?.scrollIntoView({
+                    behavior: "smooth"
+                })
+            } else {
+                let els = selectUI(item)
+                els[els.length - 1]?.scrollIntoView({
+                    behavior: "smooth"
+                })
+            }
         } else {
             sidebarEntryOpenOne(item)
         }
