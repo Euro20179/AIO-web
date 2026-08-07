@@ -214,12 +214,12 @@ async function api_listTypes() {
 }
 
 async function api_getRelations(uid: number) {
-    const res = await api_loadList("entry", uid, {
+    const res = await api_loadList<{ItemId: bigint, Children: number[], Requires: number[], Copies: number[]}>("entry", uid, {
         params: new URLSearchParams([["kind", "relations"]])
     })
 
     if(!res) {
-        return {}
+        return []
     }
     return res
 }

@@ -975,12 +975,12 @@ function items_getAllMeta() {
  */
 async function items_refreshRelations(uid: number) {
     const relations = await api_getRelations(uid)
-    for (let id in relations) {
+    for (let r of relations) {
         try {
-            const e = items_getEntry(BigInt(id))
-            e.relations.setChildren(relations[id].Children?.map((v: any) => BigInt(v)) || [])
-            e.relations.setRequires(relations[id].Requires?.map((v: any) => BigInt(v)) || [])
-            e.relations.setCopies(relations[id].Copies?.map((v: any) => BigInt(v)) || [])
+            const e = items_getEntry(r.ItemId)
+            e.relations.setChildren(r.Children?.map((v: any) => BigInt(v)) || [])
+            e.relations.setRequires(r.Requires?.map((v: any) => BigInt(v)) || [])
+            e.relations.setCopies(r.Copies?.map((v: any) => BigInt(v)) || [])
         } catch (err) {
             continue
         }
