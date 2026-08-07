@@ -535,7 +535,8 @@ async function api_deleteEntryTags(itemId: bigint, tags: string[]) {
 }
 
 async function api_deleteEntry(itemId: bigint) {
-    return await authorizedRequest(`${apiPath}/delete-entry?id=${itemId}`, {
+    return await authorizedRequest(`${apiPath}/entry/${itemId}`, {
+        method: "DELETE",
         "signin-reason": "delete this entry"
     })
 }
@@ -649,7 +650,7 @@ async function api_fetchLocation(itemId: bigint, uid: number, provider?: string,
 
 async function api_setItem(subpath: "engagement/" | "metadata/" | "", item: InfoEntry | MetadataEntry | UserEntry, signinReason?: string) {
     const serialized = api_serializeEntry(item)
-    return authorizedRequest(`${apiPath}/${subpath}set-entry`, {
+    return authorizedRequest(`${apiPath}/${subpath}set-entry?id=${item.ItemId}`, {
         body: serialized,
         method: "POST",
         "signin-reason": signinReason
