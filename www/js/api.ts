@@ -137,7 +137,7 @@ function _api_parseJsonL(jsonl: string) {
     const bigIntProperties = ["ItemId", "ParentId", "CopyOf", "Library", "Requires"]
     try {
         return JSON.parse(jsonl, (key, v) => {
-            return bigIntProperties.includes(key) ? BigInt(v) : v
+            return bigIntProperties.includes(key) && (typeof v === 'number' || typeof v === 'string') ? BigInt(v) : v
         })
     }
     catch (err) {
