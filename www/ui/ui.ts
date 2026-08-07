@@ -362,6 +362,13 @@ function startupUI({
                 if (e.ctrlKey) {
                     if (!e.shiftKey) clearUI()
                     sidebar_selectFocused()
+                } else {
+                    const id = document.activeElement?.getAttribute("data-entry-id")
+                    if(id) {
+                        dom_getel(`display-entry[data-item-id="${id}"]`)?.scrollIntoView({
+                            behavior: "smooth"
+                        })
+                    }
                 }
                 e.preventDefault()
                 return
