@@ -214,45 +214,43 @@ async function api_listTypes() {
 }
 
 async function api_getRelations(uid: number) {
-    const res = await fetch(`${apiPath}/list-relations?uid=${uid}`)
+    const res = await api_loadList("entry", uid, {
+        params: new URLSearchParams([["kind", "relations"]])
+    })
 
     if(!res) {
         return {}
     }
-    const text = await res.text()
-    return JSON.parse(text.replace(/(?<!")(\d+)(?=,|\])(?!")/g, '"$1"'))
+    return res
 }
 
 /**
- * Given an endpoint that returns a jsonl stream, load all results into a list
+ * wraps api_streamList into a list and returns that
  * @param {string} endpoint
  * @param {number} uid
+ * @param {RequestInit & {params: URLSearchParams}} [init] options for fetch
  * @reutrns {Promise<T[]>}
  */
-async function api_loadList<T>(endpoint: string, uid: number): Promise<T[]> {
-    const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
-    if (!res) {
-        return []
+async function api_loadList<T>(endpoint: string, uid: number, init?: RequestInit & {params: URLSearchParams}): Promise<T[]> {
+    const result = []
+    for await(let res of api_streamList<T>(endpoint, uid, init)) {
+        result.push(res)
     }
-
-    const text = await res.text()
-    if (!text) {
-        return []
-    }
-
-    const lines = text.split("\n").filter(Boolean)
-    return [...api_deserializeJsonl<T>(lines)]
+    return result
 }
 
 /**
- * Similar to api_loadList, however instead of loading the entire list at once
- * as soon as data is recieved, yield it
+ * Given an endpoint that returns JSONL, yield each line as it comes as an object
  * @param {string} endpoint
  * @param {number} uid
+ * @param {RequestInit & {params: URLSearchParams}} [init] options for fetch
  * @returns {AsyncGenerator<T>}
  */
-async function* api_streamList<T>(endpoint: string, uid: number): AsyncGenerator<T>{
-    const res = await fetch(`${apiPath}/${endpoint}?uid=${uid}`)
+async function* api_streamList<T>(endpoint: string, uid: number, init?: RequestInit & {params: URLSearchParams}): AsyncGenerator<T>{
+    const params = init?.params || new URLSearchParams
+    params.set("uid", uid.toString())
+
+    const res = await fetch(`${apiPath}/${endpoint}?${params.toString()}`, init)
     if(!res) {
         return
     }

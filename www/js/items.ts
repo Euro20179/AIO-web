@@ -991,7 +991,9 @@ async function items_refreshRelations(uid: number) {
     * loads all user info, and updates the global entries list
 */
 async function items_refreshUserEntries(uid: number) {
-    for await(let item of api_streamList<UserEntry>("engagement/list-entries", uid)) {
+    for await(let item of api_streamList<UserEntry>("entry", uid, {
+        params: new URLSearchParams([["kind", "user"]])
+    })) {
         try {
             items_getEntry(item.ItemId).user = item
         } catch (err) {
@@ -1004,7 +1006,9 @@ async function items_refreshUserEntries(uid: number) {
     * loads all info, and updates the global entries list, creating new entries if they dont exist
 */
 async function items_refreshInfoEntries(uid: number) {
-    for await(let item of api_streamList<InfoEntry>("list-entries", uid)) {
+    for await(let item of api_streamList<InfoEntry>("entry", uid, {
+        params: new URLSearchParams([["kind", "info"]])
+    })) {
         let stashed = _globalsNewUi.entries[String(item.ItemId)]
         if (!stashed) {
             _globalsNewUi.entries[String(item.ItemId)] = new items_Entry(item)
@@ -1033,7 +1037,9 @@ async function items_loadLibraries(uid: number) {
  * @param {number} uid
 */
 async function items_refreshMetadata(uid: number) {
-    for await(let item of api_streamList<MetadataEntry>("metadata/list-entries", uid)) {
+    for await(let item of api_streamList<MetadataEntry>("entry", uid, {
+        params: new URLSearchParams([["kind", "meta"]])
+    })) {
         items_getEntry(item.ItemId).meta = item
     }
 
@@ -1101,7 +1107,9 @@ function items_addRecommendedBy(itemId: bigint, recommender: string) {
  * @param {number} uid The user to load the events for
  */
 async function loadUserEvents(uid: number) {
-    let events = await api_loadList<UserEvent>("engagement/list-events", uid)
+    const events = await api_loadList<UserEvent>("entry", uid,  {
+        params: new URLSearchParams([["kind", "events"]])
+    })
     const grouped = Object.groupBy(events, k => String(k.ItemId))
     for (let entry in items_getAllEntries()) {
         //we must loop through all entries because :
@@ -1112,7 +1120,9 @@ async function loadUserEvents(uid: number) {
 }
 
 async function loadTransactions(uid: number) {
-    let transactions = await api_loadList<TransactionEntry>("transact/list", uid)
+    const transactions = await api_loadList<TransactionEntry>("entry", uid, {
+        params: new URLSearchParams([["kind", "transactions"]])
+    })
     const grouped = Object.groupBy(transactions, k => String(k.ItemId))
     for(let entry in items_getAllEntries()) {
         items_getEntry(BigInt(entry)).transactions = grouped[entry] || []
