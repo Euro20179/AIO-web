@@ -2087,8 +2087,8 @@ function items_countryOfOrigin2Flag(origin: string) {
     for (let o of origin.split(",")) {
         o = o.trim()
         let flag = flags[o as keyof typeof flags]
-        if(!flag && origin.length == 2)
-            flag = [...origin].map(v => String.fromCodePoint(v.codePointAt(0) - 0x41 + 0x1F1e6)).join("")
+        if(!flag && o.length == 2)
+            flag = [...o].map(v => String.fromCodePoint(v.codePointAt(0) - 0x41 + 0x1F1e6)).join("")
         str += (flag || o) + " "
     }
     return str.trim()
