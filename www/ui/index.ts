@@ -1,4 +1,39 @@
 async function main() {
+    const onrender = () => {
+        //just in case
+        removeEventListener("aio-search-performed", onrender);
+
+        const metadataload = () => {
+            removeEventListener("aio-metadata-load", metadataload)
+
+            let selected = items_getSelected()[0]
+            if(selected) {
+                ua_setfavicon(
+                    fixThumbnailURL(
+                        findMetadataById(
+                            selected.ItemId
+                        ).Thumbnail
+                    )
+                )
+            }
+
+            //i think this is to reorder everything?:
+            if (urlParams.has("view-all")) {
+                for (let mode of mode_listOpen()) {
+                    selectListUI(getFilteredResultsUI(), true, mode);
+                }
+
+                setViewingAllUI(true);
+            }
+        }
+
+        addEventListener("aio-metadata-loaded", metadataload)
+    };
+
+    //allow the fetch to happen *after* items are rendered on firefox
+    //becasue firefox doesn't render the items until after the fetch for some reason
+    addEventListener("aio-search-performed", onrender);
+
     setupHintPopovers(document)
 
     const sortBySelector = dom_getelorthrow(
@@ -31,6 +66,11 @@ async function main() {
         mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });
 
+    const uid = getUidUI();
+
+    //must happen synchronously to make item render properly
+    await loadInfoEntries(uid);
+
     const urlParams = new URLSearchParams(document.location.search);
 
     //if the user is logged in, do ui startup script for their user and their user only
@@ -51,47 +91,6 @@ async function main() {
     if (urlParams.has("display")) {
         setDisplayModeUI(true);
     }
-
-
-    const onrender = () => {
-        //just in case
-        removeEventListener("aio-search-performed", onrender);
-
-        const metadataload = () => {
-            removeEventListener("aio-metadata-load", metadataload)
-
-            let selected = items_getSelected()[0]
-            if(selected) {
-                ua_setfavicon(
-                    fixThumbnailURL(
-                        findMetadataById(
-                            selected.ItemId
-                        ).Thumbnail
-                    )
-                )
-            }
-
-            //i think this is to reorder everything?:
-            if (urlParams.has("view-all")) {
-                for (let mode of mode_listOpen()) {
-                    selectListUI(getFilteredResultsUI(), true, mode);
-                }
-
-                setViewingAllUI(true);
-            }
-        }
-
-        addEventListener("aio-metadata-loaded", metadataload)
-
-        Promise.all([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
-            for (let item of items_getSelected()) {
-                mode_refreshItem(item.ItemId);
-            }
-        })
-    };
-    //allow the fetch to happen *after* items are rendered on firefox
-    //becasue firefox doesn't render the items until after the fetch for some reason
-    addEventListener("aio-search-performed", onrender);
 
     await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
 
@@ -121,10 +120,7 @@ async function main() {
     if (urlParams.has("sort")) {
         sortBySelector.value = String(urlParams.get("sort"))
     }
-    const uid = getUidUI();
 
-    //must happen synchronously to make item render properly
-    await loadInfoEntries(uid);
 
     if (initialSearch || components.searchBox?.value) {
         mkSearchUI({
@@ -153,6 +149,12 @@ async function main() {
     loadTransactions(uid).then(() => {
         for(let item of items_getSelected()) {
             mode_refreshItem(item.ItemId)
+        }
+    })
+
+    Promise.all([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
+        for (let item of items_getSelected()) {
+            mode_refreshItem(item.ItemId);
         }
     })
 }
