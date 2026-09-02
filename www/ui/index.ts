@@ -66,6 +66,10 @@ async function main() {
         mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });
 
+    await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
+
+    setUIDFromHeuristicsUI();
+
     const uid = getUidUI();
 
     //must happen synchronously to make item render properly
@@ -92,9 +96,6 @@ async function main() {
         setDisplayModeUI(true);
     }
 
-    await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
-
-    setUIDFromHeuristicsUI();
 
     fillRecommendedListUI(recommenders, getUidUI());
     loadLibraries(getUidUI());
