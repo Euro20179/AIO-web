@@ -3022,6 +3022,9 @@ function fillNewItemFormFromMetadataUI(metadata?: MetadataEntry, form?: HTMLForm
                 case "wiiu":
                     form.elements["format"].value = 28
                     break
+                case "ps3":
+                    form.elements['format'].value = 22
+                    break
             }
         }
     }
