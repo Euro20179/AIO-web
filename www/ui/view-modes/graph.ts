@@ -295,7 +295,7 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
     if (groupBy === "Tags") {
         data = {}
         for (let item of entries) {
-            for (let tag of item.Tags) {
+            for (let tag of item.Tags || []) {
                 if (data[tag]) {
                     data[tag].push(item)
                 } else {
@@ -312,6 +312,17 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
                     data[genre].push(item)
                 } else {
                     data[genre] = [item]
+                }
+            }
+        }
+    } else if (groupBy === "Recommender") {
+        data = {}
+        for (let item of entries) {
+            for (let recby of JSON.parse(item.RecommendedBy || "[]")) {
+                if (data[recby]) {
+                    data[recby].push(item)
+                } else {
+                    data[recby] = [item]
                 }
             }
         }
