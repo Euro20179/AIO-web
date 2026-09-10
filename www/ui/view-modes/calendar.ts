@@ -186,11 +186,27 @@ CalendarMode.prototype._renderMonth = function(this: CalendarMode, start: Date, 
         if (!d) continue
 
         const item = findInfoEntryById(ev.ItemId)
+        const user = findUserEntryById(ev.ItemId)
 
         const eventMarker = document.createElement("span")
-        eventMarker.classList.add("event-marker")
         eventMarker.setAttribute("data-event", ev.Event)
         eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
+        if (user.UserRating !== 0 && ev.Event === "Finished") {
+            eventMarker.innerText += " ("
+            applyUserRating(
+                settings_get(getUserUID(), "tiers"),
+                settings_get(getUserUID(), "rating_styles"),
+                user.UserRating,
+                settings_get(user.Uid, "user_rating_max"),
+                eventMarker,
+                false
+            )
+            eventMarker.style.border = "1px solid"
+            eventMarker.style.background = `rgb(from ${eventMarker.style.getPropertyValue("color")} r g b / 0.08)`
+            eventMarker.innerText += " )"
+        } else {
+            eventMarker.classList.add("event-marker")
+        }
         eventMarker.title = items_eventTSText(ev)
         d.appendChild(eventMarker)
     }

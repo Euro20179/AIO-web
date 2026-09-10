@@ -3365,7 +3365,8 @@ function applyUserRating(
     ratingStyles: Settings["rating_styles"],
     rating: number,
     max: number,
-    root: HTMLElement
+    root: HTMLElement,
+    clearHTML: boolean = true
 ) {
     for (const name of Object.keys(tierSettings)) {
         root.classList.remove(`${name}-tier`)
@@ -3373,7 +3374,8 @@ function applyUserRating(
 
     let tier = settings_tier_from_rating(tierSettings, items_normalizeRating(rating, max))
 
-    root.innerHTML = ""
+    if(clearHTML)
+        root.innerHTML = ""
     if(tier) {
         root.classList.add(`${tier}-tier`)
         root.style.color = ratingStyles[tier as keyof typeof ratingStyles].color
