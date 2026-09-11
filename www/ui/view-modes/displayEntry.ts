@@ -464,7 +464,19 @@ function _mkde_actions() {// {{{
             for (let el of root.querySelectorAll("#user-actions")) {
                 if (!(el instanceof this.win.HTMLTableElement)) continue
                 updateEventsDisplay.call(this, root, el, item.ItemId)
-                updateNotesDisplay(root, root.querySelector("#notes"), item.ItemId)
+
+                const n = dom_getel("#notes", this.win.HTMLElement, root)
+                if(n)
+                    updateNotesDisplay(root, n, item.ItemId)
+
+                const v = dom_getel("#view-count", this.win.HTMLElement, root)
+                if(v)
+                    updateViewCountDisplay(root, v, item.ItemId)
+
+                const t = dom_getel("#view-time", this.win.HTMLElement, root)
+                if(t) {
+                    updateViewTimeDisplay(root, t, item.ItemId)
+                }
             }
         },
 
@@ -1224,6 +1236,45 @@ function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigi
     }
 }
 
+function updateViewCountDisplay(el: ShadowRoot, viewCountRoot: HTMLElement, itemId: bigint) {
+        const {include, recursive} = whatToInclude(el)
+        console.log(include, items_reduce(itemId, include, recursive, (p, c) => p + findUserEntryById(c).ViewCount, 0))
+        viewCountRoot.innerText = String(items_reduce(itemId, include, recursive, (p, c) => p + findUserEntryById(c).ViewCount, 0))
+}
+
+function updateViewTimeDisplay(el: ShadowRoot, viewMinsEl: HTMLElement, itemId: bigint) {
+    const {include, recursive} = whatToInclude(el)
+
+    let totalMins = items_reduce(itemId, include, recursive, (p, c) => {
+        const type = findInfoEntryById(c).Type
+        const user = findUserEntryById(c)
+        let data = findMetadataById(c)
+
+        let mediaDependant
+        try {
+            mediaDependant = JSON.parse(data["MediaDependant"] || "{}")
+        } catch (err) {
+            console.error("Could not parse media dependant meta info json")
+            return p
+        }
+
+        return p + user.Minutes
+            || Number(user.ViewCount) * Number(mediaDependant[`${type}-length`] || 0)
+
+    }, 0)
+
+    const user = findUserEntryById(itemId)
+
+    viewMinsEl.title = String(totalMins) + " minutes"
+
+    // ONLY if it's include self only
+    if (include === items_reduce_SELF && totalMins > 0 && user.Minutes !== totalMins && getUserExtra(user, "allow-minutes-override") === "true") {
+        user.Minutes = totalMins
+        api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${totalMins}`))
+    }
+    viewMinsEl.innerText = String((totalMins / 60).toFixed(2))
+}
+
 function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
     const costEl = el.getElementById("cost")
     if (!costEl) return
@@ -1777,21 +1828,13 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         return
     }
 
-    let type = item.Type
+    renderComponent("#view-count", viewCountEl => {
+        updateViewCountDisplay(el, viewCountEl, item.ItemId)
+    })
 
     //View count
-    renderComponent("#view-time", viewCountEl => {
-        const user = findUserEntryById(item.ItemId)
-        let mins = user.Minutes
-            || Number(user.ViewCount) * Number(mediaDependant[`${type}-length`] || 0)
-
-        viewCountEl.title = String(mins) + " minutes"
-
-        if (mins > 0 && user.Minutes !== mins && getUserExtra(user, "allow-minutes-override") === "true") {
-            user.Minutes = mins
-            api_setItem("engagement/", user).then(() => alert(`Updated viewing minutes to: ${mins}`))
-        }
-        viewCountEl.innerText = String((mins / 60).toFixed(2))
+    renderComponent("#view-time", viewMinsEl => {
+        updateViewTimeDisplay(el, viewMinsEl, item.ItemId)
     })
 
     renderComponent("#media-info", mediaInfoTbl => {
