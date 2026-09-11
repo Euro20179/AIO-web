@@ -1618,6 +1618,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
 
     renderComponent("#genres", genresRoot => {
+        if (meta.Genres == "null") return
         const genres = JSON.parse(meta.Genres || "[]")
         const children = []
         for (let genre of genres) {
