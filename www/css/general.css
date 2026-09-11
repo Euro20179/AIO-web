@@ -415,6 +415,10 @@
         background: transparent;
         color: var(--text-color);
     }
+
+    .small {
+        font-size: 0.8em;
+    }
 }
 
 @layer components {
