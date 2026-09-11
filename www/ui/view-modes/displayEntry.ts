@@ -1258,8 +1258,8 @@ function updateViewTimeDisplay(el: ShadowRoot, viewMinsEl: HTMLElement, itemId: 
             return p
         }
 
-        return p + user.Minutes
-            || Number(user.ViewCount) * Number(mediaDependant[`${type}-length`] || 0)
+        return p + (user.Minutes
+            || Number(user.ViewCount) * Number(mediaDependant[`${type}-length`] || 0))
 
     }, 0)
 
