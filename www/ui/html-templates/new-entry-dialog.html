@@ -78,7 +78,6 @@
     </style>
 
     <dialog id="new-entry">
-        <format-modifier-popover></format-modifier-popover>
 
         <h3>New Entry</h3>
 
@@ -86,6 +85,8 @@
             method="dialog"
             onsubmit="closeModalUI('new-entry'); newEntryUI(this)"
         >
+
+            <format-modifier-popover></format-modifier-popover>
 
             <input type="hidden" name="format-modifiers">
 

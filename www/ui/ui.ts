@@ -1944,11 +1944,20 @@ async function newEntryUI(form: HTMLFormElement) {
         'is-2D',
         'is-3D'
     ]
+
     for (let i = 0; i < styles.length; i++) {
         let style = styles[i]
         if (data.get(style)) {
             artStyle |= 2 ** i
             data.delete(style)
+        }
+    }
+
+    let format_mods = 0
+    const mods = ["is-digitized", "is-unowned"]
+    for(let i = 0; i < mods.length; i++) {
+        if (data.has(mods[i])) {
+            format_mods |= Number(data.get(mods[i]))
         }
     }
 
@@ -1975,7 +1984,7 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["parentId"]
     }
 
-    let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}`
+    let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}` + `&format-modifiers=${format_mods}`
 
 
     const tz = INTL_OPTIONS.timeZone
