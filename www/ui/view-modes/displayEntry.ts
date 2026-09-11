@@ -2272,11 +2272,8 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
                     info: itemCopy,
                     user: userCopy,
                     meta: metaCopy,
-                    events: events.map(v => {
-                        let e = { ...v }
-                        e.ItemId = metaCopy.ItemId
-                        return e
-                    })
+                    events: [],
+                    transactions: []
                 })
 
                 items_addCopy(itemCopy.ItemId, item.ItemId)
