@@ -1,5 +1,6 @@
 function renderGalleryItem(item: InfoEntry, parent: HTMLElement | DocumentFragment) {
     const card = mkItemCardUI(item.ItemId)
+    card.setAttribute("data-view-count", String(findUserEntryById(item.ItemId).ViewCount))
     dom_getel("h2", null, card.shadowRoot!)?.parentElement?.remove()
     parent.append(card)
     return card
