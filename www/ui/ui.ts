@@ -2470,11 +2470,15 @@ function doUserStartupUI(settings: Settings) {
 
     if (script === "") return
 
-    if (lang == "aiol" || lang == "") {
-        parseExpression(script, new CalcVarTable())
-    } else {
-        //this is the user's own script, this should be fine
-        eval(script)
+    try {
+        if (lang == "aiol" || lang == "") {
+            parseExpression(script, new CalcVarTable())
+        } else {
+            //this is the user's own script, this should be fine
+            eval(script)
+        }
+    } catch(e) {
+        console.warn("Error in startup script", e)
     }
 }
 
