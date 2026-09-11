@@ -32,6 +32,8 @@
     tmpl("new-event-dialog");
     tmpl("close-button");
     tmpl("item-identification-form-dialog");
+    tmpl("art-styles-popover");
+    tmpl("format-modifiers-popover");
 ?>
 
     <login-dialog></login-dialog>
