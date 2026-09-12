@@ -131,6 +131,10 @@ const defaultSettings = {
         }
     },
 
+    new_entry_defaults: {
+        "user-status": "Planned"
+    },
+
     UIStartupScript: "",
     StartupLang: "",
 }

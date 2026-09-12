@@ -1867,6 +1867,14 @@ async function newEntryDialogUI(params?: Record<string, string>) {
 
     const form = dom_getelorthrow("#new-item-form", HTMLFormElement, dialog)
 
+    const defaultParams = settings_get(getUserUID(), "new_entry_defaults")
+    for(let p in defaultParams) {
+        const el = form.elements.namedItem(p)
+        console.log(p, el)
+        if(!el || !(el instanceof HTMLElement) || !("value" in el)) continue
+        el.value = defaultParams[p as keyof typeof defaultParams].toString()
+    }
+
     const format_mods = dom_getelorthrow('[name="format-modifiers"]', HTMLInputElement, dialog)
     let fmt = 0
 
