@@ -26,11 +26,10 @@
             div:has([name="title"]) {
                 display: grid;
                 grid-template-areas:
-                    "search title title"
-                    "meta-editor native_title native_title"
-                    "relations status format"
-                    "type type art-and-digital";
-                grid-template-rows: repeat(4, 1fr);
+                    "search      title           status"
+                    "meta-editor native_title    type  "
+                    "relations   art-and-digital format";
+                grid-template-rows: repeat(3, 1fr);
                 grid-template-columns: min-content 1fr min-content;
                 gap: var(--very-small-gap);
                 width: 100%;
@@ -67,7 +66,7 @@
                     grid-area: format;
                 }
 
-                div:has(label > [name="is-digital"]) {
+                div:has(button[commandfor="art-styles-menu"]) {
                     display: grid;
                     grid-template-rows: subgrid;
                     grid-template-columns: repeat(2, 1fr);
@@ -188,7 +187,7 @@
 
                 <select name="format" required title="Format type"></select>
 
-                <div class="grid" style="grid-template-rows: subgrid; grid-template-columns: auto 1fr;">
+                <div class="grid">
                     <button
                         type="button"
                         command="toggle-popover"
