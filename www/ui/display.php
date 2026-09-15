@@ -13,6 +13,7 @@
 
 <?php
     include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
+    tmpl("item-card");
     tmpl("alert-box");
     tmpl("prompt-dialog");
     tmpl("login-dialog");

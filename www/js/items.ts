@@ -703,9 +703,18 @@ function items_addItem(item: {
     events: UserEvent[],
     info: InfoEntry,
     user: UserEntry,
-    transactions: TransactionEntry[]
+    transactions: TransactionEntry[],
+    children?: bigint[],
+    requirements?: bigint[],
+    copies?: bigint[],
 }) {
-    _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
+    const e = _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
+    if(item.children)
+        e.relations.setChildren(item.children)
+    if (item.copies)
+        e.relations.setCopies(item.copies)
+    if(item.requirements)
+        e.relations.setRequires(item.requirements)
 }
 
 function items_setItem(item:{
