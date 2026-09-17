@@ -1870,7 +1870,6 @@ async function newEntryDialogUI(params?: Record<string, string>) {
     const defaultParams = settings_get(getUserUID(), "new_entry_defaults")
     for(let p in defaultParams) {
         const el = form.elements.namedItem(p)
-        console.log(p, el)
         if(!el || !(el instanceof HTMLElement) || !("value" in el)) continue
         el.value = defaultParams[p as keyof typeof defaultParams].toString()
     }

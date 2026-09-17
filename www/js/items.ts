@@ -105,6 +105,7 @@ type InfoEntry = {
     RecommendedBy: string
     Priority: number
     Format_Modifiers: number
+    MetadataId: bigint
 
     Tags: string[]
 }
@@ -291,6 +292,7 @@ type GlobalsNewUi = {
     selectedEntries: InfoEntry[]
     libraries: Record<string, InfoEntry>
     viewingLibrary: bigint
+    metadata: Record<string, MetadataEntry>
 }
 
 let _globalsNewUi: GlobalsNewUi = {
@@ -299,11 +301,11 @@ let _globalsNewUi: GlobalsNewUi = {
     selectedEntries: [],
     libraries: {},
     viewingLibrary: 0n,
+    metadata: {}
 }
 
 class items_Entry {
     user: UserEntry
-    meta: MetadataEntry
     info: InfoEntry
     relations: items_Relations
     transactions: TransactionEntry[]
@@ -367,6 +369,15 @@ class items_Entry {
         let item = new items_Entry(info)
         item.loaded = false
         return item
+    }
+
+    get meta() {
+        return items_getMetadata(this.info.MetadataId)
+    }
+
+    set meta(val: MetadataEntry) {
+        this.info.MetadataId = val.ItemId
+        items_setMetadata(val)
     }
 
     async getUser() {
@@ -838,7 +849,7 @@ function items_getAllEntries(): Record<string, items_Entry> {
 }
 
 /**
-    * Finds the metadata for an entry by id
+    * Finds the metadata for an entry by item id
     * If it can't find it, a generic metadata object is returned
     * @param {bigint} id - the id to find metadata for
     * @returns {MetadataEntry}
@@ -846,6 +857,25 @@ function items_getAllEntries(): Record<string, items_Entry> {
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(items_entryExists(id) == true, `metadata entry for ${id} does not exist`)
     return items_getEntry(id).meta || genericMetadata(id, 0)
+}
+
+/**
+ * Given a metadata id, get that metadata
+ * @param {bigint} id
+ * @returns {MetadataEntry}
+ */
+function items_getMetadata(id: bigint): MetadataEntry {
+    if(!(String(id) in _globalsNewUi.metadata)) {
+        return genericMetadata(id, 0)
+    }
+    return _globalsNewUi.metadata[String(id)]
+}
+
+/**
+ * Given a metadata object, store it for future use
+ */
+function items_setMetadata(meta: MetadataEntry) {
+    _globalsNewUi.metadata[String(meta.ItemId)] = meta
 }
 
 /**
