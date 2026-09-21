@@ -20,7 +20,7 @@ var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, o
 
 function _exportTierlist_binary(root: HTMLElement) {
     let out = "\x01"
-    for(let tier of root.querySelectorAll("ul")) {
+    for(let tier of root.querySelectorAll("div")) {
         let color = _getClr((tier.firstElementChild || document.documentElement) as HTMLElement)
         out += `\x05${tier.querySelector('tier-label')?.textContent}\x00${color}\x06`
         for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
@@ -89,7 +89,7 @@ function _exportTierlist_xml(tierlist: HTMLElement) {
     const root = doc.createElement("tierlist")
     doc.append(root)
     let i = 0
-    for (let tier of tierlist.querySelectorAll("ul")) {
+    for (let tier of tierlist.querySelectorAll("div")) {
         const row = doc.createElement("row")
         root.appendChild(row)
         let label = tier.querySelector("tier-label")?.textContent
