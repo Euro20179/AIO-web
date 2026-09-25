@@ -191,11 +191,15 @@ CalendarMode.prototype._renderMonth = function(this: CalendarMode, start: Date, 
         const eventMarker = document.createElement("span")
         eventMarker.setAttribute("data-event", ev.Event)
         const itemBtn = document.createElement("button")
+
         itemBtn.onclick = () => items_getEntryAny(item.ItemId).then(i => i.ItemId && openDisplayWinUI(i.ItemId))
         itemBtn.append(item.En_Title)
+        itemBtn.style.background = "transparent"
+        itemBtn.style.border = "var(--input-border-important)"
+
         eventMarker.append(ev.Event, " - ", itemBtn)
         if (user.UserRating !== 0 && ev.Event === "Finished") {
-            eventMarker.innerText += " ("
+            eventMarker.append("(")
             applyUserRating(
                 settings_get(getUserUID(), "tiers"),
                 settings_get(getUserUID(), "rating_styles"),
@@ -206,7 +210,7 @@ CalendarMode.prototype._renderMonth = function(this: CalendarMode, start: Date, 
             )
             eventMarker.style.border = "1px solid"
             eventMarker.style.background = `rgb(from ${eventMarker.style.getPropertyValue("color")} r g b / 0.08)`
-            eventMarker.innerText += " )"
+            eventMarker.append(")")
         } else {
             eventMarker.classList.add("event-marker")
         }

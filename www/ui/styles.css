@@ -578,6 +578,9 @@
                     gap: var(--small-gap);
 
                     .event-marker {
+                        button {
+                            color: inherit;
+                        }
                         &[data-event="Viewing"], &[data-event="Started"] {
                             background: var(--blue);
                             color: var(--main);

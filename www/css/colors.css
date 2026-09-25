@@ -208,5 +208,6 @@
     --border-roundness: var(--input-border-roundness);
 
     --input-border: 1px solid var(--input-border-color);
+    --input-border-important: 1px solid var(--input-border-color);
 
 }
