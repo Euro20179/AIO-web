@@ -1238,7 +1238,6 @@ function updateNotesDisplay(root: ShadowRoot, notesEl: HTMLElement, itemId: bigi
 
 function updateViewCountDisplay(el: ShadowRoot, viewCountRoot: HTMLElement, itemId: bigint) {
         const {include, recursive} = whatToInclude(el)
-        console.log(include, items_reduce(itemId, include, recursive, (p, c) => p + findUserEntryById(c).ViewCount, 0))
         viewCountRoot.innerText = String(items_reduce(itemId, include, recursive, (p, c) => p + findUserEntryById(c).ViewCount, 0))
 }
 
@@ -1483,7 +1482,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
-    meta = await items_getMetadataById(meta.ItemId)
+    meta = await items_getMetadataById(item.ItemId)
     user = await items_getUserById(user.ItemId)
 
     renderComponent("#style-editor", el => {
