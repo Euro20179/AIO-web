@@ -197,7 +197,7 @@ CalendarMode.prototype._renderMonth = function(this: CalendarMode, start: Date, 
         itemBtn.style.background = "transparent"
         itemBtn.style.border = "var(--input-border-important)"
 
-        eventMarker.append(ev.Event, " - ", itemBtn)
+        eventMarker.append(ev.Event, " ", itemBtn)
         if (user.UserRating !== 0 && ev.Event === "Finished") {
             eventMarker.append("(")
             applyUserRating(
