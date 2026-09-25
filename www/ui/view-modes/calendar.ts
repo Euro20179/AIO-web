@@ -190,7 +190,10 @@ CalendarMode.prototype._renderMonth = function(this: CalendarMode, start: Date, 
 
         const eventMarker = document.createElement("span")
         eventMarker.setAttribute("data-event", ev.Event)
-        eventMarker.innerText = `${ev.Event} - ${item.En_Title}`
+        const itemBtn = document.createElement("button")
+        itemBtn.onclick = () => items_getEntryAny(item.ItemId).then(i => i.ItemId && openDisplayWinUI(i.ItemId))
+        itemBtn.append(item.En_Title)
+        eventMarker.append(ev.Event, " - ", itemBtn)
         if (user.UserRating !== 0 && ev.Event === "Finished") {
             eventMarker.innerText += " ("
             applyUserRating(
