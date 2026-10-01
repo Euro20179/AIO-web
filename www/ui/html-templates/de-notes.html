@@ -5,16 +5,18 @@
             float: right;
             margin: var(--small-gap) var(--small-gap) 0 0;
         ">
-            <button entry-action="editnotes">
-                ✏
-            </button>
 
             <button popout-target="notes" class="popout">
                 ↗
             </button>
         </div>
 
-        <h3>Notes</h3>
+        <div class="flex x-small-gap">
+            <h3>Notes</h3>
+            <button entry-action="editnotes" style="height: fit-content; align-self: center;">
+                ✏
+            </button>
+        </div>
 
         <article class="notes" id="notes"></article>
     </div>
