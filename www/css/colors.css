@@ -158,6 +158,8 @@
 
     --scrollbar-gutter-color: var(--secondary);
 
+    --mid-section-max-height: 50cqb;
+
     &:has(option[value="light"]:checked) {
         --text-color: CanvasText;
         --main: #eff1f5;

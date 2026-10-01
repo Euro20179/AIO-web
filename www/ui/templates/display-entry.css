@@ -273,7 +273,7 @@
         display: flow-root;
         align-self: center;
         overflow: auto auto;
-        max-height: 30cqb;
+        max-height: var(--mid-section-max-height);
     }
 
     #actions {
@@ -416,7 +416,7 @@
          * so that overflow doesn't cross into the thumbnail-fig*/
         display: flow-root;
 
-        max-height: 50cqb;
+        max-height: var(--mid-section-max-height);
 
         padding: 0;
 
@@ -556,7 +556,7 @@
         align-items: center;
         justify-content: start;
 
-        height: max(15cqb, 100px);
+        max-height: 15cqb;
         overflow: auto;
 
         item-card {
