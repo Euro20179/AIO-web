@@ -160,36 +160,36 @@
                 Format Mods
             </button>
         </menu>
-
     </div>
 
-    <de-notes></de-notes>
-
-    <div style="
-        text-align: center;
-    " class="flex wrap">
-        <div class="tags" id="tags">
-            <button id="create-tag" toggle-hint>+ <span popover='hint'>Add Tag</span></button>
-        </div>
-    </div>
-
-    <div id="description-and-notes">
-        <section>
-            <de-description></de-description>
-            <div id="genres" style="margin-bottom: var(--very-small-gap);" class="flex wrap"></div>
-        </section>
-
-        <section>
-            <hr>
-            <div class="tables flex column" id="event-table-area">
-                <div class="flex j-center" style="position: sticky; top: 0;">
-                    <input type="search" placeholder="filter events" id="user-actions-filter">
-                    <button popout-target="user-actions" class="popout">↗</button>
-                </div>
-                <table class="user-actions" id="user-actions"></table>
+    <section id="mid-section">
+        <div class="flex wrap center" style="margin-top: var(--small-gap);">
+            <div class="tags" id="tags">
+                <button id="create-tag" toggle-hint>+ <span popover='hint'>Add Tag</span></button>
             </div>
-        </section>
-    </div>
+        </div>
+
+        <de-notes></de-notes>
+
+        <div id="description-and-events">
+            <section>
+                <de-description></de-description>
+                <div id="genres" style="margin-bottom: var(--very-small-gap);" class="flex wrap"></div>
+            </section>
+
+            <section>
+                <hr>
+                <div class="tables flex column" id="event-table-area">
+                    <div class="flex j-center" style="position: sticky; top: 0;">
+                        <input type="search" placeholder="filter events" id="user-actions-filter">
+                        <button popout-target="user-actions" class="popout">↗</button>
+                    </div>
+                    <table class="user-actions" id="user-actions"></table>
+                </div>
+            </section>
+        </div>
+
+    </section>
 
     <div id="relationship-display">
         <hr>

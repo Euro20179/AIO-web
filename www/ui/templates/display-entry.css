@@ -396,7 +396,7 @@
         width: auto;
     }
 
-    #description-and-notes {
+    #description-and-events {
         display: grid;
 
         @container (width < 800px) {
@@ -427,8 +427,25 @@
         }
     }
 
-    section:has(> #description:empty) {
+    section:has(> de-description #description:empty) {
         display: none;
+    }
+
+    /* if there's no description */
+    #mid-section:has(#description:empty) {
+        /* keep the tags on top with a 2xX grid */
+        display: grid;
+        grid-template-rows: auto 1fr;
+        grid-template-columns: 1fr 1fr;
+
+        div:has(> #tags) {
+            grid-column: 1 / -1;
+        }
+
+        /* otherwise it's going to be a grid, and the table wont be full width */
+        #description-and-events {
+            display: block;
+        }
     }
 
     #notes {
