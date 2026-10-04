@@ -112,7 +112,7 @@ async function main() {
             urlParams
                 .get("item-id")!
                 .split(",")
-                .map((v) => `3 metadata.itemid = ${v}`)
+                .map((v) => `3 entryInfo.itemid = ${v}`)
                 .join(" OR ")
         : urlParams.get("q")
 
