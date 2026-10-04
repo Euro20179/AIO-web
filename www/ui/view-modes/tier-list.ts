@@ -25,7 +25,13 @@ function _exportTierlist_binary(root: HTMLElement) {
         out += `\x05${tier.querySelector('tier-label')?.textContent}\x00${color}\x06`
         for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
             if("src" in el && typeof el.src === "string") {
-                out += `${el.src}\x00`
+                out += `${el.src}`
+                //@ts-ignore
+                if (el.alt) {
+                    //@ts-ignore
+                    out += `\x1F${el.alt.replace(/\s*thumbnail$/, "")}`
+                }
+                out += '\x00'
             } else {
                 const svg = document.createElement("svg")
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text")
@@ -102,6 +108,10 @@ function _exportTierlist_xml(tierlist: HTMLElement) {
 
         for(let el of tier.querySelectorAll(":where(img,button:not(:has(img)))")) {
             const item = doc.createElement("item")
+            if ("alt" in el && typeof el.alt === "string") {
+                item.setAttribute("alt", el.alt.replace(/\s*thumbnail$/, ""))
+            }
+
             if("src" in el && typeof el.src === "string") {
                 item.append(doc.createTextNode(el.src))
             } else {
