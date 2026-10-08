@@ -27,10 +27,15 @@ include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
     ?>
 
     <meta content="Rating: <?=$itemData["User"]["UserRating"] || "Unrated"?>
+<br>
 Notes:
+<br>
 <?=htmlspecialchars($itemData["User"]["Notes"])?>
+<br>
 ---
+<br>
 Description:
+<br>
 <?=htmlspecialchars($itemData["Meta"]["Description"])?>" property="og:description">
 
 </head>
