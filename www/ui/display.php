@@ -26,7 +26,7 @@ include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
     }
     ?>
 
-    <meta content="Rating: <?=$itemData["User"]["UserRating"] || "Unrated"?>
+    <meta content="Rating: <?=$itemData["User"]["UserRating"] ? $itemData["User"]["UserRating"] : "Unrated"?>
 
 Notes:
 
