@@ -15,8 +15,13 @@ include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
     $host = get_aio_host();
     $id = $_GET["item-id"];
     $itemData = json_decode(file_get_contents("$host/api/v1/entry/$id/all"), true);
+    $titleStr = "[AIO] " . htmlspecialchars($itemData["Info"]["En_Title"]);
+    if ($itemData["User"]["UserRating"] != 0) {
+        $titleStr = $titleStr . " (rating: " . $itemData["User"]["UserRating"] . ")";
+    }
+    $titleStr = $titleStr . " (user: " . $itemData["Info"]["Uid"] . ")";
     ?>
-    <meta content="[AIO] <?=$itemData["Info"]["En_Title"]?> (user: <?=$itemData["Info"]["Uid"]?>)" property="og:title">
+    <meta content="<?=$titleStr?>" property="og:title">
     <?php
     if ($itemData["Meta"]["Thumbnail"] != "") {
     ?>
