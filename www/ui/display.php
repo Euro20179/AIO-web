@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php
+include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
+?>
 
 <head>
     <meta charset="UTF-8">
@@ -7,12 +10,34 @@
     <title></title>
     <link href="/css/colors.css" rel="stylesheet">
     <link href="/css/general.css" rel="stylesheet">
+
+    <?php
+    $host = get_aio_host();
+    $id = $_GET["item-id"];
+    $itemData = json_decode(file_get_contents("$host/api/v1/entry/$id/all"), true);
+    ?>
+    <meta content="[AIO] <?=$itemData["Info"]["En_Title"]?> (user: <?=$itemData["Info"]["Uid"]?>)" property="og:title">
+    <?php
+    if ($itemData["Meta"]["Thumbnail"] != "") {
+    ?>
+        <meta content="<?=$itemData["Meta"]["Thumbnail"]?>"
+            itemprop="image primaryImageOfPage" property="og:image">
+    <?php
+    }
+    ?>
+
+    <meta content="Rating: <?=$itemData["User"]["UserRating"] || "Unrated"?>
+Notes:
+<?=htmlspecialchars($itemData["User"]["Notes"])?>
+---
+Description:
+<?=htmlspecialchars($itemData["Meta"]["Description"])?>" property="og:description">
+
 </head>
 
 <body>
 
 <?php
-    include $_SERVER['DOCUMENT_ROOT'] . "/lib/util.php";
     tmpl("item-card");
     tmpl("alert-box");
     tmpl("prompt-dialog");
