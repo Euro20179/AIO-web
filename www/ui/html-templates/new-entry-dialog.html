@@ -163,12 +163,6 @@
 
                 <input type="text" placeholder="title" name="title" required style="max-width: 100%;">
 
-                <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
-
-                <input type="text" placeholder="native title" name="native-title">
-
-                <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
-
                 <select name="user-status" value="Planned" style="flex-grow: 1;">
                     <option value="">Status</option>
                     <option value="Planned">Planned</option>
@@ -180,7 +174,6 @@
                     <option value="Waiting">Waiting</option>
                 </select>
 
-
                 <select name="type" title="The type of media" required style="flex-grow: 1;">
                     <option value="">Type</option>
                 </select>
@@ -188,6 +181,8 @@
                 <select name="format" required title="Format type"></select>
 
                 <div class="grid">
+                    <button type="button" command="toggle-popover" commandfor="art-styles-menu">🖌</button>
+
                     <button
                         type="button"
                         command="toggle-popover"
@@ -201,9 +196,15 @@
                     <!--     <input type="checkbox" id='is-digital' -->
                     <!--         style="vertical-align: middle;" name="is-digital" -->
                     <!--         title="Whether or not the item is a digitized/digital version of the format"></label> -->
-
-                    <button type="button" command="toggle-popover" commandfor="art-styles-menu">🖌</button>
                 </div>
+
+                <input type="text" placeholder="native title" name="native-title">
+
+                <button type="button" command='show-modal' commandfor='new-entry-edit-metadata-dialog'>metadata</button>
+
+                <button type="button" command="show-modal" commandfor="new-item-relations-dialog">relations</button>
+
+
             </div>
 
 
