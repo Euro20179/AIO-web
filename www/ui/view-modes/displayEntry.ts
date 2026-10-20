@@ -3,6 +3,8 @@ type DisplayMode = {
     adding: boolean
     de_actions: ReturnType<typeof _mkde_actions>
 
+    pinned: Set<bigint>
+
     clear(): any
     displayEntryAction(func: (this: DisplayMode, item: InfoEntry, root: ShadowRoot, target: HTMLElement) => any): (target: HTMLElement) => any
 } & Mode
@@ -213,6 +215,15 @@ function _mkde_actions() {// {{{
          * Deselects the current item
          */
         close: function(item) {return  deselectUI(item)},
+
+        /**
+         * pins/unpins the item
+         */
+        togglepin: function(item) {
+            if(this.pinned.has(item.ItemId)) {
+                this.pinned.delete(item.ItemId)
+            } else this.pinned.add(item.ItemId)
+        },
 
         /**
          * Creates a copy of the current item
@@ -864,6 +875,7 @@ function _mkde_actions() {// {{{
 var DisplayMode: ModeConstructor<DisplayMode> = function(this: DisplayMode, output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis) {
     ModePrimitives.setup.call(this, output, win)
 
+    this.pinned = new Set
     this.displayQueue = []
 
     this.de_actions = new Proxy(this.de_actions, {
@@ -952,6 +964,8 @@ DisplayMode.prototype.add = function(this: DisplayMode, entry: InfoEntry) {
 }
 
 DisplayMode.prototype.sub = function(this: DisplayMode, entry: InfoEntry) {
+    if(this.pinned.has(entry.ItemId)) return
+
     removeDisplayItem.call(this, entry.ItemId)
 }
 
@@ -1007,7 +1021,7 @@ DisplayMode.prototype.subList = function(this: DisplayMode, entry: InfoEntry[]) 
     this.displayQueue = this.displayQueue.filter(i => !itemIdsToRemove.includes(i.ItemId))
 
     for (let item of entry) {
-        removeDisplayItem.call(this, item.ItemId)
+        this.sub(item)
     }
 }
 
@@ -1022,6 +1036,7 @@ DisplayMode.prototype.clearSelected = function(this: DisplayMode,) {
     for (let child of this.output.querySelectorAll("display-entry")) {
         const itemId = child.getAttribute("data-item-id")
         if (!itemId) continue
+        if(this.pinned.has(BigInt(itemId))) continue
         removeDisplayItem.call(this, BigInt(itemId))
     }
 }

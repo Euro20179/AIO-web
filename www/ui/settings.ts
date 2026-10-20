@@ -68,6 +68,12 @@ const defaultSettings = {
     enable_unsafe: ENABLE_UNSAFE,
 
     de_item_interactions: {
+        pin: {
+            text: "📌",
+            title: "toggle pin",
+            shortTitle: "pin",
+            action: "togglepin",
+        },
         identify: {
             text: "🔍︎",
             title: "identify item",
