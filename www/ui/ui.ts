@@ -1658,6 +1658,9 @@ addClientFilterRuleUI(filter => filter === 'shuffle' || filter === 'shuf',
 addClientFilterRuleUI(filter => filter.startsWith("head"),
     (filter, items) => items.take(parseInt(filter.slice("head".length).trim()) || 1))
 
+addClientFilterRuleUI(filter => filter === "rev",
+                      (filter, items) => items.toArray().reverse().values())
+
 addClientFilterRuleUI(filter => filter.startsWith("tail"),
     (filter, items) => {
         const e = [...items]
