@@ -429,24 +429,17 @@ type NewEntryParams = {
 }
 
 async function api_createEntry(params: NewEntryParams) {
-    let qs = "?"
-    let i = 0
-    for (let p in params) {
-        let v = params[p as keyof NewEntryParams]
-        if (typeof v === 'bigint') {
-            v = String(v)
-        } else if (typeof v !== 'undefined') {
-            v = encodeURIComponent(v)
-        } else {
-            continue
-        }
-
-        if (i !== 0) qs += `&`
-
-        qs += `${p}=${v}`
-        i++
+    let obj: Record<string, string> = {}
+    for(let param in params ) {
+        obj[param] = String(params[param as keyof typeof params])
     }
-    return await authorizedRequest(`${apiPath}/add-entry${qs}`)
+    return await authorizedRequest(`${apiPath}/entry`, {
+        body: JSON.stringify(obj),
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
 }
 
 async function authorizedRequest(url: string | URL, options?: RequestInit & { ["signin-reason"]?: string }): Promise<Response | null> {

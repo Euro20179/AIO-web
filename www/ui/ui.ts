@@ -1968,11 +1968,11 @@ async function newEntryUI(form: HTMLFormElement) {
         }
     }
 
-    let validEntries: Record<string, FormDataEntryValue> = {}
+    let validEntries: Record<string, string> = {}
 
     for (let [name, value] of data.entries()) {
         if (value == "") continue
-        validEntries[name] = value
+        validEntries[name] = value.toString()
     }
 
     if (validEntries["libraryId"] && validEntries["libraryId"] == "0") {
@@ -1991,12 +1991,13 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["parentId"]
     }
 
-    let queryString = "?" + Object.entries(validEntries).map(v => `${v[0]}=${encodeURIComponent(String(v[1]))}`).join("&") + `&art-style=${artStyle}` + `&format-modifiers=${format_mods}`
-
-
     const tz = INTL_OPTIONS.timeZone
+    validEntries["art-style"] = artStyle.toString()
+    validEntries["format-modifiers"] = format_mods.toString()
+    validEntries["timezone"] = tz
+    //@ts-ignore
+    let res = await api_createEntry(validEntries)
 
-    let res = await authorizedRequest(`${apiPath}/add-entry${queryString}&timezone=${encodeURIComponent(tz)}`)
     let text = await res?.text()
     if (res?.status !== 200 || !text) {
         alert(text)
