@@ -1991,6 +1991,16 @@ async function newEntryUI(form: HTMLFormElement) {
         delete validEntries["parentId"]
     }
 
+    if (validEntries["metadata"]) {
+        const m = JSON.parse(validEntries["metadata"])
+        const results = await api_query(`entryinfo.itemid = {(select entryinfo.itemid from entryinfo join metadata on metadata.itemid = metadataid where metadata.providerid = '${m.ProviderID}' AND metadata.provider = '${m.Provider}')}`, getUserUID(), 3)
+        if(results.length) {
+            if(!(await confirmUI(`You seem to already have an item called <a href='/ui/display.php?item-id=${results[0].ItemId}' target='_blank'>${results[0].En_Title}</a> that uses the selected metadata, are you sure you want to create this item?`))) {
+                return;
+            }
+        }
+    }
+
     const tz = INTL_OPTIONS.timeZone
     validEntries["art-style"] = artStyle.toString()
     validEntries["format-modifiers"] = format_mods.toString()
