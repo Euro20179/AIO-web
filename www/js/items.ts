@@ -1071,15 +1071,21 @@ async function items_loadLibraries(uid: number) {
 
 /**
  * loads all metadata info, and updates the global entries list
+ * WARNING: requires all entries to be loaded
  * side effects:
  * - fires aio-metadata-loaded after loading metadata
  * @param {number} uid
 */
 async function items_refreshMetadata(uid: number) {
+    let allmeta: Map<bigint, MetadataEntry> = new Map
     for await(let item of api_streamList<MetadataEntry>("entry", uid, {
         params: new URLSearchParams([["kind", "meta"]])
     })) {
-        items_getEntry(item.ItemId).meta = item
+        allmeta.set(item.ItemId, item)
+    }
+
+    for(let entry of Object.values(items_getAllEntries())) {
+        entry.meta = allmeta.get(entry.info.MetadataId) || genericMetadata(entry.info.MetadataId, entry.info.Uid)
     }
 
     dispatchEvent(new CustomEvent("aio-metadata-loaded"));
