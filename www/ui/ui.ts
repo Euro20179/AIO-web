@@ -1472,7 +1472,24 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     confirmUI("Are you sure you want to overwrite the metadata with a refresh")
         .then(async (ok) => {
             if(!ok) return
+            let meta = findMetadataById(item.ItemId)
+
+            if(meta.ProviderID && meta.Provider) {
+                alert("Refreshing metadata")
+                api_finalizeIdentify(meta.ProviderID, meta.Provider, item.ItemId).then(res => {
+                    if (res?.status !== 200) {
+                        alert("Failed to get metadata")
+                        return
+                    }
+
+                    alert("Metadata updated")
+                })
+
+                return
+            }
+
             const provider = await promptUI("Provider override (optional)")
+
             api_overwriteMetadataEntry(item.ItemId, provider || "").then(res => {
                 if (res?.status !== 200) {
                     alert("Failed to get metadata")
