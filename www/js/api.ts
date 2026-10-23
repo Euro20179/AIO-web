@@ -12,6 +12,7 @@ let _api_types_cache: EntryType[] = []
 function logout() {
     setUserAuth("")
     localStorage.removeItem("userUID")
+    document.cookie = document.cookie.replace(/\s*login=[^\s]+/, "")
 }
 
 function setUserAuth(auth: string, into: { setItem(key: string, value: any): any } = localStorage) {

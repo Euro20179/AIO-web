@@ -136,7 +136,7 @@ function startupUI({
     }))
 
     if (cookies['login']) {
-        setUserAuth(cookies['login'])
+        setUserAuthUI(cookies['login'])
         setUIDUI(cookies['uid'])
     }
 
@@ -470,6 +470,19 @@ function generateTransactionElementsUI(itemid: bigint) {
     }
 
     return children
+}
+
+/**
+ * Sets the user auth cookie, and sets the logged in as in the statusline
+ * @param {string} b64login `<username>:<password>` base64 login
+ */
+function setUserAuthUI(b64login: string) {
+    setUserAuth(b64login)
+    let el = dom_getel("#statusline-right", HTMLElement)
+    if(el) {
+        el.title = 'logged in as'
+        el.innerText = `<${atob(b64login).split(":")[0]}>`
+    }
 }
 
 /**
@@ -2302,7 +2315,7 @@ async function signinUI(reason: string): Promise<string> {
             })
 
             const b64 = btoa(`${username}:${password}`)
-            setUserAuth(b64)
+            setUserAuthUI(b64)
             res(b64)
         }
     })
@@ -2431,7 +2444,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
     * Fills a select element with all users
 * @param {HTMLSelectElement | undefined | null} selector
 */
-async function fillUserSelectionUI(selector: HTMLSelectElement | undefined | null) {
+async function fillUserSelectionUI(selector: HTMLSelectElement | HTMLDataListElement | undefined | null) {
     for (let acc of await api_listAccounts()) {
         const [id, name] = acc.split(":")
 

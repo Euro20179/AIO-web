@@ -225,8 +225,10 @@
 
             <section id="statusline">
                 <!--used for proper overflow-->
-                <div class="flex overflow" style="width: 100%;">
+                <div class="grid overflow" style="grid-template-columns: 1fr auto;">
                     <div class="result-stats" id="result-stats">
+                    </div>
+                    <div style="align-self: end;" id="statusline-right">
                     </div>
                 </div>
             </section>
