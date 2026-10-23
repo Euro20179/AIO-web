@@ -2132,6 +2132,15 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
 
         const entry = entries[id]
 
+        let ty = ""
+        if ("MediaDependant" in entry) {
+            try {
+                ty = Object.keys(JSON.parse(entry.MediaDependant))[0].split("-")[0]
+            } catch(err) {
+                console.log(`Failed to get type: ${err}`)
+            }
+        }
+
         let title
         if (probablyMetaEntry(entry)) {
             title = (entry.Title || entry.Native_Title) || "unknown"
@@ -2157,7 +2166,7 @@ function fillItemListingUI(entries: Record<string, MetadataEntry | items_Entry>,
         img.width = 100
         img.loading = "lazy"
         const caption = document.createElement("figcaption")
-        caption.innerText = title
+        caption.innerText = ty ? `${title} (${ty})` : title
 
         fig.append(img)
         fig.append(caption)
