@@ -1151,7 +1151,9 @@ function openModalUI(
         }
         currentDocument().body.append(root.host)
         modal = dom_getel(`#${modalName}`, win.HTMLDialogElement, root)
-        modal?.addEventListener("close", () => root.host.remove())
+        modal?.addEventListener("close", () => {
+            root.host.remove()
+        })
     }
     else modal = dom_getel(`#${modalName}`, win.HTMLDialogElement, root)
     modal?.showModal()
@@ -2272,51 +2274,37 @@ async function selectItemUI(options?: SelectItemOptions): Promise<null | bigint 
 * @param {string} reason
 * @returns {Promise<string>} the login token
 */
-let _signingIn = false
 async function signinUI(reason: string): Promise<string> {
-    //if the popover is already open, something already called this function for the user to sign in
-    if (_signingIn) {
-        return await new Promise((res) => {
-            //wait until the user finally does sign in, and the userAuth is set, when it is set, the user has signed in and this function can return the authorization
-            setInterval(() => {
-                let auth = getUserAuth()
-                if (auth) {
-                    res(auth)
-                }
-            }, 16)
-        })
-    }
-
     const loginPopover = openModalUI("login", currentDocument(), "login-dialog")
     if(!loginPopover) {
         console.error("No login dialog")
         return ""
     }
 
-    _signingIn = true
-
-    const loginReasonEl = loginPopover.querySelector("#login-reason")
-    if (loginReasonEl instanceof HTMLElement) {
+    const loginReasonEl = dom_getel("#login-reason", HTMLElement)
+    if (loginReasonEl) {
         loginReasonEl.innerText = reason || ""
     }
 
     return await new Promise((res) => {
         const form = dom_getelorthrow("#login-form", HTMLFormElement, loginPopover)
         form.onsubmit = function() {
-            _signingIn = false
             let data = new FormData(form)
             let username = data.get("username")
             let password = data.get("password")
-            loginPopover.close()
-
-            api_username2UID(username!.toString()).then(uid => {
-                if (uid < 1) return
-                storeUserUID(String(uid))
-            })
 
             const b64 = btoa(`${username}:${password}`)
-            setUserAuthUI(b64)
-            res(b64)
+            api_authorized(b64).then(uid => {
+                if(!uid) {
+                    alert("Invalid username/pass")
+                    return
+                }
+                storeUserUID(String(uid))
+                setUserAuthUI(b64)
+                loginPopover.close()
+
+                res(b64)
+            })
         }
     })
 }

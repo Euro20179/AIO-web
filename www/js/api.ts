@@ -462,8 +462,8 @@ async function authorizedRequest(url: string | URL, options?: RequestInit & { ["
     options.headers["Authorization"] = `Basic ${userAuth}`
     let res = await fetch(url, options)
     if (res.status === 401) {
-        localStorage.removeItem("userAuth")
-        return await authorizedRequest(url, options)
+        alert("Unauthorized")
+        return null
     }
     return res
 }
