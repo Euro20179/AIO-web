@@ -321,7 +321,7 @@ class items_Entry {
     constructor(info: InfoEntry | bigint, user?: UserEntry, meta?: MetadataEntry, events?: UserEvent[], transactions?: TransactionEntry[]) {
         this.info = typeof info === 'bigint' ? genericInfo(info, 0) : info
         this.user = user || genericUserEntry(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
-        this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.ItemId, this.info.Uid)
+        this.meta = meta || genericMetadata(typeof info === 'bigint' ? info : info.MetadataId, this.info.Uid)
         this.events = events || []
         this.transactions = transactions || []
 
@@ -856,7 +856,8 @@ function items_getAllEntries(): Record<string, items_Entry> {
 */
 function findMetadataById(id: bigint): MetadataEntry {
     console.assert(items_entryExists(id) == true, `metadata entry for ${id} does not exist`)
-    return items_getEntry(id).meta || genericMetadata(id, 0)
+    let e = items_getEntry(id)
+    return items_getEntry(id).meta || genericMetadata(e.info.MetadataId, e.info.Uid)
 }
 
 /**
