@@ -154,7 +154,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
             }
             //@ts-ignore
             actionEl[`on${events[i % events.length]}`] = e => {
-                actionFn(e.target as HTMLElement, e)
+                actionFn(e.currentTarget as HTMLElement, e)
             }
         }
     }

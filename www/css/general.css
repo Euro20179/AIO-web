@@ -244,6 +244,11 @@
         margin: 0 auto;
     }
 
+    .toggled {
+        background: var(--highlight);
+        color: var(--main);
+    }
+
     .styleless-button {
         background: unset;
         border: unset;

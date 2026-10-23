@@ -219,10 +219,14 @@ function _mkde_actions() {// {{{
         /**
          * pins/unpins the item
          */
-        togglepin: function(item) {
+        togglepin: function(item, root, target) {
             if(this.pinned.has(item.ItemId)) {
+                target.classList.remove("toggled")
                 this.pinned.delete(item.ItemId)
-            } else this.pinned.add(item.ItemId)
+            } else {
+                target.classList.add("toggled")
+                this.pinned.add(item.ItemId)
+            }
         },
 
         /**
