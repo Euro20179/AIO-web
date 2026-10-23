@@ -2724,7 +2724,15 @@ function inputItemUI(
     inp.onkeydown = e => {
         if(e.key == "Escape") f.remove()
     }
-    inp.onblur = () => f.remove()
+    inp.onblur = () => {
+        confirmUI(`Would you like to keep ${inp.value}?`).then(ok => {
+            if(ok) {
+                f.requestSubmit()
+            } else {
+                f.remove()
+            }
+        })
+    }
 
     if (datalist) {
         if(!datalist.isConnected) {
@@ -2735,11 +2743,11 @@ function inputItemUI(
 
     f.append(inp)
     f.action = "javascript:void(0)"
-    f.onsubmit = function(a) {
+    f.addEventListener("submit", function(e) {
         if(!inp.value) return
         f.remove()
-        return onsubmit.call(this, a, String(inp.value))
-    }
+        return onsubmit.call(this, e, String(inp.value))
+    })
     adjescentTo.insertAdjacentElement('afterend', f)
     inp.focus()
     return f
