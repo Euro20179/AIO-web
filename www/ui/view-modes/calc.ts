@@ -104,7 +104,7 @@ CalcMode.prototype.chwin = function(this: CalcMode, win: Window & typeof globalT
 
 async function _updateEachCalcItem(this: CalcMode) {
     for (let entry of items_getSelected()) {
-        let val = updateExpressionOutput.call(this, entry)
+        let val = await updateExpressionOutput.call(this, entry)
         let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
         el?.setAttribute("data-expression-output", val.jsStr())
     }
