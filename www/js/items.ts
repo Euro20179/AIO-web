@@ -760,10 +760,11 @@ function items_setItem(item:{
  * Given an entry id, load all information about it (even if it has already been loaded)
  * @param {bigint} id
  * @param {number} uid the user id of the entry to load
+ * @param {boolean} force whether or not to force a reload
  * @returns {Promise<items_Entry>}
  */
 const _loading_ids = new Set
-async function items_loadAll(id: bigint, uid: number = 0): Promise<items_Entry> {
+async function items_loadAll(id: bigint, uid: number = 0, force = true): Promise<items_Entry> {
     if(_loading_ids.has(id)) {
         return await new Promise(res => {
             var i = setInterval(() => {
@@ -772,6 +773,10 @@ async function items_loadAll(id: bigint, uid: number = 0): Promise<items_Entry> 
                 res(items_getEntry(id))
             }, 16)
         })
+    }
+
+    if(!force && items_entryExists(id)) {
+        return items_getEntry(id)
     }
 
     _loading_ids.add(id)
@@ -809,6 +814,35 @@ async function items_getMetadataById(id: bigint): Promise<MetadataEntry> {
         return (await items_loadAll(id)).meta
     }
     return m
+}
+
+async function items_getAllForIfNotGotten(ids: bigint[]): Promise<items_Entry[]> {
+    let notGotten = []
+    for(let id of ids) {
+        if(
+            findMetadataById(id).Datapoints.match(/"_AIO_GENERIC":true/) ||
+            findUserEntryById(id).Extra.match(/"_AIO_GENERIC":true/)
+        ) {
+            notGotten.push(id)
+        }
+    }
+
+    if(!notGotten.length) {
+        let entries = []
+        for(let id of ids) {
+            entries.push(items_getEntry(id))
+        }
+        return entries
+    }
+
+    let items = await api_getEntriesAll(notGotten, 0)
+    if(typeof items === 'string') throw new Error(`failed to fetch data: ${items}`)
+    let entries = []
+    for(let item of items) {
+        items_updateEntryById(String(item.info.ItemId), item)
+        entries.push(items_getEntry(item.info.ItemId))
+    }
+    return entries
 }
 
 /**

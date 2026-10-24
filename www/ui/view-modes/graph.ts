@@ -264,6 +264,7 @@ async function organizeDataByExpr(entries: InfoEntry[]): Promise<Record<string, 
 async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[string[], InfoEntry[][]]> {
     let groupBy = groupBySelect.value
 
+
     const groupings: Record<string, (i: InfoEntry) => any> = {
         "Year": i => items_getAllEntries()[String(i.ItemId)].meta.ReleaseYear,
         "Decade": i => {
@@ -328,12 +329,11 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
         }
     }
     else if (groupByInput.value) {
-        data = organizeDataByExpr(entries)
+        data = await organizeDataByExpr(entries)
     }
     else {
         data = Object.groupBy(entries, (groupings[/**@type {keyof typeof groupings}*/(groupBy)])) as Record<string, InfoEntry[]>
     }
-
 
     //filling in years messes up the sorting, idk why
     if (sortBy == "") {
@@ -586,7 +586,9 @@ GraphMode.prototype.sub = function(this: GraphMode, entry: InfoEntry) {
 }
 
 GraphMode.prototype.addList = function(this: GraphMode, entries: InfoEntry[]) {
-    makeGraphs(items_getSelected())
+    items_getAllForIfNotGotten(entries.map(v => v.ItemId)).then(() => {
+        makeGraphs(items_getSelected())
+    })
 }
 
 GraphMode.prototype.subList = function(this: GraphMode, entries: InfoEntry[]) {
