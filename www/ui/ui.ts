@@ -1487,7 +1487,7 @@ function overwriteEntryMetadataUI(_root: ShadowRoot, item: InfoEntry) {
     confirmUI("Are you sure you want to overwrite the metadata with a refresh")
         .then(async (ok) => {
             if(!ok) return
-            let meta = findMetadataById(item.ItemId)
+            let meta = await items_getMetadataById(item.ItemId)
 
             if(meta.ProviderID && meta.Provider) {
                 alert("Refreshing metadata")
@@ -2504,7 +2504,7 @@ function setDisplayModeUI(on: boolean | "toggle" = "toggle") {
 */
 function updatePageInfoWithItemUI(item: InfoEntry) {
     document.title = `[AIO] | ${item.En_Title || item.Native_Title}`
-    ua_setfavicon(fixThumbnailURL(findMetadataById(item.ItemId).Thumbnail))
+    ua_setfavicon(`${apiPath}/resource/get-thumbnail-by-id?id=${item.ItemId}`)
 }
 
 /**

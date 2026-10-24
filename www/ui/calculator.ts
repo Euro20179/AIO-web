@@ -1807,18 +1807,22 @@ class CalcVarTable {
                     if a-rand, get a random loaded entry`]], "EntryTy<Info>"))
 
         this.symbols.set("meta", new Func(async(id) => {
-            return findByid(id, i => {
-                switch (i) {
-                    case "s-rand":
-                        const results = items_getResults()
-                        return new EntryTy(findMetadataById(results[Math.floor(Math.random() * results.length)].info.ItemId) as MetadataEntry)
-                    case "a-rand":
-                        const v = Object.values(items_getAllEntries())
-                        return new EntryTy(findMetadataById(v[Math.floor(Math.random() * v.length)].info.ItemId) as MetadataEntry)
-                    default:
-                        return new EntryTy(findMetadataById(i) as MetadataEntry)
-                }
-            })
+            let r: items_Entry[] = []
+            let s = id.jsStr()
+            switch (s) {
+                case "s-rand":
+                    r = items_getResults()
+                    break
+                case "a-rand":
+                    r = Object.values(items_getAllEntries())
+                    break
+                default:
+                    r = [items_getEntry(BigInt(s))]
+                    break
+            }
+            let pickedid = r[Math.floor(Math.random() * r.length)].ItemId
+            const meta = await items_getMetadataById(pickedid)
+            return new EntryTy(meta)
         }, "Get a meta entry by id",
             [["id: Num | 's-rand' | 'a-rand'", "same as entry()"]],
             "EntryTy<Meta>"))
@@ -1846,7 +1850,7 @@ class CalcVarTable {
             if (o instanceof Num) {
                 const i = o.toNum().jsValue
                 let user = findUserEntryById(i)
-                let meta = findMetadataById(i)
+                let meta = await items_getMetadataById(i)
                 let info = findInfoEntryById(i)
                 if (!user || !meta || !info) return new Num(0)
                 obj = new Obj({

@@ -137,7 +137,7 @@ async function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement,
 
     el.setAttribute("data-item-id", String(item.ItemId))
 
-    let meta = findMetadataById(item.ItemId)
+    let meta = await items_getMetadataById(item.ItemId)
 
     if (updateExpr) {
         let val = await updateExpressionOutput.call(this, item)

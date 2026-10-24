@@ -8,13 +8,7 @@ async function main() {
 
             let selected = items_getSelected()[0]
             if(selected) {
-                items_getMetadataById(selected.ItemId).then(meta => {
-                    ua_setfavicon(
-                        fixThumbnailURL(
-                            meta.Thumbnail
-                        )
-                    )
-                })
+                ua_setfavicon(`${apiPath}/resource/get-thumbnail-by-id?id=${selected.ItemId}`)
             }
 
             //i think this is to reorder everything?:
