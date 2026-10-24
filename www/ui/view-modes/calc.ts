@@ -63,9 +63,11 @@ CalcMode.prototype.sub = function(this: CalcMode, entry: InfoEntry) {
 }
 
 CalcMode.prototype.addList = function(this: CalcMode, entry: InfoEntry[]) {
-    for (let item of entry) {
-        renderCalcItem.call(this, item)
-    }
+    items_getAllForIfNotGotten(entry.map(v => v.ItemId)).then(() => {
+        for (let item of entry) {
+            renderCalcItem.call(this, item)
+        }
+    })
 }
 
 CalcMode.prototype.subList = function(this: CalcMode, entry: InfoEntry[]) {
