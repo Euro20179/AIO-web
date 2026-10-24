@@ -242,15 +242,15 @@ function fillGap(obj: Record<any, any>, label: string) {
     }
 }
 
-function organizeDataByExpr(entries: InfoEntry[]): Record<string, InfoEntry[]> {
+async function organizeDataByExpr(entries: InfoEntry[]): Promise<Record<string, InfoEntry[]>> {
     let expr = groupByInput.value
 
     let group: Record<string, InfoEntry[]> = Object.groupBy(entries, item => {
         let meta = findMetadataById(item.ItemId)
         let user = findUserEntryById(item.ItemId)
-        let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
-
-        return parseExpression(expr, symbols).toStr().jsValue
+        let names = Object.keys(item).concat(Object.keys(meta)).concat(Object.keys(user)).concat(["GeneralRating"])
+        let vals = Object.values(item).concat(Object.values(meta)).concat(Object.values(user)).concat([(meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 ])
+        return Function(...names, `return ${expr}`)(...vals)
     }) as Record<string, InfoEntry[]>
     //Sometimes there's just empty groups i'm not sure why
     for (let key in group) {

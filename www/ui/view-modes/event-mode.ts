@@ -97,15 +97,14 @@ EventMode.prototype._filterEvents = function(this: EventMode, script: string) {
     this.excludedEvents.length = 0
 
     for (let event of this.eventOrder.list()) {
-        let tbl = makeSymbolsTableFromObj(event)
-        for (let eventTy of ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+        const eventTys = ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]
+        let names = Object.keys(event).concat(eventTys)
+        let vals = Object.values(event)
+        for (let eventTy of eventTys ) {
             let is = event.Event === eventTy
-            const n = new Num(Number(is))
-            tbl.set(eventTy.toLowerCase(), n)
-            tbl.set(eventTy.toLowerCase(), n)
+            vals.push(Number(is))
         }
-        let res = parseExpression(script, tbl)
-        if (!res.truthy()) {
+        if(Function(...names, `return ${script}`)(...vals)) {
             this.excludedEvents.push(event)
         }
     }

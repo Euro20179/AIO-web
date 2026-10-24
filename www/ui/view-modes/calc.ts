@@ -102,7 +102,7 @@ CalcMode.prototype.chwin = function(this: CalcMode, win: Window & typeof globalT
     return container
 }
 
-function _updateEachCalcItem(this: CalcMode) {
+async function _updateEachCalcItem(this: CalcMode) {
     for (let entry of items_getSelected()) {
         let val = updateExpressionOutput.call(this, entry)
         let el = this.output.querySelector(`[data-item-id="${entry.ItemId}"]`)
@@ -110,7 +110,7 @@ function _updateEachCalcItem(this: CalcMode) {
     }
 }
 
-function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
+async function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
     let expr = this.expressionInput?.value
 
     let meta = findMetadataById(item.ItemId)
@@ -121,7 +121,7 @@ function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
 
     let val = new Str(`${meta?.Description || ""}<br>${meta?.Rating || 0}`)
     if (expr) {
-        val = parseExpression(expr, symbols)
+        val = await parseExpression(expr, symbols)
     }
     return val
 }
@@ -131,7 +131,7 @@ function removeCalcItem(this: CalcMode, item: InfoEntry) {
     el?.remove()
 }
 
-function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement, updateExpr = false) {
+async function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement, updateExpr = false) {
     let root = el.shadowRoot
     if (!root) return el
 
@@ -140,7 +140,7 @@ function refreshCalcItem(this: CalcMode, item: InfoEntry, el: HTMLElement, updat
     let meta = findMetadataById(item.ItemId)
 
     if (updateExpr) {
-        let val = updateExpressionOutput.call(this, item)
+        let val = await updateExpressionOutput.call(this, item)
         el.setAttribute("data-expression-output", String(val.jsStr()))
     }
 

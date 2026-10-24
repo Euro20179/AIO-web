@@ -126,14 +126,14 @@ CalendarMode.prototype._getValidEvents = function(this: CalendarMode, start: Dat
 
     if (eventFilter) {
         validEvents = validEvents.filter(e => {
-            const symbols = makeSymbolsTableFromObj(e)
-            for (let eventTy of ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]) {
+            let eventTys = ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]
+            let names = Object.keys(e).concat(eventTys)
+            let vals = Object.values(e)
+            for (let eventTy of eventTys) {
                 let is = e.Event === eventTy
-                const n = new Num(Number(is))
-                symbols.set(eventTy.toLowerCase(), n)
-                symbols.set(eventTy.toLowerCase(), n)
+                vals.push(Number(is))
             }
-            return parseExpression(eventFilter.value, symbols).truthy()
+            return !!Function(...names, `return ${eventFilter.value}`)(...vals)
         })
     }
 

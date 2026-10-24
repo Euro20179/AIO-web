@@ -649,6 +649,27 @@ function arr_shuf<T>(iter: Iterable<T>): T[] {
     return cpy
 }
 
+async function arr_asort<T>(arr: T[], fn: (a: T, b: T) => Promise<number>) {
+    if (arr.length <= 1) {
+        return arr;
+    }
+    const mid = Math.floor(arr.length / 2),
+          left = arr.slice(0, mid), right = arr.slice(mid);
+    await arr_asort(left, fn);
+    await arr_asort(right, fn);
+    let ia = 0, il = 0, ir = 0;
+    while (il < left.length && ir < right.length) {
+        arr[ia++] = (await fn(left[il], right[ir]) <= 0) ? left[il++] : right[ir++];
+    }
+    while (il < left.length) {
+        arr[ia++] = left[il++];
+    }
+    while (ir < right.length) {
+        arr[ia++] = right[ir++];
+    }
+    return arr;
+}
+
 /**
  * Creates a datalist from a list of items, and appends it into doc
  * @param {string} name the id to give the datalist, if it is already in document and is NOT a datalist, 1 is returned

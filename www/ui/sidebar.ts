@@ -149,8 +149,7 @@ SidebarMode.prototype.refresh = function(this: SidebarMode, itemId: bigint) {
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     if (el) {
         _changeSidebarItemData(itemId, el)
-        items_getMetadataById(itemId)
-            .then(meta => this.updateThumbnail(itemId, fixThumbnailURL(meta.Thumbnail)))
+        this.updateThumbnail(itemId, `${apiPath}/resource/get-thumbnail-by-id?id=${findInfoEntryById(itemId).MetadataId}`)
     }
 }
 
@@ -268,22 +267,22 @@ function _updateSidebarEntryContents(item: InfoEntry, user: UserEntry, meta: Met
 
 
     //position
-    const posEl = dom_getel("#progress", null, el)
-    pos: if(posEl) {
-        if (!("max" in posEl &&
-            "value" in posEl)) break pos
-        posEl.setAttribute("data-status", user.Status)
-        try {
-            var mediaDependant = JSON.parse(meta.MediaDependant || "{}")
-        } catch (err) {
-            console.error("Could not parse media dependant meta info json")
-            break pos
-        }
-        let lengthInNumber = items_getLength(mediaDependant)[0] || 0
-        let userPos = parseInt(user.CurrentPosition)
-        posEl.max = lengthInNumber || 1
-        posEl.value = userPos || 0
-    }
+    // const posEl = dom_getel("#progress", null, el)
+    // pos: if(posEl) {
+    //     if (!("max" in posEl &&
+    //         "value" in posEl)) break pos
+    //     posEl.setAttribute("data-status", user.Status)
+    //     try {
+    //         var mediaDependant = JSON.parse(meta.MediaDependant || "{}")
+    //     } catch (err) {
+    //         console.error("Could not parse media dependant meta info json")
+    //         break pos
+    //     }
+    //     let lengthInNumber = items_getLength(mediaDependant)[0] || 0
+    //     let userPos = parseInt(user.CurrentPosition)
+    //     posEl.max = lengthInNumber || 1
+    //     posEl.value = userPos || 0
+    // }
 
     updateDeclarativeDSL({}, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el) 
 }
@@ -306,10 +305,7 @@ function sidebar_selectList(entries: InfoEntry[], clearSelected: boolean = true)
 var selectSidebarItems = sidebar_selectList
 
 function _changeSidebarItemData(id: bigint, el: HTMLElement) {
-    items_getMetadataById(id)
-        .then(meta => {
-            _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), meta, el.shadowRoot as ShadowRoot)
-        })
+    _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
     el.setAttribute("data-entry-id", String(id))
 }
 
@@ -394,9 +390,8 @@ function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLEle
 
     parent ||= this.output
 
-    let meta = findMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
-    if (!user || !meta || !elem.shadowRoot) return elem
+    if (!user || !elem.shadowRoot) return elem
 
     elem.shadowRoot.querySelector("figure")?.setAttribute("aria-label", `${item.En_Title || item.Native_Title} thumbnail`)
 
@@ -410,8 +405,8 @@ function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLEle
     let img = elem.shadowRoot.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
 
-        if (options?.renderImg && meta.Thumbnail) {
-            img.src = fixThumbnailURL(meta.Thumbnail)
+        if (options?.renderImg) {
+            img.src = `${apiPath}/resource/get-thumbnail-by-id?id=${item.MetadataId}`
         } else {
             this.observer.observe(elem)
         }

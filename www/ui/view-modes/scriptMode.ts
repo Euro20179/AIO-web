@@ -144,24 +144,15 @@ function execute(this: ScriptMode) {
         this.clear()
     }
 
-    if (dom_getelorthrow("#script-js-mode", this.win.HTMLInputElement, this.win.document)?.checked) {
-        //put the script within a scope so the user can redeclare vars
-        script = `{${script}}`
-        let b = new Blob([script], { type: "application/javascript" })
-        let scriptEl = document.createElement("script")
-        scriptEl.src = URL.createObjectURL(b)
-        this.win.document.body.append(scriptEl)
-        scriptEl.remove()
-        URL.revokeObjectURL(scriptEl.src)
-        return
-    }
-
-    const value = parseExpression(script, tbl)
-    if (value instanceof Elem) {
-        this.output.append(value.el)
-    } else {
-        this.output.append(value.jsStr())
-    }
+    //put the script within a scope so the user can redeclare vars
+    script = `{${script}}`
+    let b = new Blob([script], { type: "application/javascript" })
+    let scriptEl = document.createElement("script")
+    scriptEl.src = URL.createObjectURL(b)
+    this.win.document.body.append(scriptEl)
+    scriptEl.remove()
+    URL.revokeObjectURL(scriptEl.src)
+    return
 }
 
 mode_register("script", ScriptMode)

@@ -246,7 +246,7 @@ TierListMode.prototype._findInfo = async function(this: TierListMode, id: bigint
         const expr = customExprEl.value
         let item = findInfoEntryById(id)
         let symbols = makeSymbolsTableFromObj({ ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 })
-        let calc = parseExpression(expr, symbols)
+        let calc = await parseExpression(expr, symbols)
         rating = calc.toNum().jsValue
     }
 

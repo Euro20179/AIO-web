@@ -185,8 +185,8 @@ script.value = `let y = if "yes" == "no" do
     3
 else 4
 fi`
-    script.onchange = function() {
-        output.innerHTML = parseExpression(script.value, new CalcVarTable()).toStr().jsStr()
+    script.onchange = async function() {
+        output.innerHTML = await parseExpression(script.value, new CalcVarTable()).toStr().jsStr()
     }
 
     script.onchange()

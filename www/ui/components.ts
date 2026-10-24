@@ -81,7 +81,7 @@ function setupHintPopovers(root: {
 /**
  * @description updates all put-data elements with their respective contents
  */
-function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, enable_unsafe: boolean, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
+async function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, event: Event) => any>, enable_unsafe: boolean, item: InfoEntry, user: UserEntry, meta: MetadataEntry, root: ShadowRoot | Document | DocumentFragment) {
     //put-data, for basic data such as `put-data=Rating` or `put-data=info.En_Title,meta.Title`
     for (let elem of root.querySelectorAll("[put-data]")) {
         let keys = elem.getAttribute("put-data")?.split(",")
@@ -188,7 +188,7 @@ function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement, even
                 symbols.set("root", new Elem(root as unknown as HTMLElement))
                 symbols.set("results", new Arr(items_getResults().map(v => new EntryTy(v.info))))
                 symbols.set("this", new EntryTy(item))
-                res = parseExpression(script, symbols)
+                res = await parseExpression(script, symbols)
             } else {
                 res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
             }
