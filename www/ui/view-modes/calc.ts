@@ -113,7 +113,7 @@ async function _updateEachCalcItem(this: CalcMode) {
 async function updateExpressionOutput(this: CalcMode, item: InfoEntry) {
     let expr = this.expressionInput?.value
 
-    let meta = findMetadataById(item.ItemId)
+    let meta = await items_getMetadataById(item.ItemId)
     let user = findUserEntryById(item.ItemId)
 
     let all = { ...item, ...meta, ...user, GeneralRating: (meta?.Rating || 0) / (meta?.RatingMax || 1) * 100 }
