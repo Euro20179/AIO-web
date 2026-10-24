@@ -149,9 +149,8 @@ SidebarMode.prototype.refresh = function(this: SidebarMode, itemId: bigint) {
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     if (el) {
         _changeSidebarItemData(itemId, el)
-        let meta = findMetadataById(itemId)
-        if (meta)
-            this.updateThumbnail(itemId, meta?.Thumbnail)
+        items_getMetadataById(itemId)
+            .then(meta => this.updateThumbnail(itemId, fixThumbnailURL(meta.Thumbnail)))
     }
 }
 
@@ -307,7 +306,10 @@ function sidebar_selectList(entries: InfoEntry[], clearSelected: boolean = true)
 var selectSidebarItems = sidebar_selectList
 
 function _changeSidebarItemData(id: bigint, el: HTMLElement) {
-    _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
+    items_getMetadataById(id)
+        .then(meta => {
+            _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), meta, el.shadowRoot as ShadowRoot)
+        })
     el.setAttribute("data-entry-id", String(id))
 }
 

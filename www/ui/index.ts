@@ -8,13 +8,13 @@ async function main() {
 
             let selected = items_getSelected()[0]
             if(selected) {
-                ua_setfavicon(
-                    fixThumbnailURL(
-                        findMetadataById(
-                            selected.ItemId
-                        ).Thumbnail
+                items_getMetadataById(selected.ItemId).then(meta => {
+                    ua_setfavicon(
+                        fixThumbnailURL(
+                            meta.Thumbnail
+                        )
                     )
-                )
+                })
             }
 
             //i think this is to reorder everything?:
@@ -153,7 +153,7 @@ async function main() {
         }
     })
 
-    Promise.all([items_refreshRelations(uid), items_refreshMetadata(uid)]).then(() => {
+    items_refreshRelations(uid).then(() => {
         for (let item of items_getSelected()) {
             mode_refreshItem(item.ItemId);
         }

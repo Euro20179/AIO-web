@@ -762,11 +762,24 @@ function items_setItem(item:{
  * @param {number} uid the user id of the entry to load
  * @returns {Promise<items_Entry>}
  */
+const _loading_ids = new Set
 async function items_loadAll(id: bigint, uid: number = 0): Promise<items_Entry> {
+    if(_loading_ids.has(id)) {
+        return await new Promise(res => {
+            var i = setInterval(() => {
+                if (_loading_ids.has(id)) return
+                clearInterval(i)
+                res(items_getEntry(id))
+            }, 16)
+        })
+    }
+
+    _loading_ids.add(id)
     let e = await api_getEntryAll(id, uid)
     if(e) {
         items_setItem(e)
     }
+    _loading_ids.delete(id)
     return items_getEntry(id)
 }
 

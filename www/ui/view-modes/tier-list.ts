@@ -8,7 +8,7 @@ type TierListMode = {
     _modeSelector(): any
     _customExpr(): any
     _getMode(): "general" | "user" | "custom"
-    _findInfo(id: bigint, mode: "general" | "user" | "custom"): [number, string | false]
+    _findInfo(id: bigint, mode: "general" | "user" | "custom"): Promise<[number, string | false]>
 } & Mode
 
 var TierListMode: ModeConstructor<TierListMode> = function(this: TierListMode, output?: HTMLElement | DocumentFragment, win ?: Window & typeof globalThis) {
@@ -232,9 +232,9 @@ TierListMode.prototype._getMode = function(this: TierListMode, ): "general" | "u
     return mode
 }
 
-TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode: "general" | "user" | "custom"): [number, string | false] {
+TierListMode.prototype._findInfo = async function(this: TierListMode, id: bigint, mode: "general" | "user" | "custom"): Promise<[number, string | false]> {
     let user = findUserEntryById(id)
-    let meta = findMetadataById(id)
+    let meta = await items_getMetadataById(id)
 
     let rating
     if (mode === "general") {
@@ -258,55 +258,49 @@ TierListMode.prototype._findInfo = function(this: TierListMode, id: bigint, mode
 TierListMode.prototype.add = function(this: TierListMode, entry: InfoEntry): HTMLElement {
     let mode = this._getMode()
     let li = this.win.document.createElement("li")
-    let [rating, tier] = this._findInfo(entry.ItemId, mode)
+    this._findInfo(entry.ItemId, mode).then(async([rating, tier]) => {
+        const btn = createClickableEntryUI(entry.ItemId)
+        btn.title = `${entry.En_Title || entry.Native_Title} - (${rating})`
 
-    const btn = createClickableEntryUI(entry.ItemId)
-    btn.title = `${entry.En_Title || entry.Native_Title} - (${rating})`
+        li.id = `tier-item-${entry.ItemId}`
+        li.append(btn)
 
-    li.id = `tier-item-${entry.ItemId}`
-    li.append(btn)
+        if (!(tier !== false)) {
+            console.warn(`No tier for rating: ${rating}`)
+            return li
+        }
 
-    if (!(tier !== false)) {
-        console.warn(`No tier for rating: ${rating}`)
-        return li
-    }
+        let ul = this.rows[tier]
 
-    let ul = this.rows[tier]
+        const els = ul.querySelectorAll("li")
 
-    const els = ul.querySelectorAll("li")
+        if (els.length === 0) {
+            ul.append(li)
+        } else {
+            for (let el of els) {
+                let elId = BigInt(el.id.split("-item-")[1])
 
-    if (els.length === 0) {
-        ul.append(li)
-    } else {
-        for (let el of els) {
-            let elId = BigInt(el.id.split("-item-")[1])
+                let [elRating, _] = await this._findInfo(elId, mode)
 
-            let [elRating, _] = this._findInfo(elId, mode)
-
-            if (rating < elRating) {
-                //if rating < elRating, there may be another element that 
-                //this new element is closer to in rating, so we can't finish
-                //yet
-                el.after(li)
-            } else {
-                el.before(li)
-                //if rating >= elRating, and because the <li>s are in order,
-                //that means nothing else is greater than it so we can stop
-                break
+                if (rating < elRating) {
+                    //if rating < elRating, there may be another element that 
+                    //this new element is closer to in rating, so we can't finish
+                    //yet
+                    el.after(li)
+                } else {
+                    el.before(li)
+                    //if rating >= elRating, and because the <li>s are in order,
+                    //that means nothing else is greater than it so we can stop
+                    break
+                }
             }
         }
-    }
+    })
 
     return li
 }
 
 TierListMode.prototype.sub = function(this: TierListMode, entry: InfoEntry, ratingMode: "general" | "user" | "" = ""): boolean {
-    let mode = ratingMode || this._getMode()
-    let [_, tier] = this._findInfo(entry.ItemId, mode)
-
-    if (!(tier !== false))
-        throw new Error("Trying to remove item with an unknown tier")
-
     const li = this.output.querySelector(`#tier-item-${entry.ItemId}`)
 
     if (li !== null) {
@@ -319,9 +313,13 @@ TierListMode.prototype.sub = function(this: TierListMode, entry: InfoEntry, rati
 }
 
 TierListMode.prototype.addList = function(this: TierListMode, entry: InfoEntry[]) {
-    for (const item of entry) {
-        this.add(item)
-    }
+    api_getEntriesAll(entry.map(v => v.ItemId), 0).then(items => {
+        if(typeof items === 'string') return
+        for(let item of items) {
+            items_setMetadata(item.meta)
+            this.add(item.info)
+        }
+    })
 }
 
 TierListMode.prototype.subList = function(this: TierListMode, entry: InfoEntry[], ratingMode: "general" | "user" | "" = "") {
