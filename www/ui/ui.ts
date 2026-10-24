@@ -2401,7 +2401,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
         "Meme": "General",
         "Picture": "General",
         "Song": "Music",
-        "Albumn": "Music",
+        "Album": "Music",
         "Soundtrack": "Music",
         "Book": "Reading",
         "Manga": "Reading",

@@ -78,7 +78,7 @@ type EntryType =
     | "Picture"
     | "Meme"
     | "Library"
-    | "Albumn"
+    | "Album"
     | "Soundtrack"
 
 type UserEvent = {
@@ -1377,7 +1377,7 @@ function typeToSymbol(type: string): string {
         "Picture": "🖼",
         "Meme": "🃏",
         "Video": "📼",
-        "Albumn": "A♫",
+        "Album": "A♫",
         "Soundtrack": "📺︎♫",
         "Unowned": "X",
     }
