@@ -602,7 +602,15 @@ async function api_getEntriesAll(itemIds: bigint[], uid: number): Promise<{
     events: UserEvent[],
     transactions: TransactionEntry[]
 }[] | string>{
-    let res = await fetch(`${apiPath}/get-all-for-entries?ids=${itemIds.join(",")}&uid=${uid}`)
+    let res = await fetch(`${apiPath}/get-all-for-entries?uid=${uid}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "ids": itemIds.join(","),
+        })
+    })
 
     if (res.status !== 200) {
         return `${res.status}: ${await res.text()}`
