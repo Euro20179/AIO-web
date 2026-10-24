@@ -264,7 +264,6 @@ async function organizeDataByExpr(entries: InfoEntry[]): Promise<Record<string, 
 async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[string[], InfoEntry[][]]> {
     let groupBy = groupBySelect.value
 
-
     const groupings: Record<string, (i: InfoEntry) => any> = {
         "Year": i => items_getAllEntries()[String(i.ItemId)].meta.ReleaseYear,
         "Decade": i => {
@@ -292,41 +291,26 @@ async function organizeData(entries: InfoEntry[], sortBy: string): Promise<[stri
         "Item-name": i => i.En_Title
     }
 
-    let data: Record<string, InfoEntry[]>
-    if (groupBy === "Tags") {
-        data = {}
-        for (let item of entries) {
-            for (let tag of item.Tags || []) {
-                if (data[tag]) {
-                    data[tag].push(item)
+    let data: Record<string, InfoEntry[]> = {}
+
+    const groupbylist = (lgetter: (e: InfoEntry) => any[]) => {
+        for(let e of entries) {
+            for(let item of lgetter(e)) {
+                if(data[item]) {
+                    data[item].push(e)
                 } else {
-                    data[tag] = [item]
+                    data[item] = [e]
                 }
             }
         }
     }
-    else if (groupBy === "Genres") {
-        data = {}
-        for (let item of entries) {
-            for (let genre of JSON.parse(findMetadataById(item.ItemId).Genres || "[]")) {
-                if (data[genre]) {
-                    data[genre].push(item)
-                } else {
-                    data[genre] = [item]
-                }
-            }
-        }
+
+    if (groupBy === "Tags") {
+        groupbylist(i => i.Tags)
+    } else if (groupBy === "Genres") {
+        groupbylist(i => JSON.parse(findMetadataById(i.ItemId).Genres || "[]"))
     } else if (groupBy === "Recommender") {
-        data = {}
-        for (let item of entries) {
-            for (let recby of JSON.parse(item.RecommendedBy || "[]")) {
-                if (data[recby]) {
-                    data[recby].push(item)
-                } else {
-                    data[recby] = [item]
-                }
-            }
-        }
+        groupbylist(i => JSON.parse(i.RecommendedBy || "[]"))
     }
     else if (groupByInput.value) {
         data = await organizeDataByExpr(entries)
