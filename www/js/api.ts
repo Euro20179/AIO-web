@@ -722,15 +722,31 @@ async function api_authorized(auth: string): Promise<false | number> {
     return Number(text)
 }
 
+let _rec_fetching = false
 async function api_list_recommenders(uid: number): Promise<string[]> {
+    let resolves: ((value: string[] | PromiseLike<string[]>) => void)[] = []
+    if(_rec_fetching) return await new Promise(res => {
+        resolves.push(res)
+    })
+
+    const finishFetch = (result: string[]) => {
+        _rec_fetching = false
+        for(let res of resolves) {
+            res(result)
+        }
+    }
+
+    _rec_fetching = true
     let res = await fetch(`${apiPath}/recommenders?uid=${encodeURIComponent(uid)}`)
     if (res.status !== 200) {
         res.text().then(console.error)
+        setTimeout(() => finishFetch([]), 100)
         return []
     }
 
-    let r = await res.text()
-    return r.split("\x1F")
+    let r = (await res.text()).split("\x1F")
+    setTimeout(() => finishFetch([]), 100)
+    return r
 }
 
 type SortKind = "user-title"

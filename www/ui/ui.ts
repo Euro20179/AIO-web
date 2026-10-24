@@ -2369,6 +2369,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
     formatSelector.replaceChildren(...Object.values(optGroups))
 }
 
+
 /**
     * Fills a datalist with a list of all recommenders a user has used
 * @param {HTMLDataListElement} list
@@ -3407,7 +3408,7 @@ function mkItemCardUI(forItem: bigint, openfn?: (target: HTMLElement, event: Eve
     const meta = findMetadataById(forItem)
     const img = document.createElement("img")
     img.slot = "thumbnail"
-    img.src = fixThumbnailURL(meta.Thumbnail)
+    img.src = `${apiPath}/resource/get-thumbnail-by-id?id=${item.ItemId}`
     img.loading = 'lazy'
     img.alt = item.En_Title + " thumbnail"
     card.append(img)

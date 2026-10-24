@@ -1001,6 +1001,16 @@ DisplayMode.prototype.refresh = function(this: DisplayMode, id: bigint) {
 DisplayMode.prototype.addList = function(this: DisplayMode, entry: InfoEntry[]) {
     this.adding = true;
     (async () => {
+        let idsToFetch = []
+        for(let id of entry) {
+            idsToFetch.push(id.ItemId)
+        }
+
+        let items = await api_getEntriesAll(idsToFetch, 0)
+        if(typeof items === 'string') throw new Error("failed to fetch data")
+        for(let item of items) {
+            items_updateEntryById(String(item.info.ItemId), item)
+        }
         //We need to keep track of whether or not we're adding so that
         //it can be canceled
         //such as in the case when we are still adding, but mode_clearItems()

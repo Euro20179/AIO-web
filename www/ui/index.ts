@@ -30,6 +30,7 @@ async function main() {
         addEventListener("aio-metadata-loaded", metadataload)
     };
 
+
     //allow the fetch to happen *after* items are rendered on firefox
     //becasue firefox doesn't render the items until after the fetch for some reason
     addEventListener("aio-search-performed", onrender);
@@ -65,6 +66,9 @@ async function main() {
         sidebarItems: dom_getelorthrow("#sidebar-items", HTMLElement),
         mainUI: dom_getelorthrow("#main-ui", HTMLElement),
     });
+
+    await api_listArtStyles()
+    await api_listFormats()
 
     await fillUserSelectionUI(dom_getel('[name="uid"]', HTMLSelectElement));
 
