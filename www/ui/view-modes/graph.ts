@@ -577,7 +577,9 @@ GraphMode.prototype.close = function(this: GraphMode) {
 }
 
 GraphMode.prototype.add = function(this: GraphMode, entry: InfoEntry) {
-    makeGraphs(items_getSelected())
+    items_loadAll(entry.ItemId).then(() => {
+        makeGraphs(items_getSelected())
+    })
     return this.win.document.getElementById("graph-output") as HTMLElement
 }
 

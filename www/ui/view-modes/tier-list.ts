@@ -313,8 +313,10 @@ TierListMode.prototype.sub = function(this: TierListMode, entry: InfoEntry, rati
 }
 
 TierListMode.prototype.addList = function(this: TierListMode, entry: InfoEntry[]) {
-    api_getEntriesAll(entry.map(v => v.ItemId), 0).then(items => {
-        if(typeof items === 'string') return
+    items_getAllForIfNotGotten(entry.map(v => v.ItemId)).then(items => {
+        if(typeof items === 'string') {
+            throw new Error(`Failed to get item data: ${items}`)
+        }
         for(let item of items) {
             items_setMetadata(item.meta)
             this.add(item.info)
