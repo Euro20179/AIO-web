@@ -124,7 +124,7 @@ CalendarMode.prototype._getValidEvents = function(this: CalendarMode, start: Dat
         this.output
     )
 
-    if (eventFilter) {
+    if (eventFilter?.value) {
         validEvents = validEvents.filter(e => {
             let eventTys = ["Planned", "Viewing", "Started", "Finished", "Dropped", "Paused", "ReViewing", "Waiting", "Resuming", "Added"]
             let names = Object.keys(e).concat(eventTys)
