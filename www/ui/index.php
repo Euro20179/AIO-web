@@ -229,6 +229,9 @@
                     <div class="result-stats" id="result-stats">
                     </div>
                     <div style="align-self: end;" id="statusline-right">
+                        <button class="styleless-button" onclick="signinUI()">
+                            &lt;logged out&gt;
+                        </button>
                     </div>
                 </div>
             </section>
