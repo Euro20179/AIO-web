@@ -569,7 +569,7 @@ function items_removeCopy(copy: bigint, copyof: bigint) {
     * @param {boolean} replace
     * @returns {Promise<void>}
 */
-async function items_addById(items: bigint[] | bigint, replace: boolean = false): Promise<void> {
+async function* items_addById(items: bigint[] | bigint, replace: boolean = false): AsyncGenerator<items_Entry> {
     if(typeof items === 'bigint') items = [items]
 
     let idsThatNeedInfo = []
@@ -582,16 +582,18 @@ async function items_addById(items: bigint[] | bigint, replace: boolean = false)
         }
     }
 
-    if(idsThatNeedInfo.length === 0) return
-
-    const entries = await api_getEntriesAll(idsThatNeedInfo, 0)
-    if(typeof entries === 'string') {
-        console.error("Failed to add entries by id: ", entries)
-        return
+    for await(let i of api_streamEntriesAll(idsThatNeedInfo, 0)) {
+        let missing = items.slice(0, items.indexOf(i.info.ItemId))
+        for(let m of missing) {
+            yield items_getEntry(m)
+        }
+        items = items.slice(items.indexOf(i.info.ItemId) + 1)
+        items_addItem(i)
+        yield items_getEntry(i.info.ItemId)
     }
 
-    for(let entry of entries) {
-        items_addItem(entry)
+    for(let i of items) {
+        yield items_getEntry(i)
     }
 }
 
@@ -719,7 +721,17 @@ function items_addItem(item: {
     requirements?: bigint[],
     copies?: bigint[],
 }) {
-    const e = _globalsNewUi.entries[String(item.user.ItemId)] = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
+    let e = _globalsNewUi.entries[String(item.user.ItemId)]
+    if (!e) {
+        e = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
+        _globalsNewUi.entries[String(item.user.ItemId)] = e
+    } else {
+        e.info = item.info
+        e.user = item.user
+        e.meta = item.meta
+        e.events = item.events
+        e.transactions = item.transactions
+    }
     if(item.children)
         e.relations.setChildren(item.children)
     if (item.copies)
@@ -851,7 +863,7 @@ async function items_getAllForIfNotGotten(ids: bigint[]): Promise<items_Entry[]>
  * @returns {boolean}
 */
 function items_entryExists(id: bigint): boolean {
-    return String(id) in _globalsNewUi.entries
+    return String(id) in _globalsNewUi.entries && _globalsNewUi.entries[String(id)].loaded
 }
 
 /**
@@ -902,7 +914,6 @@ function items_getAllEntries(): Record<string, items_Entry> {
     * @returns {MetadataEntry}
 */
 function findMetadataById(id: bigint): MetadataEntry {
-    console.assert(items_entryExists(id) == true, `metadata entry for ${id} does not exist`)
     let e = items_getEntry(id)
     return items_getEntry(id).meta || genericMetadata(e.info.MetadataId, e.info.Uid)
 }
@@ -932,7 +943,6 @@ function items_setMetadata(meta: MetadataEntry) {
     * @returns {TransactionEntry[]}
     */
 function findTransactionsById(id: bigint): TransactionEntry[] {
-    console.assert(items_entryExists(id) == true, `transactions for entry ${id} does not exist`)
     return items_getEntry(id).transactions || []
 }
 
@@ -943,7 +953,6 @@ function findTransactionsById(id: bigint): TransactionEntry[] {
     * @returns {UserEntry}
 */
 function findUserEntryById(id: bigint): UserEntry {
-    console.assert(items_entryExists(id) == true, `user entry for ${id} does not exist`)
     return items_getEntry(id).user || genericUserEntry(id, 0)
 }
 
@@ -954,7 +963,6 @@ function findUserEntryById(id: bigint): UserEntry {
     * @returns {UserEvent[]}
 */
 function findUserEventsById(id: bigint): UserEvent[] {
-    console.assert(items_entryExists(id) == true, `user events for ${id} does not exist`)
     return items_getEntry(id).events || []
 }
 
@@ -965,7 +973,6 @@ function findUserEventsById(id: bigint): UserEvent[] {
     * @returns {InfoEntry}
 */
 function findInfoEntryById(id: bigint): InfoEntry {
-    console.assert(items_entryExists(id) == true, `info entry for ${id} does not exist`)
     return items_getEntry(id).info || genericInfo(id, 0)
 }
 
@@ -990,6 +997,7 @@ function genericInfo(itemId: bigint, uid: number): InfoEntry {
         RecommendedBy: "[]",
         Priority: 0,
         Format_Modifiers: 0,
+        MetadataId: 0n,
 
         Tags: []
     }

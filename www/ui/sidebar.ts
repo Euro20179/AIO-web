@@ -13,7 +13,7 @@ type SidebarMode = {
     focusNextItem(backward: boolean): any
     selectNth(n: Number): any
     reorder(itemOrder: bigint[], select?: boolean): any
-    render(entries: InfoEntry[], clearRendered?: boolean, select?: boolean): any
+    render(entries: InfoEntry[], clearRendered?: boolean, select?: boolean, insertKind?: "append" | "replace"): any
 
     updateThumbnail(id: bigint, src: string): any
     mkobserver(): any
@@ -195,7 +195,7 @@ SidebarMode.prototype.reorder = function(this: SidebarMode, itemOrder: bigint[],
     this.render(itemOrder.map(v => findInfoEntryById(v)), true, select)
 }
 
-SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true, select = true) {
+SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[], clearRendered = true, select = true, insertKind: "append" | "replace" = "replace") {
     this.renderBacklog = []
     if (!entries.length) return
 
@@ -207,7 +207,9 @@ SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[],
         fragments.push(frag)
     }
 
-    this.output.replaceChildren(...fragments)
+    if (insertKind == "replace") {
+        this.output.replaceChildren(...fragments)
+    } else this.output.append(...fragments)
 
     if(entries.length > chunksize) {
         const btn = document.createElement("button")
@@ -221,7 +223,8 @@ SidebarMode.prototype.render = function(this: SidebarMode, entries: InfoEntry[],
 
         this.renderBacklog = entries.slice(chunksize)
     }
-    selectSidebarItems(entries, clearRendered)
+    if(select)
+        selectSidebarItems(entries, clearRendered)
 }
 
 /**

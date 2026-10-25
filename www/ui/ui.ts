@@ -1361,6 +1361,7 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
     switch (st) {
         case "4":
         case "3": {
+            entries = []
             entries = await api_query(
                 String(filters.newSearch) || "%",
                 Number(formData.get("uid")) || 0,
@@ -1396,10 +1397,28 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
     setResultStatUI("results", entries.length)
 
     const ids = entries.map(v => v.ItemId)
-    await items_addById(ids)
     items_setResults(ids)
 
     clearUI()
+
+    components['sidebarUI']?.clearSelected()
+    let found = []
+    let i = 0
+    for await(let item of items_addById(ids)) {
+        if (i === 0) {
+            selectUI(item.info)
+        }
+        found.push(item)
+        i++
+        if (i % 20 == 0 && i > 0) {
+            components['sidebarUI']?.render(getFilteredResultsUI(found), false, false, "append")
+            found = []
+            //@ts-ignore
+            if(window.scheduler?.yield) {
+                await scheduler.yield()
+            }
+        }
+    }
 
     if (entries.length === 0) {
         setError("No results")
@@ -1407,7 +1426,9 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
         const g = genericInfo(0n, 0)
         g.En_Title = "No Results"
         renderFakeSidebarItem(g, components['sidebarUI']?.output || document.createDocumentFragment())
-    } else components['sidebarUI']?.render(getFilteredResultsUI(), false)
+    } else if(found.length) {
+        components['sidebarUI']?.render(getFilteredResultsUI(found), false, false, "append")
+    }
 
     dispatchEvent(new CustomEvent("aio-search-performed", {
         detail: {

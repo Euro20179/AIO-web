@@ -1491,8 +1491,6 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
  * @description updates special-case legacy elements
  */
 async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, _events: UserEvent[], el: ShadowRoot) {
-    await settings_load(user.Uid)
-
     const renderComponent = (query: string,
         fill: (element: HTMLElement, itemId: bigint) => any) => {
         for (let l of el.querySelectorAll(query)) {
@@ -1558,8 +1556,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     })
 
     //item item interaction menu
-    renderComponent("#item-interaction-menu", el => {
+    renderComponent("#item-interaction-menu", async(el) => {
         if (!(el instanceof this.win.HTMLElement)) return
+        await settings_load(user.Uid)
+
         const buttons = settings_get(getUserUID(), "de_item_interactions")
 
         let btns = []
@@ -1827,14 +1827,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //Audience Rating
     renderComponent("#audience-rating", audienceRatingEl => {
-        if (meta.Rating) {
-            applyUserRating(
-                settings_get(getUserUID(), "tiers"),
-                settings_get(getUserUID(), "rating_styles"),
-                meta.Rating,
-                meta.RatingMax || settings_get(meta.Uid, "user_rating_max"),
-                audienceRatingEl
-            )
+        if (meta.Rating) {            
+            settings_load(user.Uid).then(() => {
+                applyUserRating(
+                    settings_get(getUserUID(), "tiers"),
+                    settings_get(getUserUID(), "rating_styles"),
+                    meta.Rating,
+                    meta.RatingMax || settings_get(meta.Uid, "user_rating_max"),
+                    audienceRatingEl
+                )
+            })
         }
     })
 
@@ -1923,7 +1925,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
     //update this last because some legacy elements get filled with new elements
     //that rely on stuff like entry-action
-    updateDeclarativeDSL(this.de_actions, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el)
+    settings_load(user.Uid).then(() => {
+        updateDeclarativeDSL(this.de_actions, settings_get(getUserUID(), "enable_unsafe"), item, user, meta, el)
+    })
 }
 
 function displayItemInWindow(itemId: bigint, target: string = "_blank", popup: boolean = false) {

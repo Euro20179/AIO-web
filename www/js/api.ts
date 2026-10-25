@@ -343,6 +343,30 @@ async function api_delRequires(uid: number, itemid: bigint, requires: bigint) {
     return await authorizedRequest(`${apiPath}/del-requires?uid=${uid}&itemid=${itemid}&requires=${requires}`)
 }
 
+async function* api_streamQuery(searchString: string, uid: number, version: 3 | 4, orderby: SortKind = ""): AsyncGenerator<InfoEntry> {
+    const params = new URLSearchParams([
+        ["q", searchString],
+    ])
+
+    if(orderby) {
+        const apiOrder = api_uiSort2Api(orderby)
+        if(apiOrder) {
+            params.set("order-by", apiOrder)
+        }
+    }
+
+    if(version === 3) {
+        params.set("v", "3")
+    }
+
+    for await(let info of api_streamList<InfoEntry>("entry", uid, {
+        params,
+        method: "QUERY"
+    })) {
+        yield info
+    }
+}
+
 /**
  * Performs a v3 or v4 search
  * @param {string} searchString the search query
@@ -635,6 +659,67 @@ async function api_getEntriesAll(itemIds: bigint[], uid: number): Promise<{
     }
 
     return items
+}
+
+async function* api_streamEntriesAll(itemIds: bigint[], uid: number): AsyncGenerator<{
+    user: UserEntry,
+    info: InfoEntry,
+    meta: MetadataEntry,
+    events: UserEvent[],
+    transactions: TransactionEntry[]
+}> {
+    let res = await fetch(`${apiPath}/get-all-for-entries?uid=${uid}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "ids": itemIds.join(","),
+        })
+    })
+
+    if (res.status !== 200) {
+        console.error(`${res.status}: ${await res.text()}`)
+        return {}
+    }
+
+    const reader = res.body?.getReader()
+    if(!reader) {
+        return
+    }
+
+    const td = new TextDecoder()
+
+    let curblock: string[] = []
+    let curline: number[] = []
+
+    let r
+    let potentialblockend = false
+    while(!(r = await reader.read()).done) {
+        for(let ch of r.value) {
+            if(ch == 10) {
+                if(potentialblockend) {
+                    try {
+                        yield {
+                            user: api_deserializeJsonl<UserEntry>(curblock[0]).next().value,
+                            meta: api_deserializeJsonl<MetadataEntry>(curblock[1]).next().value,
+                            info: api_deserializeJsonl<InfoEntry>(curblock[2]).next().value,
+                            events: [...api_deserializeJsonl<UserEvent>(curblock.slice(3, curblock.indexOf("TRANSACTIONS")))],
+                            transactions: [...api_deserializeJsonl<TransactionEntry>(curblock.slice(curblock.indexOf("TRANSACTIONS") + 1))]
+                        }
+                    } catch(err) {}
+                    curblock = []
+                    continue
+                }
+                potentialblockend = true
+                curblock.push(td.decode(Uint8Array.from(curline)))
+                curline = []
+            } else {
+                potentialblockend = false
+                curline.push(ch)
+            }
+        }
+    }
 }
 
 async function api_fetchLocation(itemId: bigint, uid: number, provider?: string, providerId?: string) {
