@@ -628,26 +628,9 @@ function createClickableEntryUI(id: bigint, openfn?: Function): HTMLElement {
         openDisplayWinUI(id)
     }
 
-    if(items_getEntry(id).fixedThumbnail) {
-        const card = mkItemCardUI(id, openfn as any)
-        card.classList.add("image-only")
-        return card
-    } else {
-        const btn = document.createElement("button")
-        const entry = items_getEntry(id)
-        let text = entry.info.En_Title || entry.info.Native_Title
-        if(entry.info.Uid !== getUidUI()) {
-            if(ACCOUNTS[entry.info.Uid]) {
-                text += ` (${ACCOUNTS[entry.info.Uid]})`
-            } else {
-                text += ` (uid: ${entry.info.Uid})`
-            }
-        }
-        btn.append(text)
-        btn.addEventListener("click", () => openfn())
-        return btn
-    }
-
+    const card = mkItemCardUI(id, openfn as any)
+    card.classList.add("image-only")
+    return card
 }
 
 /**
