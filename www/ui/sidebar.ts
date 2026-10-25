@@ -149,7 +149,7 @@ SidebarMode.prototype.refresh = function(this: SidebarMode, itemId: bigint) {
     let el = document.querySelector(`sidebar-entry[data-entry-id="${itemId}"]`) as HTMLElement
     if (el) {
         _changeSidebarItemData(itemId, el)
-        this.updateThumbnail(itemId, `${apiPath}/resource/get-thumbnail-by-id?id=${findInfoEntryById(itemId).MetadataId}`)
+        this.updateThumbnail(itemId, `${apiPath}/resource/get-thumbnail-by-id?id=${itemId}`)
     }
 }
 
@@ -406,7 +406,7 @@ function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLEle
     if (img) {
 
         if (options?.renderImg) {
-            img.src = `${apiPath}/resource/get-thumbnail-by-id?id=${item.MetadataId}`
+            img.src = `${apiPath}/resource/get-thumbnail-by-id?id=${item.ItemId}`
         } else {
             this.observer.observe(elem)
         }
