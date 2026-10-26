@@ -135,7 +135,11 @@ function startupUI({
         return [k, valAll]
     }))
 
-    if (cookies['login']) {
+    let auth = getUserAuth()
+    if (auth) {
+        setUserAuthUI(auth)
+        setUIDUI(String(getUserUID()))
+    } else if (cookies['login']) {
         setUserAuthUI(cookies['login'])
         setUIDUI(cookies['uid'])
     }
@@ -1399,13 +1403,12 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
     const ids = entries.map(v => v.ItemId)
     items_setResults(ids)
 
-    clearUI()
-
     components['sidebarUI']?.clearSelected()
     let found = []
     let i = 0
     for await(let item of items_addById(ids)) {
         if (i === 0) {
+            clearUI()
             selectUI(item.info)
         }
         found.push(item)
