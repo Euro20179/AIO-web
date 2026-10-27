@@ -146,6 +146,7 @@
 
                 <form action="javascript:loadSearchUI()" id="sidebar-form" class="flex row wrap">
                     <input type="search" name="q" placeholder="search query" list="search-recs">
+                    <div id="search-autocomplete-box" role="listbox"></div>
                     <datalist id="search-recs">
                         <option value="3 @planned">planned</option>
                         <option value="3 @finished">finished</option>

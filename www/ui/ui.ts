@@ -27,7 +27,7 @@ type ClientSearchFilters = {
     newSearch: string;
     sortBy: string;
 
-    searchType: "4" | "3" | `metadata:${string}`
+    searchType: "4" | "3" | "command"
 
     [key: string]: any
 };
@@ -88,6 +88,54 @@ function startupUI({
 
     for (let key in arguments[0]) {
         components[key as keyof StartupUIComponents] = arguments[0][key]
+    }
+
+     if (components.searchForm) addSearchEvent: {
+        const q = dom_getel('[name="q"]', HTMLInputElement, components.searchForm)
+        if (!q) break addSearchEvent
+
+        q.addEventListener("blur", () =>{
+            if((dom_getel("#search-autocomplete-box", HTMLElement)?.childElementCount || 0) > 0)
+                return
+            dom_getel("#search-autocomplete-box", HTMLElement)?.replaceChildren()
+        })
+        q.addEventListener("input", e => {
+            let els = []
+            let textl: string[] = []
+            let curArg = ""
+            let curArgNo = 0
+            if(!q.value.includes(" ")) {
+                for(let cmd of _searchCommands.keys()) {
+                    cmd = `/${cmd}`
+                    textl.push(cmd)
+                }
+                curArg = q.value.slice(1)
+                curArgNo = 0
+            } else if(_searchCommands.get(q.value.split(" ")[0].slice(1))){
+                let cmd = _searchCommands.get(q.value.split(" ")[0].slice(1))
+                let args = q.value.split(" ")
+                let argno = args.length - 1
+                curArg = args[argno]
+                curArgNo = argno
+                textl = cmd?.autoComplete(args[argno], argno) || []
+            }
+            for(let t of textl) {
+                if(!t.startsWith(curArg)) continue
+                let e = document.createElement("button")
+                e.role = "option"
+                e.innerText = t
+                e.onclick = () => {
+                    let args = q.value.split(" ")
+                    args = args.slice(0, curArgNo).concat([t]).concat(args.slice(curArgNo + 1))
+                    q.value = args.join(" ")
+                    q.focus()
+                    e.parentElement?.replaceChildren()
+                }
+                els.push(e)
+            }
+            let box = dom_getel("#search-autocomplete-box", HTMLElement)
+            if(box) box.replaceChildren(...els)
+        })
     }
 
     if (components['itemFilter'] && !(components["itemFilter"] instanceof HTMLInputElement)) {
@@ -1310,6 +1358,56 @@ function getSearchDataUI(): FormData {
     return data
 }
 
+const _searchCommands = new Map<string, SearchCommandUI>
+
+class SearchCommandUI{
+    getResults: (args: string[]) => Promise<InfoEntry[]>
+    autoComplete: (arg: string, argno: number) => string[]
+    constructor(getResults: SearchCommandUI["getResults"], autoComplete: SearchCommandUI["autoComplete"]) {
+        this.getResults = getResults
+        this.autoComplete = autoComplete
+    }
+
+}
+
+function addSearchCommandUI(name: string, do_: (args: string[]) => Promise<InfoEntry[]>, compl: (arg: string, argno: number) => string[]) {
+    _searchCommands.set(name, new SearchCommandUI(do_, compl))
+}
+
+addSearchCommandUI("s", async(q) => {
+    let [provider, ...search] = q
+    let results: InfoEntry[] = []
+    if (search.length == 0) {
+        search = [provider]
+        provider = "omdb"
+    }
+    let s = search.join(" ")
+    const res = await api_identify(String(s) || "%", provider)
+    if (!res) {
+        return results
+    }
+    const text = await res.text()
+    for (let meta of api_deserializeJsonl<MetadataEntry>(text.split("\x02").slice(1).join("\x02").trim())) {
+        results.push(items_meta2info(meta))
+        items_addItem({
+            events: [],
+            info: results[results.length - 1],
+            user: items_meta2user(meta),
+            meta,
+            transactions: []
+        })
+    }
+    return results
+}, (arg: string, argno: number) => {
+    if (argno == 1) {
+        let root = document.createElement("item-identification-form-dialog")
+        if(!root.shadowRoot) return []
+        return [...root.shadowRoot.querySelectorAll("[name=\"provider\"] option")].map(v => v.value)
+        // return ["anilist", "omdb", "openlibrary", "googlebooks", "steam", "seerr"]
+    }
+    return []
+})
+
 /**
     * Akin to the user submitting the search form
 * form inputs:
@@ -1375,24 +1473,14 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
             break
         }
         default: {
-            let [_, provider] = st.split(":")
-            const res = await api_identify(String(filters.newSearch) || "%", provider)
-            if (!res) {
+            let command = filters.newSearch.slice(1).split(" ")[0]
+            let cmd = _searchCommands.get(command)
+            if(!cmd) {
                 entries = []
+                alert(`/${command} not found`)
                 break
             }
-            const text = await res.text()
-            entries = []
-            for (let meta of api_deserializeJsonl<MetadataEntry>(text.split("\x02").slice(1).join("\x02").trim())) {
-                entries.push(items_meta2info(meta))
-                items_addItem({
-                    events: [],
-                    info: entries[entries.length - 1],
-                    user: items_meta2user(meta),
-                    meta,
-                    transactions: []
-                })
-            }
+            entries = await cmd.getResults(filters.newSearch.split(" ").slice(1))
         }
     }
 
@@ -1579,15 +1667,8 @@ addSearchParserUI("search-type", (search, filters) => {
     if (search.startsWith("3")) {
         filters["searchType"] = '3'
         search = search.slice(1).trimStart()
-    } else if (search.startsWith("!s")) {
-        if (search.startsWith("!s:")) {
-            let identifier = search.split("!s:")[1].split(/\s/)[0]
-            filters["searchType"] = `metadata:${identifier}`
-            search = search.slice(3 + identifier.length).trimStart()
-        } else {
-            filters["searchType"] = `metadata:${"omdb"}`
-            search = search.slice(2).trimStart()
-        }
+    } else if (search.startsWith("/")) {
+        filters["searchType"] = "command"
     } else {
         filters['searchType'] = '4'
     }

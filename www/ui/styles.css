@@ -217,6 +217,23 @@
             width: 50cqi;
         }
 
+        #search-autocomplete-box {
+            display: none;
+
+            &:not(:empty) {
+                display: flex;
+                flex-direction: column;
+
+                background: var(--text-color);
+                color: var(--main);
+
+                position-anchor: --search-box;
+                position: absolute;
+
+                top: anchor(bottom);
+            }
+        }
+
         [name="q"] {
             flex-grow: 1;
             anchor-name: --search-box;
