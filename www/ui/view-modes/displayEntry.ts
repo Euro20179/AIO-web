@@ -1031,7 +1031,11 @@ DisplayMode.prototype.subList = function(this: DisplayMode, entry: InfoEntry[]) 
 }
 
 DisplayMode.prototype.put = function(this: DisplayMode, html: string | HTMLElement | ShadowRoot) {
-    this.output.append(html)
+    if(typeof html === 'string' && this.output instanceof this.win.HTMLElement) {
+        this.output.innerHTML += html
+    } else {
+        this.output.append(html)
+    }
 }
 
 DisplayMode.prototype.clearSelected = function(this: DisplayMode,) {

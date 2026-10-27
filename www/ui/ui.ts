@@ -109,7 +109,7 @@ function startupUI({
                     cmd = `/${cmd}`
                     textl.push(cmd)
                 }
-                curArg = q.value.slice(1)
+                curArg = q.value
                 curArgNo = 0
             } else if(_searchCommands.get(q.value.split(" ")[0].slice(1))){
                 let cmd = _searchCommands.get(q.value.split(" ")[0].slice(1))
@@ -1363,18 +1363,31 @@ const _searchCommands = new Map<string, SearchCommandUI>
 class SearchCommandUI{
     getResults: (args: string[]) => Promise<InfoEntry[]>
     autoComplete: (arg: string, argno: number) => string[]
-    constructor(getResults: SearchCommandUI["getResults"], autoComplete: SearchCommandUI["autoComplete"]) {
+    description: string
+    constructor(description: string, getResults: SearchCommandUI["getResults"], autoComplete: SearchCommandUI["autoComplete"]) {
+        this.description = description
         this.getResults = getResults
         this.autoComplete = autoComplete
     }
 
 }
 
-function addSearchCommandUI(name: string, do_: (args: string[]) => Promise<InfoEntry[]>, compl: (arg: string, argno: number) => string[]) {
-    _searchCommands.set(name, new SearchCommandUI(do_, compl))
+function addSearchCommandUI(name: string, description: string, do_: (args: string[]) => Promise<InfoEntry[]>, compl: (arg: string, argno: number) => string[]) {
+    _searchCommands.set(name, new SearchCommandUI(description, do_, compl))
 }
 
-addSearchCommandUI("s", async(q) => {
+addSearchCommandUI("help", "list commands", async() => {
+    mode_setMode("entry")
+    ui_clearall()
+    let html = "<dl>"
+    for(let cmd of _searchCommands.keys()) {
+        html += `<dt>/${cmd}</dt><dd>${_searchCommands.get(cmd)!.description}</dd>`
+    }
+    ui_put(html)
+    return []
+}, () => [])
+
+addSearchCommandUI("s", "search using a metadata provider", async(q) => {
     let [provider, ...search] = q
     let results: InfoEntry[] = []
     if (search.length == 0) {
