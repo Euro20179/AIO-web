@@ -2387,9 +2387,7 @@ async function fillRecommendedListUI(list: HTMLDataListElement, uid: number) {
 
     const recommenders = await api_list_recommenders(uid)
     for (let r of recommenders) {
-        const opt = document.createElement("option")
-        opt.value = r
-        list.appendChild(opt)
+        dom_appenddatalist(list, r, r)
     }
 }
 
@@ -2447,10 +2445,7 @@ async function fillUserSelectionUI(selector: HTMLSelectElement | HTMLDataListEle
         ACCOUNTS[Number(id)] = name
 
         if (selector) {
-            const opt = document.createElement("option")
-            opt.value = id
-            opt.innerText = name
-            selector.append(opt)
+            dom_appenddatalist(selector, name, id)
         }
     }
 }

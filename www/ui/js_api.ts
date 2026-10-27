@@ -706,7 +706,7 @@ function dom_createdatalist(name: string, from: string[], doc: Document = docume
  * @param {string} label
  * @param {string} value
  */
-function dom_appenddatalist(dl: HTMLDataListElement, label: string, value: string): void {
+function dom_appenddatalist(dl: HTMLDataListElement | HTMLSelectElement, label: string, value: string): void {
     const o = document.createElement("option")
     o.value = value
     o.innerText = label
