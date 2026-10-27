@@ -1379,11 +1379,18 @@ function addSearchCommandUI(name: string, description: string, do_: (args: strin
 addSearchCommandUI("help", "list commands", async() => {
     mode_setMode("entry")
     ui_clearall()
-    let html = "<dl>"
+    let html = `<div><h2>Search Commands</h2><dl>`
     for(let cmd of _searchCommands.keys()) {
         html += `<dt>/${cmd}</dt><dd>${_searchCommands.get(cmd)!.description}</dd>`
     }
-    ui_put(html)
+    ui_put(html + "</dl></div>")
+    addEventListener("aio-search-performed", (e) => {
+        //this outer event listener fires on the /help search
+        addEventListener("aio-search-performed", (e) => {
+            //this inner one fires on the next search
+            ui_modeclear()
+        }, { once: true })
+    }, { once: true })
     return []
 }, () => [])
 
@@ -1536,7 +1543,8 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
 
     dispatchEvent(new CustomEvent("aio-search-performed", {
         detail: {
-            results: entries
+            results: entries,
+            query: filters.newSearch
         }
     }))
 }
