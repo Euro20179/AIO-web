@@ -1396,8 +1396,10 @@ async function createRelationButtons(thisId: bigint, elementParent: HTMLElement,
         child = await items_getEntryAny(child.ItemId)
         let el = createClickableEntryUI(
             child.ItemId,
-            () => {
-                if(items_isSelected(child.ItemId)) {
+            (_target: HTMLElement, e: Event) => {
+                if(e && "altKey" in e && e.altKey) {
+                    openDisplayWinUI(child.ItemId)
+                } else if(items_isSelected(child.ItemId)) {
                     dom_getel(`display-entry[data-item-id="${child.ItemId}"]`)?.scrollIntoView({
                         behavior: "smooth"
                     })
