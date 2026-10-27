@@ -120,14 +120,24 @@ function startupUI({
                 textl = cmd?.autoComplete(args[argno], argno) || []
             }
             for(let t of textl) {
-                if(!t.startsWith(curArg)) continue
+                if(!t.startsWith(curArg) || !curArg.length) continue
                 let e = document.createElement("button")
                 e.role = "option"
                 e.innerText = t
-                e.onclick = () => {
+                e.onclick = async() => {
                     let args = q.value.split(" ")
                     args = args.slice(0, curArgNo).concat([t]).concat(args.slice(curArgNo + 1))
-                    q.value = args.join(" ")
+                    let cmd = _searchCommands.get(e.innerText.slice(1))
+                    if (cmd?.kind == "replace") {
+                        let val = await cmd.getResults(args)
+                        if (typeof val === 'string') {
+                            q.value = val
+                        } else {
+                            alert(`${e.innerText} was 'replace' but returned results instead of a replacement`)
+                        }
+                    } else {
+                        q.value = args.join(" ")
+                    }
                     q.focus()
                     e.parentElement?.replaceChildren()
                 }
@@ -1361,10 +1371,17 @@ function getSearchDataUI(): FormData {
 const _searchCommands = new Map<string, SearchCommandUI>
 
 class SearchCommandUI{
-    getResults: (args: string[]) => Promise<InfoEntry[]>
+    kind: "replace" | "search"
+    getResults: (args: string[]) => Promise<InfoEntry[] | string>
     autoComplete: (arg: string, argno: number) => string[]
     description: string
-    constructor(description: string, getResults: SearchCommandUI["getResults"], autoComplete: SearchCommandUI["autoComplete"]) {
+    constructor(
+        kind: SearchCommandUI["kind"],
+        description: string,
+        getResults: SearchCommandUI["getResults"],
+        autoComplete: SearchCommandUI["autoComplete"]
+    ) {
+        this.kind = kind
         this.description = description
         this.getResults = getResults
         this.autoComplete = autoComplete
@@ -1372,11 +1389,15 @@ class SearchCommandUI{
 
 }
 
-function addSearchCommandUI(name: string, description: string, do_: (args: string[]) => Promise<InfoEntry[]>, compl: (arg: string, argno: number) => string[]) {
-    _searchCommands.set(name, new SearchCommandUI(description, do_, compl))
+function addSearchCommandUI(name: string, kind: SearchCommandUI["kind"], description: string, do_: (args: string[]) => Promise<InfoEntry[] | string>, compl: (arg: string, argno: number) => string[]) {
+    _searchCommands.set(name, new SearchCommandUI(kind, description, do_, compl))
 }
 
-addSearchCommandUI("help", "list commands", async() => {
+addSearchCommandUI("planned", "replace", "search planned", async() => {
+    return "3 @planned"
+}, () => [])
+
+addSearchCommandUI("help", "search", "list commands", async() => {
     mode_setMode("entry")
     ui_clearall()
     let html = `<div><h2>Search Commands</h2><dl>`
@@ -1394,7 +1415,7 @@ addSearchCommandUI("help", "list commands", async() => {
     return []
 }, () => [])
 
-addSearchCommandUI("s", "search using a metadata provider", async(q) => {
+addSearchCommandUI("s", "search", "search using a metadata provider", async(q) => {
     let [provider, ...search] = q
     let results: InfoEntry[] = []
     if (search.length == 0) {
@@ -1500,7 +1521,10 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
                 alert(`/${command} not found`)
                 break
             }
-            entries = await cmd.getResults(filters.newSearch.split(" ").slice(1))
+            if (cmd.kind == "replace") {
+                return
+            }
+            entries = await cmd.getResults(filters.newSearch.split(" ").slice(1)) as InfoEntry[]
         }
     }
 
