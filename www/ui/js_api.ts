@@ -701,6 +701,19 @@ function dom_createdatalist(name: string, from: string[], doc: Document = docume
 }
 
 /**
+ * add an option to a datalist
+ * @param {HTMLDataListElement} dl
+ * @param {string} label
+ * @param {string} value
+ */
+function dom_appenddatalist(dl: HTMLDataListElement, label: string, value: string): void {
+    const o = document.createElement("option")
+    o.value = value
+    o.innerText = label
+    dl.append(o)
+}
+
+/**
  * Resets a form completely (including type="hidden" inputs)
  * @param {HTMLFormElement} form
  */
@@ -846,6 +859,15 @@ function ui_setstat(name: string, val: number): number {
  */
 function ui_delstat(name: string): boolean {
     return deleteStatUI(name)
+}
+
+/**
+ * Add a search preset
+ * @param {string} label
+ * @param {string} query
+ */
+function ui_addsearchrec(label: string, query: string) {
+    dom_appenddatalist(dom_getelorthrow("#search-recs", HTMLDataListElement), label, query)
 }
 
 /**
