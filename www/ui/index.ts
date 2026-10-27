@@ -138,19 +138,6 @@ async function main() {
         }))
     }
 
-    //do this second because events can get really large, and having to wait for it could take a while
-    loadUserEvents(uid).then(() => {
-        for (let item of items_getSelected()) {
-            mode_refreshItem(item.ItemId);
-        }
-    });
-
-    loadTransactions(uid).then(() => {
-        for(let item of items_getSelected()) {
-            mode_refreshItem(item.ItemId)
-        }
-    })
-
     items_refreshRelations(uid).then(() => {
         for (let item of items_getSelected()) {
             mode_refreshItem(item.ItemId);
