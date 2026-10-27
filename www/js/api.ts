@@ -668,6 +668,7 @@ async function* api_streamEntriesAll(itemIds: bigint[], uid: number): AsyncGener
     events: UserEvent[],
     transactions: TransactionEntry[]
 }> {
+    if(itemIds.length === 0) return
     let res = await fetch(`${apiPath}/get-all-for-entries?uid=${uid}`, {
         method: "POST",
         headers: {
