@@ -119,8 +119,12 @@ function startupUI({
                 curArgNo = argno
                 textl = cmd?.autoComplete(args[argno], argno) || []
             }
+
+            // we dont want commands showing up when / has not been hit
+            if (curArg == "" && curArgNo == 0) return
+
             for(let t of textl) {
-                if(!t.startsWith(curArg) || !curArg.length) continue
+                if(!t.startsWith(curArg)) continue
                 let e = document.createElement("button")
                 e.role = "option"
                 e.innerText = t
