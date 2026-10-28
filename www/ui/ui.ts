@@ -1397,9 +1397,11 @@ function addSearchCommandUI(name: string, kind: SearchCommandUI["kind"], descrip
     _searchCommands.set(name, new SearchCommandUI(kind, description, do_, compl))
 }
 
-addSearchCommandUI("planned", "replace", "search planned", async() => {
-    return "3 @planned"
-}, () => [])
+for(let event of ["planned", "finished", "viewing", "dropped", "paused"]) {
+    addSearchCommandUI(event, "replace", `search ${event}`, async() => {
+        return `3 @${event}`
+    }, () => [])
+}
 
 addSearchCommandUI("help", "search", "list commands", async() => {
     mode_setMode("entry")
