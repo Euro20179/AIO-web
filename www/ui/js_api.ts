@@ -867,7 +867,7 @@ function ui_delstat(name: string): boolean {
  * @param {string} query
  */
 function ui_addsearchrec(label: string, query: string) {
-    dom_appenddatalist(dom_getelorthrow("#search-recs", HTMLDataListElement), label, query)
+    addSearchCommandUI(label, "replace", query, async() => query, () => [])
 }
 
 /**
