@@ -2505,7 +2505,12 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
         g.appendChild(opt)
     }
 
-    formatSelector.replaceChildren(...Object.values(optGroups))
+    let metaOpt = document.createElement("option")
+    metaOpt.value = String(-1)
+    metaOpt.innerText = "metadata"
+    metaOpt.hidden = true
+
+    formatSelector.replaceChildren(metaOpt, ...Object.values(optGroups))
 }
 
 

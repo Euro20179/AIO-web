@@ -2220,12 +2220,14 @@ function items_meta2info(meta: MetadataEntry): InfoEntry {
         En_Title: meta.Title,
         Native_Title: meta.Native_Title,
         ItemId: meta.ItemId,
+        MetadataId: meta.ItemId,
         Uid: meta.Uid,
         ArtStyle: 0,
-        Collection: JSON.parse(meta.Genres || "[]").join("\x1F"),
-        Tags: JSON.parse(meta.Genres || "[]"),
+        Collection: "[]",
+        Tags: [],
         Location: "",
-        Format: 7,
+        Format: -1, //indicates metadata
+        Format_Modifiers: 0,
         Library: 0n,
         RecommendedBy: "[]",
         Type: "Movie",
@@ -2241,13 +2243,13 @@ function items_meta2info(meta: MetadataEntry): InfoEntry {
 function items_meta2user(meta: MetadataEntry): UserEntry {
     return {
         CurrentPosition: "",
-        Extra: meta.MediaDependant || "{}",
+        Extra: "{}",
         ItemId: meta.ItemId,
         Uid: meta.Uid,
         Minutes: 0,
         Notes: "",
         Status: "",
-        UserRating: meta.Rating,
+        UserRating: 0,
         ViewCount: 0
     }
 }
