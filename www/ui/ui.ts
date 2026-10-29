@@ -2190,7 +2190,7 @@ async function newEntryUI(form: HTMLFormElement) {
 
     let json = api_deserializeJsonl<InfoEntry>(text).next().value
 
-    items_addById(json.ItemId).then(() => {
+    items_addById(json.ItemId).next().then(() => {
         let toUpdate: Parameters<typeof updateInfo2>["0"] = {
             [String(json.ItemId)]: {
                 info: json
@@ -2510,7 +2510,7 @@ async function fillFormatSelectionUI(formatSelector: HTMLSelectElement) {
     metaOpt.innerText = "metadata"
     metaOpt.hidden = true
 
-    formatSelector.replaceChildren(metaOpt, ...Object.values(optGroups))
+    formatSelector.replaceChildren(...Object.values(optGroups), metaOpt)
 }
 
 
