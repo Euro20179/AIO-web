@@ -304,7 +304,9 @@ CalendarMode.prototype.sub = function(this: CalendarMode, entry: InfoEntry) {
 
 CalendarMode.prototype.addList = function(this: CalendarMode, entry: InfoEntry[]) {
     this.selectedItems = this.selectedItems.concat(entry)
-    this._render()
+    items_getAllForIfNotGotten(entry.map(v => v.ItemId)).then(() => {
+        this._render()
+    })
 }
 
 CalendarMode.prototype.subList = function(this: CalendarMode, entry: InfoEntry[]) {
