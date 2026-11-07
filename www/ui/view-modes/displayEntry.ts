@@ -2311,6 +2311,7 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         "user-view-count": user.ViewCount,
         "user-rating": user.UserRating,
         "get-metadata": false,
+        "metadata-id": item.MetadataId,
         type: item.Type,
     }).then(async (res) => {
         if (!res || res.status !== 200) {
@@ -2323,14 +2324,13 @@ function copyThis(this: DisplayMode, item: InfoEntry) {
         const userCopy = { ...user }
         userCopy.ItemId = itemCopy.ItemId
         const metaCopy = { ...meta }
-        metaCopy.ItemId = itemCopy.ItemId
+        metaCopy.ItemId = itemCopy.MetadataId
 
         const promises = []
         promises.push(api_setItem("", itemCopy))
         promises.push(api_setItem("engagement/", userCopy))
-        promises.push(api_setItem("metadata/", metaCopy))
         for (let event of events) {
-            promises.push(api_registerEvent(metaCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
+            promises.push(api_registerEvent(itemCopy.ItemId, event.Event, event.Timestamp, event.After, event.TimeZone))
         }
 
         Promise.all(promises)

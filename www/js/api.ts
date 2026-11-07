@@ -451,11 +451,13 @@ type NewEntryParams = {
     "user-status"?: UserStatus,
     "user-view-count"?: number,
     "user-notes"?: string
+    "metadata-id": bigint
 }
 
 async function api_createEntry(params: NewEntryParams) {
     let obj: Record<string, string> = {}
-    for(let param in params ) {
+    for(let param in params) {
+        if (params[param as keyof typeof params] === undefined) continue
         obj[param] = String(params[param as keyof typeof params])
     }
     return await authorizedRequest(`${apiPath}/entry`, {
