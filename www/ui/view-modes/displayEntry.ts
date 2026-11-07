@@ -1350,7 +1350,7 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
         }
 
         let eventNameText = event.Event
-        if (eventNameText.toLowerCase().includes("ending")) {
+        if (eventNameText.toLowerCase().includes("ending") && getUserUID() !== items_getEntry(event.ItemId).info.Uid) {
             eventNameText = eventNameText.replace(/(.*)(ending)/i, "<span><span class='spoiler'>$1</span>$2</span>")
         }
 
