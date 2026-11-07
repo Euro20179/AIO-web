@@ -1749,14 +1749,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     renderComponent("#on-format", async (onFormat) => {
         const name = await formatToName(item.Format, item.Format_Modifiers)
         if (!(name).startsWith("UNOWNED")) {
-            onFormat.title = name
-            onFormat.innerHTML = formatToSymbolUI(item.Format, item.Format_Modifiers)
+            onFormat.setAttribute("toggle-hint", "")
+            onFormat.innerHTML = `${formatToSymbolUI(item.Format, item.Format_Modifiers)} <span popover='hint'>${name}</span>`
         }
     })
 
     renderComponent("#media-type", el => {
-        el.innerText = typeIcon
-        el.title = item.Type
+        el.innerHTML = `${typeIcon} <span popover='hint'>${item.Type}</span>`
+        el.setAttribute("toggle-hint", "")
     })
     renderComponent("#country-origin", el => {
         if (meta.Country) {
