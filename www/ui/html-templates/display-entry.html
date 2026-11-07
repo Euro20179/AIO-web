@@ -10,6 +10,30 @@
 
 <de-template-editor></de-template-editor>
 
+<dialog id="format-settings" popover="auto">
+    <h2 class="center">Format Settings</h2>
+    <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
+        <select id="type-selector" style="min-width: 50px;"
+            toggle-hint="type-hint"
+            entry-action="settype" entry-action-trigger="change"
+            aria-labelledby="type-hint"> </select>
+        <span id="type-hint" popover='hint'>Media Type</span>
+
+        <select id="format-selector" toggle-hint='format-hint'
+            entry-action="setformat" entry-action-trigger="change"
+            aria-labelledby="format-hint"></select>
+        <span id="format-hint" popover='hint'>Media Format</span>
+
+        <button command="toggle-popover" commandfor="art-styles-menu" style="height: fit-content;">Art Styles</button>
+
+        <format-modifier-popover></format-modifier-popover>
+
+        <button command="toggle-popover" commandfor="format-modifier-selection-popover"  style="height: fit-content;">
+            Format Mods
+        </button>
+    </menu>
+</dialog>
+
 <dialog id="notes-edit-dialog">
     <p class="center">Notes save automatically</p>
     <textarea id="notes-edit-box" rows="10" cols="80"></textarea>
@@ -72,9 +96,6 @@
 
     <figure class="thumbnail-fig flex column" id="thumbnail-fig">
         <div class="center" aria-hidden="true" style="text-box: trim-end text alphabetic;">
-            <span id="media-type"></span>
-            on
-            <span id="on-format"></span>
         </div>
 
         <input type="file" hidden id="thumbnail-file-upload">
@@ -123,7 +144,13 @@
         </hgroup>
 
         <div class="flex column x-small-gap" style="align-items: center;">
+
             <p class="m-0">
+                A
+                <button id="media-type" popovertarget="format-settings" style="text-box-trim: trim-both"></button>
+                on
+                <button id="on-format" popovertarget="format-settings" style="text-box-trim: trim-both"></button>.
+
                 Rated
                 <button class="rating styleless-button" id="user-rating"
                     toggle-hint='your-rating-hint'
@@ -136,30 +163,9 @@
                 Times
                 (<button class="styleless-button" id="view-time" entry-action="setviewminutes"></button> hours)
             </p>
-
             <de-status-menu></de-status-menu>
         </div>
 
-        <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
-            <select id="type-selector" style="min-width: 50px;"
-                toggle-hint="type-hint"
-                entry-action="settype" entry-action-trigger="change"
-                aria-labelledby="type-hint"> </select>
-            <span id="type-hint" popover='hint'>Media Type</span>
-
-            <select id="format-selector" toggle-hint='format-hint'
-                entry-action="setformat" entry-action-trigger="change"
-                aria-labelledby="format-hint"></select>
-            <span id="format-hint" popover='hint'>Media Format</span>
-
-            <button command="toggle-popover" commandfor="art-styles-menu" style="height: fit-content;">Art Styles</button>
-
-            <format-modifier-popover></format-modifier-popover>
-
-            <button command="toggle-popover" commandfor="format-modifier-selection-popover"  style="height: fit-content;">
-                Format Mods
-            </button>
-        </menu>
     </div>
 
     <section id="mid-section">
