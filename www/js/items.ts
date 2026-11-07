@@ -1308,6 +1308,10 @@ sorts.set("user-title", (a, b) => {
     return a.En_Title < b.En_Title ? 0 : 1
 })
 
+sorts.set("minutes", (a, b) => {
+    return findUserEntryById(a.ItemId).Minutes - findUserEntryById(b.ItemId).Minutes
+})
+
 sorts.set("native-title", (a, b) => {
     let am = findMetadataById(a.ItemId)
     let bm = findMetadataById(b.ItemId)

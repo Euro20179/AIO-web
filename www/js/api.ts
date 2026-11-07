@@ -856,6 +856,7 @@ type SortKind = "user-title"
                     | "finished"
                     | "item-id"
                     | "priority"
+                    | "minutes"
                     | ""
 
 /**
@@ -885,6 +886,8 @@ function api_uiSort2Api(sort: SortKind) {
             return "entryInfo.itemId"
         case "priority":
             return "entryInfo.priority"
+        case "minutes":
+            return "minutes"
         //in case the order by doesnt exist on the server
         default:
             return ""

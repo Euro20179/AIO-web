@@ -156,6 +156,7 @@
                             <option value="release-year" title="*requires metadata">Release year*</option>
                             <option value="cost">Cost</option>
                             <option value="priority">Priority</option>
+                            <option value="minutes">Time Spent</option>
                         </optgroup>
                         <optgroup label="Title">
                             <option value="user-title">User Title</option>
