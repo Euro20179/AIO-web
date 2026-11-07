@@ -1746,11 +1746,11 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     let formatIcon = formatToSymbolUI(item.Format, item.Format_Modifiers)
+    const formatName = await formatToName(item.Format, item.Format_Modifiers)
     renderComponent("#on-format", async (onFormat) => {
-        const name = await formatToName(item.Format, item.Format_Modifiers)
-        if (!(name).startsWith("UNOWNED")) {
+        if (!(formatName).startsWith("UNOWNED")) {
+            onFormat.innerHTML = `${formatToSymbolUI(item.Format, item.Format_Modifiers)} <span popover='hint'>${formatName}</span>`
             onFormat.setAttribute("toggle-hint", "")
-            onFormat.innerHTML = `${formatToSymbolUI(item.Format, item.Format_Modifiers)} <span popover='hint'>${name}</span>`
         }
     })
 
