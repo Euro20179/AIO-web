@@ -1350,6 +1350,10 @@ function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLT
         }
 
         let eventNameText = event.Event
+        if (eventNameText.toLowerCase().includes("ending")) {
+            eventNameText = eventNameText.replace(/(.*)(ending)/i, "<span><span class='spoiler'>$1</span>$2</span>")
+        }
+
         if(associatedTransaction) {
             eventNameText += ` (${Math.abs(associatedTransaction.Price)} ${associatedTransaction.Currency})`
         }
