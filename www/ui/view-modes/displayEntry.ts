@@ -1307,12 +1307,24 @@ function updateCostDisplay(this: DisplayMode, el: ShadowRoot, itemId: bigint) {
 
     const { include, recursive } = whatToInclude(el)
 
-    costEl.innerText = String(items_calculateCost(itemId, include, recursive))
+    items_loadTransactionsFor(
+        items_reduce<bigint[]>(itemId, include, recursive, (p, c) => (p.push(c), p), []),
+        0,
+        false
+    ).then(() => {
+        costEl.innerText = String(items_calculateCost(itemId, include, recursive))
+    })
 }
 
-function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint, eventFilter = "") {
+async function updateEventsDisplay(this: DisplayMode, el: ShadowRoot, eventsTbl: HTMLTableElement, itemId: bigint, eventFilter = "") {
 
     const {include, recursive} = whatToInclude(el)
+
+    await items_loadEventsFor(
+        items_reduce<bigint[]>(itemId, include, recursive, (p, c) => (p.push(c), p), []),
+        0,
+        false
+    )
 
     const eventsToLookAt = items_findAllEvents(itemId, include, recursive)
         .filter(v => {

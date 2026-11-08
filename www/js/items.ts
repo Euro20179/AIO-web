@@ -315,6 +315,8 @@ class items_Entry {
         * or if it is a fake placeholder item
     */
     loaded: boolean
+    loadedEvents: boolean
+    loadedTransactions: boolean
 
     events: UserEvent[]
 
@@ -328,6 +330,8 @@ class items_Entry {
         //items_refreshRelations() must be called to fill all relations
         this.relations = new items_Relations(this.info.ItemId, [], [], [])
         this.loaded = true
+        this.loadedEvents = false
+        this.loadedTransactions = false
     }
 
     static fromObj({
@@ -793,6 +797,8 @@ async function items_loadAll(id: bigint, uid: number = 0, force = true): Promise
 
     _loading_ids.add(id)
     let e = await api_getEntryAll(id, uid)
+    items_getEntry(id).loadedTransactions = true
+    items_getEntry(id).loadedEvents = true
     if(e) {
         items_setItem(e)
     }
@@ -835,6 +841,8 @@ async function items_getAllForIfNotGotten(ids: bigint[]): Promise<items_Entry[]>
             findMetadataById(id).Datapoints.match(/"_AIO_GENERIC":true/) ||
             findUserEntryById(id).Extra.match(/"_AIO_GENERIC":true/)
         ) {
+            items_getEntry(id).loadedTransactions = true
+            items_getEntry(id).loadedEvents = true
             notGotten.push(id)
         }
     }
@@ -1217,6 +1225,31 @@ async function loadUserEvents(uid: number) {
         //if an item had an event, but now has 0 events, if we loop through the new events, it will never hit that item that now has no events
         //therefore it will never be updated
         items_getEntry(BigInt(entry)).events = grouped[entry] || []
+    }
+}
+
+async function items_loadTransactionsFor(itemIds: bigint[], uid: number = 0, force: boolean = true) {
+    let promises = []
+    for(let id of itemIds) {
+        if (!items_getEntry(id).loadedTransactions || force)
+            promises.push(api_loadList<TransactionEntry>(`entry/${id}/transactions`, uid, ))
+        items_getEntry(id).loadedTransactions = true
+    }
+    for(let transactionList of await Promise.all(promises)) {
+        if(!transactionList.length) continue
+        items_updateEntryById(String(transactionList[0].ItemId), { transactions: transactionList })
+    }
+}
+
+async function items_loadEventsFor(itemIds: bigint[], uid: number = 0, force: boolean = true) {
+    let promises = []
+    for(let id of itemIds) {
+        if (!items_getEntry(id).loadedEvents || force)
+            promises.push(api_loadList<UserEvent>(`entry/${id}/events`, uid, ))
+        items_getEntry(id).loadedEvents = true
+    }
+    for(let eventList of await Promise.all(promises)) {
+        items_updateEntryById(String(eventList[0].ItemId), { events: eventList })
     }
 }
 
