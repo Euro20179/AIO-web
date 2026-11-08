@@ -1249,6 +1249,7 @@ async function items_loadEventsFor(itemIds: bigint[], uid: number = 0, force: bo
         items_getEntry(id).loadedEvents = true
     }
     for(let eventList of await Promise.all(promises)) {
+        if(!eventList.length) continue
         items_updateEntryById(String(eventList[0].ItemId), { events: eventList })
     }
 }
