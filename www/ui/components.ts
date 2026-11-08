@@ -190,7 +190,8 @@ async function updateDeclarativeDSL(actions: Record<string, (target: HTMLElement
                 symbols.set("this", new EntryTy(item))
                 res = await parseExpression(script, symbols)
             } else {
-                res = new Function("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
+                //@ts-ignore
+                res = await new ((async function(){}).constructor)("root", "results", script).bind(item)(root, items_getResults().map(v => v.info), item)
             }
             let outputId = elem.getAttribute("data-output")
             if (outputId) {
