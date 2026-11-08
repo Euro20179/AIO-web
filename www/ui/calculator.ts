@@ -1746,6 +1746,8 @@ class CalcVarTable {
             }
 
             let children = [...findDescendants(jsId)]
+            await items_getAllForIfNotGotten(children.map(v => v.ItemId))
+            console.log(children.map(v => items_getEntry(v.ItemId)))
 
             return new Arr(children.map(v => new EntryTy(v.info)))
         }, "Gets the children of an entry",
@@ -1758,6 +1760,7 @@ class CalcVarTable {
             }
 
             let children = [...findCopies(jsId)]
+            await items_getAllForIfNotGotten(children.map(v => v.ItemId))
 
             return new Arr(children.map(v => new EntryTy(v.info)))
         }, "Get the copies of an entry",
