@@ -1477,7 +1477,7 @@ async function formatToName(format: number, modifiers: number): Promise<string> 
 
     const formats = await api_listFormats()
 
-    if (format > Object.keys(formats).length) {
+    if (format > Object.keys(formats).length || format < 0) {
         return `unknown${out}`
     }
     return `${formats[format].toUpperCase()}${out}`
