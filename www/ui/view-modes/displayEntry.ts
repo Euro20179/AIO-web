@@ -93,6 +93,12 @@ function _mkde_actions() {// {{{
                 })
         },
 
+        reload: function(item) {
+            items_loadAll(item.ItemId, item.Uid, true).then(() => {
+                mode_refreshItem(item.ItemId)
+            })
+        },
+
         /**
             * Creates a buy/sell transaction.
         */

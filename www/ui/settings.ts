@@ -81,6 +81,13 @@ const defaultSettings = {
             action: 'identifymetadata',
         },
 
+        reload: {
+            action: "reload",
+            title: "reload item",
+            "text": "⟳",
+            shortTitle: "reload",
+        },
+
         refresh: {
             action: "refresh",
             title: "refresh metadata",
