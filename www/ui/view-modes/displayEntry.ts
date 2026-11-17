@@ -637,13 +637,20 @@ function _mkde_actions() {// {{{
          * Sets the type of the current item to the value of this element
          */
         settype: function(item, _, target) {
-            if (!("value" in target)) return
+            if (!("value" in target) || typeof target.value != 'string') return
+            let val = target.value
             api_listTypes().then(types => {
-                if (!types.includes(target.value as EntryType)) return
-                item.Type = target.value as EntryType
+                for(let type of types) {
+                    if (type.toLowerCase() == val.toLowerCase()) {
+                        val = type
+                        break
+                    }
+                }
+
+                item.Type = val as EntryType
                 api_setItem("", item)
                     .catch(console.error)
-                    .then(alert.bind(window, `Switched type to: ${target.value}`))
+                    .then(alert.bind(window, `Switched type to: ${val}`))
                 updateInfo2({
                     [String(item.ItemId)]: {
                         info: item
@@ -1683,13 +1690,21 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     })
 
     //type selector
-    renderComponent("#type-selector", el => {
-        if (!(el instanceof this.win.HTMLSelectElement)) {
+    renderComponent("#type-selector", ts => {
+        if (!(ts instanceof this.win.HTMLSelectElement) && !(ts instanceof this.win.HTMLDataListElement)) {
             console.warn("#type-selector must be a <select>")
             return
         }
-        fillTypeSelectionUI(el).then(() => {
-            el.value = item.Type
+
+        fillTypeSelectionUI(ts).then(() => {
+            if ("value" in ts) {
+                ts.value = item.Type
+            }
+            renderComponent(`[list="type-selector"]`, s => {
+                if ("value" in s) {
+                    s.value = item.Type
+                }
+            })
         })
     })
 

@@ -13,10 +13,13 @@
 <dialog id="format-settings" popover="auto">
     <h2 class="center">Format Settings</h2>
     <menu aria-label="Display and item settings" class="m-0 p-0" id="menu-bar">
-        <select id="type-selector" style="min-width: 50px;"
+        <datalist id="type-selector"> </datalist>
+
+        <input list="type-selector"
             toggle-hint="type-hint"
             entry-action="settype" entry-action-trigger="change"
-            aria-labelledby="type-hint"> </select>
+            aria-labelledby="type-hint">
+
         <span id="type-hint" popover='hint'>Media Type</span>
 
         <select id="format-selector" toggle-hint='format-hint'

@@ -2532,7 +2532,7 @@ async function fillRecommendedListUI(list: HTMLDataListElement, uid: number) {
     * Fills a select element with all the possible types
 * @param {HTMLSelectElement} typeDropdown
 */
-async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
+async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement | HTMLDataListElement) {
     const groups = {
         "Show": "TV",
         "Movie": "TV",
