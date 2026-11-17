@@ -3,17 +3,6 @@ function getCtx2(this: GraphMode, id: string): CanvasRenderingContext2D {
     return canv.getContext("2d") as CanvasRenderingContext2D
 }
 
-const typeColors = {
-    "Manga": "#e5c890",
-    "Show": "#f7c8e0",
-    "Movie": "#95bdff",
-    "MovieShort": "#b4e4ff",
-    "Song": "#dfffd8",
-    "Game": "#fed8b1",
-    "Book": "gainsboro",
-    "Collection": "#b4befe"
-}
-
 
 let groupBySelect = document.getElementById("group-by") as HTMLSelectElement
 let typeSelection = document.getElementById("chart-type") as HTMLSelectElement

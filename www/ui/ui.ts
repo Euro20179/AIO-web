@@ -2546,6 +2546,7 @@ async function fillTypeSelectionUI(typeDropdown: HTMLSelectElement) {
         "Album": "Music",
         "Soundtrack": "Music",
         "Book": "Reading",
+        "Novel": "Reading",
         "Manga": "Reading",
         "ShortStory": "Reading",
         "Game": "Activity",
