@@ -115,7 +115,7 @@ Description:
         updateInfo2({
             [id]: e
         })
-        renderDisplayItem.call(m, e.meta.ItemId)
+        renderDisplayItem.call(m, BigInt(id))
     })
 })()
 </script>
