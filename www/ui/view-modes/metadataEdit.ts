@@ -19,7 +19,7 @@ MetadataMode.prototype.mkcontainer = function(this: MetadataMode) {
     return c
 }
 
-async function renderMetadataItem(out: HTMLElement, meta: MetadataEntry) {
+async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry) {
     const el = out.shadowRoot
     if (!el) {
         throw new Error("out does not contain a shadowroot")
@@ -103,7 +103,7 @@ MetadataMode.prototype.add = function(this: MetadataMode, entry: InfoEntry) {
     this.output.append(out)
     items_getMetadataById(entry.ItemId).then(meta => {
         out.setAttribute("data-item-id", String(meta.ItemId))
-        renderMetadataItem(out, meta)
+        refreshMetadataItem(out, meta)
     })
     return out
 }
@@ -112,6 +112,23 @@ MetadataMode.prototype.addList = function(this: MetadataMode, entries: InfoEntry
     for(let entry of entries) {
         this.add(entry)
     }
+}
+
+MetadataMode.prototype.sub = function(this: MetadataMode, entry: InfoEntry) {
+    let el = this.output.querySelector(`metadata-item[data-item-id=${entry.MetadataId}]`)
+    if(el) el.remove()
+}
+
+MetadataMode.prototype.subList = function(this: MetadataMode, entries: InfoEntry[]) {
+    for(let e of entries) {
+        this.sub(e)
+    }
+}
+
+MetadataMode.prototype.refresh = function(this: MetadataMode, id: bigint) {
+    let el = this.output.querySelector(`metadata-item[data-item-id="${id}"]`) as HTMLElement
+    if(el)
+        refreshMetadataItem(el, findMetadataById(id))
 }
 
 
