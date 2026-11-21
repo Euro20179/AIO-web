@@ -36,6 +36,7 @@
     <script src="/ui/view-modes/scriptMode.js" defer></script>
     <script src="/ui/view-modes/event-mode.js" defer></script>
     <script src="/ui/view-modes/menu-mode.js" defer></script>
+    <script src="/ui/view-modes/metadataEdit.js" defer></script>
     <script src="/ui/shortcuts.js" defer></script>
     <script src="/ui/ui.js" defer></script>
     <!-- defer because document needs to load first -->
@@ -54,6 +55,7 @@
         "login-dialog",
         "gallery-entry",
         "display-entry",
+        "metadata-item",
         "alert-box",
         "tz-datalist",
         "color-scheme-selector",
@@ -196,6 +198,7 @@
                         <option value="gallery" title="Gallery mode">🖼︎ Gallery</option>
                         <option value="script" title="Script mode">&lt;> Script</option>
                         <option value="tierlist" title="Tierlist mode">S Tierlist</option>
+                        <option value="metadata" title="Metadata editor">Metadata</option>
                         <option value="sidebar" title="Tierlist mode" hidden>| Sidebar</option>
                     </select><!-- no whitespace --><button id="new-view-window" style='height: 100%;'>🪟</button>
                 </div>

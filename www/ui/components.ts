@@ -392,6 +392,7 @@ const component_shadow_templates = [
 
     /* outputs/modes */
     "gallery-entry",
+    "metadata-item",
 
     /* specific dialogs */
     "edit-transaction",

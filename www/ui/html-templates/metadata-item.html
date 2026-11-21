@@ -1,0 +1,42 @@
+<template id="metadata-item">
+
+<link rel="stylesheet" href="/css/colors.css">
+<link rel="stylesheet" href="/css/general.css">
+
+<style>
+[contenteditable] {
+    text-decoration: underline dotted;
+}
+</style>
+
+<h1 contenteditable put-data="Title">{TITLE}</h1>
+<h3 contenteditable put-data="meta.Native_Title">{NATIVE TITLE}</h3>
+
+<p>
+Rated <span put-data="Rating" contenteditable></span>/<span put-data="RatingMax" contenteditable></span> (<span id="rating-percent"></span>%)
+</p>
+
+<label>provider <input id="provider" list="providers" placeholder="provider"></label> (<span put-data="ProviderID" contenteditable toggle-hint="provider-id-hint"></span>)
+<span id="provider-id-hint" popover='hint'>Provider id</span>
+
+<datalist id="providers">
+    <option value="anilist"></option>
+    <option value="omdb"></option>
+    <option value="googlebooks"></option>
+    <option value="steam"></option>
+    <option value="googlebooks"></option>
+    <option value="wikipedia"></option>
+    <option value="gtdbgamecube"></option>
+    <option value="gtdbswitch"></option>
+    <option value="gtdbcube"></option>
+    <option value="gtdbcustom"></option>
+    <option value="gtdbds"></option>
+    <option value="gtdbwiiu"></option>
+    <option value="gtdbwii"></option>
+    <option value="gtdbps3"></option>
+    <option value="seerr"></option>
+    <option value="radarr"></option>
+</datalist>
+
+
+</template>

@@ -475,6 +475,10 @@
         }
     }/* }}} */
 
+    #metadata-items {
+        height: 100%;
+    }
+
     #gallery-output {/* {{{ */
         width: 100%;
 
