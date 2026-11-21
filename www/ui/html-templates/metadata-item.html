@@ -7,16 +7,98 @@
 [contenteditable] {
     text-decoration: underline dotted;
 }
+
+*:empty {
+    border: 1px dotted;
+}
+
+[empty-placeholder]:empty::before {
+    content: attr(empty-placeholder);
+    color: hsl(from currentColor h s l / 50%);
+    text-decoration: none;
+}
+
 </style>
 
-<h1 contenteditable put-data="Title">{TITLE}</h1>
-<h3 contenteditable put-data="meta.Native_Title">{NATIVE TITLE}</h3>
+<input type="file" hidden id="thumbnail-file-upload">
+
+<figure style="float: left; margin: 1ex 2ch;">
+    <figcaption style="text-align: center;">thumbnail</figcaption>
+    <button class="styleless-button" entry-action="setthumbnail">
+        <img src="" alt="" class="thumbnail" id="thumbnail" loading="lazy" height="200">
+    </button>
+</figure>
+
+
+<textarea
+    put-data="Title"
+    entry-action="save"
+    entry-action-trigger="input"
+    placeholder="title"
+    cols="30"
+></textarea>
+<br>
+<textarea
+    put-data="meta.Native_Title"
+    entry-action="save"
+    entry-action-trigger="input"
+    entry-action-save="Native_Title"
+    placeholder="native title"
+    cols="30"
+></textarea>
+
+<p>(id: <span put-data="ItemId"></span>)</p>
 
 <p>
-Rated <span put-data="Rating" contenteditable></span>/<span put-data="RatingMax" contenteditable></span> (<span id="rating-percent"></span>%)
+    Released in
+    <input
+        put-data="ReleaseYear"
+        put-data-mode="value"
+        type="number"
+        entry-action="save"
+        entry-action-trigger="change"
+        value="0"
+        style="width: 12ch;"
+    >
+</p>
+<p>
+    Rated
+    <input
+        put-data="Rating"
+        put-data-mode="value"
+        type="number"
+        entry-action="save"
+        entry-action-trigger="change"
+        value="0"
+        style="width: 12ch;"
+    >
+    /
+    <input
+        put-data="RatingMax"
+        put-data-mode="value"
+        type="number"
+        entry-action="save"
+        entry-action-trigger="change"
+        value="10"
+        style="width: 12ch;"
+    >
+
+    (<span id="rating-percent"></span>%)
 </p>
 
-<label>provider <input id="provider" list="providers" placeholder="provider"></label> (<span put-data="ProviderID" contenteditable toggle-hint="provider-id-hint"></span>)
+<br>
+
+<textarea
+    put-data="Description"
+    entry-action="save"
+    entry-action-trigger="change"
+    cols="80"
+    rows="20"
+></textarea>
+
+<br>
+
+<label>provider <input id="provider" list="providers" placeholder="provider" entry-action-save="Provider" entry-action="save" entry-action-trigger="input"></label> (<input put-data="ProviderID" put-data-mode="value" entry-action="save" entry-action-trigger="input" toggle-hint="provider-id-hint">)
 <span id="provider-id-hint" popover='hint'>Provider id</span>
 
 <datalist id="providers">
