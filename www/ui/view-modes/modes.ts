@@ -25,12 +25,15 @@ interface ModeConstructor<T> {
   new (output?: HTMLElement | DocumentFragment, win?: Window & typeof globalThis): T;
 }
 
+type ModeAddOptions = {
+    meta?: MetadataEntry
+}
 interface Mode {
     output: HTMLElement | DocumentFragment
     win: Window & typeof globalThis
     container: HTMLElement | null
     NAME: string
-    add(entry: InfoEntry): HTMLElement
+    add(entry: InfoEntry, options?: ModeAddOptions): HTMLElement
     sub(entry: InfoEntry): any
     addList(entry: InfoEntry[]): any
     subList(entry: InfoEntry[]): any
@@ -239,13 +242,14 @@ function mode_chwin(newWin: Window & typeof globalThis, mode: Mode) {
  *
  * @param {InfoEntry} item
  * @param {Mode} [mode=undefined] the mode to update (otherwise all open modes)
+* @param {{meta?: MetadataEntry}} [options] additional options when selecting
  */
-function mode_selectItem(item: InfoEntry, mode?: Mode): HTMLElement[] {
+function mode_selectItem(item: InfoEntry, mode?: Mode, options?: ModeAddOptions): HTMLElement[] {
     if (mode) return [mode.add(item)]
 
     const elems = []
     for (const mode of mode_listOpen()) {
-        elems.push(mode.add(item))
+        elems.push(mode.add(item, options))
     }
     return elems
 }

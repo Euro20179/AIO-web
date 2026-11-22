@@ -307,8 +307,10 @@ function sidebar_selectList(entries: InfoEntry[], clearSelected: boolean = true)
 }
 var selectSidebarItems = sidebar_selectList
 
-function _changeSidebarItemData(id: bigint, el: HTMLElement) {
-    _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), findMetadataById(id), el.shadowRoot as ShadowRoot)
+function _changeSidebarItemData(id: bigint, el: HTMLElement, options?: {
+   meta?: MetadataEntry
+}) {
+    _updateSidebarEntryContents(findInfoEntryById(id), findUserEntryById(id), options?.meta || findMetadataById(id), el.shadowRoot as ShadowRoot)
     el.setAttribute("data-entry-id", String(id))
 }
 
@@ -360,16 +362,23 @@ var renderSidebarItemList = sidebar_renderItemList
  */
 function sidebar_renderFakeItem(
     item: InfoEntry,
-    parent: HTMLElement | DocumentFragment
+    parent: HTMLElement | DocumentFragment,
+    options?: {
+        meta?: MetadataEntry
+    }
 ): HTMLElement {
     let elem = document.createElement("sidebar-entry")
     let title = elem.shadowRoot?.getElementById("sidebar-title") as HTMLInputElement
     let img = elem.shadowRoot?.querySelector("[part=\"thumbnail\"]") as HTMLImageElement
     if (img) {
-        const x = document.createElement("p")
-        x.innerHTML = "X"
-        x.style.fontSize = "2rem"
-        img.replaceWith(x)
+        if (options?.meta) {
+            img.src = fixThumbnailURL(options.meta.Thumbnail)
+        } else {
+            const x = document.createElement("p")
+            x.innerHTML = "X"
+            x.style.fontSize = "2rem"
+            img.replaceWith(x)
+        }
     }
     title.value = item.En_Title
     parent.append(elem)
@@ -388,6 +397,7 @@ var renderFakeSidebarItem = sidebar_renderFakeItem
 function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLElement | DocumentFragment, options?: {
     below?: string,
     renderImg?: boolean
+    meta?: MetadataEntry,
 }) {
     let elem = document.createElement("sidebar-entry")
 
@@ -462,13 +472,13 @@ function sidebar_renderItem(this: SidebarMode, item: InfoEntry, parent?: HTMLEle
     )
 
     elem.addEventListener("on-screen-appear", async function(e) {
-        let meta = await items_getMetadataById(item.ItemId)
+        let meta = options?.meta || await items_getMetadataById(item.ItemId)
         if (img.src !== fixThumbnailURL(meta.Thumbnail)) {
             img.src = fixThumbnailURL(meta.Thumbnail)
         }
     })
 
-    _changeSidebarItemData(item.ItemId, elem)
+    _changeSidebarItemData(item.ItemId, elem, { meta: options?.meta })
 
     return elem
 }

@@ -1403,6 +1403,7 @@ for(let event of ["planned", "finished", "viewing", "dropped", "paused"]) {
     }, () => [])
 }
 
+
 addSearchCommandUI("help", "search", "list commands", async() => {
     mode_setMode("entry")
     ui_clearall()
@@ -1454,6 +1455,43 @@ addSearchCommandUI("s", "search", "search using a metadata provider", async(q) =
     }
     return []
 })
+
+addSearchCommandUI("m", "replace", "search aio metadata", async(q) => {
+    let s = q.join(" ")
+    const metadatas = await api_query(s, getUidUI(), 3, "", "metadata/")
+    components['sidebarUI']?.clearSelected()
+
+    clearUI(false)
+
+    mode_setMode("metadata")
+
+    items_setResults([])
+
+    function select(m: MetadataEntry) {
+        clearUI(false)
+        selectUI(items_meta2info(m), false, undefined, {
+            meta: m
+        })
+    }
+
+    let i = 0
+    for(let item of metadatas) {
+        let s = sidebar_renderFakeItem(items_meta2info(item), components['sidebarUI']?.output || document.createDocumentFragment(), {
+            meta: item
+        })
+
+        if (i == 0) {
+            select(item)
+        }
+
+        s.addEventListener("click", () => {
+            select(item)
+        })
+
+        i++
+    }
+    return []
+}, () =>  [] )
 
 /**
     * Akin to the user submitting the search form
@@ -1527,10 +1565,10 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
                 alert(`/${command} not found`)
                 break
             }
+            entries = await cmd.getResults(filters.newSearch.split(" ").slice(1)) as InfoEntry[]
             if (cmd.kind == "replace") {
                 return
             }
-            entries = await cmd.getResults(filters.newSearch.split(" ").slice(1)) as InfoEntry[]
         }
     }
 
@@ -3042,14 +3080,15 @@ function openDisplayWinUI(id: bigint, target: string = "_blank", popup: boolean 
 * @param {InfoEntry} item
 * @param {boolean} [updateStats=true]
 * @param {Mode} [mode=undefined] the mode to update (otherwise all open modes)
+* @param {{meta?: MetadataEntry}} [options] additional options when selecting
 */
-function selectUI(item: InfoEntry, updateStats: boolean = true, mode?: Mode): HTMLElement[] {
+function selectUI(item: InfoEntry, updateStats: boolean = true, mode?: Mode, options?: ModeAddOptions): HTMLElement[] {
     setError("")
 
     items_selectById(item.ItemId)
     updateStats && changeResultStatsWithItemUI(item)
     updatePageInfoWithItemUI(item)
-    return mode_selectItem(item, mode)
+    return mode_selectItem(item, mode, options)
 }
 
 /**

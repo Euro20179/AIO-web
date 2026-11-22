@@ -373,8 +373,29 @@ async function* api_streamQuery(searchString: string, uid: number, version: 3 | 
  * @param {string} uid can be 0 to allow results from all users
  * @param {3 | 4} version the search version
  * @param {string} [orderby=""]
+ * @param {"entry" | "metadata/"} [kind="entry"] which object kind to search
  */
-async function api_query(searchString: string, uid: number, version: 3 | 4, orderby: SortKind = ""): Promise<InfoEntry[]> {
+async function api_query(
+    searchString: string,
+    uid: number,
+    version: 3 | 4,
+    orderby: SortKind,
+    kind: "metadata/",
+): Promise<MetadataEntry[]>
+async function api_query(
+    searchString: string,
+    uid: number,
+    version: 3 | 4,
+    orderby: SortKind,
+    kind?: "entry",
+): Promise<InfoEntry[]>
+async function api_query<T extends InfoEntry | MetadataEntry>(
+    searchString: string,
+    uid: number,
+    version: 3 | 4,
+    orderby: SortKind = "",
+    kind: "entry" | "metadata/" = "entry",
+): Promise<T[]>{
     let apiOrder = api_uiSort2Api(orderby)
     let qs = `?q=${encodeURIComponent(searchString)}&uid=${uid}`
     if(apiOrder !== "") {
@@ -385,7 +406,7 @@ async function api_query(searchString: string, uid: number, version: 3 | 4, orde
         qs += "&v=3"
     }
 
-    const res = await fetch(`${apiPath}/entry${qs}`, {
+    const res = await fetch(`${apiPath}/${kind}${qs}`, {
         method: "QUERY"
     }).catch(console.error)
     if (!res) return []
@@ -397,7 +418,7 @@ async function api_query(searchString: string, uid: number, version: 3 | 4, orde
     }
 
     try {
-        return [...api_deserializeJsonl<InfoEntry>(itemsText.split("\n").filter(Boolean))]
+        return [...api_deserializeJsonl<T>(itemsText.split("\n").filter(Boolean))]
     } catch (err) {
         console.error(err)
     }

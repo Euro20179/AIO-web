@@ -98,13 +98,20 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry) {
     )
 }
 
-MetadataMode.prototype.add = function(this: MetadataMode, entry: InfoEntry) {
+MetadataMode.prototype.add = function(this: MetadataMode, entry: InfoEntry, options?: {
+    meta?: MetadataEntry
+}) {
     const out = document.createElement("metadata-item")
     this.output.append(out)
-    items_getMetadataById(entry.ItemId).then(meta => {
-        out.setAttribute("data-item-id", String(meta.ItemId))
-        refreshMetadataItem(out, meta)
-    })
+    if (options?.meta) {
+        out.setAttribute("data-item-id", String(options.meta.ItemId))
+        refreshMetadataItem(out, options.meta)
+    } else {
+        items_getMetadataById(entry.ItemId).then(meta => {
+            out.setAttribute("data-item-id", String(meta.ItemId))
+            refreshMetadataItem(out, meta)
+        })
+    }
     return out
 }
 

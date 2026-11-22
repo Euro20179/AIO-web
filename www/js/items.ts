@@ -724,9 +724,9 @@ function items_addItem(item: {
     children?: bigint[],
     requirements?: bigint[],
     copies?: bigint[],
-}) {
+}, forceNew: boolean = false) {
     let e = _globalsNewUi.entries[String(item.user.ItemId)]
-    if (!e) {
+    if (!e || forceNew) {
         e = new items_Entry(item.info, item.user, item.meta, item.events, item.transactions)
         _globalsNewUi.entries[String(item.user.ItemId)] = e
     } else {
