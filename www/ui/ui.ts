@@ -1583,8 +1583,10 @@ async function loadSearchUI(form: HTMLFormElement | null | undefined = component
     let found = []
     let i = 0
     for await(let item of items_addById(ids)) {
-        if (i === 0) {
-            clearUI()
+        if (i === 0 || isViewingAllUI()) {
+            if (i == 0) {
+                clearUI()
+            }
             selectUI(item.info)
         }
         found.push(item)
