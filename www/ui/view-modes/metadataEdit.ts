@@ -19,7 +19,7 @@ MetadataMode.prototype.mkcontainer = function(this: MetadataMode) {
     return c
 }
 
-async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry) {
+async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: Window & typeof globalThis = window) {
     const el = out.shadowRoot
     if (!el) {
         throw new Error("out does not contain a shadowroot")
@@ -46,6 +46,35 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry) {
         l.src = fixThumbnailURL(meta.Thumbnail)
     })
 
+    renderComponent("#media-dependant", l => {
+        let body = dom_getelorthrow("tbody", win.HTMLTableSectionElement, l)
+        let md = JSON.parse(meta.MediaDependant)
+
+        body.replaceChildren()
+
+        for(let key in md) {
+            let val = md[key]
+            let r = body.insertRow()
+            let k = r.insertCell()
+            let v = r.insertCell()
+
+            k.contentEditable = 'true'
+            v.contentEditable = 'true'
+
+            k.setAttribute("entry-action", "savetable")
+            k.setAttribute("entry-action-target", "#media-dependant")
+            k.setAttribute("entry-action-trigger", "blur")
+            k.setAttribute("entry-action-save-as", "MediaDependant")
+            v.setAttribute("entry-action", "savetable")
+            v.setAttribute("entry-action-target", "#media-dependant")
+            v.setAttribute("entry-action-trigger", "blur")
+            v.setAttribute("entry-action-save-as", "MediaDependant")
+
+            k.append(key)
+            v.append(val)
+        }
+    })
+
     const fileUpload = el.getElementById("thumbnail-file-upload")
 
     if (fileUpload instanceof HTMLInputElement && "files" in fileUpload) {
@@ -63,13 +92,69 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry) {
         }
     }
 
+    function saveTable(l: HTMLElement) {
+        let t = l.getAttribute("entry-action-target")
+        if (!t) {
+            throw new Error("No entry-action-target given for addrow")
+        }
+        let prop = l.getAttribute("entry-action-save-as")
+        let sr = l.getRootNode() as ShadowRoot
+        let el = dom_getelorthrow(t, win.HTMLElement, sr)
+        let j: Record<string, string> = {}
+        for(let row of el.querySelectorAll("tbody tr")) {
+            let k = dom_getelorthrow("td:first-of-type", win.HTMLTableCellElement, row)
+            let v = dom_getelorthrow("td:last-of-type", win.HTMLTableCellElement, row)
+            let key = k.innerText
+            let val = v.innerText
+            if(!key.trim()) continue
+            j[key.trim()] = val
+        }
+
+        if(prop !== "MediaDependant") {
+            throw new Error(`${prop} is not a json metdata key`)
+        }
+
+        setPropUI(meta, prop, JSON.stringify(j), `set ${prop}`)
+    }
+
     updateDeclarativeDSL(
         {
+            addrow(l) {
+                let t = l.getAttribute("entry-action-target")
+                if (!t) {
+                    throw new Error("No entry-action-target given for addrow")
+                }
+                let sr = l.getRootNode() as ShadowRoot
+                let el = dom_getelorthrow(t, win.HTMLTableSectionElement, sr)
+                let r = el.insertRow()
+                let k = r.insertCell()
+                let v = r.insertCell()
+                v.append("VALUE")
+                v.contentEditable = 'true'
+                k.append("NAME")
+                k.contentEditable = 'true'
+
+                k.onblur = (e) => {
+                    saveTable(k)
+                }
+                v.onblur = e => {
+                    saveTable(v)
+                }
+                k.setAttribute("entry-action-target", "#media-dependant")
+                k.setAttribute("entry-action-save-as", "MediaDependant")
+                v.setAttribute("entry-action-target", "#media-dependant")
+                v.setAttribute("entry-action-save-as", "MediaDependant")
+            },
+
             setthumbnail: function() {
                 const fileUpload = el.getElementById("thumbnail-file-upload")
                 if (!fileUpload || !("value" in fileUpload)) return
 
                 fileUpload.click()
+            },
+
+            savetable(l) {
+                saveTable(l)
             },
 
             save: (el, event) => {
@@ -105,11 +190,11 @@ MetadataMode.prototype.add = function(this: MetadataMode, entry: InfoEntry, opti
     this.output.append(out)
     if (options?.meta) {
         out.setAttribute("data-item-id", String(options.meta.ItemId))
-        refreshMetadataItem(out, options.meta)
+        refreshMetadataItem(out, options.meta, this.win)
     } else {
         items_getMetadataById(entry.ItemId).then(meta => {
             out.setAttribute("data-item-id", String(meta.ItemId))
-            refreshMetadataItem(out, meta)
+            refreshMetadataItem(out, meta, this.win)
         })
     }
     return out
@@ -135,7 +220,7 @@ MetadataMode.prototype.subList = function(this: MetadataMode, entries: InfoEntry
 MetadataMode.prototype.refresh = function(this: MetadataMode, id: bigint) {
     let el = this.output.querySelector(`metadata-item[data-item-id="${id}"]`) as HTMLElement
     if(el)
-        refreshMetadataItem(el, findMetadataById(id))
+        refreshMetadataItem(el, findMetadataById(id), this.win)
 }
 
 

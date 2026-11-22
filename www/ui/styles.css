@@ -360,6 +360,12 @@
         }
     }/* }}} */
 
+    #metadata-items {
+        display: flex;
+        flex-direction: row;
+        gap: var(--small-gap);
+    }
+
     #entry-output {/* {{{ */
         --grid-size: 50%;
         grid-area: main;
