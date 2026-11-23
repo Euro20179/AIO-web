@@ -107,11 +107,6 @@
         text-overflow: ellipsis;
         overflow: clip;
 
-        select { 
-            width: 15ch;
-            height: fit-content;
-        }
-
         @container (width < 400px){
             display: flex;
             flex-direction: column;

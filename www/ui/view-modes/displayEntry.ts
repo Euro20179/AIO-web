@@ -1526,42 +1526,31 @@ function getCurrentObjectInObjEditor(itemId: bigint, el: ShadowRoot): object {
  * @description updates special-case legacy elements
  */
 async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, user: UserEntry, meta: MetadataEntry, _events: UserEvent[], el: ShadowRoot) {
-    const renderComponent = (query: string,
-        fill: (element: HTMLElement, itemId: bigint) => any) => {
-        for (let l of el.querySelectorAll(query)) {
-            fill(l as HTMLElement, item.ItemId)
-        }
-    }
-
     //just in case we have generic metadata
     //if meta is not generic, this operation is cheap, no need for a guard
     meta = await items_getMetadataById(item.ItemId)
     user = await items_getUserById(user.ItemId)
 
-    renderComponent("#style-editor", el => {
+    component_render(el, "#style-editor", el => {
         if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        items_getUserById(item.ItemId).then(u => {
-            el.innerHTML = getUserExtra(u, "styles") || ""
-        })
-    })
+        el.innerHTML = getUserExtra(user, "styles") || ""
+    }, [getUserExtra(user, "styles") || ""])
 
-    renderComponent("#template-editor", el => {
+    component_render(el, "#template-editor",  el => {
         if (!(el instanceof this.win.HTMLTextAreaElement)) return
-        items_getUserById(item.ItemId).then(u => {
-            el.innerHTML = getUserExtra(u, "template") || ""
-        })
-    })
+        el.innerHTML = getUserExtra(user, "template") || ""
+    }, [getUserExtra(user, "template") || ""])
 
-    renderComponent("#library", el => {
+    component_render(el, "#library", el => {
         if (!("value" in el)) return
         if (!item.Library) {
             el.value = "Library"
             return
         }
         el.value = items_getEntry(item.Library).info.En_Title
-    })
+    }, [item.Library])
 
-    renderComponent("#recommended-bys", el => {
+    component_render(el, "#recommended-bys", el => {
         el.querySelectorAll("div").forEach(div => div.remove())
         let i = 0
         for (let r of items_getRecommendedBy(item.ItemId)) {
@@ -1571,6 +1560,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             const outerBtn = dom_getel(".recommender", this.win.HTMLElement, recommender)
             if(outerBtn) {
                 outerBtn.onclick = e => {
+                    if (!(e.target instanceof this.win.HTMLElement)) {
+                        throw new Error("what?")
+                    }
                     if(e.target?.id === 'delete-recommended-by') return
                     ui_search(`recommendedBy ~ '%"${r}"%'`)
                 }
@@ -1588,10 +1580,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             s.append(r)
             i++
         }
-    })
+    }, [items_getRecommendedBy(item.ItemId).join("")])
 
     //item item interaction menu
-    renderComponent("#item-interaction-menu", async(el) => {
+    component_render(el, "#item-interaction-menu", async(el) => {
         if (!(el instanceof this.win.HTMLElement)) return
         await settings_load(user.Uid)
 
@@ -1638,59 +1630,63 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         }
 
         el.replaceChildren(...btns)
-    })
+    }, 1)
 
-    renderComponent("#display-info-object-tbl", objTable => {
+    component_render(el, "#display-info-object-tbl", objTable => {
         if (!(objTable instanceof this.win.HTMLTableElement)) {
             console.warn("#display-info-object-tbl must be a <table>")
             return
         }
 
         updateObjectTblUI(getCurrentObjectInObjEditor(item.ItemId, el), objTable)
-    })
+    }, Infinity)
 
-    renderComponent("#status-selector",
-        el => updateStatusDisplay(user.Status, el))
+    component_render(
+        el,
+        "#status-selector",
+        el => updateStatusDisplay(user.Status, el),
+        [user.Status]
+    )
 
-    renderComponent("#cost", l => {
+    component_render(el, "#cost", l => {
         updateCostDisplay.call(this, el, item.ItemId)
-    })
+    }, Infinity)
 
-    renderComponent("#tz-selector", tzEl => {
+    component_render(el, "#tz-selector", tzEl => {
         if (!(tzEl instanceof this.win.HTMLSelectElement)) {
             console.warn("#tz-selector must be a <select>")
             return
         }
         tzEl.value = INTL_OPTIONS.timeZone
-    })
+    }, [INTL_OPTIONS.timeZone])
 
     //Art Style
     api_listArtStyles().then(as => {
         for (let a in as) {
-            renderComponent(`#is-${as[a]}`, cb => {
+            component_render(el, `#is-${as[a]}`, cb => {
                 if (!cb || !(cb instanceof HTMLInputElement)) return
                 if (items_hasArtStyle(item, Number(a) as ArtStyle)) {
                     cb.checked = true
                 }
-            })
+            }, [Object.keys(as).join(",")])
         }
     })
 
-    renderComponent("#location-link", el => {
+    component_render(el, "#location-link", el => {
         if (!("value" in el)) return
         let loc = item.Location
         el.value = loc
-    })
+    }, [item.Location])
 
     //user styles
-    renderComponent("#custom-styles", el => {
+    component_render(el, "#custom-styles", el => {
         let userExtra = getUserExtra(user, "styles")
         let styles = userExtra || ""
         el.innerText = styles
-    })
+    }, [getUserExtra(user, "styles")])
 
     //type selector
-    renderComponent("#type-selector", ts => {
+    component_render(el, "#type-selector", ts => {
         if (!(ts instanceof this.win.HTMLSelectElement) && !(ts instanceof this.win.HTMLDataListElement)) {
             console.warn("#type-selector must be a <select>")
             return
@@ -1700,16 +1696,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             if ("value" in ts) {
                 ts.value = item.Type
             }
-            renderComponent(`[list="type-selector"]`, s => {
+            component_render(el, `[list="type-selector"]`, s => {
                 if ("value" in s) {
                     s.value = item.Type
                 }
-            })
+            }, [item.Type])
         })
-    })
+    }, [item.Type])
 
     //format selector
-    renderComponent("#format-selector", formatSelector => {
+    component_render(el, "#format-selector", formatSelector => {
         if (!(formatSelector instanceof this.win.HTMLSelectElement)) {
             console.warn("#format-selector must be a <select>")
             return
@@ -1717,20 +1713,20 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         fillFormatSelectionUI(formatSelector).then(() => {
             formatSelector.value = String(item.Format)
         })
-    })
+    }, [item.Format])
 
 
-    renderComponent("#format-digitized", () => {
+    component_render(el, "#format-digitized", () => {
         const digitized = el.getElementById("format-digitized")
         if (!(digitized instanceof this.win.HTMLInputElement)) {
             console.warn("#format-digitized must be a <input>")
             return
         }
         digitized.checked = items_isDigitized(item.Format_Modifiers)
-    })
+    }, [items_isDigitized(item.Format_Modifiers)])
 
 
-    renderComponent("#genres", genresRoot => {
+    component_render(el, "#genres", genresRoot => {
         if (meta.Genres == "null") return
         const genres = JSON.parse(meta.Genres || "[]")
         const children = []
@@ -1744,10 +1740,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             children.push(el)
         }
         genresRoot.replaceChildren(...children)
-    })
+    }, [meta.Genres])
 
     //tags
-    renderComponent("#tags", tagsRoot => {
+    component_render(el, "#tags", tagsRoot => {
         tagsRoot.querySelectorAll("div").forEach(div => div.remove())
 
         const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
@@ -1774,31 +1770,33 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
 
                 tagsRoot?.append(copy)
             }
-    })
+    }, [item.Tags?.join(",")])
 
     //type icon
     let typeIcon = typeToSymbol(item.Type)
     let formatIcon = formatToSymbolUI(item.Format, item.Format_Modifiers)
     const formatName = await formatToName(item.Format, item.Format_Modifiers)
-    renderComponent("#on-format", async (onFormat) => {
+    component_render(el, "#on-format", async (onFormat) => {
         if (!(formatName).startsWith("UNOWNED")) {
             onFormat.innerHTML = `${formatToSymbolUI(item.Format, item.Format_Modifiers)} <span popover='hint'>${formatName}</span>`
             onFormat.setAttribute("toggle-hint", "")
         }
-    })
+    }, [item.Format, item.Format_Modifiers])
 
-    renderComponent("#media-type", el => {
+    component_render(el, "#media-type", el => {
         el.innerHTML = `${typeIcon} <span popover='hint'>${item.Type}</span>`
         el.setAttribute("toggle-hint", "")
-    })
-    renderComponent("#country-origin", el => {
+    }, [item.Type])
+
+    component_render(el, "#country-origin", el => {
         if (meta.Country) {
             let flags = items_countryOfOrigin2Flag(meta.Country)
             el.title = ` (${meta.Country})`
             el.innerText = flags
         }
-    })
-    renderComponent("#main-title", displayEntryTitle => {
+    }, [meta.Country])
+
+    component_render(el, "#main-title", displayEntryTitle => {
         displayEntryTitle.innerText = meta.Title || item.En_Title
         //only set the title of the heading to the user's title if the metadata title exists
         //otherwise it looks dumb
@@ -1821,42 +1819,50 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         formatToName(item.Format, item.Format_Modifiers).then(name => {
             displayEntryTitle?.setAttribute("data-format-name", name)
         })
-    })
+    }, [
+        meta.Title || item.En_Title,
+        typeIcon,
+        item.Uid,
+        formatIcon,
+        meta.Country,
+        item.Format,
+        item.Format_Modifiers
+    ])
 
 
 
 
     //Native title
-    renderComponent("#official-native-title", displayEntryNativeTitle => {
+    component_render(el, "#official-native-title", displayEntryNativeTitle => {
         displayEntryNativeTitle.innerText = meta.Native_Title || item.Native_Title
         //Same as with the regular title
         if (meta.Native_Title && item.Native_Title) {
             displayEntryNativeTitle.title = item.Native_Title
         }
-    })
+    }, [meta.Native_Title || item.Native_Title])
 
     //Thumbnail
-    renderComponent("#thumbnail", imgEl => {
+    component_render(el, "#thumbnail", imgEl => {
         if (!(imgEl instanceof this.win.HTMLImageElement)) {
             console.warn("#thumbnail must be an <img>")
             return
         }
         imgEl.alt = meta.Title || item.En_Title
         imgEl.src = fixThumbnailURL(meta.Thumbnail)
-    })
+    }, [meta.Title || item.En_Title, meta.Thumbnail])
 
     //Notes
-    renderComponent("#notes-edit-box", notesEditBox => {
+    component_render(el, "#notes-edit-box", notesEditBox => {
         if (!("value" in notesEditBox)) return
         notesEditBox.value = user.Notes
-    })
+    }, [user.Notes])
 
-    renderComponent("#notes", notesEl => {
+    component_render(el, "#notes", notesEl => {
         updateNotesDisplay(el, notesEl, item.ItemId)
-    })
+    }, Infinity)
 
     //Rating
-    renderComponent("#user-rating", ratingEl => {
+    component_render(el, "#user-rating", ratingEl => {
         settings_load(user.Uid).then(() => {
             applyUserRating(
                 settings_get(getUserUID(), "tiers"),
@@ -1866,10 +1872,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 ratingEl
             )
         })
-    })
+    }, [getUserUID(), user.UserRating])
 
     //Audience Rating
-    renderComponent("#audience-rating", audienceRatingEl => {
+    component_render(el, "#audience-rating", audienceRatingEl => {
         if (meta.Rating) {            
             settings_load(user.Uid).then(() => {
                 applyUserRating(
@@ -1881,7 +1887,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 )
             })
         }
-    })
+    }, [meta.Rating, meta.RatingMax, user.Uid])
 
     let data = meta
     let mediaDependant
@@ -1892,16 +1898,16 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         return
     }
 
-    renderComponent("#view-count", viewCountEl => {
+    component_render(el, "#view-count", viewCountEl => {
         updateViewCountDisplay(el, viewCountEl, item.ItemId)
-    })
+    }, Infinity)
 
     //View count
-    renderComponent("#view-time", viewMinsEl => {
+    component_render(el, "#view-time", viewMinsEl => {
         updateViewTimeDisplay(el, viewMinsEl, item.ItemId)
-    })
+    }, Infinity)
 
-    renderComponent("#media-info", mediaInfoTbl => {
+    component_render(el, "#media-info", mediaInfoTbl => {
         //remove the <Media>- part from the key looks ugly
         let modifiedKeys: { [k: string]: string } = {}
         for (let key in mediaDependant) {
@@ -1914,7 +1920,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
             modifiedKeys[title] = val
         }
         mkGenericTbl(mediaInfoTbl, modifiedKeys)
-    })
+    }, [meta.MediaDependant])
 
     let userPos = parseInt(user.CurrentPosition)
 
@@ -1923,24 +1929,24 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //Media dependant
     let lengthInNumber = items_getLength(mediaDependant)[0] || 0
 
-    renderComponent("#entry-progressbar", progressEl => {
+    component_render(el, "#entry-progressbar", progressEl => {
         if (!("max" in progressEl &&
             "value" in progressEl &&
             /(Re)?Viewing/.test(user.Status))) return
         progressEl.max = lengthInNumber || 1
         progressEl.value = userPos || 0
-    })
+    }, [lengthInNumber, userPos])
 
-    renderComponent("#entry-progressbar-position-label", captionEl => {
+    component_render(el, "#entry-progressbar-position-label", captionEl => {
         captionEl.innerText = `${user.CurrentPosition}/${lengthInNumber}`
         captionEl.title = `${Math.round(userPos / lengthInNumber * 1000) / 10}%`
-    })
+    }, [user.CurrentPosition, lengthInNumber, userPos])
 
-    renderComponent("#multiple-progress", multipleProgressEl => {
+    component_render(el, "#multiple-progress", multipleProgressEl => {
         multipleProgressEl.innerHTML = ""
 
         multipleProgressEl.replaceChildren(...mkDeProgressUI(item.ItemId))
-    })
+    }, Infinity)
 
     //relation elements
     for (let relationship of [
@@ -1949,7 +1955,7 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
         ["required-items", findRequirements],
         ["required-by-items", items_findRequiredBy],
     ] as const) {
-        renderComponent(`#${relationship[0]}`, relationshipEl => {
+        component_render(el, `#${relationship[0]}`, relationshipEl => {
             relationshipEl.innerHTML = ""
             createRelationButtons(
                 item.ItemId,
@@ -1957,14 +1963,14 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
                 relationship[1](item.ItemId),
                 relationship[0]
             )
-        })
+        }, Infinity)
     }
 
     //Events
-    renderComponent("#user-actions", tbl => {
+    component_render(el, "#user-actions", tbl => {
         if (!(tbl instanceof this.win.HTMLTableElement)) return
         updateEventsDisplay.call(this, el, tbl, user.ItemId)
-    })
+    }, Infinity)
 
     //update this last because some legacy elements get filled with new elements
     //that rely on stuff like entry-action
@@ -2015,13 +2021,6 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         events = findUserEventsById(itemId),
         item = findInfoEntryById(itemId)
 
-    const renderComponent = function(query: string,
-        fill: (element: HTMLElement, itemId: bigint) => any) {
-        for (let el of root.querySelectorAll(query)) {
-            fill(el as HTMLElement, itemId)
-        }
-    }
-
     //use the dumbest hack imaginable to allow the previewtemplate function to force the window it opens to do the rendering
     //that hack being setting a global variable called GLOBAL_TEMPLATE which is the template to use
     //@ts-ignore
@@ -2037,31 +2036,31 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
 
     hookActionButtons(root, itemId)
 
-    renderComponent("#recommended-by",
+    component_render(el, "#recommended-by",
         el => {
             if (!(el instanceof this.win.HTMLDataListElement)) {
                 console.warn("#recommended-by must be a datalist element")
                 return
             }
             fillRecommendedListUI(el, getUidUI())
-        })
+        }, Infinity)
 
     api_listArtStyles().then(as => {
         for (let a in as) {
-            renderComponent(`#is-${as[a]}`, el => {
+            component_render(el, `#is-${as[a]}`, el => {
                 if (!el || !(el instanceof HTMLInputElement)) return
                 el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.toggleartstyle(e.target)
-            })
+            }, 1)
         }
     })
 
-    renderComponent("#current-edited-object",
+    component_render(el, "#current-edited-object",
         el => {
             el.onchange =
                 e =>
                     e.target instanceof this.win.HTMLElement &&
                     this.de_actions.setobjtable(e.target)
-        })
+        }, 1)
 
     for(let mod of items_F_MODS) {
         let inputName = {
@@ -2100,50 +2099,50 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         "include-requires-in-cost",
         "include-recusively-in-cost"
     ]) {
-        renderComponent(`#${input}`, el => {
+        component_render(el, `#${input}`, el => {
             el.onchange =
                 (e) =>
                     e.target instanceof this.win.HTMLElement &&
                     this.de_actions.togglerelationinclude(e.target)
-        })
+        }, 1)
     }
 
-    renderComponent("button.popout", el => popoutUI(el))
-    renderComponent("#status-selector", el => {
+    component_render(el, "button.popout", el => popoutUI(el), 1)
+    component_render(el, "#status-selector", el => {
         el.onchange =
             e =>
                 e.target instanceof this.win.HTMLSelectElement &&
                 this.de_actions.updatestatus(e.target)
-    })
+    }, 1)
 
-    renderComponent("#new-child", el => {
+    component_render(el, "#new-child", el => {
         el.addEventListener("click", e => {
             this.de_actions.newchild(e.target as HTMLElement)
         })
-    })
+    }, 1)
 
-    renderComponent("#new-copy", el => {
+    component_render(el, "#new-copy", el => {
         el.addEventListener("click", e => {
             this.de_actions.newcopy(e.target as HTMLElement)
         })
-    })
+    }, 1)
 
-    renderComponent("#new-child-by-id", el => {
+    component_render(el, "#new-child-by-id", el => {
         if (!("value" in el)) return
         el.onchange = e => {
             e.target instanceof HTMLElement && this.de_actions.addchild(e.target)
         }
-    })
+    }, 1)
 
-    renderComponent("#notes-edit-box", el => {
+    component_render(el, "#notes-edit-box", el => {
         if (!("value" in el)) return
 
         el.onchange = () => {
             updateNotesUI(item.ItemId, String(el.value))
         }
-    })
+    }, 1)
 
-    renderComponent("#create-tag", el => {
+    component_render(el, "#create-tag", el => {
         el.onclick = async () => {
             const tagsdl = dom_getel("#tags-dl", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
             inputItemUI(el, 'tag', (e, tag) => {
@@ -2151,9 +2150,9 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
                 el.focus()
             }, tagsdl as HTMLDataListElement || undefined)
         }
-    })
+    }, 1)
 
-    renderComponent("#create-recommended-by", el => {
+    component_render(el, "#create-recommended-by", el => {
         el.onclick = async () => {
             const rdl = dom_getel("#recommended-by", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
             inputItemUI(el, 'recommender', (e, r) => {
@@ -2161,25 +2160,25 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
                 el.focus()
             }, rdl as HTMLDataListElement || undefined)
         }
-    })
+    }, 1)
 
-    renderComponent("#location-link", el => {
+    component_render(el, "#location-link", el => {
         if (!("value" in el)) return
 
         el.onchange = async () => {
             await updateLocationUI(itemId, String(el.value))
         }
-    })
+    }, 1)
 
-    renderComponent("#user-actions-filter", el => {
+    component_render(el, "#user-actions-filter", el => {
         if (!("value" in el)) return
         el.oninput = (e) => {
-            renderComponent("#user-actions", eventsTbl => {
+            component_render(el, "#user-actions", eventsTbl => {
                 if (!(eventsTbl instanceof this.win.HTMLTableElement)) return
                 updateEventsDisplay.call(this, root, eventsTbl, itemId, String(el.value))
-            })
+            }, Infinity)
         }
-    })
+    }, 1)
 
     changeDisplayItemData.call(this, item, user, meta, events, el)
     return el

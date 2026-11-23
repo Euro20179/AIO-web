@@ -7,6 +7,54 @@ const labelWrap = async<TLabel, T>(label: TLabel, promise: Promise<T>): Promise<
 }
 
 
+type Primitive = string | number | boolean | null | undefined | bigint
+let _component_render_cache = new Map<HTMLElement | ShadowRoot | Document,
+                                        Map<string, Primitive[] | number>>
+/**
+ * Given a root, and list of dependencies, render a component
+ * if all dependencies have not changed, fill does not get called
+ * @param {HTMLElement | ShadowRoot | Document} root
+ * @param {string} query a css query selector
+ * @param {(el: HTMLElement, itemId: bigint) => any} fill the function that renders the component
+ * @param {any[]} dependencies a list of values that this component relies on
+ */
+function component_render(
+    root: HTMLElement | ShadowRoot | Document,
+    query: string,
+    fill: (el: HTMLElement) => any,
+    dependencies: Primitive[] | number
+) {
+    let rcache = _component_render_cache.getOrInsert(root, new Map)
+    let cache = rcache.getOrInsert(query, typeof dependencies === 'number' ? dependencies : [])
+
+    if (typeof cache === 'number'  && cache < 1) {
+        return
+    }
+    // if they are not the same length, dependencies have by definition updated
+    if (!(typeof cache === 'number') && (dependencies as Primitive[]).length === cache.length) {
+        let allgood = true
+        for(let i = 0; i < cache.length; i++) {
+            if ((dependencies as Primitive[])[i] != cache[i]) {
+                allgood = false
+            }
+        }
+        if (allgood) return
+    }
+
+    if (typeof cache === 'number') {
+        cache--
+        rcache.set(query, cache)
+    } else {
+        rcache.set(query, dependencies)
+    }
+
+    for(let l of root.querySelectorAll(query)) {
+        fill(l as HTMLElement)
+    }
+}
+
+
+
 //gets replaced with colors.css, general.css, sidebar-entry.css in that order
 //the math.random is so that the build system doesn't inline this text, i need the ``
 //the reason i am doing this is because sharing the css styles like this triples the speed at which the sidebar can render

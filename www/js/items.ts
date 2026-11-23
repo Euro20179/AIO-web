@@ -107,7 +107,7 @@ type InfoEntry = {
     Format_Modifiers: number
     MetadataId: bigint
 
-    Tags: string[]
+    Tags: string[] | null
 }
 
 type UserEntry = {

@@ -25,28 +25,21 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
         throw new Error("out does not contain a shadowroot")
     }
 
-    const renderComponent = (query: string,
-        fill: (element: HTMLElement, itemId: bigint) => any) => {
-        for (let l of el.querySelectorAll(query)) {
-            fill(l as HTMLElement, meta.ItemId)
-        }
-    }
-
-    renderComponent("#provider", l => {
+    component_render(el, "#provider", l => {
         if("value" in l)
             l.value = meta.Provider
-    })
+    }, [meta.Provider])
 
-    renderComponent("#rating-percent", l => {
+    component_render(el, "#rating-percent", l => {
         l.innerText = String(meta.Rating / (meta.RatingMax || 1) * 100)
-    })
+    }, [meta.Rating, meta.RatingMax])
 
-    renderComponent("#thumbnail", l => {
+    component_render(el, "#thumbnail", l => {
         if(!("src" in l)) return
         l.src = fixThumbnailURL(meta.Thumbnail)
-    })
+    }, [meta.Thumbnail])
 
-    renderComponent("#media-dependant", l => {
+    component_render(el, "#media-dependant", l => {
         let body = dom_getelorthrow("tbody", win.HTMLTableSectionElement, l)
         let md = JSON.parse(meta.MediaDependant)
 
@@ -73,7 +66,7 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
             k.append(key)
             v.append(val)
         }
-    })
+    }, [meta.MediaDependant])
 
     const fileUpload = el.getElementById("thumbnail-file-upload")
 

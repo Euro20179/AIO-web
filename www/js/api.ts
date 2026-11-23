@@ -182,7 +182,7 @@ function api_formatsCache() {
     return _api_formats_cache
 }
 
-async function api_listArtStyles() {
+async function api_listArtStyles(): Promise<{[key: number]: string}> {
     if (Object.keys(_api_as_cache).length > 0) return _api_as_cache
 
     const res = await fetch(`${apiPath}/type/artstyle`)
