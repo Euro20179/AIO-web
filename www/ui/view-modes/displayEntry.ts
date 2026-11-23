@@ -2036,7 +2036,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
 
     hookActionButtons(root, itemId)
 
-    component_render(el, "#recommended-by",
+    component_render(root, "#recommended-by",
         el => {
             if (!(el instanceof this.win.HTMLDataListElement)) {
                 console.warn("#recommended-by must be a datalist element")
@@ -2047,14 +2047,14 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
 
     api_listArtStyles().then(as => {
         for (let a in as) {
-            component_render(el, `#is-${as[a]}`, el => {
+            component_render(root, `#is-${as[a]}`, el => {
                 if (!el || !(el instanceof HTMLInputElement)) return
                 el.onchange = (e) => e.target instanceof HTMLElement && this.de_actions.toggleartstyle(e.target)
             }, 1)
         }
     })
 
-    component_render(el, "#current-edited-object",
+    component_render(root, "#current-edited-object",
         el => {
             el.onchange =
                 e =>
@@ -2099,7 +2099,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         "include-requires-in-cost",
         "include-recusively-in-cost"
     ]) {
-        component_render(el, `#${input}`, el => {
+        component_render(root, `#${input}`, el => {
             el.onchange =
                 (e) =>
                     e.target instanceof this.win.HTMLElement &&
@@ -2107,34 +2107,34 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         }, 1)
     }
 
-    component_render(el, "button.popout", el => popoutUI(el), 1)
-    component_render(el, "#status-selector", el => {
+    component_render(root, "button.popout", el => popoutUI(el), 1)
+    component_render(root, "#status-selector", el => {
         el.onchange =
             e =>
                 e.target instanceof this.win.HTMLSelectElement &&
                 this.de_actions.updatestatus(e.target)
     }, 1)
 
-    component_render(el, "#new-child", el => {
+    component_render(root, "#new-child", el => {
         el.addEventListener("click", e => {
             this.de_actions.newchild(e.target as HTMLElement)
         })
     }, 1)
 
-    component_render(el, "#new-copy", el => {
+    component_render(root, "#new-copy", el => {
         el.addEventListener("click", e => {
             this.de_actions.newcopy(e.target as HTMLElement)
         })
     }, 1)
 
-    component_render(el, "#new-child-by-id", el => {
+    component_render(root, "#new-child-by-id", el => {
         if (!("value" in el)) return
         el.onchange = e => {
             e.target instanceof HTMLElement && this.de_actions.addchild(e.target)
         }
     }, 1)
 
-    component_render(el, "#notes-edit-box", el => {
+    component_render(root, "#notes-edit-box", el => {
         if (!("value" in el)) return
 
         el.onchange = () => {
@@ -2142,7 +2142,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         }
     }, 1)
 
-    component_render(el, "#create-tag", el => {
+    component_render(root, "#create-tag", el => {
         el.onclick = async () => {
             const tagsdl = dom_getel("#tags-dl", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
             inputItemUI(el, 'tag', (e, tag) => {
@@ -2152,7 +2152,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         }
     }, 1)
 
-    component_render(el, "#create-recommended-by", el => {
+    component_render(root, "#create-recommended-by", el => {
         el.onclick = async () => {
             const rdl = dom_getel("#recommended-by", this.win.HTMLDataListElement, this.win.document)?.cloneNode(true)
             inputItemUI(el, 'recommender', (e, r) => {
@@ -2162,7 +2162,7 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         }
     }, 1)
 
-    component_render(el, "#location-link", el => {
+    component_render(root, "#location-link", el => {
         if (!("value" in el)) return
 
         el.onchange = async () => {
@@ -2170,10 +2170,10 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
         }
     }, 1)
 
-    component_render(el, "#user-actions-filter", el => {
+    component_render(root, "#user-actions-filter", el => {
         if (!("value" in el)) return
         el.oninput = (e) => {
-            component_render(el, "#user-actions", eventsTbl => {
+            component_render(root, "#user-actions", eventsTbl => {
                 if (!(eventsTbl instanceof this.win.HTMLTableElement)) return
                 updateEventsDisplay.call(this, root, eventsTbl, itemId, String(el.value))
             }, Infinity)
