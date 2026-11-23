@@ -1644,7 +1644,9 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     component_render(
         el,
         "#status-selector",
-        el => updateStatusDisplay(user.Status, el),
+        el => {
+            updateStatusDisplay(user.Status, el)
+        },
         [user.Status]
     )
 
@@ -2108,12 +2110,13 @@ function renderDisplayItem(this: DisplayMode, itemId: bigint, template?: string,
     }
 
     component_render(root, "button.popout", el => popoutUI(el), 1)
-    component_render(root, "#status-selector", el => {
-        el.onchange =
+
+    let sl = dom_getel("#status-selector", this.win.HTMLSelectElement, el)
+    if(sl)
+        sl.onchange =
             e =>
                 e.target instanceof this.win.HTMLSelectElement &&
                 this.de_actions.updatestatus(e.target)
-    }, 1)
 
     component_render(root, "#new-child", el => {
         el.addEventListener("click", e => {
