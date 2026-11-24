@@ -1747,31 +1747,10 @@ async function updateDisplayEntryContents(this: DisplayMode, item: InfoEntry, us
     //tags
     component_render(el, "#tags", tagsRoot => {
         tagsRoot.querySelectorAll("div").forEach(div => div.remove())
-
-        const tagTempl = el.querySelector("template#tag") as HTMLTemplateElement
-        if (tagTempl)
-            for (let tag of item.Tags || []) {
-                if (!tag) continue
-
-                const copy = tagTempl.content.cloneNode(true) as HTMLElement
-                const del = copy.querySelector("#delete-tag") as HTMLElement
-
-                del.setAttribute("tag-name", tag)
-
-                const btn = copy.querySelector("#tag-name") as HTMLElement
-                btn.prepend(tag)
-                btn.setAttribute("tag-name", tag)
-
-                btn.onclick = function(e) {
-                    if (e.target?.id === "delete-tag") return
-
-                    let btn = e.target as HTMLButtonElement
-                    let tag = btn.getAttribute("tag-name")
-                    ui_search(`#tag:${tag}`)
-                }
-
-                tagsRoot?.append(copy)
-            }
+        component_renderList(tagsRoot, item.Tags || [], (e, tag) => {
+            if (e.target?.id === "delete-tag") return
+            ui_search(`#tag:${tag}`)
+        })
     }, [item.Tags?.join(",")])
 
     //type icon

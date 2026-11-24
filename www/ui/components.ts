@@ -89,6 +89,33 @@ function mkGenericTbl(root: HTMLElement, data: Record<any, any>) {
     root.innerHTML = tbl.outerHTML
 }
 
+function component_renderList(root: HTMLElement, list: string[], onclick?: (e: Event, tag: string) => any) {
+    root.querySelectorAll("li.tag").forEach(li => li.remove())
+
+    for(let tag of list) {
+        if (!tag) continue
+
+        let li = document.createElement("li")
+        if (onclick)
+            li.role = "button"
+        li.classList.add("tag")
+        li.id = "tag-name"
+        li.tabIndex = 0
+        li.innerHTML = `
+            <button class="delete" id="delete-tag" entry-action="deletetag">x</button>
+        `
+        const del = dom_getelorthrow("#delete-tag", null, li)
+        del.setAttribute("tag-name", tag)
+        li.prepend(tag)
+
+        if (onclick) {
+            li.onclick = e => onclick(e, tag)
+        }
+
+        root.append(li)
+    }
+}
+
 /**
     * Firefox has a bug where a select rendered out of a template
     * does not render the dropdown arrow.

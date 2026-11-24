@@ -18,6 +18,18 @@
     text-decoration: none;
 }
 
+#genres {
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    gap: var(--very-small-gap);
+
+    > li {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+}
+
 </style>
 
 <input type="file" hidden id="thumbnail-file-upload">
@@ -101,6 +113,12 @@
     >
 
     (<span id="rating-percent"></span>%)
+</p>
+
+<p>
+    Genres <button id="create-genre">+</button>
+    <ul id="genres">
+    </ul>
 </p>
 
 <br>

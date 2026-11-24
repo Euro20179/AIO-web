@@ -39,6 +39,27 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
         l.src = fixThumbnailURL(meta.Thumbnail)
     }, [meta.Thumbnail])
 
+    component_render(el, "#create-genre", l => {
+        l.onclick = async () => {
+            inputItemUI(l, 'genre', (e, genre) => {
+                let genres = JSON.parse(meta.Genres) as string[]
+                if(genres.includes(genre)) {
+                    alert(`${genre} is already added as a genre`)
+                    return
+                }
+                genres.push(genre)
+                setPropUI(meta, "Genres", JSON.stringify(genres), `add genre: ${genre}`)
+            })
+        }
+    }, 1)
+
+    component_render(el, "#genres", l => {
+        component_renderList(l, JSON.parse(meta.Genres), (e, tag) => {
+            if (!(e.target instanceof win.HTMLElement) || e.target.parentElement !== l) return
+            ui_search(`#g:${tag}`)
+        })
+    }, [meta.Genres])
+
     component_render(el, "#media-dependant", l => {
         let body = dom_getelorthrow("tbody", win.HTMLTableSectionElement, l)
         let md = JSON.parse(meta.MediaDependant)
@@ -112,6 +133,28 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
 
     updateDeclarativeDSL(
         {
+            deletetag(l, e) {
+                let target = e.target
+                if (!target || !(target instanceof win.HTMLElement)) return
+                const tag = target.getAttribute("tag-name")
+                if (!tag) {
+                    console.warn("The target with entry-aciton=deletetag has no tag-name")
+                    alert("This button is not hooked up to a genre")
+                    return
+                }
+
+                confirmUI(`Are you sure you want to delete the genre: ${tag}`)
+                    .then(res => {
+                        if(!res) return
+                        let genres = JSON.parse(meta.Genres) as string[]
+                        genres = genres.filter(k => k != tag)
+                        return setPropUI(meta, "Genres", JSON.stringify(genres), `remove genre: ${tag}`)
+                    })
+                    .then(res => {
+                        if (res?.status !== 200) return ""
+                        alert("Removed genre")
+                    })
+            },
             addrow(l) {
                 let t = l.getAttribute("entry-action-target")
                 if (!t) {
