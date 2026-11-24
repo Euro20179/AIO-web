@@ -98,68 +98,71 @@ CategoriesMode.prototype.add = function(this: CategoriesMode, item: InfoEntry) {
     const addCategory = (c: string | string[]) => {
         categories.push(c)
     }
-    for(let categorizeBy of this.categorizeSelectors) {
-        switch(categorizeBy.value) {
-            case "Status":
-                addCategory(findUserEntryById(item.ItemId).Status)
-                break
-            case "Uid":
-                addCategory(uid2username(item.Uid))
-                break
-            case "Type":
-                addCategory(item.Type)
-                break
-            case "Format":
-                addCategory(items_formatToNameCached(item.Format, item.Format_Modifiers))
-                break
-            case "Tag":
-                if(item.Tags)
-                    addCategory(item.Tags)
-                break
-            case "Genre": {
-                const genres = findMetadataById(item.ItemId).Genres
-                if(genres) {
-                    addCategory(JSON.parse(genres))
+
+    let toreturn = this.mkItemCard(item)
+
+    items_getUserById(item.ItemId).then(user => {
+        for(let categorizeBy of this.categorizeSelectors) {
+            switch(categorizeBy.value) {
+                case "Status":
+                    addCategory(user.Status)
+                    break
+                case "Uid":
+                    addCategory(uid2username(item.Uid))
+                    break
+                case "Type":
+                    addCategory(item.Type)
+                    break
+                case "Format":
+                    addCategory(items_formatToNameCached(item.Format, item.Format_Modifiers))
+                    break
+                case "Tag":
+                    if(item.Tags)
+                        addCategory(item.Tags)
+                    break
+                case "Genre": {
+                    const genres = findMetadataById(item.ItemId).Genres
+                    if(genres) {
+                        addCategory(JSON.parse(genres))
+                    }
+                    break
                 }
-                break
-            }
-            case "Country": {
-                addCategory(
-                    findMetadataById(item.ItemId).Country
-                        .split(",")
-                        .map(v => util_countrycode2name(v.trim()) + " " + items_countryOfOrigin2Flag(v.trim()))
-                )
-            }
-        }
-    }
-
-    let toreturn
-
-    let strs = []
-
-    let baseStr = categories.filter(v => typeof v === 'string').join(" ")
-    let arrs = categories.filter(v => Array.isArray(v)).sort((a, b) => b.length - a.length)
-    if(arrs.length) {
-        for(let item of arrs[0]) {
-            strs.push(baseStr + " " + item)
-        }
-        for(let arr of arrs.slice(1)) {
-            for(let item of arr) {
-                for(let j = 0; j < strs.length; j++) {
-                    strs[j] += " " + item
+                case "Country": {
+                    addCategory(
+                        findMetadataById(item.ItemId).Country
+                            .split(",")
+                            .map(v => util_countrycode2name(v.trim()) + " " + items_countryOfOrigin2Flag(v.trim()))
+                    )
                 }
             }
         }
-    } else {
-        strs.push(baseStr)
-    }
 
-    for (let k of strs) {
-        const slide = (this.slides.get(k) || this.setupSlide(k)).querySelector("div")!
+        let strs = []
 
-        toreturn = this.mkItemCard(item)
-        slide.append(toreturn)
-    }
+        let baseStr = categories.filter(v => typeof v === 'string').join(" ")
+        let arrs = categories.filter(v => Array.isArray(v)).sort((a, b) => b.length - a.length)
+        if(arrs.length) {
+            for(let item of arrs[0]) {
+                strs.push(baseStr + " " + item)
+            }
+            for(let arr of arrs.slice(1)) {
+                for(let item of arr) {
+                    for(let j = 0; j < strs.length; j++) {
+                        strs[j] += " " + item
+                    }
+                }
+            }
+        } else {
+            strs.push(baseStr)
+        }
+
+        for (let k of strs) {
+            const slide = (this.slides.get(k) || this.setupSlide(k)).querySelector("div")!
+            //this comes before because we already made 1 item card
+            slide.append(toreturn)
+            toreturn = this.mkItemCard(item)
+        }
+    })
 
     return toreturn
 }
