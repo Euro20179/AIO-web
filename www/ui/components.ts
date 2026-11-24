@@ -98,7 +98,7 @@ function component_renderList(root: HTMLElement, list: string[], onclick?: (e: E
         let li = document.createElement("li")
         if (onclick)
             li.role = "button"
-        li.classList.add("tag")
+        li.classList.add("tag", "no-marker")
         li.id = "tag-name"
         li.tabIndex = 0
         li.innerHTML = `
