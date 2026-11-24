@@ -62,7 +62,7 @@
 <textarea
     put-data="Title"
     entry-action="save"
-    entry-action-trigger="input"
+    entry-action-trigger="change"
     placeholder="title"
     cols="30"
 ></textarea>
@@ -70,7 +70,7 @@
 <textarea
     put-data="meta.Native_Title"
     entry-action="save"
-    entry-action-trigger="input"
+    entry-action-trigger="change"
     entry-action-save="Native_Title"
     placeholder="native title"
     cols="30"
@@ -133,7 +133,7 @@
 
 <br>
 
-<label>provider <input id="provider" list="providers" placeholder="provider" entry-action-save="Provider" entry-action="save" entry-action-trigger="input"></label> (<input put-data="ProviderID" put-data-mode="value" entry-action="save" entry-action-trigger="input" toggle-hint="provider-id-hint">)
+<label>provider <input id="provider" list="providers" placeholder="provider" entry-action-save="Provider" entry-action="save" entry-action-trigger="change"></label> (<input put-data="ProviderID" put-data-mode="value" entry-action="save" entry-action-trigger="change" toggle-hint="provider-id-hint">)
 <span id="provider-id-hint" popover='hint'>Provider id</span>
 
 <datalist id="providers">

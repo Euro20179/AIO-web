@@ -54,7 +54,7 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
     }, 1)
 
     component_render(el, "#genres", l => {
-        component_renderList(l, JSON.parse(meta.Genres), (e, tag) => {
+        component_renderList(l, JSON.parse(meta.Genres || "[]"), (e, tag) => {
             if (!(e.target instanceof win.HTMLElement) || e.target.parentElement !== l) return
             ui_search(`#g:${tag}`)
         })
