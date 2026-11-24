@@ -100,6 +100,9 @@ CategoriesMode.prototype.add = function(this: CategoriesMode, item: InfoEntry) {
     }
     for(let categorizeBy of this.categorizeSelectors) {
         switch(categorizeBy.value) {
+            case "Status":
+                addCategory(findUserEntryById(item.ItemId).Status)
+                break
             case "Uid":
                 addCategory(uid2username(item.Uid))
                 break
