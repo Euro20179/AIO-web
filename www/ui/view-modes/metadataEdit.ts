@@ -133,6 +133,26 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
 
     updateDeclarativeDSL(
         {
+            editdescription(l, e) {
+                let descel = (l.getRootNode() as ShadowRoot).querySelector('[put-data="Description"]')
+                if(!descel) return
+                let te = document.createElement("textarea")
+                meta = items_getMetadata(meta.ItemId)
+                te.id = 'edit-description'
+                te.value = meta.Description
+                te.cols = 70
+                te.rows = 10
+                const saveDesc = () => {
+                    meta = items_getMetadata(meta.ItemId)
+                    setPropUI(meta, "Description", te.value, "update description").then(() => {
+                        descel.innerHTML = meta.Description
+                        te.replaceWith(descel)
+                    })
+                }
+                l.onclick = saveDesc
+                te.onchange = saveDesc
+                descel.replaceWith(te)
+            },
             deletetag(l, e) {
                 let target = e.target
                 if (!target || !(target instanceof win.HTMLElement)) return
@@ -199,7 +219,6 @@ async function refreshMetadataItem(out: HTMLElement, meta: MetadataEntry, win: W
                     alert("Failed to save, unknown property, THIS SHOULD NEVER OCCUR")
                     throw new Error(`Failed to save, unknown property ${property}`)
                 }
-                console.log(el)
                 meta = items_getMetadata(meta.ItemId)
                 let val: string | number = el.innerText.trim()
                 if("value" in el && el.value) {
